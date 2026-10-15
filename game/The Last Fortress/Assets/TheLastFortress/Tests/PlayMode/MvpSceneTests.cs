@@ -154,7 +154,7 @@ namespace TheLastFortress.Tests
             game.Player.Select(tower);
             game.SyncViews();
             StringAssert.Contains($"Damage {game.Sim.TowerDamage(tower)}", game.Hud.SelectionText);
-            StringAssert.Contains($"range {game.Sim.TowerRange(tower):0.0#}", game.Hud.SelectionText);
+            StringAssert.Contains("range " + game.Sim.TowerRange(tower).ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture), game.Hud.SelectionText); // same text on every OS locale
             game.Player.Select(game.Sim.Grid.GetOccupant(new GridPos(5, 5)));
             game.SyncViews();
             StringAssert.Contains($"Income +{game.Sim.BuildingIncome(game.Sim.Grid.GetOccupant(new GridPos(5, 5)))}/day · House link", game.Hud.SelectionText);

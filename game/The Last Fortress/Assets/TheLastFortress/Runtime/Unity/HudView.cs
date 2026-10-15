@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -305,7 +306,7 @@ namespace TheLastFortress
             var def = tower.Definition;
             var damage = sim.TowerDamage(tower);
             var range = sim.TowerRange(tower);
-            var text = $"Damage {damage}{(damage != def.AttackDamage ? $" (base {def.AttackDamage})" : "")} every {def.AttackIntervalSeconds:0.##} s · range {range:0.0#}";
+            var text = $"Damage {damage}{(damage != def.AttackDamage ? $" (base {def.AttackDamage})" : "")} every {def.AttackIntervalSeconds.ToString("0.##", CultureInfo.InvariantCulture)} s · range {range.ToString("0.0#", CultureInfo.InvariantCulture)}";
             if (sim.HasPerk(PerkRules.LastStand)) text += sim.LastStandActive ? " · Last Stand active" : " · Last Stand below 30% Keep";
             if (sim.HasPerk(PerkRules.FlamingArrows)) text += $"\n+ burn {PerkRules.BurnDamage}/s for 3 s";
             return text;
@@ -360,7 +361,7 @@ namespace TheLastFortress
 
                     break;
                 case RunState.Night:
-                    Set(stateText, sim.Paused ? $"NIGHT{nightTag} — PAUSED" : $"NIGHT{nightTag}  {sim.NightElapsedSeconds:0.0}s");
+                    Set(stateText, sim.Paused ? $"NIGHT{nightTag} — PAUSED" : $"NIGHT{nightTag}  {sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture)}s");
                     Set(infoText, $"Enemies alive {sim.AliveEnemyCount} · still to come {sim.ScheduledRemaining}");
                     break;
                 case RunState.Reward:

@@ -29,4 +29,4 @@ The adaptive policy's "delayed economy" turned out small: it bought a House on D
 
 1. **No balance change is indicated.** A defense-led opening that adapts its purchases wins all three seeds; even pure defense on guaranteed Keep income wins them (diagnostic). The earlier "defense is weak" signal came from one fixed script's purchase order. Do not tune costs/waves on this evidence; plan 004's bounded-tuning rules remain available if human playtests later show a real gap.
 2. **Product decision still needed (owner):** the remaining asymmetry is margin, not viability — economy-first ends with ~2–3x more gold and full Keep HP, and also wins without perks. Decide whether that is the intended reward for investing early, or whether defense-led play should be pushed toward a comparable margin. This is a goal decision for the owner, not something these runs can settle.
-3. Mechanical viability only: these scripts say nothing about whether fresh players understand or enjoy either approach. Keep the five-fresh-player gate open.
+3. Mechanical viability only: these scripts say nothing about whether players understand or enjoy either approach.

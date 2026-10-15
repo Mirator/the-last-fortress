@@ -1,0 +1,20 @@
+tooltip bl: cell (1,11) shown=True rect=(x:33.41, y:35.48, width:390.00, height:63.00) canvas=(1920.00, 1080.00)
+tooltip br: cell (11,1) shown=True rect=(x:1496.59, y:35.48, width:390.00, height:63.00) canvas=(1920.00, 1080.00)
+tooltip tl: cell (8,18) shown=True rect=(x:33.41, y:894.52, width:390.00, height:63.00) canvas=(1920.00, 1080.00)
+tooltip tr: cell (18,8) shown=True rect=(x:1496.59, y:894.52, width:390.00, height:63.00) canvas=(1920.00, 1080.00)
+night1 kill: state=Night arrows=0 cues=Kill,Hit
+pause: state=Night paused=True arrows=1 unchanged=True cues 0->0
+menu: arrows unchanged=True
+quit guard (night): Quit game | Cancel
+after night: state=Reward cues=0 arrows=1
+reward header: Night 1 survived — choose one reward
+Current forecast for dawn of Day 2: +65 gold
+reward recap: Night 1: 10 enemies defeated · Keep unharmed · no buildings lost
+offer LastStand: next dawn +65
+offer ThriftyConstruction: next dawn +65
+offer Sharpshooters: next dawn +65
+chose Sharpshooters
+quit guard (day): Save and exit | Exit without these changes | Cancel
+restart guard: Retry from Day 1 | Cancel
+keep hit shown=10 keepHp=490
+outcome: Defeat
