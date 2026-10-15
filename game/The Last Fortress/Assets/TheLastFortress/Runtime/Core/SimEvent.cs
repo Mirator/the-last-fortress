@@ -14,6 +14,14 @@ namespace TheLastFortress
         TowerShot,
         EnemyAttacked,
         RouteMissing,
+        IncomePaid,
+        BuildingRepaired,
+        TrapTriggered,
+        DamageReflected,
+        BuildingRotated,
+        OfferCreated,
+        PerkAcquired,
+        BurnTick,
     }
 
     /// <summary>Notification for presentation adapters. Simulation state stays authoritative.</summary>

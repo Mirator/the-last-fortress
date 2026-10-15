@@ -18,13 +18,18 @@ namespace TheLastFortress.Tests
         Mouse mouse;
         Keyboard keyboard;
         InputSettings.EditorInputBehaviorInPlayMode previousBehavior;
+        InputSettings.BackgroundBehavior previousBackground;
 
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             previousBehavior = InputSystem.settings.editorInputBehaviorInPlayMode;
+            previousBackground = InputSystem.settings.backgroundBehavior;
             // Virtual devices must reach the game even when the Editor window is unfocused during automated runs.
             InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            // The default ResetAndDisableNonBackgroundDevices disables the test devices whenever the Editor application
+            // itself is not the OS foreground window, so results depended on desktop focus rather than game code.
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             mouse = InputSystem.AddDevice<Mouse>("TestMouse");
             keyboard = InputSystem.AddDevice<Keyboard>("TestKeyboard");
             yield return LoadScene();
@@ -42,6 +47,7 @@ namespace TheLastFortress.Tests
             if (mouse != null) InputSystem.RemoveDevice(mouse);
             if (keyboard != null) InputSystem.RemoveDevice(keyboard);
             InputSystem.settings.editorInputBehaviorInPlayMode = previousBehavior;
+            InputSystem.settings.backgroundBehavior = previousBackground;
             yield return null;
         }
 

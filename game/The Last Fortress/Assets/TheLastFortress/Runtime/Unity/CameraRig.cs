@@ -16,6 +16,21 @@ namespace TheLastFortress
         Camera cam;
         Vector3 focus = DefaultFocus;
         float size = DefaultSize;
+        float shake;
+
+        /// <summary>Settings multiplier for pan speed and zoom step (MVP settings; 1 = prototype behavior).</summary>
+        public float Sensitivity { get; set; } = 1f;
+
+        /// <summary>Settings toggle; when false <see cref="Kick"/> does nothing.</summary>
+        public bool ShakeEnabled { get; set; } = true;
+
+        public float ShakeAmount => shake;
+
+        /// <summary>Small bounded screen shake (Keep hits). Never moves the logical focus.</summary>
+        public void Kick(float amount)
+        {
+            if (ShakeEnabled) shake = Mathf.Min(0.3f, shake + amount);
+        }
 
         public Camera Camera => cam != null ? cam : cam = GetComponent<Camera>();
         public Vector3 Focus => focus;
@@ -61,7 +76,7 @@ namespace TheLastFortress
                 var rot = Quaternion.Euler(0, Yaw, 0);
                 var right = rot * Vector3.right;
                 var forward = rot * Vector3.forward;
-                focus += (right * move.x + forward * move.y).normalized * (PanSpeed * dt * size / DefaultSize);
+                focus += (right * move.x + forward * move.y).normalized * (PanSpeed * Sensitivity * dt * size / DefaultSize);
                 focus.x = Mathf.Clamp(focus.x, -2f, 22f);
                 focus.z = Mathf.Clamp(focus.z, -2f, 22f);
             }
@@ -69,9 +84,10 @@ namespace TheLastFortress
             if (mouse != null && !pointerOverUi)
             {
                 var scroll = mouse.scroll.ReadValue().y;
-                if (Mathf.Abs(scroll) > 0.01f) size = Mathf.Clamp(size - Mathf.Sign(scroll) * 0.8f, MinSize, MaxSize);
+                if (Mathf.Abs(scroll) > 0.01f) size = Mathf.Clamp(size - Mathf.Sign(scroll) * 0.8f * Sensitivity, MinSize, MaxSize);
             }
 
+            shake = Mathf.MoveTowards(shake, 0f, dt * 0.8f);
             Apply();
         }
 
@@ -82,7 +98,8 @@ namespace TheLastFortress
             c.orthographicSize = size;
             var rotation = Quaternion.Euler(Pitch, Yaw, 0);
             transform.rotation = rotation;
-            transform.position = focus - rotation * Vector3.forward * Distance;
+            var jitter = shake > 0f ? new Vector3(Mathf.Sin(Time.unscaledTime * 61f), 0f, Mathf.Cos(Time.unscaledTime * 53f)) * shake : Vector3.zero;
+            transform.position = focus + jitter - rotation * Vector3.forward * Distance;
             c.nearClipPlane = 0.1f;
             c.farClipPlane = 120f;
         }

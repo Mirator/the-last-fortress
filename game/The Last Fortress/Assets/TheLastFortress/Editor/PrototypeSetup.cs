@@ -73,13 +73,13 @@ namespace TheLastFortress.Editor
             EditorUtility.SetDirty(content);
             AssetDatabase.SaveAssets();
 
-            BuildScene(content);
-            AddToBuildSettings();
+            BuildScene(ScenePath, ContentPath);
+            AddToBuildSettings(ScenePath);
             message = $"The Last Fortress prototype set up: {ScenePath}";
             return true;
         }
 
-        static void EnsureFolder(string path)
+        internal static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
             var parent = Path.GetDirectoryName(path)?.Replace('\\', '/');
@@ -115,7 +115,7 @@ namespace TheLastFortress.Editor
             return m;
         }
 
-        static EntityPrefabBuilder.Materials CreateMaterials(out Dictionary<string, Material> all)
+        internal static EntityPrefabBuilder.Materials CreateMaterials(out Dictionary<string, Material> all)
         {
             all = new Dictionary<string, Material>();
             LitMaterial("Grass", Palette.Grass, all);
@@ -130,6 +130,11 @@ namespace TheLastFortress.Editor
                 Amber = LitMaterial("TorchAmber", Palette.Amber, all, Palette.Amber * 1.6f),
                 EnemyBody = LitMaterial("EnemyBody", Palette.EnemyBody, all),
                 EnemyCloth = LitMaterial("EnemyCloth", Palette.EnemyCloth, all, Palette.EnemyCloth * 0.25f),
+                Crop = LitMaterial("Crop", Palette.DarkGrass, all),
+                RunnerCloth = LitMaterial("RunnerCloth", Palette.Hex(0xD39A4C), all, Palette.Hex(0xD39A4C) * 0.25f),
+                BruteCloth = LitMaterial("BruteCloth", Palette.Hex(0x7A3A33), all, Palette.Hex(0x7A3A33) * 0.2f),
+                GolemStone = LitMaterial("GolemStone", Palette.Hex(0x8C877E), all, Palette.Hex(0x8C877E) * 0.12f),
+                GolemGlow = LitMaterial("GolemGlow", Palette.WarningCoral, all, Palette.WarningCoral * 2.2f),
             };
 
             var overlayPath = $"{Root}/Materials/Overlay.mat";
@@ -144,10 +149,12 @@ namespace TheLastFortress.Editor
             overlay.color = Color.white;
             EditorUtility.SetDirty(overlay);
             all["Overlay"] = overlay;
+            LitMaterial("Foliage", Palette.Hex(0x5C7444), all);
+            LitMaterial("Rock", Palette.Hex(0x9A958B), all);
             return mats;
         }
 
-        static GameObject SavePrefab(GameObject temp, string name)
+        internal static GameObject SavePrefab(GameObject temp, string name)
         {
             var path = $"{Root}/Prefabs/{name}.prefab";
             var prefab = PrefabUtility.SaveAsPrefabAsset(temp, path);
@@ -155,13 +162,13 @@ namespace TheLastFortress.Editor
             return prefab;
         }
 
-        static void BuildScene(PrototypeContent content)
+        internal static void BuildScene(string scenePath, string contentPath)
         {
-            var scene = File.Exists(ScenePath)
-                ? EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single)
+            var scene = File.Exists(scenePath)
+                ? EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single)
                 : EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             // Opening a scene in Single mode can unload in-memory asset handles; reacquire from disk.
-            content = AssetDatabase.LoadAssetAtPath<PrototypeContent>(ContentPath);
+            var content = AssetDatabase.LoadAssetAtPath<PrototypeContent>(contentPath);
 
             var camGo = FindOrCreate("Main Camera");
             camGo.tag = "MainCamera";
@@ -203,7 +210,7 @@ namespace TheLastFortress.Editor
             RenderSettings.skybox = null;
 
             EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene, ScenePath);
+            EditorSceneManager.SaveScene(scene, scenePath);
         }
 
         static T Ensure<T>(GameObject go) where T : Component =>
@@ -223,16 +230,16 @@ namespace TheLastFortress.Editor
             return found != null ? found : new GameObject(name);
         }
 
-        static void AddToBuildSettings()
+        internal static void AddToBuildSettings(string scenePath)
         {
             var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-            var index = scenes.FindIndex(s => s.path == ScenePath);
+            var index = scenes.FindIndex(s => s.path == scenePath);
             if (index >= 0)
             {
                 if (scenes[index].enabled) return;
-                scenes[index] = new EditorBuildSettingsScene(ScenePath, true);
+                scenes[index] = new EditorBuildSettingsScene(scenePath, true);
             }
-            else scenes.Add(new EditorBuildSettingsScene(ScenePath, true));
+            else scenes.Add(new EditorBuildSettingsScene(scenePath, true));
 
             EditorBuildSettings.scenes = scenes.ToArray();
         }

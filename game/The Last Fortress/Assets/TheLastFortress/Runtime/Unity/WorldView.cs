@@ -16,6 +16,11 @@ namespace TheLastFortress
             public Transform HpFill;
             public GameObject HpBar;
             public float Flash;
+
+            /// <summary>Wall connection mask the current mesh was built for (-1 for non-Walls).</summary>
+            public int WallMask = -1;
+
+            public int Orientation;
         }
 
         sealed class EnemyView
@@ -24,6 +29,7 @@ namespace TheLastFortress
             public GameObject Root;
             public Transform HpFill;
             public GameObject HpBar;
+            public GameObject Burn;
         }
 
         sealed class ArrowFx
@@ -47,8 +53,23 @@ namespace TheLastFortress
         readonly List<SimEvent> events = new List<SimEvent>();
         readonly List<int> scratch = new List<int>();
         bool? nightLook;
+        GameObject terrainRoot;
+        Material poolWater;
+        int topologyRevision = -1;
+        int topologyReset = -1;
 
         public int BuildingViewCount => buildingViews.Count;
+
+        /// <summary>Number of Wall meshes rebuilt because their connections changed (diagnostic: no per-frame regeneration).</summary>
+        public int WallRebuildCount { get; private set; }
+
+        public int TerrainDecorationCount { get; private set; }
+
+        public int WallMaskOf(int buildingId) => buildingViews.TryGetValue(buildingId, out var v) ? v.WallMask : -1;
+
+        public float ViewYaw(int buildingId) => buildingViews.TryGetValue(buildingId, out var v) ? v.Root.transform.eulerAngles.y : float.NaN;
+
+        bool ConnectedWalls => content.wallShapePrefabs != null && content.wallShapePrefabs.Length == 6 && content.wallShapePrefabs[0] != null;
         public int EnemyViewCount => enemyViews.Count;
 
         public int CountBuildingViews(BuildingKind kind)
@@ -165,6 +186,57 @@ namespace TheLastFortress
             if (buildGrid.activeSelf != visible) buildGrid.SetActive(visible);
         }
 
+        /// <summary>Decorative meshes for forest/rock/water cells (no colliders, no hidden blockers); rebuilt per run.</summary>
+        public void SetTerrain(TerrainMap map)
+        {
+            if (terrainRoot != null) Destroy(terrainRoot);
+            terrainRoot = null;
+            TerrainDecorationCount = 0;
+            if (map == null || content.foliage == null) return;
+            if (poolWater == null) poolWater = Prims.Tinted(content.water, Palette.Hex(0x3B6E8C));
+            terrainRoot = new GameObject("Terrain");
+            terrainRoot.transform.SetParent(transform, false);
+            for (var i = 0; i < map.Cells.Length; i++)
+            {
+                var type = map.Cells[i];
+                if (type == TerrainType.Land) continue;
+                var cell = new GridPos(i % GridCoordinates.Size, i / GridCoordinates.Size);
+                var root = new GameObject($"{type} {cell}").transform;
+                root.SetParent(terrainRoot.transform, false);
+                root.position = Prims.CellCenter(cell);
+                var h = (cell.X * 73 + cell.Z * 151) % 7 / 7f; // stable per-cell variation, not gameplay randomness
+                switch (type)
+                {
+                    case TerrainType.Forest:
+                        for (var t = 0; t < 2; t++)
+                        {
+                            var p = new Vector3(t == 0 ? -0.18f : 0.2f, 0, t == 0 ? 0.15f : -0.17f);
+                            var s = 0.8f + 0.25f * ((h + t * 0.37f) % 1f);
+                            Prims.Create(PrimitiveType.Cube, root, p + new Vector3(0, 0.15f * s, 0), new Vector3(0.09f, 0.3f * s, 0.09f), content.timberShadow, "Trunk");
+                            Prims.Create(PrimitiveType.Cube, root, p + new Vector3(0, 0.42f * s, 0), new Vector3(0.36f * s, 0.34f * s, 0.36f * s), content.foliage, "Canopy", Quaternion.Euler(0, 45 + h * 40, 0));
+                            Prims.Create(PrimitiveType.Cube, root, p + new Vector3(0, 0.66f * s, 0), new Vector3(0.22f * s, 0.24f * s, 0.22f * s), content.foliage, "CanopyTop", Quaternion.Euler(0, h * 40, 0));
+                        }
+
+                        break;
+                    case TerrainType.Rock:
+                        Prims.Create(PrimitiveType.Cube, root, new Vector3(-0.08f, 0.18f, 0.02f), new Vector3(0.5f, 0.36f, 0.44f), content.rock, "Boulder", Quaternion.Euler(8, 30 + h * 60, 6));
+                        Prims.Create(PrimitiveType.Cube, root, new Vector3(0.22f, 0.1f, -0.2f), new Vector3(0.26f, 0.2f, 0.24f), content.rock, "Stone", Quaternion.Euler(-6, 10 + h * 80, 0));
+                        break;
+                    case TerrainType.Water:
+                        // Raised clear of the ground top (y = 0) so the faces never z-fight, with a pale rim so a pool reads
+                        // differently from the sea around the board.
+                        Prims.Create(PrimitiveType.Cube, root, new Vector3(0, 0.007f, 0), new Vector3(0.98f, 0.014f, 0.98f), content.rock, "Rim")
+                            .GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                        var pool = Prims.Create(PrimitiveType.Cube, root, new Vector3(0, 0.018f, 0), new Vector3(0.84f, 0.012f, 0.84f), poolWater, "Pool");
+                        pool.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                        Prims.Create(PrimitiveType.Cube, root, new Vector3(0.28f, 0.03f, 0.3f), new Vector3(0.16f, 0.06f, 0.1f), content.rock, "ShoreStone", Quaternion.Euler(0, 25, 0));
+                        break;
+                }
+
+                TerrainDecorationCount++;
+            }
+        }
+
         public void ClearAll()
         {
             foreach (var v in buildingViews.Values) Destroy(v.Root);
@@ -174,6 +246,7 @@ namespace TheLastFortress
             enemyViews.Clear();
             arrows.Clear();
             nightLook = null;
+            topologyRevision = -1;
         }
 
         /// <summary>Drain events, diff views against the simulation, interpolate enemies.</summary>
@@ -200,21 +273,41 @@ namespace TheLastFortress
             SyncBuildings(sim, deltaTime);
             SyncEnemies(sim);
             UpdateArrows(deltaTime);
-            var night = sim.State == RunState.Night || (sim.State == RunState.Defeat) || sim.StressMode;
+            var night = sim.State == RunState.Night || sim.State == RunState.Reward || sim.State == RunState.Defeat || sim.StressMode;
             if (nightLook != night) ApplyLighting(night);
         }
 
         void SyncBuildings(RunSimulation sim, float dt)
         {
+            // Wall topology only changes with solid occupancy; recompute masks on a new revision and rebuild only Walls
+            // whose connections changed (placed/sold/destroyed Wall and its neighbors), never every frame.
+            var topologyChanged = ConnectedWalls && (sim.Grid.Revision != topologyRevision || sim.ResetCount != topologyReset);
+            topologyRevision = sim.Grid.Revision;
+            topologyReset = sim.ResetCount;
             foreach (var b in sim.Grid.AllBuildings())
             {
                 if (!buildingViews.TryGetValue(b.Id, out var view))
                 {
-                    view = CreateBuildingView(b);
+                    view = CreateBuildingView(sim, b);
                     buildingViews[b.Id] = view;
                 }
+                else if (topologyChanged && b.Kind == BuildingKind.Wall && WallTopology.Mask(sim.Grid, b.Cell) != view.WallMask)
+                {
+                    Destroy(view.Root);
+                    var flash = view.Flash;
+                    view = CreateBuildingView(sim, b);
+                    view.Flash = flash;
+                    buildingViews[b.Id] = view;
+                    WallRebuildCount++;
+                }
 
-                var fraction = (float)b.Hp / b.Definition.MaxHp;
+                if (b.Kind != BuildingKind.Wall && view.Orientation != b.Orientation)
+                {
+                    view.Orientation = b.Orientation;
+                    view.Root.transform.rotation = Quaternion.Euler(0, b.Orientation * 90f, 0);
+                }
+
+                var fraction = b.MaxHp > 0 ? (float)b.Hp / b.MaxHp : 1f;
                 var showBar = fraction < 0.999f;
                 if (view.HpBar.activeSelf != showBar) view.HpBar.SetActive(showBar);
                 if (showBar) SetFill(view.HpFill, fraction);
@@ -264,6 +357,8 @@ namespace TheLastFortress
                 if (view.HpBar.activeSelf != showBar) view.HpBar.SetActive(showBar);
                 if (showBar) SetFill(view.HpFill, fraction);
                 view.HpBar.transform.rotation = Quaternion.identity;
+                if (view.Burn.activeSelf != e.Burning) view.Burn.SetActive(e.Burning);
+                if (e.Burning) view.Burn.transform.localScale = Vector3.one * (0.8f + 0.25f * Mathf.Sin(Time.unscaledTime * 18f + e.Id));
             }
 
             scratch.Clear();
@@ -277,22 +372,55 @@ namespace TheLastFortress
             }
         }
 
-        BuildingView CreateBuildingView(Building b)
+        BuildingView CreateBuildingView(RunSimulation sim, Building b)
         {
-            var root = Instantiate(content.PrefabFor(b.Kind), buildingsRoot);
+            var mask = -1;
+            var yaw = b.Orientation * 90f;
+            GameObject prefab;
+            if (b.Kind == BuildingKind.Wall && ConnectedWalls)
+            {
+                mask = WallTopology.Mask(sim.Grid, b.Cell);
+                WallTopology.Classify(mask, out var shape, out var turns);
+                prefab = content.wallShapePrefabs[(int)shape];
+                yaw = turns * 90f;
+            }
+            else prefab = content.PrefabFor(b.Kind);
+
+            var root = Instantiate(prefab, buildingsRoot);
             root.name = $"{b.Kind} #{b.Id} {b.Cell}";
-            root.transform.position = Prims.CellCenter(b.Cell);
-            var height = b.Kind == BuildingKind.Keep ? 1.95f : b.Kind == BuildingKind.Tower ? 2.3f : 1.05f;
+            root.transform.position = Prims.CellCenter(b.Cell) + RouteOverlay.FootprintOffset(b.Kind);
+            root.transform.rotation = Quaternion.Euler(0, yaw, 0);
+            var height = BarHeight(b.Kind);
             var bar = CreateBar(root.transform, height, 0.8f, hpFill, out var fill);
-            return new BuildingView { Building = b, Root = root, HpBar = bar, HpFill = fill };
+            return new BuildingView { Building = b, Root = root, HpBar = bar, HpFill = fill, WallMask = mask, Orientation = b.Kind == BuildingKind.Wall ? 0 : b.Orientation };
+        }
+
+        static float BarHeight(BuildingKind kind)
+        {
+            switch (kind)
+            {
+                case BuildingKind.Keep: return 1.95f;
+                case BuildingKind.Tower: return 2.3f;
+                case BuildingKind.House: return 1.35f;
+                case BuildingKind.Farm: return 0.9f;
+                default: return 1.05f;
+            }
         }
 
         EnemyView CreateEnemyView(Enemy e)
         {
-            var root = Instantiate(content.gruntPrefab, enemiesRoot);
-            root.name = $"Grunt #{e.Id}";
-            var bar = CreateBar(root.transform, 0.8f, 0.5f, hpFillEnemy, out var fill);
-            return new EnemyView { Enemy = e, Root = root, HpBar = bar, HpFill = fill };
+            var root = Instantiate(content.EnemyPrefabFor(e.Kind), enemiesRoot);
+            root.name = $"{e.Kind} #{e.Id}";
+            if (content.enemyScale > 0f && !Mathf.Approximately(content.enemyScale, 1f)) root.transform.localScale = Vector3.one * content.enemyScale;
+            var height = e.Kind == EnemyKind.SiegeGolem ? 1.75f : e.Kind == EnemyKind.Brute ? 1.05f : 0.8f;
+            var width = e.Kind == EnemyKind.SiegeGolem ? 1.0f : e.Kind == EnemyKind.Brute ? 0.7f : 0.5f;
+            var bar = CreateBar(root.transform, height, width, hpFillEnemy, out var fill);
+            // Burn feedback: a small flickering amber flame above the enemy (shape + motion, not color alone).
+            var burn = Prims.Create(PrimitiveType.Cube, root.transform, new Vector3(0, height - 0.18f, 0), new Vector3(0.14f, 0.2f, 0.14f), content.arrow, "Burn",
+                Quaternion.Euler(0, 45, 0));
+            burn.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            burn.SetActive(false);
+            return new EnemyView { Enemy = e, Root = root, HpBar = bar, HpFill = fill, Burn = burn };
         }
 
         GameObject CreateBar(Transform parent, float height, float width, Material fillMat, out Transform fill)

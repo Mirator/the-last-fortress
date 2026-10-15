@@ -1,23 +1,57 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TheLastFortress
 {
     /// <summary>uGUI HUD built in code (legacy UI.Text with the built-in font; no TMP resources required).</summary>
-    public sealed class HudView : MonoBehaviour
+    public sealed partial class HudView : MonoBehaviour
     {
         PrototypeBootstrap game;
         Font font;
         RectTransform canvasRect;
 
-        Text goldText, keepText, stateText, infoText, routeText, tooltipText, breachText, selectionTitle, selectionBody,
-            terminalTitle, terminalBody, diagnosticText, primaryLabel, stressText;
-        RectTransform keepFill, tooltipRect, breachRect;
-        GameObject selectionPanel, tooltipPanel, breachLabel, terminalOverlay, stressBanner, diagnosticPanel;
-        Image wallCardImage, towerCardImage, primaryImage;
+        sealed class BuildCard
+        {
+            public BuildingKind Kind;
+            public Button Button;
+            public Image Image;
+            public Text Cost;
+        }
 
-        public Button WallCard { get; private set; }
-        public Button TowerCard { get; private set; }
+        Text goldText, keepText, incomeText, stateText, infoText, routeText, tooltipText, breachText, selectionTitle, selectionBody,
+            terminalTitle, terminalBody, diagnosticText, primaryLabel, stressText, repairLabel;
+        RectTransform keepFill, tooltipRect, breachRect;
+        GameObject selectionPanel, tooltipPanel, breachLabel, terminalOverlay, stressBanner, diagnosticPanel, rewardOverlay, bossPanel;
+        Image primaryImage;
+        readonly List<BuildCard> cards = new List<BuildCard>();
+        readonly Button[] rewardButtons = new Button[PerkRules.OfferSize];
+        readonly Text[] rewardTitles = new Text[PerkRules.OfferSize];
+        readonly Text[] rewardBodies = new Text[PerkRules.OfferSize];
+        Text rewardHeader, perksText, bossText;
+        RectTransform bossFill;
+        string shownOfferId;
+        string[] shownPerks;
+
+        public GameObject RewardOverlay => rewardOverlay;
+        public Button RewardButton(int i) => rewardButtons[i];
+        public string RewardCardText(int i) => rewardTitles[i].text + "\n" + rewardBodies[i].text;
+        public GameObject BossPanel => bossPanel;
+
+        public Button WallCard => CardFor(BuildingKind.Wall);
+        public Button TowerCard => CardFor(BuildingKind.Tower);
+        public Button RepairButton { get; private set; }
+        public string InfoText => infoText.text;
+        public string RouteText => routeText.text;
+        public string IncomeText => incomeText.text;
+        public string SelectionText => selectionPanel.activeSelf ? selectionBody.text : null;
+
+        public Button CardFor(BuildingKind kind)
+        {
+            foreach (var c in cards)
+                if (c.Kind == kind) return c.Button;
+            return null;
+        }
         public Button PrimaryButton { get; private set; }
         public Button MenuRestartButton { get; private set; }
         public Button ResetCameraButton { get; private set; }
@@ -53,7 +87,7 @@ namespace TheLastFortress
             var root = canvasRect;
 
             // Top-left: gold and Keep health
-            var resources = Panel(root, "Resources", new Vector2(0, 1), new Vector2(24, -24), new Vector2(380, 132));
+            var resources = Panel(root, "Resources", new Vector2(0, 1), new Vector2(24, -24), new Vector2(380, game.IsMvp ? 196 : 132));
             Swatch(resources, new Vector2(20, -22), Palette.Amber, true);
             goldText = Label(resources, "Gold", 28, TextAnchor.UpperLeft, new Vector2(62, -14), new Vector2(300, 40), Palette.HudText);
             Swatch(resources, new Vector2(20, -70), Palette.WarningCoral, false);
@@ -66,22 +100,50 @@ namespace TheLastFortress
             keepFill.pivot = new Vector2(0, 0.5f);
             keepFill.offsetMin = keepFill.offsetMax = Vector2.zero;
             keepFill.gameObject.AddComponent<Image>().color = Palette.WarningCoral;
+            incomeText = Label(resources, "Income", 21, TextAnchor.UpperLeft, new Vector2(20, -122), new Vector2(350, 50), Palette.HudText);
 
             // Top-center: phase and enemies
-            var status = Panel(root, "Status", new Vector2(0.5f, 1), new Vector2(0, -24), new Vector2(760, 150));
-            stateText = Label(status, "State", 34, TextAnchor.UpperCenter, new Vector2(0, -10), new Vector2(740, 44), Palette.Amber, true);
-            infoText = Label(status, "Info", 22, TextAnchor.UpperCenter, new Vector2(0, -58), new Vector2(740, 32), Palette.HudText, true);
-            routeText = Label(status, "Route", 21, TextAnchor.UpperCenter, new Vector2(0, -98), new Vector2(740, 44), Palette.RouteCyan, true);
+            var mvp = game.IsMvp;
+            var status = Panel(root, "Status", new Vector2(0.5f, 1), new Vector2(0, -24), new Vector2(mvp ? 860 : 760, mvp ? 158 : 150));
+            stateText = Label(status, "State", 34, TextAnchor.UpperCenter, new Vector2(0, -10), new Vector2(840, 44), Palette.Amber, true);
+            infoText = Label(status, "Info", mvp ? 22 : 21, TextAnchor.UpperCenter, new Vector2(0, -56), new Vector2(840, mvp ? 58 : 32), Palette.HudText, true);
+            routeText = Label(status, "Route", 21, TextAnchor.UpperCenter, new Vector2(0, mvp ? -116 : -98), new Vector2(840, 36), Palette.RouteCyan, true);
+            perksText = Label(resources, "Perks", 17, TextAnchor.UpperLeft, new Vector2(20, -170), new Vector2(350, 24), Palette.Amber);
+
+            // Boss health (only while a Siege Golem is alive)
+            bossPanel = Panel(root, "BossBar", new Vector2(0.5f, 1), new Vector2(0, mvp ? -192 : -186), new Vector2(620, 54)).gameObject;
+            bossText = Label(bossPanel.transform, "Text", 22, TextAnchor.UpperCenter, new Vector2(0, -4), new Vector2(600, 28), Palette.WarningCoral, true);
+            var bossBack = Rect(bossPanel.transform, "Bar", new Vector2(0.5f, 0), new Vector2(0, 8), new Vector2(580, 12));
+            bossBack.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.5f);
+            bossFill = Rect(bossBack, "Fill", Vector2.zero, Vector2.zero, Vector2.zero);
+            bossFill.anchorMin = Vector2.zero;
+            bossFill.anchorMax = Vector2.one;
+            bossFill.offsetMin = bossFill.offsetMax = Vector2.zero;
+            bossFill.gameObject.AddComponent<Image>().color = Palette.WarningCoral;
+            bossPanel.SetActive(false);
 
             // Top-right: menu
-            var menu = Panel(root, "Menu", new Vector2(1, 1), new Vector2(-24, -24), new Vector2(430, 76));
-            MenuRestartButton = MakeButton(menu, "Restart", new Vector2(0, 1), new Vector2(12, -12), new Vector2(196, 52), game.Restart, out _);
-            ResetCameraButton = MakeButton(menu, "Reset Camera", new Vector2(0, 1), new Vector2(220, -12), new Vector2(198, 52), game.ResetCamera, out _);
+            var mvpMenu = game.IsMvp;
+            var menu = Panel(root, "Menu", new Vector2(1, 1), new Vector2(-24, -24), new Vector2(mvpMenu ? 470 : 430, mvpMenu ? 112 : 76));
+            MenuRestartButton = MakeButton(menu, "Restart", new Vector2(0, 1), new Vector2(12, -12), new Vector2(mvpMenu ? 140 : 196, 52), game.Restart, out var restartTop);
+            ResetCameraButton = MakeButton(menu, "Reset Camera", new Vector2(0, 1), new Vector2(mvpMenu ? 160 : 220, -12), new Vector2(mvpMenu ? 150 : 198, 52), game.ResetCamera, out var resetTop);
+            if (mvpMenu) restartTop.fontSize = resetTop.fontSize = 21;
+            if (game.IsMvp) BuildRunMenuRow(menu);
 
             // Bottom-center: build cards
-            var cards = Rect(root, "BuildCards", new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(500, 120));
-            WallCard = Card(cards, "Wall", game.Definitions.Wall.Cost, "1", new Vector2(0, 0), () => game.Player.SetTool(BuildingKind.Wall), out wallCardImage);
-            TowerCard = Card(cards, "Archer Tower", game.Definitions.Tower.Cost, "2", new Vector2(260, 0), () => game.Player.SetTool(BuildingKind.Tower), out towerCardImage);
+            var kinds = game.PurchasableKinds;
+            var cardWidth = kinds.Count > 2 ? 196f : 240f;
+            var gap = kinds.Count > 2 ? 12f : 20f;
+            var cardRow = Rect(root, "BuildCards", new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(kinds.Count * (cardWidth + gap) - gap, 120));
+            for (var i = 0; i < kinds.Count; i++)
+            {
+                var kind = kinds[i];
+                var def = game.Definitions.For(kind);
+                var buildCard = new BuildCard { Kind = kind };
+                buildCard.Button = Card(cardRow, def.DisplayName, def.Cost, (i + 1).ToString(), new Vector2(i * (cardWidth + gap), 0), cardWidth,
+                    () => game.Player.SetTool(kind), out buildCard.Image, out buildCard.Cost, game.IsMvp ? CardEffect(def) : null);
+                cards.Add(buildCard);
+            }
 
             // Bottom-right: primary action
             var actions = Rect(root, "Actions", new Vector2(1, 0), new Vector2(-24, 24), new Vector2(300, 100));
@@ -90,18 +152,28 @@ namespace TheLastFortress
             primaryLabel.fontSize = 30;
 
             // Bottom-left: selection
-            selectionPanel = Panel(root, "Selection", new Vector2(0, 0), new Vector2(24, 24), new Vector2(380, 190)).gameObject;
+            selectionPanel = Panel(root, "Selection", new Vector2(0, 0), new Vector2(24, 24), new Vector2(380, game.IsMvp ? 248 : 190)).gameObject;
             selectionTitle = Label(selectionPanel.transform, "Name", 26, TextAnchor.UpperLeft, new Vector2(18, -12), new Vector2(350, 36), Palette.Amber);
             selectionBody = Label(selectionPanel.transform, "Body", 21, TextAnchor.UpperLeft, new Vector2(18, -52), new Vector2(350, 70), Palette.HudText);
-            SellButton = MakeButton(selectionPanel.transform, "Sell", new Vector2(0, 1), new Vector2(18, -124), new Vector2(200, 52), game.SellSelected, out _);
+            SellButton = MakeButton(selectionPanel.transform, "Sell", new Vector2(0, 1), new Vector2(18, -124), new Vector2(160, 52), game.SellSelected, out _);
+            RepairButton = MakeButton(selectionPanel.transform, "Repair", new Vector2(0, 1), new Vector2(190, -124), new Vector2(172, 52), game.RepairSelected, out repairLabel);
+            repairLabel.fontSize = 20;
+            RepairButton.gameObject.SetActive(false);
+            if (game.IsMvp)
+            {
+                RotateButton = MakeButton(selectionPanel.transform, "Rotate (R)", new Vector2(0, 1), new Vector2(18, -184), new Vector2(160, 50), game.RotateSelected, out _);
+                RotateButton.gameObject.SetActive(false);
+            }
             selectionPanel.SetActive(false);
 
             // Controls hint
             Label(root, "Hint", 18, TextAnchor.LowerLeft, new Vector2(24, 230), new Vector2(1100, 30), Palette.HudText.WithAlpha(0.8f))
-                .text = "1 Wall · 2 Tower · LMB place/select · RMB/Esc cancel · WASD/arrows pan · wheel zoom · Space pause";
+                .text = (game.IsMvp ? "1 Wall · 2 Tower · 3 House · 4 Farm · 5 Trap" : "1 Wall · 2 Tower")
+                        + " · LMB place/select · RMB/Esc cancel · WASD/arrows pan · wheel zoom · Space pause";
             var hintRect = root.Find("Hint") as RectTransform;
             hintRect.anchorMin = hintRect.anchorMax = hintRect.pivot = Vector2.zero;
             hintRect.anchoredPosition = new Vector2(24, 226);
+            if (game.IsMvp) hintRect.gameObject.SetActive(false); // the MVP lists controls in its menu instead
 
             // Cursor tooltip and breach label (never block pointer)
             tooltipPanel = Panel(root, "Tooltip", new Vector2(0, 0), Vector2.zero, new Vector2(330, 74)).gameObject;
@@ -150,6 +222,77 @@ namespace TheLastFortress
             TerminalRestartButton = MakeButton(card, "Restart", new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(260, 70), game.Restart, out var restartLabel);
             restartLabel.fontSize = 28;
             terminalOverlay.SetActive(false);
+
+            // Reward choice (blocks the world; combat and building are stopped in Reward)
+            var reward = Rect(root, "RewardOverlay", new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            reward.anchorMin = Vector2.zero;
+            reward.anchorMax = Vector2.one;
+            reward.offsetMin = reward.offsetMax = Vector2.zero;
+            reward.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.07f, 0.09f, 0.55f);
+            rewardOverlay = reward.gameObject;
+            rewardHeader = Label(reward, "Header", 40, TextAnchor.MiddleCenter, new Vector2(0, -250), new Vector2(1200, 110), Palette.Amber, true);
+            for (var i = 0; i < PerkRules.OfferSize; i++)
+            {
+                var index = i;
+                var rt = Rect(reward, $"RewardCard{i}", new Vector2(0.5f, 0.5f), new Vector2((i - 1) * 420, -30), new Vector2(390, 330));
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                var img = rt.gameObject.AddComponent<Image>();
+                img.color = Palette.HudSurface.WithAlpha(0.97f);
+                var button = rt.gameObject.AddComponent<Button>();
+                button.targetGraphic = img;
+                var colors = button.colors;
+                colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
+                button.colors = colors;
+                button.onClick.AddListener(() => Choose(index));
+                rewardTitles[i] = Label(rt, "Title", 30, TextAnchor.UpperCenter, new Vector2(0, -24), new Vector2(360, 44), Palette.Amber, true);
+                rewardBodies[i] = Label(rt, "Body", 22, TextAnchor.UpperCenter, new Vector2(0, -84), new Vector2(350, 230), Palette.HudText, true);
+                rewardButtons[i] = button;
+            }
+
+            rewardOverlay.SetActive(false);
+            if (game.IsMvp) BuildMvpPanels(root);
+        }
+
+        void Choose(int index)
+        {
+            if (shownOfferId == null || shownPerks == null || index >= shownPerks.Length) return;
+            game.ChoosePerk(shownOfferId, shownPerks[index]); // stale or repeated clicks are rejected by the simulation
+        }
+
+        void RefreshReward(RunSimulation sim)
+        {
+            var offer = sim.State == RunState.Reward ? sim.CurrentOffer : null;
+            if (rewardOverlay.activeSelf != (offer != null)) rewardOverlay.SetActive(offer != null);
+            if (offer == null)
+            {
+                shownOfferId = null;
+                shownPerks = null;
+                return;
+            }
+
+            shownOfferId = offer.OfferId;
+            shownPerks = offer.PerkIds;
+            Set(rewardHeader, $"Night {offer.ClearedNight} survived — choose one reward\nDawn of Day {offer.ClearedNight + 1} pays +{sim.IncomeForecast().Total} gold after your choice");
+            for (var i = 0; i < rewardButtons.Length; i++)
+            {
+                var has = i < offer.PerkIds.Length;
+                if (rewardButtons[i].gameObject.activeSelf != has) rewardButtons[i].gameObject.SetActive(has);
+                if (!has) continue;
+                var id = offer.PerkIds[i];
+                Set(rewardTitles[i], PerkRules.Title(id));
+                Set(rewardBodies[i], PerkRules.Effect(id) + "\n\n" + Relevance(sim, id));
+            }
+        }
+
+        static string Relevance(RunSimulation sim, string id)
+        {
+            var kind = PerkRules.AffectedKind(id);
+            if (kind == null) return "Applies to your whole fortress.";
+            var n = 0;
+            foreach (var b in sim.Grid.AllBuildings())
+                if (b.Kind == kind.Value && b.IsAlive) n++;
+            var name = sim.Definitions.For(kind.Value).DisplayName;
+            return n > 0 ? $"You own {n} {name}{(n == 1 ? "" : "s")}." : $"You own no {name} yet (future ones benefit).";
         }
 
         // ---------- refresh ----------
@@ -158,19 +301,35 @@ namespace TheLastFortress
         {
             var defs = sim.Definitions;
             Set(goldText, $"Gold  {sim.Gold}");
-            Set(keepText, $"Keep  {sim.Keep.Hp} / {defs.Keep.MaxHp}");
-            keepFill.anchorMax = new Vector2(Mathf.Clamp01((float)sim.Keep.Hp / defs.Keep.MaxHp), 1);
+            Set(keepText, $"Keep  {sim.Keep.Hp} / {sim.Keep.MaxHp}");
+            keepFill.anchorMax = new Vector2(Mathf.Clamp01((float)sim.Keep.Hp / sim.Keep.MaxHp), 1);
+            Set(incomeText, sim.IsCampaign ? IncomeLine(sim) : "");
 
             var wave = sim.Wave;
+            var campaign = sim.IsCampaign;
+            var nightTag = campaign ? $" {sim.NightNumber} of {sim.TotalNights}" : "";
             switch (sim.State)
             {
                 case RunState.Day:
-                    Set(stateText, "DAY — build your defenses");
-                    Set(infoText, $"Upcoming: {wave.Spawns.Count} Grunts from the west edge {WavePlan.MainEntry}, one every 1.5 s");
+                    if (!campaign)
+                    {
+                        Set(stateText, "DAY — build your defenses");
+                        Set(infoText, $"Upcoming: {wave.Spawns.Count} Grunts from the west edge {WavePlan.MainEntry}, one every 1.5 s");
+                    }
+                    else
+                    {
+                        Set(stateText, $"DAY{nightTag}");
+                        Set(infoText, WaveText.Tonight(wave));
+                    }
+
                     break;
                 case RunState.Night:
-                    Set(stateText, sim.Paused ? "NIGHT — PAUSED" : $"NIGHT  {sim.NightElapsedSeconds:0.0}s");
+                    Set(stateText, sim.Paused ? $"NIGHT{nightTag} — PAUSED" : $"NIGHT{nightTag}  {sim.NightElapsedSeconds:0.0}s");
                     Set(infoText, $"Enemies alive {sim.AliveEnemyCount} · still to come {sim.ScheduledRemaining}");
+                    break;
+                case RunState.Reward:
+                    Set(stateText, $"NIGHT {sim.NightNumber} CLEARED");
+                    Set(infoText, "Choose one reward to continue. Building is closed until the next Day.");
                     break;
                 default:
                     Set(stateText, sim.State == RunState.Victory ? "VICTORY" : "DEFEAT");
@@ -182,27 +341,38 @@ namespace TheLastFortress
 
             // Route summary (Day only)
             var route = overlay.PrimaryRoute;
-            if (route == null) Set(routeText, sim.State == RunState.Night ? "Towers fire automatically. Enemies follow open routes first." : "");
+            var newSides = campaign && sim.State == RunState.Day ? WaveText.NewEntries(sim.Campaign, sim.NightNumber) : null;
+            if (route == null) Set(routeText, sim.State == RunState.Night && !campaign ? "Towers fire automatically. Enemies follow open routes first." : "");
             else if (!route.Found) Set(routeText, "NO ROUTE — map invalid");
+            else if (newSides != null && overlay.CandidateRoute == null && !route.IsBreach)
+            {
+                Set(routeText, $"NEW: enemies also attack from {newSides}");
+                routeText.color = Palette.WarningCoral;
+            }
             else if (!route.IsBreach)
             {
-                Set(routeText, $"{(overlay.CandidateRoute != null ? "If built: " : "Route: ")}open path, {route.Cells.Count - 1} tiles to the Keep");
+                Set(routeText, campaign ? "" : $"{(overlay.CandidateRoute != null ? "If built: " : "Route: ")}open path, {route.Cells.Count - 1} tiles to the Keep");
                 routeText.color = Palette.RouteCyan;
             }
             else
             {
                 var blocker = sim.Grid.GetOccupant(route.Blocker);
                 var name = blocker != null ? blocker.Definition.DisplayName : player.Tool.HasValue ? defs.For(player.Tool.Value).DisplayName : "structure";
+                if (sim.Wave.EntryCells.Count > 1) name += $" (from {WaveText.EntryName(sim.Wave.EntryCells[0])})";
                 Set(routeText, $"{(overlay.CandidateRoute != null ? "If built: " : "")}SEALED — enemies will BREACH {name} at {route.Blocker}");
                 routeText.color = Palette.WarningCoral;
             }
 
             // Build cards
             var canBuild = sim.State == RunState.Day && !sim.StressMode;
-            WallCard.interactable = canBuild;
-            TowerCard.interactable = canBuild;
-            wallCardImage.color = player.Tool == BuildingKind.Wall ? CardActive : CardIdle;
-            towerCardImage.color = player.Tool == BuildingKind.Tower ? CardActive : CardIdle;
+            foreach (var card in cards)
+            {
+                card.Button.interactable = canBuild;
+                card.Image.color = player.Tool == card.Kind ? CardActive : CardIdle;
+                var price = sim.PriceFor(card.Kind);
+                Set(card.Cost, $"{price} gold");
+                card.Cost.color = price <= sim.Gold ? Palette.Amber : Palette.WarningCoral;
+            }
 
             // Primary action
             if (sim.State == RunState.Day)
@@ -221,7 +391,7 @@ namespace TheLastFortress
             }
             else
             {
-                Set(primaryLabel, "—");
+                Set(primaryLabel, sim.State == RunState.Reward ? "CHOOSE REWARD" : "—");
                 PrimaryButton.interactable = false;
             }
 
@@ -231,13 +401,24 @@ namespace TheLastFortress
             if (sel != null)
             {
                 Set(selectionTitle, sel.Definition.DisplayName);
-                var body = $"HP {sel.Hp} / {sel.Definition.MaxHp}   at {sel.Cell}";
+                var body = sel.Definition.HasHp ? $"HP {sel.Hp} / {sel.MaxHp}   at {sel.Cell}" : $"{sel.Definition.TrapDamage} damage on entry · walkable   at {sel.Cell}";
                 if (sel.Kind == BuildingKind.Tower) body += $"\nDamage {sel.Definition.AttackDamage} every {sel.Definition.AttackIntervalSeconds}s, range {sel.Definition.Range}";
-                var canSell = sim.State == RunState.Day && sel.IsDestructible && !sim.StressMode;
+                if (sel.Definition.DailyIncome > 0 && campaign) body += $"\nIncome +{sel.Definition.DailyIncome}/day" + (sel.Kind == BuildingKind.Farm && EconomyRules.FarmHasAdjacentHouse(sim.Grid, sel) ? $" +{EconomyRules.FarmHouseBonus} House link" : "");
+                if (sel.Kind == BuildingKind.Wall && sim.WallReflection(sel) > 0) body += $"\nReflects {sim.WallReflection(sel)} per hit (Spike Trap link)";
+                var day = sim.State == RunState.Day && !sim.StressMode;
+                var canSell = day && sel.IsDestructible;
                 if (canSell) body += $"\nSell refund: {PlacementService.RefundFor(sel)} gold";
                 else if (!sel.IsDestructible) body += "\nThe Keep cannot be sold";
                 Set(selectionBody, body);
                 if (SellButton.gameObject.activeSelf != canSell) SellButton.gameObject.SetActive(canSell);
+                var canRepair = day && campaign && sel.Definition.HasHp;
+                if (RepairButton.gameObject.activeSelf != canRepair) RepairButton.gameObject.SetActive(canRepair);
+                if (canRepair)
+                {
+                    sim.RepairQuote(sel, out var restored, out var cost);
+                    RepairButton.interactable = restored > 0;
+                    Set(repairLabel, sel.Hp >= sel.MaxHp ? "Full health" : restored > 0 ? $"Repair +{restored} HP\nfor {cost} gold" : "No gold");
+                }
             }
 
             // Ghost tooltip
@@ -246,9 +427,12 @@ namespace TheLastFortress
             if (showTip)
             {
                 var def = defs.For(player.Tool.Value);
+                var size = def.FootprintSize > 1 ? $" ({def.FootprintSize}x{def.FootprintSize})" : "";
+                var price = sim.PriceFor(player.Tool.Value);
+                var extra = !campaign ? "" : player.Tool == BuildingKind.Wall ? " · Automatic connections" : RunSimulation.IsRotatable(player.Tool.Value) ? " · R rotates" : "";
                 Set(tooltipText, overlay.GhostValid
-                    ? $"{def.DisplayName} — {def.Cost} gold\n[OK] Valid placement"
-                    : $"{def.DisplayName} — {def.Cost} gold\n[X] {PlacementText.Describe(overlay.GhostRejection)}");
+                    ? $"{def.DisplayName}{size} — {price} gold\n[OK] Valid placement{extra}"
+                    : $"{def.DisplayName}{size} — {price} gold\n[X] {PlacementText.Describe(overlay.GhostRejection)}");
                 tooltipText.color = overlay.GhostValid ? Palette.HudText : Palette.WarningCoral;
                 var anchor = player.HoverOverride.HasValue ? rig.CellToScreen(player.HoverOverride.Value) : player.PointerPosition;
                 tooltipRect.anchoredPosition = ScreenToCanvas(anchor) + new Vector2(28, -12);
@@ -265,6 +449,22 @@ namespace TheLastFortress
 
             if (stressBanner.activeSelf != sim.StressMode) stressBanner.SetActive(sim.StressMode);
 
+            // Perks and boss
+            Set(perksText, sim.OwnedPerks.Count == 0 ? "" : "Perks: " + string.Join(", ", PerkTitles(sim)));
+            Enemy boss = null;
+            foreach (var e in sim.Enemies)
+                if (e.Alive && e.Kind == EnemyKind.SiegeGolem) boss = e;
+            var showBoss = boss != null && sim.State == RunState.Night;
+            if (bossPanel.activeSelf != showBoss) bossPanel.SetActive(showBoss);
+            if (showBoss)
+            {
+                Set(bossText, $"BOSS — {boss.Definition.DisplayName}  {boss.Hp} / {boss.Definition.MaxHp}{(boss.Burning ? "  (burning)" : "")}");
+                bossFill.anchorMax = new Vector2(Mathf.Clamp01((float)boss.Hp / boss.Definition.MaxHp), 1);
+            }
+
+            RefreshReward(sim);
+            if (game.IsMvp) RefreshMvpPanels(sim, player);
+
             var diag = sim.State == RunState.Day && sim.Diagnostics.Count > 0 ? sim.Diagnostics[sim.Diagnostics.Count - 1] : null;
             if (diagnosticPanel.activeSelf != (diag != null)) diagnosticPanel.SetActive(diag != null);
             if (diag != null) Set(diagnosticText, diag);
@@ -277,10 +477,25 @@ namespace TheLastFortress
                 var won = sim.State == RunState.Victory;
                 Set(terminalTitle, won ? "VICTORY" : "DEFEAT");
                 terminalTitle.color = won ? Palette.Amber : Palette.WarningCoral;
-                Set(terminalBody, won
-                    ? $"All {wave.Spawns.Count} Grunts defeated.\nKeep held with {sim.Keep.Hp} / {defs.Keep.MaxHp} HP after {sim.NightElapsedSeconds:0.0}s."
-                    : $"The Keep fell after {sim.NightElapsedSeconds:0.0}s.\n{sim.AliveEnemyCount} Grunts were still attacking.");
+                if (campaign) Set(terminalBody, SummaryText(sim));
+                else
+                    Set(terminalBody, won
+                        ? $"All {wave.Spawns.Count} Grunts defeated.\nKeep held with {sim.Keep.Hp} / {defs.Keep.MaxHp} HP after {sim.NightElapsedSeconds:0.0}s."
+                        : $"The Keep fell after {sim.NightElapsedSeconds:0.0}s.\n{sim.AliveEnemyCount} Grunts were still attacking.");
             }
+        }
+
+        static IEnumerable<string> PerkTitles(RunSimulation sim)
+        {
+            foreach (var id in sim.OwnedPerks) yield return PerkRules.Title(id);
+        }
+
+        static string IncomeLine(RunSimulation sim)
+        {
+            var received = sim.State == RunState.Day && sim.NightNumber > 1 && sim.LastPaidDay == sim.NightNumber && sim.LastIncome.Total > 0
+                ? $"\nReceived +{sim.LastIncome.Total} at dawn" : "";
+            if (sim.NightNumber >= sim.TotalNights) return "No income after the last night" + received;
+            return $"Income +{sim.IncomeForecast().Total} per day" + received;
         }
 
         Vector2 ScreenToCanvas(Vector2 screen)
@@ -356,20 +571,40 @@ namespace TheLastFortress
             return button;
         }
 
-        Button Card(Transform parent, string title, int cost, string hotkey, Vector2 position,
-            UnityEngine.Events.UnityAction onClick, out Image image)
+        /// <summary>One short line on each MVP card saying what the building does (values from the live definitions).</summary>
+        static string CardEffect(BuildingDefinition d)
         {
-            var rt = Rect(parent, title.Replace(" ", "") + "Card", new Vector2(0, 0), position, new Vector2(240, 120));
+            switch (d.Kind)
+            {
+                case BuildingKind.Wall: return "Blocks enemy paths";
+                case BuildingKind.Tower: return $"Shoots · range {d.Range:0}";
+                case BuildingKind.House: return $"+{d.DailyIncome} gold per day";
+                case BuildingKind.Farm: return $"+{d.DailyIncome}/day · 2x2 tiles";
+                case BuildingKind.SpikeTrap: return $"Damages enemies on it";
+                default: return "";
+            }
+        }
+
+        Button Card(Transform parent, string title, int cost, string hotkey, Vector2 position, float width,
+            UnityEngine.Events.UnityAction onClick, out Image image, out Text costText, string effect = null)
+        {
+            var rt = Rect(parent, title.Replace(" ", "") + "Card", new Vector2(0, 0), position, new Vector2(width, 120));
             image = rt.gameObject.AddComponent<Image>();
             image.color = CardIdle;
             var button = rt.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             button.onClick.AddListener(onClick);
-            Label(rt, "Title", 26, TextAnchor.UpperLeft, new Vector2(16, -12), new Vector2(210, 34), Palette.HudText).text = title;
-            Label(rt, "Cost", 30, TextAnchor.UpperLeft, new Vector2(16, -52), new Vector2(150, 40), Palette.Amber).text = $"{cost} gold";
-            var key = Label(rt, "Hotkey", 22, TextAnchor.MiddleCenter, new Vector2(178, -64), new Vector2(46, 40), Palette.HudSurface);
+            var compact = effect != null;
+            Label(rt, "Title", width < 240 ? 23 : 26, TextAnchor.UpperLeft, new Vector2(16, compact ? -8 : -12), new Vector2(width - 30, 34), Palette.HudText).text = title;
+            if (compact)
+                Label(rt, "Effect", 17, TextAnchor.UpperLeft, new Vector2(16, -38), new Vector2(width - 24, 24), Palette.HudText.WithAlpha(0.75f)).text = effect;
+            costText = Label(rt, "Cost", compact ? 25 : 28, TextAnchor.UpperLeft, new Vector2(16, compact ? -70 : -52), new Vector2(width - 90, 40), Palette.Amber);
+            costText.text = $"{cost} gold";
+            var keyX = width - 62;
+            var keyY = compact ? -70f : -64f;
+            var key = Label(rt, "Hotkey", 22, TextAnchor.MiddleCenter, new Vector2(keyX, keyY), new Vector2(46, 40), Palette.HudSurface);
             key.text = hotkey;
-            var keyBack = Rect(rt, "HotkeyBack", new Vector2(0, 1), new Vector2(178, -64), new Vector2(46, 40));
+            var keyBack = Rect(rt, "HotkeyBack", new Vector2(0, 1), new Vector2(keyX, keyY), new Vector2(46, 40));
             var kb = keyBack.gameObject.AddComponent<Image>();
             kb.color = Palette.HudText;
             kb.raycastTarget = false;

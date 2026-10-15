@@ -3,14 +3,18 @@ using System.Collections.Generic;
 
 namespace TheLastFortress
 {
+    /// <summary>Stable serialized IDs: append only, never reorder.</summary>
     public enum BuildingKind
     {
         Keep = 0,
         Wall = 1,
         Tower = 2,
+        House = 3,
+        Farm = 4,
+        SpikeTrap = 5,
     }
 
-    /// <summary>Tuning values for a one-cell structure.</summary>
+    /// <summary>Tuning values for a structure. Shared and read-only during a run; perks never mutate it.</summary>
     public sealed class BuildingDefinition
     {
         public BuildingKind Kind;
@@ -21,20 +25,70 @@ namespace TheLastFortress
         public double AttackIntervalSeconds;
         public double Range;
 
+        /// <summary>Gold paid on entering each new Day while the building survives (MVP only).</summary>
+        public int DailyIncome;
+
+        /// <summary>Damage dealt once to an enemy completing entry into the cell (Spike Trap only).</summary>
+        public int TrapDamage;
+
         public bool CanAttack => AttackDamage > 0;
         public bool Purchasable => Kind != BuildingKind.Keep;
+
+        /// <summary>Traps are a walkable floor layer; every other structure blocks movement.</summary>
+        public bool IsSolid => Kind != BuildingKind.SpikeTrap;
+
+        public bool HasHp => Kind != BuildingKind.SpikeTrap;
+
+        /// <summary>Square footprint edge length. Fixed by the rules, not tuning: Farm is 2 x 2, everything else 1 x 1.</summary>
+        public int FootprintSize => FootprintSizeOf(Kind);
+
+        public static int FootprintSizeOf(BuildingKind kind) => kind == BuildingKind.Farm ? 2 : 1;
+
+        /// <summary>Footprint cells from the lowest (x,z) anchor, in offset order (0,0),(1,0),(0,1),(1,1).</summary>
+        public static GridPos[] FootprintCells(BuildingKind kind, GridPos anchor)
+        {
+            var size = FootprintSizeOf(kind);
+            var cells = new GridPos[size * size];
+            var i = 0;
+            for (var dz = 0; dz < size; dz++)
+            for (var dx = 0; dx < size; dx++)
+                cells[i++] = new GridPos(anchor.X + dx, anchor.Z + dz);
+            return cells;
+        }
+    }
+
+    /// <summary>Stable serialized IDs: append only, never reorder.</summary>
+    public enum EnemyKind
+    {
+        Grunt = 0,
+        Runner = 1,
+        Brute = 2,
+        SiegeGolem = 3,
     }
 
     public sealed class EnemyDefinition
     {
+        public EnemyKind Kind;
         public string DisplayName;
         public int MaxHp;
         public double SpeedTilesPerSecond;
         public int AttackDamage;
         public double AttackIntervalSeconds;
+
+        /// <summary>Damage multiplier applied only when the target is a Wall (Brute/Golem x2).</summary>
+        public int WallDamageMultiplier = 1;
+
+        /// <summary>Fixed-point movement: one tile = this many units.</summary>
+        public const int UnitsPerTile = 1200;
+
+        /// <summary>Movement units consumed per 0.05 s step: speed * 60 (Grunt 60, Runner 105, Brute 36, Golem 24).</summary>
+        public int MoveUnitsPerStep => (int)Math.Round(SpeedTilesPerSecond * UnitsPerTile * PrototypeDefinitions.StepSeconds);
     }
 
-    /// <summary>Complete prototype tuning set. Values are validated before a run can start.</summary>
+    /// <summary>
+    /// Complete tuning set. Values are validated before a run can start. House/Farm/SpikeTrap are optional:
+    /// absent in the prototype (not purchasable there), present in the MVP (see <see cref="MvpDefinitions"/>).
+    /// </summary>
     public sealed class PrototypeDefinitions
     {
         public const double StepSeconds = 0.05;
@@ -43,7 +97,13 @@ namespace TheLastFortress
         public BuildingDefinition Keep;
         public BuildingDefinition Wall;
         public BuildingDefinition Tower;
+        public BuildingDefinition House;
+        public BuildingDefinition Farm;
+        public BuildingDefinition SpikeTrap;
         public EnemyDefinition Grunt;
+        public EnemyDefinition Runner;
+        public EnemyDefinition Brute;
+        public EnemyDefinition SiegeGolem;
 
         /// <summary>Initial tuning from specification 002, "Initial combat tuning".</summary>
         public static PrototypeDefinitions CreateDefault() => new PrototypeDefinitions
@@ -62,6 +122,7 @@ namespace TheLastFortress
             },
         };
 
+        /// <summary>Definition for a kind, or null for an optional kind absent from this tuning set.</summary>
         public BuildingDefinition For(BuildingKind kind)
         {
             switch (kind)
@@ -69,6 +130,22 @@ namespace TheLastFortress
                 case BuildingKind.Keep: return Keep;
                 case BuildingKind.Wall: return Wall;
                 case BuildingKind.Tower: return Tower;
+                case BuildingKind.House: return House;
+                case BuildingKind.Farm: return Farm;
+                case BuildingKind.SpikeTrap: return SpikeTrap;
+                default: throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
+            }
+        }
+
+        /// <summary>Definition for an enemy kind, or null for a kind absent from this tuning set (prototype: Grunt only).</summary>
+        public EnemyDefinition EnemyFor(EnemyKind kind)
+        {
+            switch (kind)
+            {
+                case EnemyKind.Grunt: return Grunt;
+                case EnemyKind.Runner: return Runner;
+                case EnemyKind.Brute: return Brute;
+                case EnemyKind.SiegeGolem: return SiegeGolem;
                 default: throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
             }
         }
@@ -86,18 +163,45 @@ namespace TheLastFortress
             ValidateBuilding(Keep, BuildingKind.Keep, errors);
             ValidateBuilding(Wall, BuildingKind.Wall, errors);
             ValidateBuilding(Tower, BuildingKind.Tower, errors);
+            if (House != null) ValidateBuilding(House, BuildingKind.House, errors);
+            if (Farm != null) ValidateBuilding(Farm, BuildingKind.Farm, errors);
+            if (SpikeTrap != null)
+            {
+                if (SpikeTrap.Kind != BuildingKind.SpikeTrap) errors.Add($"SpikeTrap definition has kind {SpikeTrap.Kind}.");
+                if (SpikeTrap.Cost < 0) errors.Add("Spike Trap cost must not be negative.");
+                if (SpikeTrap.TrapDamage <= 0) errors.Add("Spike Trap damage must be positive.");
+            }
+
             if (Grunt == null)
             {
                 errors.Add("Grunt definition missing.");
                 return errors;
             }
 
-            if (Grunt.MaxHp <= 0) errors.Add("Grunt HP must be positive.");
-            if (Grunt.AttackDamage < 0) errors.Add("Grunt damage must not be negative.");
-            ValidateInterval("Grunt attack interval", Grunt.AttackIntervalSeconds, errors);
-            if (Grunt.SpeedTilesPerSecond <= 0) errors.Add("Grunt speed must be positive.");
-            else ValidateInterval("Grunt seconds per tile", 1.0 / Grunt.SpeedTilesPerSecond, errors);
+            ValidateEnemy(Grunt, errors);
+            if (Runner != null) ValidateEnemy(Runner, errors);
+            if (Brute != null) ValidateEnemy(Brute, errors);
+            if (SiegeGolem != null) ValidateEnemy(SiegeGolem, errors);
             return errors;
+        }
+
+        static void ValidateEnemy(EnemyDefinition e, List<string> errors)
+        {
+            var name = e.DisplayName ?? e.Kind.ToString();
+            if (e.MaxHp <= 0) errors.Add($"{name} HP must be positive.");
+            if (e.AttackDamage < 0) errors.Add($"{name} damage must not be negative.");
+            if (e.WallDamageMultiplier < 1) errors.Add($"{name} wall multiplier must be at least 1.");
+            ValidateInterval($"{name} attack interval", e.AttackIntervalSeconds, errors);
+            if (!(e.SpeedTilesPerSecond > 0) || double.IsInfinity(e.SpeedTilesPerSecond))
+            {
+                errors.Add($"{name} speed must be positive and finite.");
+                return;
+            }
+
+            // Movement is fixed-point: speed * 60 units per step must be a whole number (attack timing is validated separately).
+            var units = e.SpeedTilesPerSecond * EnemyDefinition.UnitsPerTile * StepSeconds;
+            if (Math.Abs(units - Math.Round(units)) > 1e-6 || Math.Round(units) < 1)
+                errors.Add($"{name} speed ({e.SpeedTilesPerSecond} tiles/s) must be a whole number of 1/1200-tile units per {StepSeconds}s step.");
         }
 
         static void ValidateBuilding(BuildingDefinition def, BuildingKind expected, List<string> errors)
@@ -111,6 +215,7 @@ namespace TheLastFortress
             if (def.Kind != expected) errors.Add($"{expected} definition has kind {def.Kind}.");
             if (def.MaxHp <= 0) errors.Add($"{def.DisplayName} HP must be positive.");
             if (def.Cost < 0) errors.Add($"{def.DisplayName} cost must not be negative.");
+            if (def.DailyIncome < 0) errors.Add($"{def.DisplayName} income must not be negative.");
             if (def.CanAttack)
             {
                 ValidateInterval($"{def.DisplayName} attack interval", def.AttackIntervalSeconds, errors);

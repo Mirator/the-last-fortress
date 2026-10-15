@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d08f956edcb6dd4f896ae357be1c7b0, type: 3}
+  m_Name: MvpContent
+  m_EditorClassIdentifier: TheLastFortress.Runtime::TheLastFortress.PrototypeContent
+  definitions: {fileID: 11400000, guid: c229310b3909f23458a7a699b261486e, type: 2}
+  mvpDefinitions: {fileID: 11400000, guid: d42a6bc0627f66f4e8bc000e9478e112, type: 2}
+  keepPrefab: {fileID: 6440497214723432423, guid: 70ece24faa35d97489b2376f0ff687fe, type: 3}
+  wallPrefab: {fileID: 1998575460765660594, guid: 09b8bd1eeb48bbe4e82af639633f9c0b, type: 3}
+  towerPrefab: {fileID: 1112093812300093508, guid: 89778087862789f4482debc682862177, type: 3}
+  gruntPrefab: {fileID: 9036051224892743207, guid: 24da9229eb426d24cb5f5c34a780202c, type: 3}
+  housePrefab: {fileID: 5277260028096390677, guid: 0e64fc6695a506341b1c35f4115b3d0d, type: 3}
+  farmPrefab: {fileID: 1039874398559794542, guid: 7ab3817aa7dcc7646bb91a9eb903ed45, type: 3}
+  trapPrefab: {fileID: 1147258301517022158, guid: 4bd86a39955b3b449bd1b50e7c334624, type: 3}
+  runnerPrefab: {fileID: 843949496038645126, guid: a043d064dff13874d85076c924016886, type: 3}
+  brutePrefab: {fileID: 5264471698511741351, guid: e5a7654585e01324190af26901ceab2e, type: 3}
+  golemPrefab: {fileID: 2420143663933871889, guid: f67be200d8a4b4244a6d510062c496ca, type: 3}
+  wallShapePrefabs:
+  - {fileID: 2437841978709261811, guid: c38bae8e4e791a542a45842d4ebda39a, type: 3}
+  - {fileID: 8882741028239806279, guid: 2000df4d539a5674fa8cdd0d5249db65, type: 3}
+  - {fileID: 9221202855275405175, guid: 1322b8da49770c241890444f920c29db, type: 3}
+  - {fileID: 6026799193222652213, guid: f34b8daf9461fe34a811078468588a0c, type: 3}
+  - {fileID: 6424769892367090624, guid: bd019e30aca86a448b58ded4a574a7bd, type: 3}
+  - {fileID: 1373029656162853461, guid: 3fa17192ce51a8540a724c25783f8e0f, type: 3}
+  enemyScale: 1.35
+  grass: {fileID: 2100000, guid: 2ba6a866d2d7e934eab073c3516fcc38, type: 2}
+  water: {fileID: 2100000, guid: f9e2934e21fbb5d44b392f40f49c6d69, type: 2}
+  timberShadow: {fileID: 2100000, guid: ddadbc511bf2155428d1ab0ec762ebeb, type: 2}
+  overlay: {fileID: 2100000, guid: 96d63c55ca1a0fd498917d60f1d828e0, type: 2}
+  arrow: {fileID: 2100000, guid: a126e42a60d3c744b907fe9b0f133832, type: 2}
+  foliage: {fileID: 2100000, guid: cfb12aa74e207044386bc35424b0d9bd, type: 2}
+  rock: {fileID: 2100000, guid: 51e6202bac68e824ea0be3bc67649c8c, type: 2}
+  overlayOnTop: {fileID: 2100000, guid: 0e8c8736da47ca74abcfea08a727159f, type: 2}
+  winningLayout: {fileID: 0}
+  losingLayout: {fileID: 0}
+  stressLayout: {fileID: 4900000, guid: 79d3c75cab386a04bb542e5555532700, type: 3}

@@ -1,6 +1,6 @@
-# The Last Fortress — navigation prototype
+# The Last Fortress — navigation prototype and six-night MVP
 
-One-wave proof for plan `plans/001-navigation-prototype.md` and specification `specs/002-navigation-prototype.md`: buy Walls and Archer Towers, preview the route, start one Grunt wave, watch automatic combat, win or lose, restart. The six-night MVP (`specs/003`) is **not** implemented.
+One-wave proof for plan `plans/001-navigation-prototype.md` and specification `specs/002-navigation-prototype.md`: buy Walls and Archer Towers, preview the route, start one Grunt wave, watch automatic combat, win or lose, restart. The six-night MVP (`specs/003`, plans 003–005) is a separate scene; see **Six-night MVP** below.
 
 - Editor: Unity `6000.3.16f1` (URP 17.3, Input System 1.19, Test Framework 1.6). No packages were added or upgraded.
 - Scene: `Assets/TheLastFortress/Scenes/NavigationPrototype.unity` (enabled in Build Settings; `SampleScene` left untouched).
@@ -80,3 +80,30 @@ Example measurement on the reference machine:
 - Overlay lines can be hidden behind tall Towers; the BREACH label is screen-space, so it stays visible.
 - Real frame deltas above 0.25 s are not caught up (prevents a spiral after hitches). Simulation results do not depend on frame rate.
 - Tuning is provisional and appears lenient: see `plans/001-navigation-prototype-results.md`.
+
+## Six-night MVP
+
+Scene `Assets/TheLastFortress/Scenes/Mvp.unity` (content `Data/MvpContent.asset`, tuning `Data/MvpDefinitions.asset`, both separate from the prototype). Results: `plans/003-results.md`, `004-results.md`, `005-results.md`.
+
+| Input | Action |
+|---|---|
+| `1`–`5` or cards | Wall 20, Archer Tower 70, House 40, Farm 60 (2 x 2), Spike Trap 35 |
+| `R` | Rotate the Tower/House/Farm ghost, or the selected one (cosmetic; Walls auto-connect, Traps have no facing) |
+| Selection panel | Sell (floor(price/2)), Repair (5 HP per gold, exact quote), Rotate — Day only |
+| Reward cards | Choose one of three perks after Nights 1–5 |
+| **Menu** (top-right) | Resume, Save and Quit (Day only), Settings; **Restart** = same-seed retry |
+
+Launch opens the menu: New Run (optional seed, invariant unsigned decimal), Continue (returns to the start of the current night), Recover backup (only offered when the latest save is damaged), Settings, Quit. Saves live in `%USERPROFILE%/AppData/LocalLow/DefaultCompany/The Last Fortress/Mvp/` (`run.json`, `run.json.bak`, `run-N.json` for runs started after a damaged save, `settings.json`).
+
+Editor: **The Last Fortress > Setup MVP Scene** (idempotent; never overwrites `MvpDefinitions.asset`, only fills newly added enemy kinds) and **The Last Fortress > Build MVP** → `Builds/Mvp/TheLastFortress.exe` (Windows x64, non-development, `Mvp.unity` only). Batch: `-executeMethod TheLastFortress.Editor.BuildMvp.BuildWindows`.
+
+| MVP arguments | Effect |
+|---|---|
+| none | Menu |
+| `-newrun [-seed N]` | Skip the menu and start a saved run (generated terrain) |
+| `-flat` | Use the flat authored map for New Run (recorded policies/debugging) |
+| `-saves <dir>` | Save directory override (tests, captures) |
+| `-stress [-measure <file>]` | Labeled MVP stress fixture: 100 maintained enemies (per entry 15 Grunt, 5 Runner, 4 Brute, 1 Golem), invulnerable Keep/Walls, debug House/Farm/Trap |
+| `-capture <dir>` | Evidence screenshots (use with `-saves`) and quit |
+
+PlayMode tests set `SaveStore.DirectoryOverride` to a temp folder; storage tests use temp folders. Live-Editor test runs export XML to `TestResults/` as before.

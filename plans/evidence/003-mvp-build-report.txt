@@ -1,0 +1,9 @@
+started=2026-10-15T12:26:03.0345522+02:00
+result=Succeeded
+platform=StandaloneWindows64 options=None
+output=C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Builds/Mvp/TheLastFortress.exe
+total_size_bytes=129818979
+duration=00:00:13.9013499
+errors=0 warnings=1
+scenes=Assets/TheLastFortress/Scenes/Mvp.unity
+unity=6000.3.16f1

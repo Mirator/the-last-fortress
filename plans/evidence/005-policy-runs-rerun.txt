@@ -1,0 +1,240 @@
+economy-first seed 1: perks Victory, no-perk Victory
+economy-first seed 2: perks Victory, no-perk Victory
+economy-first seed 3: perks Victory, no-perk Victory
+defense-first seed 1: perks Victory, no-perk Defeat
+defense-first seed 2: perks Victory, no-perk Defeat
+defense-first seed 3: perks Victory, no-perk Defeat
+
+# Plan 004 policy runs (flat authored map, MVP default tuning)
+
+## economy-first seed=1 perks=normal
+Day 1: gold before night 10; Tower 9 9 (70g); Tower 11 11 (70g); Farm 4 13 (60g); House 6 13 (40g)
+  Night 1: Reward, Keep 500/500, 21,8s, defeated 10
+  Reward LastStand,ThriftyConstruction,Sharpshooters -> Sharpshooters; dawn income +65
+Day 2: gold before night 15; Farm 4 11 (60g); House 6 12 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward ThriftyConstruction,FortressHeart,LastStand -> ThriftyConstruction; dawn income +90
+Day 3: gold before night 42; Tower 9 11 (63g)
+  Night 3: Reward, Keep 390/500, 32,4s, defeated 46
+  Reward FortressHeart,EfficientFarming,ExpandedVision -> EfficientFarming; dawn income +106
+Day 4: gold before night 45; Tower 11 9 (63g); Wall 9 10 (18g); repair Keep +110
+  Night 4: Reward, Keep 474/500, 36,2s, defeated 75
+  Reward Recycling,ReinforcedTimber,FlamingArrows -> FlamingArrows; dawn income +106
+Day 5: gold before night 28; Wall 11 10 (18g); Wall 10 9 (18g); Wall 10 11 (18g); Tower 8 10 (63g); Tower 12 10 skipped: InsufficientGold; repair Keep +26
+  Night 5: Reward, Keep 500/500, 41,1s, defeated 111
+  Reward Recycling,ExpandedVision,BarbedDefenses -> ExpandedVision; dawn income +106
+Day 6: gold before night 8; Tower 10 8 (63g); Tower 10 12 (63g); Wall 7 10 skipped: InsufficientGold; Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold
+  Night 6: Victory, Keep 500/500, 51,3s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 14, gold earned 473, synergies ever 1, perks [Sharpshooters,ThriftyConstruction,EfficientFarming,FlamingArrows,ExpandedVision]
+
+## economy-first seed=1 perks=DEBUG no-perk baseline
+Day 1: gold before night 10; Tower 9 9 (70g); Tower 11 11 (70g); Farm 4 13 (60g); House 6 13 (40g)
+  Night 1: Reward, Keep 500/500, 21,8s, defeated 10
+  Reward LastStand,ThriftyConstruction,Sharpshooters -> DEBUG skip
+Day 2: gold before night 15; Farm 4 11 (60g); House 6 12 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward ExpandedVision,FortressHeart,Recycling -> DEBUG skip
+Day 3: gold before night 35; Tower 9 11 (70g)
+  Night 3: Reward, Keep 264/500, 32,9s, defeated 46
+  Reward FlamingArrows,EfficientFarming,ExpandedVision -> DEBUG skip
+Day 4: gold before night 0; Tower 11 9 (70g); Wall 9 10 (20g); repair Keep +175
+  Night 4: Reward, Keep 403/500, 36,2s, defeated 75
+  Reward FortressHeart,ThriftyConstruction,FlamingArrows -> DEBUG skip
+Day 5: gold before night 10; Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g); Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold; repair Keep +97
+  Night 5: Reward, Keep 380/500, 41,9s, defeated 111
+  Reward ExpandedVision,Recycling,BarbedDefenses -> DEBUG skip
+Day 6: gold before night 0; Tower 10 8 (70g); Tower 10 12 skipped: InsufficientGold; Wall 7 10 (20g); Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold; repair Keep +50
+  Night 6: Victory, Keep 430/500, 62,2s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 13, gold earned 425, synergies ever 1, perks []
+
+## economy-first seed=2 perks=normal
+Day 1: gold before night 10; Tower 9 9 (70g); Tower 11 11 (70g); Farm 4 13 (60g); House 6 13 (40g)
+  Night 1: Reward, Keep 500/500, 21,8s, defeated 10
+  Reward EfficientFarming,Recycling,FlamingArrows -> EfficientFarming; dawn income +74
+Day 2: gold before night 24; Farm 4 11 (60g); House 6 12 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward ThriftyConstruction,Sharpshooters,LastStand -> Sharpshooters; dawn income +106
+Day 3: gold before night 60; Tower 9 11 (70g)
+  Night 3: Reward, Keep 390/500, 32,4s, defeated 46
+  Reward BarbedDefenses,FortressHeart,ReinforcedTimber -> FortressHeart; dawn income +106
+Day 4: gold before night 54; Tower 11 9 (70g); Wall 9 10 (20g); repair Keep +110
+  Night 4: Reward, Keep 624/650, 36,2s, defeated 75
+  Reward Recycling,FlamingArrows,LastStand -> FlamingArrows; dawn income +106
+Day 5: gold before night 24; Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g); Tower 8 10 (70g); Tower 12 10 skipped: InsufficientGold; repair Keep +26
+  Night 5: Reward, Keep 650/650, 41,1s, defeated 111
+  Reward Recycling,BarbedDefenses,ThriftyConstruction -> ThriftyConstruction; dawn income +106
+Day 6: gold before night 4; Tower 10 8 (63g); Tower 10 12 (63g); Wall 7 10 skipped: InsufficientGold; Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold
+  Night 6: Victory, Keep 650/650, 53,9s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 14, gold earned 498, synergies ever 1, perks [EfficientFarming,Sharpshooters,FortressHeart,FlamingArrows,ThriftyConstruction]
+
+## economy-first seed=2 perks=DEBUG no-perk baseline
+Day 1: gold before night 10; Tower 9 9 (70g); Tower 11 11 (70g); Farm 4 13 (60g); House 6 13 (40g)
+  Night 1: Reward, Keep 500/500, 21,8s, defeated 10
+  Reward EfficientFarming,Recycling,FlamingArrows -> DEBUG skip
+Day 2: gold before night 15; Farm 4 11 (60g); House 6 12 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward ThriftyConstruction,Recycling,BarbedDefenses -> DEBUG skip
+Day 3: gold before night 35; Tower 9 11 (70g)
+  Night 3: Reward, Keep 264/500, 32,9s, defeated 46
+  Reward FortressHeart,EfficientFarming,Recycling -> DEBUG skip
+Day 4: gold before night 0; Tower 11 9 (70g); Wall 9 10 (20g); repair Keep +175
+  Night 4: Reward, Keep 403/500, 36,2s, defeated 75
+  Reward LastStand,ExpandedVision,Sharpshooters -> DEBUG skip
+Day 5: gold before night 10; Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g); Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold; repair Keep +97
+  Night 5: Reward, Keep 380/500, 41,9s, defeated 111
+  Reward EfficientFarming,BarbedDefenses,LastStand -> DEBUG skip
+Day 6: gold before night 0; Tower 10 8 (70g); Tower 10 12 skipped: InsufficientGold; Wall 7 10 (20g); Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold; repair Keep +50
+  Night 6: Victory, Keep 430/500, 62,2s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 13, gold earned 425, synergies ever 1, perks []
+
+## economy-first seed=3 perks=normal
+Day 1: gold before night 10; Tower 9 9 (70g); Tower 11 11 (70g); Farm 4 13 (60g); House 6 13 (40g)
+  Night 1: Reward, Keep 500/500, 21,8s, defeated 10
+  Reward Sharpshooters,ExpandedVision,FortressHeart -> Sharpshooters; dawn income +65
+Day 2: gold before night 15; Farm 4 11 (60g); House 6 12 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward ExpandedVision,Recycling,FlamingArrows -> FlamingArrows; dawn income +90
+Day 3: gold before night 35; Tower 9 11 (70g)
+  Night 3: Reward, Keep 456/500, 31,7s, defeated 46
+  Reward ThriftyConstruction,FortressHeart,ReinforcedTimber -> ThriftyConstruction; dawn income +90
+Day 4: gold before night 35; Tower 11 9 (63g); Wall 9 10 (18g); repair Keep +44
+  Night 4: Reward, Keep 494/500, 36,2s, defeated 75
+  Reward LastStand,EfficientFarming,Recycling -> EfficientFarming; dawn income +106
+Day 5: gold before night 22; Wall 11 10 (18g); Wall 10 9 (18g); Wall 10 11 (18g); Tower 8 10 (63g); Tower 12 10 skipped: InsufficientGold; repair Keep +6
+  Night 5: Reward, Keep 500/500, 41,1s, defeated 111
+  Reward BarbedDefenses,ReinforcedTimber,FortressHeart -> FortressHeart; dawn income +106
+Day 6: gold before night 2; Tower 10 8 (63g); Tower 10 12 (63g); Wall 7 10 skipped: InsufficientGold; Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold
+  Night 6: Victory, Keep 650/650, 53,9s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 14, gold earned 457, synergies ever 1, perks [Sharpshooters,FlamingArrows,ThriftyConstruction,EfficientFarming,FortressHeart]
+
+## economy-first seed=3 perks=DEBUG no-perk baseline
+Day 1: gold before night 10; Tower 9 9 (70g); Tower 11 11 (70g); Farm 4 13 (60g); House 6 13 (40g)
+  Night 1: Reward, Keep 500/500, 21,8s, defeated 10
+  Reward Sharpshooters,ExpandedVision,FortressHeart -> DEBUG skip
+Day 2: gold before night 15; Farm 4 11 (60g); House 6 12 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward FortressHeart,BarbedDefenses,ExpandedVision -> DEBUG skip
+Day 3: gold before night 35; Tower 9 11 (70g)
+  Night 3: Reward, Keep 264/500, 32,9s, defeated 46
+  Reward ExpandedVision,ThriftyConstruction,FlamingArrows -> DEBUG skip
+Day 4: gold before night 0; Tower 11 9 (70g); Wall 9 10 (20g); repair Keep +175
+  Night 4: Reward, Keep 403/500, 36,2s, defeated 75
+  Reward LastStand,EfficientFarming,ExpandedVision -> DEBUG skip
+Day 5: gold before night 10; Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g); Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold; repair Keep +97
+  Night 5: Reward, Keep 380/500, 41,9s, defeated 111
+  Reward Recycling,LastStand,EfficientFarming -> DEBUG skip
+Day 6: gold before night 0; Tower 10 8 (70g); Tower 10 12 skipped: InsufficientGold; Wall 7 10 (20g); Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold; repair Keep +50
+  Night 6: Victory, Keep 430/500, 62,2s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 13, gold earned 425, synergies ever 1, perks []
+
+## defense-first seed=1 perks=normal
+Day 1: gold before night 40; Tower 9 9 (70g); Tower 11 11 (70g); Tower 9 11 (70g)
+  Night 1: Reward, Keep 500/500, 20,4s, defeated 10
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> Sharpshooters; dawn income +20
+Day 2: gold before night 60; Tower 11 9 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward BarbedDefenses,LastStand,Recycling -> BarbedDefenses; dawn income +20
+Day 3: gold before night 0; Wall 9 10 (20g); Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g)
+  Night 3: Reward, Keep 500/500, 31,7s, defeated 46
+  Reward ExpandedVision,Recycling,FlamingArrows -> FlamingArrows; dawn income +20
+Day 4: gold before night 20; Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold
+  Night 4: Reward, Keep 374/500, 36,2s, defeated 75
+  Reward LastStand,Recycling,ExpandedVision -> ExpandedVision; dawn income +20
+Day 5: gold before night 14; Tower 10 8 skipped: InsufficientGold; Tower 10 12 skipped: InsufficientGold; repair Keep +126
+  Night 5: Reward, Keep 362/500, 43,2s, defeated 111
+  Reward EfficientFarming,LastStand,FortressHeart -> FortressHeart; dawn income +20
+Day 6: gold before night 0; Wall 7 10 (20g); Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold; repair Keep +70
+  Night 6: Victory, Keep 238/650, 67,2s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 8, gold earned 100, synergies ever 0, perks [Sharpshooters,BarbedDefenses,FlamingArrows,ExpandedVision,FortressHeart]
+
+## defense-first seed=1 perks=DEBUG no-perk baseline
+Day 1: gold before night 40; Tower 9 9 (70g); Tower 11 11 (70g); Tower 9 11 (70g)
+  Night 1: Reward, Keep 500/500, 20,4s, defeated 10
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> DEBUG skip
+Day 2: gold before night 60; Tower 11 9 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward LastStand,Recycling,ThriftyConstruction -> DEBUG skip
+Day 3: gold before night 0; Wall 9 10 (20g); Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g)
+  Night 3: Reward, Keep 460/500, 31,7s, defeated 46
+  Reward FortressHeart,Recycling,ExpandedVision -> DEBUG skip
+Day 4: gold before night 12; Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold; repair Keep +40
+  Night 4: Reward, Keep 154/500, 38,7s, defeated 75
+  Reward FlamingArrows,ExpandedVision,Recycling -> DEBUG skip
+Day 5: gold before night 0; Tower 10 8 skipped: InsufficientGold; Tower 10 12 skipped: InsufficientGold; repair Keep +160
+  Night 5: Defeat, Keep 0/500, 36,0s, defeated 97
+Result: Defeat; nights cleared 4, defeated 97, purchased 7, gold earned 80, synergies ever 0, perks []
+
+## defense-first seed=2 perks=normal
+Day 1: gold before night 40; Tower 9 9 (70g); Tower 11 11 (70g); Tower 9 11 (70g)
+  Night 1: Reward, Keep 500/500, 20,4s, defeated 10
+  Reward Sharpshooters,ThriftyConstruction,FortressHeart -> Sharpshooters; dawn income +20
+Day 2: gold before night 60; Tower 11 9 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward FlamingArrows,LastStand,BarbedDefenses -> FlamingArrows; dawn income +20
+Day 3: gold before night 0; Wall 9 10 (20g); Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g)
+  Night 3: Reward, Keep 500/500, 31,7s, defeated 46
+  Reward Recycling,FortressHeart,ReinforcedTimber -> FortressHeart; dawn income +20
+Day 4: gold before night 20; Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold
+  Night 4: Reward, Keep 524/650, 36,2s, defeated 75
+  Reward ExpandedVision,LastStand,ThriftyConstruction -> ExpandedVision; dawn income +20
+Day 5: gold before night 14; Tower 10 8 skipped: InsufficientGold; Tower 10 12 skipped: InsufficientGold; repair Keep +126
+  Night 5: Reward, Keep 512/650, 43,2s, defeated 111
+  Reward EfficientFarming,BarbedDefenses,ThriftyConstruction -> BarbedDefenses; dawn income +20
+Day 6: gold before night 0; Wall 7 10 (20g); Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold; repair Keep +70
+  Night 6: Victory, Keep 238/650, 67,2s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 8, gold earned 100, synergies ever 0, perks [Sharpshooters,FlamingArrows,FortressHeart,ExpandedVision,BarbedDefenses]
+
+## defense-first seed=2 perks=DEBUG no-perk baseline
+Day 1: gold before night 40; Tower 9 9 (70g); Tower 11 11 (70g); Tower 9 11 (70g)
+  Night 1: Reward, Keep 500/500, 20,4s, defeated 10
+  Reward Sharpshooters,ThriftyConstruction,FortressHeart -> DEBUG skip
+Day 2: gold before night 60; Tower 11 9 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward FlamingArrows,ExpandedVision,Sharpshooters -> DEBUG skip
+Day 3: gold before night 0; Wall 9 10 (20g); Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g)
+  Night 3: Reward, Keep 460/500, 31,7s, defeated 46
+  Reward ReinforcedTimber,Recycling,FortressHeart -> DEBUG skip
+Day 4: gold before night 12; Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold; repair Keep +40
+  Night 4: Reward, Keep 154/500, 38,7s, defeated 75
+  Reward FlamingArrows,BarbedDefenses,Recycling -> DEBUG skip
+Day 5: gold before night 0; Tower 10 8 skipped: InsufficientGold; Tower 10 12 skipped: InsufficientGold; repair Keep +160
+  Night 5: Defeat, Keep 0/500, 36,0s, defeated 97
+Result: Defeat; nights cleared 4, defeated 97, purchased 7, gold earned 80, synergies ever 0, perks []
+
+## defense-first seed=3 perks=normal
+Day 1: gold before night 40; Tower 9 9 (70g); Tower 11 11 (70g); Tower 9 11 (70g)
+  Night 1: Reward, Keep 500/500, 20,4s, defeated 10
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> FlamingArrows; dawn income +20
+Day 2: gold before night 60; Tower 11 9 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward Sharpshooters,ReinforcedTimber,FortressHeart -> Sharpshooters; dawn income +20
+Day 3: gold before night 0; Wall 9 10 (20g); Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g)
+  Night 3: Reward, Keep 500/500, 31,7s, defeated 46
+  Reward BarbedDefenses,Recycling,LastStand -> BarbedDefenses; dawn income +20
+Day 4: gold before night 20; Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold
+  Night 4: Reward, Keep 374/500, 36,2s, defeated 75
+  Reward Recycling,ThriftyConstruction,ExpandedVision -> ExpandedVision; dawn income +20
+Day 5: gold before night 14; Tower 10 8 skipped: InsufficientGold; Tower 10 12 skipped: InsufficientGold; repair Keep +126
+  Night 5: Reward, Keep 362/500, 43,2s, defeated 111
+  Reward Recycling,LastStand,ReinforcedTimber -> ReinforcedTimber; dawn income +20
+Day 6: gold before night 0; Wall 7 10 (20g); Wall 13 10 skipped: InsufficientGold; Wall 10 7 skipped: InsufficientGold; Wall 10 13 skipped: InsufficientGold; repair Keep +70
+  Night 6: Victory, Keep 88/500, 67,2s, defeated 152
+Result: Victory; nights cleared 6, defeated 152, purchased 8, gold earned 100, synergies ever 0, perks [FlamingArrows,Sharpshooters,BarbedDefenses,ExpandedVision,ReinforcedTimber]
+
+## defense-first seed=3 perks=DEBUG no-perk baseline
+Day 1: gold before night 40; Tower 9 9 (70g); Tower 11 11 (70g); Tower 9 11 (70g)
+  Night 1: Reward, Keep 500/500, 20,4s, defeated 10
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> DEBUG skip
+Day 2: gold before night 60; Tower 11 9 skipped: InsufficientGold
+  Night 2: Reward, Keep 500/500, 28,9s, defeated 26
+  Reward ExpandedVision,Recycling,FortressHeart -> DEBUG skip
+Day 3: gold before night 0; Wall 9 10 (20g); Wall 11 10 (20g); Wall 10 9 (20g); Wall 10 11 (20g)
+  Night 3: Reward, Keep 460/500, 31,7s, defeated 46
+  Reward LastStand,Recycling,FortressHeart -> DEBUG skip
+Day 4: gold before night 12; Tower 8 10 skipped: InsufficientGold; Tower 12 10 skipped: InsufficientGold; repair Keep +40
+  Night 4: Reward, Keep 154/500, 38,7s, defeated 75
+  Reward FlamingArrows,FortressHeart,Sharpshooters -> DEBUG skip
+Day 5: gold before night 0; Tower 10 8 skipped: InsufficientGold; Tower 10 12 skipped: InsufficientGold; repair Keep +160
+  Night 5: Defeat, Keep 0/500, 36,0s, defeated 97
+Result: Defeat; nights cleared 4, defeated 97, purchased 7, gold earned 80, synergies ever 0, perks []
+

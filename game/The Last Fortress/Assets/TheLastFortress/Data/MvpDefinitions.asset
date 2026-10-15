@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96024dc73882c444e948314ffc07f856, type: 3}
+  m_Name: MvpDefinitions
+  m_EditorClassIdentifier: TheLastFortress.Runtime::TheLastFortress.MvpDefinitionsAsset
+  startingGold: 250
+  keep:
+    displayName: Keep
+    cost: 0
+    maxHp: 500
+    attackDamage: 0
+    attackIntervalSeconds: 0
+    range: 0
+    dailyIncome: 20
+    trapDamage: 0
+  wall:
+    displayName: Wall
+    cost: 20
+    maxHp: 100
+    attackDamage: 0
+    attackIntervalSeconds: 0
+    range: 0
+    dailyIncome: 0
+    trapDamage: 0
+  tower:
+    displayName: Archer Tower
+    cost: 70
+    maxHp: 100
+    attackDamage: 10
+    attackIntervalSeconds: 0.75
+    range: 4
+    dailyIncome: 0
+    trapDamage: 0
+  house:
+    displayName: House
+    cost: 40
+    maxHp: 80
+    attackDamage: 0
+    attackIntervalSeconds: 0
+    range: 0
+    dailyIncome: 15
+    trapDamage: 0
+  farm:
+    displayName: Farm
+    cost: 60
+    maxHp: 100
+    attackDamage: 0
+    attackIntervalSeconds: 0
+    range: 0
+    dailyIncome: 25
+    trapDamage: 0
+  spikeTrap:
+    displayName: Spike Trap
+    cost: 35
+    maxHp: 0
+    attackDamage: 0
+    attackIntervalSeconds: 0
+    range: 0
+    dailyIncome: 0
+    trapDamage: 8
+  grunt:
+    displayName: Grunt
+    maxHp: 30
+    speedTilesPerSecond: 1
+    attackDamage: 10
+    attackIntervalSeconds: 1
+    wallDamageMultiplier: 1
+  runner:
+    displayName: Runner
+    maxHp: 20
+    speedTilesPerSecond: 1.75
+    attackDamage: 6
+    attackIntervalSeconds: 0.75
+    wallDamageMultiplier: 1
+  brute:
+    displayName: Brute
+    maxHp: 150
+    speedTilesPerSecond: 0.6
+    attackDamage: 20
+    attackIntervalSeconds: 1.5
+    wallDamageMultiplier: 2
+  siegeGolem:
+    displayName: Siege Golem
+    maxHp: 800
+    speedTilesPerSecond: 0.4
+    attackDamage: 40
+    attackIntervalSeconds: 2
+    wallDamageMultiplier: 2

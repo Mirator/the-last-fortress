@@ -17,6 +17,15 @@ namespace TheLastFortress.Tests
             return new RunSimulation(config);
         }
 
+        /// <summary>MVP tuning; a single wave unless a campaign is supplied.</summary>
+        public static RunSimulation NewMvpRun(WavePlan wave = null, CampaignConfig campaign = null) =>
+            new RunSimulation(new RunConfig
+            {
+                Definitions = MvpDefinitions.CreateDefault(),
+                Wave = wave ?? WavePlan.CreateMainWave(),
+                Campaign = campaign,
+            });
+
         public static WavePlan SingleGrunt(GridPos? cell = null) =>
             new WavePlan("single", new[] { new SpawnEntry(0, cell ?? WavePlan.MainEntry, 0) }, new[] { cell ?? WavePlan.MainEntry });
 

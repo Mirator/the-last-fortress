@@ -96,6 +96,13 @@ namespace TheLastFortress
             sb.AppendLine($"resolution={Screen.width}x{Screen.height} fullscreen={Screen.fullScreenMode}");
             sb.AppendLine($"quality={QualitySettings.names[QualitySettings.GetQualityLevel()]} vsync={QualitySettings.vSyncCount} targetFrameRate={Application.targetFrameRate}");
             sb.AppendLine($"cpu={SystemInfo.processorType} gpu={SystemInfo.graphicsDeviceName} ram_mb={SystemInfo.systemMemorySize} api={SystemInfo.graphicsDeviceType}");
+            sb.AppendLine($"unity={Application.unityVersion} rules_version={CheckpointCodec.RulesVersion} scene={(game.IsMvp ? "MVP (MVP prefabs, connected Walls, effects)" : "prototype")}");
+            var wave = game.Sim.Wave;
+            var mix = wave.MaintainMix == null ? $"{wave.MaintainActivePerEntry} Grunt" : string.Join(", ", System.Array.ConvertAll(wave.MaintainMix, m => $"{m.count} {m.kind}"));
+            sb.AppendLine($"fixture={wave.Name} entries={string.Join(" ", wave.EntryCells)} maintained_per_entry=[{mix}] respawn=same archetype at same entry; Keep/Walls invulnerable (fixture only)");
+            var layout = new List<string>();
+            foreach (var b in game.Sim.Grid.AllBuildings()) layout.Add($"{b.Kind}{b.Cell}");
+            sb.AppendLine($"layout={string.Join(" ", layout)}");
             sb.AppendLine($"warmup_s={WarmupSeconds} measured_s={MeasureSeconds} samples={samples.Count}");
             sb.AppendLine($"sim_steps_during_measure={game.Sim.Tick - simStepsAtStart}");
             sb.AppendLine($"active_enemies_min={minActive} max={maxActive}");

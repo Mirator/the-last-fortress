@@ -28,6 +28,17 @@ namespace TheLastFortress
             Placements = placements;
         }
 
+        /// <summary>
+        /// Labeled debug additions for the MVP stress fixture so House/Farm/Trap views are exercised: a House and a Farm away
+        /// from the four entry routes and a Spike Trap on the west approach.
+        /// </summary>
+        public static LayoutFixture CreateMvpStressExtras() => new LayoutFixture("MVP stress extras", new[]
+        {
+            new Placement(BuildingKind.House, new GridPos(15, 15)),
+            new Placement(BuildingKind.Farm, new GridPos(15, 3)),
+            new Placement(BuildingKind.SpikeTrap, new GridPos(4, 10)),
+        });
+
         /// <summary>Exact stress layout from specification 002 (30 Walls, 10 Towers).</summary>
         public static LayoutFixture CreateStressLayout()
         {

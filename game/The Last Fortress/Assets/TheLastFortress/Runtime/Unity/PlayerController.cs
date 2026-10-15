@@ -20,6 +20,9 @@ namespace TheLastFortress
         public Keyboard KeyboardOverride;
 
         public BuildingKind? Tool { get; private set; }
+
+        /// <summary>Cosmetic facing (90-degree steps) for the next Tower/House/Farm placed; R rotates it during Day.</summary>
+        public int GhostOrientation { get; private set; }
         public Building Selected { get; private set; }
         public GridPos? HoverCell { get; private set; }
         public bool PointerOverUi { get; private set; }
@@ -44,14 +47,23 @@ namespace TheLastFortress
             HoverCell = null;
             HoverOverride = null;
             LastRejection = PlacementRejection.None;
+            GhostOrientation = 0;
         }
 
         public bool SetTool(BuildingKind kind)
         {
             if (game.Sim.State != RunState.Day || game.Sim.StressMode) return false;
+            if (!IsBuildable(kind)) return false;
             Tool = kind;
             Selected = null;
             return true;
+        }
+
+        bool IsBuildable(BuildingKind kind)
+        {
+            foreach (var k in game.PurchasableKinds)
+                if (k == kind) return true;
+            return false;
         }
 
         public void CancelTool() => Tool = null;
@@ -77,6 +89,9 @@ namespace TheLastFortress
             {
                 if (keyboard.digit1Key.wasPressedThisFrame || keyboard.numpad1Key.wasPressedThisFrame) SetTool(BuildingKind.Wall);
                 if (keyboard.digit2Key.wasPressedThisFrame || keyboard.numpad2Key.wasPressedThisFrame) SetTool(BuildingKind.Tower);
+                if (keyboard.digit3Key.wasPressedThisFrame || keyboard.numpad3Key.wasPressedThisFrame) SetTool(BuildingKind.House);
+                if (keyboard.digit4Key.wasPressedThisFrame || keyboard.numpad4Key.wasPressedThisFrame) SetTool(BuildingKind.Farm);
+                if (keyboard.digit5Key.wasPressedThisFrame || keyboard.numpad5Key.wasPressedThisFrame) SetTool(BuildingKind.SpikeTrap);
                 if (keyboard.escapeKey.wasPressedThisFrame)
                 {
                     if (Tool.HasValue) Tool = null;
@@ -84,6 +99,7 @@ namespace TheLastFortress
                 }
 
                 if (keyboard.spaceKey.wasPressedThisFrame && sim.State == RunState.Night) game.TogglePause();
+                if (keyboard.rKey.wasPressedThisFrame && sim.State == RunState.Day && game.IsMvp) RotateClockwise();
             }
 
             if (mouse != null)
@@ -108,11 +124,24 @@ namespace TheLastFortress
             if (Tool.HasValue)
             {
                 // Re-validated on click inside TryPlace; an invalid preview can never become a placement.
-                LastRejection = sim.TryPlace(Tool.Value, cell, out _);
+                LastRejection = sim.TryPlace(Tool.Value, cell, GhostOrientation, out _);
                 return;
             }
 
-            Selected = sim.Grid.GetOccupant(cell);
+            Selected = sim.Grid.GetOccupant(cell) ?? sim.Grid.GetTrap(cell);
+        }
+
+        /// <summary>R: rotates the active Tower/House/Farm ghost, or else the selected building (Walls auto-connect; Traps are directionless).</summary>
+        public void RotateClockwise()
+        {
+            if (game.Sim.State != RunState.Day) return;
+            if (Tool.HasValue)
+            {
+                if (RunSimulation.IsRotatable(Tool.Value)) GhostOrientation = (GhostOrientation + 1) & 3;
+                return;
+            }
+
+            if (Selected != null) game.Sim.TryRotate(Selected);
         }
 
         bool IsOverUi(Vector2 position)
