@@ -84,20 +84,31 @@ namespace TheLastFortress
                 if (!b.IsAlive) continue;
                 if (b.Kind == BuildingKind.House)
                 {
-                    r.Houses += b.Definition.DailyIncome;
+                    r.Houses += BuildingIncome(grid, b, farmBonusPercent);
                     r.HouseCount++;
                 }
                 else if (b.Kind == BuildingKind.Farm)
                 {
-                    var linked = FarmHasAdjacentHouse(grid, b);
-                    var gross = b.Definition.DailyIncome + (linked ? FarmHouseBonus : 0);
-                    r.Farms += gross * (100 + farmBonusPercent) / 100;
+                    r.Farms += BuildingIncome(grid, b, farmBonusPercent);
                     r.FarmCount++;
-                    if (linked) r.LinkedFarms++;
+                    if (FarmHasAdjacentHouse(grid, b)) r.LinkedFarms++;
                 }
             }
 
             return r;
+        }
+
+        /// <summary>
+        /// Daily income of one surviving House or Farm (0 for anything else). The single per-building rule used by the
+        /// payment, the forecast and the HUD: Farm = floor((base + 5 if any edge-adjacent House) * (100 + bonus) / 100).
+        /// </summary>
+        public static int BuildingIncome(GridState grid, Building b, int farmBonusPercent)
+        {
+            if (b == null || !b.IsAlive) return 0;
+            if (b.Kind == BuildingKind.House) return b.Definition.DailyIncome;
+            if (b.Kind != BuildingKind.Farm) return 0;
+            var gross = b.Definition.DailyIncome + (FarmHasAdjacentHouse(grid, b) ? FarmHouseBonus : 0);
+            return gross * (100 + farmBonusPercent) / 100;
         }
     }
 }

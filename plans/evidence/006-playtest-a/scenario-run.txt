@@ -1,0 +1,18 @@
+scenario=placement-perk-resume seed=1 terrain=flat profile=Six nights
+initial state=Day gold=250 keepHp=500/500
+mistake=reserved-ring result=ReservedRing text='Edge reserved for enemy entry' goldDelta=0 gridRevisionDelta=0
+mistake=occupied-keep result=Occupied text='Tile occupied'
+place='defense tower 1' kind=Tower cell=(8,8) result=None id=2 price=70 goldDelta=-70 gold=180
+place='defense tower 2' kind=Tower cell=(8,9) result=None id=3 price=70 goldDelta=-70 gold=110
+strategy=third-tower result=None gold=40
+mistake=overspend-farm result=InsufficientGold text='Not enough gold' goldDelta=0
+recovery=sell-third-tower result=None goldDelta=35
+place='economy farm after recovery' kind=Farm cell=(12,4) result=None id=5 price=60 goldDelta=-60 gold=15
+effective-before-perk towerDamage=10 range=4,0 income=45
+night1-start=True validationErrors=0
+night1-end state=Reward steps=391 tick=391 keepHp=500/500 enemies=0 scheduled=0 gold=15
+offer id=run1-night1 perks=LastStand,ThriftyConstruction,Sharpshooters
+choice=Sharpshooters rationale='an owned Tower benefits from higher direct damage' accepted=True state=Day incomeForecastBefore=45 incomeForecastAfter=45 paidGoldDelta=45
+effective-after-perk towerDamage=12 range=4,0 income=45 owned=Sharpshooters
+resume restoreProblem=None message='' snapshotEqual=True gold=60 day=2 lastPaidDay=2 perks=Sharpshooters
+resume-combat originalStarted=True resumedStarted=True steps=623 originalState=Reward resumedState=Reward keepHp=500/500 enemies=0/0 gold=60/60 snapshotEqual=True

@@ -17,6 +17,7 @@ namespace TheLastFortress
             public Button Button;
             public Image Image;
             public Text Cost;
+            public Text Effect;
         }
 
         Text goldText, keepText, incomeText, stateText, infoText, routeText, tooltipText, breachText, selectionTitle, selectionBody,
@@ -28,7 +29,7 @@ namespace TheLastFortress
         readonly Button[] rewardButtons = new Button[PerkRules.OfferSize];
         readonly Text[] rewardTitles = new Text[PerkRules.OfferSize];
         readonly Text[] rewardBodies = new Text[PerkRules.OfferSize];
-        Text rewardHeader, perksText, bossText;
+        Text rewardHeader, rewardRecap, perksText, bossText;
         RectTransform bossFill;
         string shownOfferId;
         string[] shownPerks;
@@ -36,6 +37,8 @@ namespace TheLastFortress
         public GameObject RewardOverlay => rewardOverlay;
         public Button RewardButton(int i) => rewardButtons[i];
         public string RewardCardText(int i) => rewardTitles[i].text + "\n" + rewardBodies[i].text;
+        public string RewardHeaderText => rewardHeader.text;
+        public string RewardRecapText => rewardRecap.text;
         public GameObject BossPanel => bossPanel;
 
         public Button WallCard => CardFor(BuildingKind.Wall);
@@ -125,7 +128,7 @@ namespace TheLastFortress
             // Top-right: menu
             var mvpMenu = game.IsMvp;
             var menu = Panel(root, "Menu", new Vector2(1, 1), new Vector2(-24, -24), new Vector2(mvpMenu ? 470 : 430, mvpMenu ? 112 : 76));
-            MenuRestartButton = MakeButton(menu, "Restart", new Vector2(0, 1), new Vector2(12, -12), new Vector2(mvpMenu ? 140 : 196, 52), game.Restart, out var restartTop);
+            MenuRestartButton = MakeButton(menu, "Restart", new Vector2(0, 1), new Vector2(12, -12), new Vector2(mvpMenu ? 140 : 196, 52), game.RequestRestart, out var restartTop);
             ResetCameraButton = MakeButton(menu, "Reset Camera", new Vector2(0, 1), new Vector2(mvpMenu ? 160 : 220, -12), new Vector2(mvpMenu ? 150 : 198, 52), game.ResetCamera, out var resetTop);
             if (mvpMenu) restartTop.fontSize = resetTop.fontSize = 21;
             if (game.IsMvp) BuildRunMenuRow(menu);
@@ -142,6 +145,7 @@ namespace TheLastFortress
                 var buildCard = new BuildCard { Kind = kind };
                 buildCard.Button = Card(cardRow, def.DisplayName, def.Cost, (i + 1).ToString(), new Vector2(i * (cardWidth + gap), 0), cardWidth,
                     () => game.Player.SetTool(kind), out buildCard.Image, out buildCard.Cost, game.IsMvp ? CardEffect(def) : null);
+                if (game.IsMvp) buildCard.Effect = buildCard.Button.transform.Find("Effect").GetComponent<Text>();
                 cards.Add(buildCard);
             }
 
@@ -176,11 +180,12 @@ namespace TheLastFortress
             if (game.IsMvp) hintRect.gameObject.SetActive(false); // the MVP lists controls in its menu instead
 
             // Cursor tooltip and breach label (never block pointer)
-            tooltipPanel = Panel(root, "Tooltip", new Vector2(0, 0), Vector2.zero, new Vector2(330, 74)).gameObject;
+            var tipWidth = game.IsMvp ? TooltipWidth : 330f;
+            tooltipPanel = Panel(root, "Tooltip", new Vector2(0, 0), Vector2.zero, new Vector2(tipWidth, 74)).gameObject;
             tooltipRect = tooltipPanel.GetComponent<RectTransform>();
             tooltipRect.pivot = new Vector2(0, 1);
             tooltipPanel.GetComponent<Image>().raycastTarget = false;
-            tooltipText = Label(tooltipPanel.transform, "Text", 21, TextAnchor.MiddleLeft, new Vector2(12, -6), new Vector2(310, 62), Palette.HudText);
+            tooltipText = Label(tooltipPanel.transform, "Text", 21, game.IsMvp ? TextAnchor.UpperLeft : TextAnchor.MiddleLeft, new Vector2(12, game.IsMvp ? -8 : -6), new Vector2(tipWidth - 20, 62), Palette.HudText);
             tooltipPanel.SetActive(false);
 
             breachLabel = Panel(root, "BreachLabel", new Vector2(0, 0), Vector2.zero, new Vector2(150, 40)).gameObject;
@@ -231,6 +236,7 @@ namespace TheLastFortress
             reward.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.07f, 0.09f, 0.55f);
             rewardOverlay = reward.gameObject;
             rewardHeader = Label(reward, "Header", 40, TextAnchor.MiddleCenter, new Vector2(0, -250), new Vector2(1200, 110), Palette.Amber, true);
+            rewardRecap = Label(reward, "Recap", 24, TextAnchor.MiddleCenter, new Vector2(0, -362), new Vector2(1200, 36), Palette.HudText, true);
             for (var i = 0; i < PerkRules.OfferSize; i++)
             {
                 var index = i;
@@ -272,7 +278,8 @@ namespace TheLastFortress
 
             shownOfferId = offer.OfferId;
             shownPerks = offer.PerkIds;
-            Set(rewardHeader, $"Night {offer.ClearedNight} survived — choose one reward\nDawn of Day {offer.ClearedNight + 1} pays +{sim.IncomeForecast().Total} gold after your choice");
+            Set(rewardRecap, sim.LastNight != null && sim.LastNight.Night == offer.ClearedNight ? $"Night {offer.ClearedNight}: {RecapLine(sim.LastNight)}" : "");
+            Set(rewardHeader, $"Night {offer.ClearedNight} survived — choose one reward\nCurrent forecast for dawn of Day {offer.ClearedNight + 1}: +{sim.IncomeForecast().Total} gold");
             for (var i = 0; i < rewardButtons.Length; i++)
             {
                 var has = i < offer.PerkIds.Length;
@@ -280,8 +287,37 @@ namespace TheLastFortress
                 if (!has) continue;
                 var id = offer.PerkIds[i];
                 Set(rewardTitles[i], PerkRules.Title(id));
-                Set(rewardBodies[i], PerkRules.Effect(id) + "\n\n" + Relevance(sim, id));
+                Set(rewardBodies[i], PerkRules.Effect(id) + "\n\n" + Relevance(sim, id) + IncomePreview(sim, id));
             }
+        }
+
+        /// <summary>For income-changing rewards: the actual next payment with this choice (read-only preview).</summary>
+        static string IncomePreview(RunSimulation sim, string id)
+        {
+            var now = sim.IncomeForecast().Total;
+            var with = sim.IncomeForecastWith(id).Total;
+            return with == now ? "" : $"\nNext dawn: +{now} → +{with} gold";
+        }
+
+        /// <summary>Effective direct damage/interval/range; burn and Last Stand state named separately.</summary>
+        static string TowerDetails(RunSimulation sim, Building tower)
+        {
+            var def = tower.Definition;
+            var damage = sim.TowerDamage(tower);
+            var range = sim.TowerRange(tower);
+            var text = $"Damage {damage}{(damage != def.AttackDamage ? $" (base {def.AttackDamage})" : "")} every {def.AttackIntervalSeconds:0.##} s · range {range:0.0#}";
+            if (sim.HasPerk(PerkRules.LastStand)) text += sim.LastStandActive ? " · Last Stand active" : " · Last Stand below 30% Keep";
+            if (sim.HasPerk(PerkRules.FlamingArrows)) text += $"\n+ burn {PerkRules.BurnDamage}/s for 3 s";
+            return text;
+        }
+
+        /// <summary>A House/Farm's own effective daily income with the reasons it differs from base.</summary>
+        static string IncomeDetails(RunSimulation sim, Building b)
+        {
+            var text = $"Income +{sim.BuildingIncome(b)}/day";
+            if (b.Kind == BuildingKind.Farm && EconomyRules.FarmHasAdjacentHouse(sim.Grid, b)) text += " · House link";
+            if (b.Kind == BuildingKind.Farm && sim.HasPerk(PerkRules.EfficientFarming)) text += " · Efficient Farming";
+            return text;
         }
 
         static string Relevance(RunSimulation sim, string id)
@@ -371,6 +407,7 @@ namespace TheLastFortress
                 card.Image.color = player.Tool == card.Kind ? CardActive : CardIdle;
                 var price = sim.PriceFor(card.Kind);
                 Set(card.Cost, $"{price} gold");
+                if (card.Effect != null) Set(card.Effect, CardEffect(defs.For(card.Kind), sim));
                 card.Cost.color = price <= sim.Gold ? Palette.Amber : Palette.WarningCoral;
             }
 
@@ -402,8 +439,8 @@ namespace TheLastFortress
             {
                 Set(selectionTitle, sel.Definition.DisplayName);
                 var body = sel.Definition.HasHp ? $"HP {sel.Hp} / {sel.MaxHp}   at {sel.Cell}" : $"{sel.Definition.TrapDamage} damage on entry · walkable   at {sel.Cell}";
-                if (sel.Kind == BuildingKind.Tower) body += $"\nDamage {sel.Definition.AttackDamage} every {sel.Definition.AttackIntervalSeconds}s, range {sel.Definition.Range}";
-                if (sel.Definition.DailyIncome > 0 && campaign) body += $"\nIncome +{sel.Definition.DailyIncome}/day" + (sel.Kind == BuildingKind.Farm && EconomyRules.FarmHasAdjacentHouse(sim.Grid, sel) ? $" +{EconomyRules.FarmHouseBonus} House link" : "");
+                if (sel.Kind == BuildingKind.Tower) body += "\n" + TowerDetails(sim, sel);
+                if (sel.Definition.DailyIncome > 0 && campaign) body += "\n" + IncomeDetails(sim, sel);
                 if (sel.Kind == BuildingKind.Wall && sim.WallReflection(sel) > 0) body += $"\nReflects {sim.WallReflection(sel)} per hit (Spike Trap link)";
                 var day = sim.State == RunState.Day && !sim.StressMode;
                 var canSell = day && sel.IsDestructible;
@@ -419,6 +456,8 @@ namespace TheLastFortress
                     RepairButton.interactable = restored > 0;
                     Set(repairLabel, sel.Hp >= sel.MaxHp ? "Full health" : restored > 0 ? $"Repair +{restored} HP\nfor {cost} gold" : "No gold");
                 }
+
+                if (game.IsMvp) LayoutSelection(day && RunSimulation.IsRotatable(sel.Kind));
             }
 
             // Ghost tooltip
@@ -435,7 +474,8 @@ namespace TheLastFortress
                     : $"{def.DisplayName}{size} — {price} gold\n[X] {PlacementText.Describe(overlay.GhostRejection)}");
                 tooltipText.color = overlay.GhostValid ? Palette.HudText : Palette.WarningCoral;
                 var anchor = player.HoverOverride.HasValue ? rig.CellToScreen(player.HoverOverride.Value) : player.PointerPosition;
-                tooltipRect.anchoredPosition = ScreenToCanvas(anchor) + new Vector2(28, -12);
+                if (game.IsMvp) PlaceTooltip(ScreenToCanvas(anchor));
+                else tooltipRect.anchoredPosition = ScreenToCanvas(anchor) + new Vector2(28, -12);
             }
 
             // Breach label
@@ -497,6 +537,68 @@ namespace TheLastFortress
             if (sim.NightNumber >= sim.TotalNights) return "No income after the last night" + received;
             return $"Income +{sim.IncomeForecast().Total} per day" + received;
         }
+
+        const float TooltipWidth = 390f, TooltipMargin = 8f;
+
+        /// <summary>The tooltip's current canvas-local rectangle (x, y = bottom-left).</summary>
+        public Rect TooltipCanvasRect
+        {
+            get
+            {
+                var p = tooltipRect.anchoredPosition;
+                var s = tooltipRect.sizeDelta;
+                return new Rect(p.x, p.y - s.y, s.x, s.y);
+            }
+        }
+
+        public Vector2 CanvasSize => canvasRect.rect.size;
+
+        /// <summary>
+        /// Sizes the tooltip to its text, places it below-right of the pointer and flips/clamps it so the whole box
+        /// (price, footprint, reason, rotation hint) stays inside the canvas at any edge, pan or zoom.
+        /// </summary>
+        void PlaceTooltip(Vector2 pointer)
+        {
+            var textHeight = Mathf.Ceil(tooltipText.preferredHeight);
+            tooltipText.rectTransform.sizeDelta = new Vector2(TooltipWidth - 24, textHeight);
+            var size = new Vector2(TooltipWidth, textHeight + 16);
+            tooltipRect.sizeDelta = size;
+            var canvas = canvasRect.rect.size;
+            var x = pointer.x + 28f;
+            var top = pointer.y - 12f;
+            if (x + size.x > canvas.x - TooltipMargin) x = pointer.x - 28f - size.x; // flip left
+            if (top - size.y < TooltipMargin) top = pointer.y + 12f + size.y; // flip above
+            x = Mathf.Clamp(x, TooltipMargin, Mathf.Max(TooltipMargin, canvas.x - size.x - TooltipMargin));
+            top = Mathf.Clamp(top, size.y + TooltipMargin, Mathf.Max(size.y + TooltipMargin, canvas.y - TooltipMargin));
+            tooltipRect.anchoredPosition = new Vector2(x, top);
+        }
+
+        /// <summary>
+        /// Selection panel grows upward to fit its text; action rows sit below the text, so details, refund and repair
+        /// quote never overlap the Sell/Repair/Rotate hit targets.
+        /// </summary>
+        void LayoutSelection(bool rotateRow)
+        {
+            var bodyHeight = Mathf.Max(28f, Mathf.Ceil(selectionBody.preferredHeight));
+            selectionBody.rectTransform.sizeDelta = new Vector2(350, bodyHeight);
+            var rowY = -(52f + bodyHeight + 10f);
+            ((RectTransform)SellButton.transform).anchoredPosition = new Vector2(18, rowY);
+            ((RectTransform)RepairButton.transform).anchoredPosition = new Vector2(190, rowY);
+            var anyAction = SellButton.gameObject.activeSelf || RepairButton.gameObject.activeSelf;
+            var height = 52f + bodyHeight + 10f + (anyAction ? 52f + 8f : 0f);
+            if (RotateButton != null)
+            {
+                var rotateY = anyAction ? rowY - 58f : rowY;
+                ((RectTransform)RotateButton.transform).anchoredPosition = new Vector2(18, rotateY);
+                if (rotateRow) height = -rotateY + 50f + 8f;
+            }
+
+            ((RectTransform)selectionPanel.transform).sizeDelta = new Vector2(380, height + 8f);
+        }
+
+        /// <summary>Selection panel and its action buttons (canvas-local), for layout checks.</summary>
+        public RectTransform SelectionPanelRect => (RectTransform)selectionPanel.transform;
+        public RectTransform SelectionBodyRect => selectionBody.rectTransform;
 
         Vector2 ScreenToCanvas(Vector2 screen)
         {
@@ -571,15 +673,20 @@ namespace TheLastFortress
             return button;
         }
 
-        /// <summary>One short line on each MVP card saying what the building does (values from the live definitions).</summary>
-        static string CardEffect(BuildingDefinition d)
+        /// <summary>
+        /// One short line on each MVP card saying what the building does. With a run, Tower/Farm show effective values
+        /// (perks); the Farm line never includes the placement-dependent House bonus.
+        /// </summary>
+        static string CardEffect(BuildingDefinition d, RunSimulation sim = null)
         {
             switch (d.Kind)
             {
                 case BuildingKind.Wall: return "Blocks enemy paths";
-                case BuildingKind.Tower: return $"Shoots · range {d.Range:0}";
+                case BuildingKind.Tower: return sim == null ? $"Shoots · range {d.Range:0}" : $"Shoots {sim.TowerDamage(d)} · range {sim.TowerRange(d):0.#}";
                 case BuildingKind.House: return $"+{d.DailyIncome} gold per day";
-                case BuildingKind.Farm: return $"+{d.DailyIncome}/day · 2x2 tiles";
+                case BuildingKind.Farm:
+                    var farm = sim != null && sim.HasPerk(PerkRules.EfficientFarming) ? d.DailyIncome * (100 + PerkRules.EfficientFarmingPercent) / 100 : d.DailyIncome;
+                    return $"+{farm}/day · 2x2 tiles";
                 case BuildingKind.SpikeTrap: return $"Damages enemies on it";
                 default: return "";
             }

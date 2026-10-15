@@ -66,6 +66,30 @@ namespace TheLastFortress
             LastError = null;
         }
 
+        /// <summary>
+        /// Whether the live Day differs from the last durable checkpoint in saved player progress: gold, buildings
+        /// (type/anchor/HP/facing/price), perks or Day number. Evaluated on request only; ignores view state, grid revision
+        /// and offer/run identifiers.
+        /// </summary>
+        public bool HasUnsavedDayEdits(RunSimulation sim)
+        {
+            if (!HasRun || sim.State != RunState.Day) return false;
+            if (LastDay == null) return true;
+            var now = CheckpointCodec.Capture(sim);
+            if (now.gold != LastDay.gold || now.checkpointNight != LastDay.checkpointNight) return true;
+            if (now.perks.Length != LastDay.perks.Length || now.buildings.Length != LastDay.buildings.Length) return true;
+            for (var i = 0; i < now.perks.Length; i++)
+                if (now.perks[i] != LastDay.perks[i]) return true;
+            for (var i = 0; i < now.buildings.Length; i++)
+            {
+                BuildingData a = now.buildings[i], b = LastDay.buildings[i];
+                if (a.id != b.id || a.kind != b.kind || a.x != b.x || a.z != b.z || a.hp != b.hp || a.orientation != b.orientation || a.price != b.price)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Captures and commits the current Day. Returns false (and keeps it pending) when the write fails.</summary>
         public bool CommitDay(RunSimulation sim)
         {

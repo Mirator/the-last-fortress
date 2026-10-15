@@ -317,6 +317,88 @@ namespace TheLastFortress.Tests
         }
 
         [Test]
+        public void OfferedIncomePerkPreviewMatchesPaymentWithoutMutatingTheRun()
+        {
+            // Linked Farm + House opening; the first seed whose real Night 1 offer contains Efficient Farming.
+            for (uint seed = 0; seed < 5000; seed++)
+            {
+                var sim = new RunSimulation(new RunConfig
+                {
+                    Definitions = MvpDefinitions.CreateDefault(), Seed = seed,
+                    Campaign = new CampaignConfig { Label = "t", Nights = new[] { Empty(), Empty() }, OffersRewards = true },
+                });
+                Place(sim, BuildingKind.Farm, 5, 5);
+                Place(sim, BuildingKind.House, 7, 5);
+                sim.StartNight();
+                sim.Step();
+                var offer = sim.CurrentOffer;
+                if (!offer.PerkIds.Contains(PerkRules.EfficientFarming)) continue;
+
+                var before = sim.CaptureSnapshot();
+                Assert.AreEqual(65, sim.IncomeForecast().Total, "current forecast: Keep 20 + House 15 + linked Farm 30");
+                Assert.AreEqual(74, sim.IncomeForecastWith(PerkRules.EfficientFarming).Total, "20 + 15 + floor(30 * 1.3)");
+                Assert.AreEqual(65, sim.IncomeForecastWith(PerkRules.FortressHeart).Total, "a Keep perk implies no income change");
+                sim.IncomeForecastWith(PerkRules.EfficientFarming);
+                Assert.AreEqual(before, sim.CaptureSnapshot(), "previewing never changes gold, perks, RNG or the offer");
+                Assert.AreSame(offer, sim.GetOrCreateOffer());
+
+                var gold = sim.Gold;
+                Assert.IsTrue(sim.ChoosePerk(offer.OfferId, PerkRules.EfficientFarming));
+                Assert.AreEqual(gold + 74, sim.Gold, "the payment equals the preview");
+                Assert.AreEqual(39, sim.BuildingIncome(sim.Grid.GetOccupant(new GridPos(5, 5))), "selected Farm uses the same rule");
+                return;
+            }
+
+            Assert.Fail("no seed offered Efficient Farming after Night 1");
+        }
+
+        [Test]
+        public void NightRecapCountsOnlyThatNightsAppliedLosses()
+        {
+            WavePlan OneGrunt() => new WavePlan("g", new[] { new SpawnEntry(0, MvpCampaign.West, 0) }, new[] { MvpCampaign.West });
+            RunSimulation Run(params WavePlan[] nights) => new RunSimulation(new RunConfig
+            {
+                Definitions = MvpDefinitions.CreateDefault(), Campaign = new CampaignConfig { Label = "t", Nights = nights },
+            });
+
+            // Clean night: the Tower kills the Grunt before it reaches anything.
+            var clean = Run(OneGrunt(), OneGrunt());
+            Place(clean, BuildingKind.Tower, 8, 9);
+            Assert.IsNull(clean.LastNight);
+            clean.StartNight();
+            RunToEnd(clean);
+            Assert.AreEqual((1, 1, 0, 0), (clean.LastNight.Night, clean.LastNight.EnemiesDefeated, clean.LastNight.KeepDamage, clean.LastNight.BuildingsLost));
+
+            // Building-loss night: the House sealing the Keep is destroyed in combat; the Keep takes some hits.
+            var loss = Run(OneGrunt(), OneGrunt());
+            PlaceWalls(loss, (11, 10), (10, 9), (10, 11));
+            var house = Place(loss, BuildingKind.House, 9, 10);
+            Place(loss, BuildingKind.Farm, 8, 11);
+            Place(loss, BuildingKind.Tower, 11, 13);
+            loss.StartNight();
+            RunToEnd(loss);
+            Assert.IsTrue(house.Removed);
+            var recap = loss.LastNight;
+            Assert.AreEqual((1, 1), (recap.EnemiesDefeated, recap.BuildingsLost));
+            Assert.AreEqual(500 - loss.Keep.Hp, recap.KeepDamage, "HP actually removed from the Keep");
+            var keepDamage = recap.KeepDamage;
+            loss.TryRepair(loss.Keep);
+            Assert.AreEqual(SellRejection.None, loss.TrySell(loss.Grid.GetOccupant(new GridPos(8, 11))));
+            Assert.AreEqual((keepDamage, 1), (recap.KeepDamage, recap.BuildingsLost), "repairs and sales never rewrite the finished night");
+            loss.StartNight();
+            Assert.AreNotSame(recap, loss.LastNight);
+            Assert.AreEqual((2, 0, 0, 0), (loss.LastNight.Night, loss.LastNight.EnemiesDefeated, loss.LastNight.KeepDamage, loss.LastNight.BuildingsLost), "reset at the next Night start");
+
+            // Lethal night: overkill is capped at the HP the Keep had.
+            var defeat = Run(MvpCampaign.CreateFoundation().Nights[0]);
+            defeat.StartNight();
+            RunToEnd(defeat);
+            Assert.AreEqual(RunState.Defeat, defeat.State);
+            Assert.AreEqual(500, defeat.LastNight.KeepDamage);
+            Assert.AreEqual(0, defeat.LastNight.BuildingsLost, "the Keep itself is not a lost building");
+        }
+
+        [Test]
         public void BurnKeepsCadenceOnRefreshExpiresInclusiveAndFreezesWhilePaused()
         {
             var final = new WavePlan("brute", new[] { new SpawnEntry(0, MvpCampaign.West, 0, EnemyKind.Brute) }, new[] { MvpCampaign.West });

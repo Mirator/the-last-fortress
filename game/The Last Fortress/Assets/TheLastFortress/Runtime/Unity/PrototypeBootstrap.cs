@@ -54,6 +54,26 @@ namespace TheLastFortress
         /// <summary>True when the flat authored map was requested (-flat, tests, recorded policies).</summary>
         public bool FlatMap { get; private set; }
 
+        /// <summary>A guard dialog's text and choices; the HUD renders it and play is suspended while it is open.</summary>
+        public sealed class ConfirmRequest
+        {
+            public string Title;
+            public string Body;
+            public readonly List<(string label, Action action)> Options = new List<(string, Action)>();
+        }
+
+        /// <summary>The open guard dialog (Restart/Quit), or null.</summary>
+        public ConfirmRequest PendingConfirm { get; private set; }
+
+        /// <summary>Application exit boundary (replaced in tests so nothing ever really quits).</summary>
+        public Action QuitApplication = Application.Quit;
+
+        /// <summary>Save-and-exit is waiting for its save to succeed (Retry); the exit happens only after that commit.</summary>
+        public bool ExitAfterSave { get; private set; }
+
+        /// <summary>Combat and input are suspended by the menu or a guard dialog.</summary>
+        public bool Suspended => MenuOpen || PendingConfirm != null;
+
         RunState observedState;
         int observedNight;
         int observedKeepHp;
@@ -136,8 +156,8 @@ namespace TheLastFortress
                 else EnterNormalMode();
             }
 
-            if (!MenuOpen) Player.Tick(dt);
-            if (AutoAdvance && !MenuOpen) Sim.Advance(dt);
+            if (!Suspended) Player.Tick(dt);
+            if (AutoAdvance && !Suspended) Sim.Advance(dt);
             SyncViews(dt);
         }
 
@@ -145,17 +165,32 @@ namespace TheLastFortress
         public void SyncViews(float dt = 0f)
         {
             ObserveTransitions();
+            var fxDt = PresentationDelta(dt);
             World.SetBuildGridVisible(Player.Tool.HasValue && Sim.State == RunState.Day);
-            World.Sync(Sim, dt);
+            World.Sync(Sim, fxDt);
             Overlay.Refresh(Sim, Player);
             Hud.Refresh(Sim, Player, Overlay, cameraRig);
+            Hud.TickEffects(fxDt);
         }
+
+        /// <summary>
+        /// Combat presentation clock: frozen while Night is paused or the menu suspends play, so arrows, cues, gait and burn
+        /// hold exactly where they are. It keeps running into Reward/Victory/Defeat so the final kill's cues finish.
+        /// HUD refresh and camera inspection stay live regardless.
+        /// </summary>
+        public float PresentationDelta(float dt) => Suspended || (Sim.State == RunState.Night && Sim.Paused) ? 0f : dt;
 
         /// <summary>Checkpoint triggers that follow simulation transitions (Reward ledger, terminal record) and Keep-hit shake.</summary>
         void ObserveTransitions()
         {
             if (Sim == null) return;
-            if (IsMvp && Sim.State == RunState.Night && Sim.Keep.Hp < observedKeepHp && Settings.cameraShake) cameraRig.Kick(0.12f);
+            // Actual Keep damage only (HP drop): a HUD cue that works off-screen and with shake disabled, plus optional shake.
+            if (IsMvp && Sim.Keep.Hp < observedKeepHp && (Sim.State == RunState.Night || Sim.State == RunState.Defeat))
+            {
+                Hud.KeepHit(observedKeepHp - Sim.Keep.Hp);
+                if (Settings.cameraShake) cameraRig.Kick(0.12f);
+            }
+
             observedKeepHp = Sim.Keep.Hp;
             if (Sim.State == observedState && Sim.NightNumber == observedNight) return;
             var previous = observedState;
@@ -302,12 +337,131 @@ namespace TheLastFortress
         /// <summary>Leaves the run without saving (Night/Reward resume from the last Day checkpoint; pending writes are lost).</summary>
         public void QuitToMenuWithoutSaving()
         {
+            ExitAfterSave = false;
+            PendingConfirm = null;
             Persistence.Detach();
             EnterNormalMode();
             OpenMenu();
         }
 
-        public bool RetrySave() => Persistence != null && Persistence.Retry();
+        public bool RetrySave()
+        {
+            if (Persistence == null || !Persistence.Retry()) return false;
+            if (ExitAfterSave) FinishExit();
+            return true;
+        }
+
+        // ---------- Restart / Quit guards ----------
+
+        /// <summary>
+        /// Top-bar Restart. Prototype, ended runs and an untouched Day 1 reset immediately; a progressed MVP run first asks
+        /// to confirm "Retry same seed — start Day 1".
+        /// </summary>
+        public void RequestRestart()
+        {
+            if (!IsMvp || Persistence == null || !Persistence.HasRun || Sim.IsTerminal || IsUntouchedDayOne())
+            {
+                Restart();
+                return;
+            }
+
+            var request = new ConfirmRequest
+            {
+                Title = "Retry same seed — start Day 1?",
+                Body = $"This run goes back to Day 1 on seed {Sim.Seed} with fresh gold, buildings and perks. " +
+                       "Your current progress is replaced; its last save file is kept on disk but cannot be continued from the menu.",
+            };
+            request.Options.Add(("Retry from Day 1", () =>
+            {
+                PendingConfirm = null;
+                Restart();
+            }));
+            request.Options.Add(("Cancel", CancelConfirm));
+            OpenConfirm(request);
+        }
+
+        /// <summary>
+        /// Menu "Quit game". With unsaved Day edits: save and exit / exit without them / cancel. During Night or Reward:
+        /// explains that Continue replays the night from its Day checkpoint. Otherwise exits directly.
+        /// </summary>
+        public void RequestQuit()
+        {
+            if (!IsMvp || Persistence == null || !Persistence.HasRun || Sim.IsTerminal || Sim.StressMode)
+            {
+                QuitApplication();
+                return;
+            }
+
+            if (Sim.State == RunState.Night || Sim.State == RunState.Reward)
+            {
+                var offer = Sim.State == RunState.Reward ? $" The reward offer for Night {Sim.NightNumber} is kept." : "";
+                var nightRequest = new ConfirmRequest
+                {
+                    Title = "Quit during the night?",
+                    Body = $"Combat is not saved. Continue will replay Night {Sim.NightNumber} from the start of Day {Sim.NightNumber}.{offer}",
+                };
+                nightRequest.Options.Add(("Quit game", () =>
+                {
+                    PendingConfirm = null;
+                    QuitApplication();
+                }));
+                nightRequest.Options.Add(("Cancel", CancelConfirm));
+                OpenConfirm(nightRequest);
+                return;
+            }
+
+            if (!Persistence.HasUnsavedDayEdits(Sim))
+            {
+                QuitApplication();
+                return;
+            }
+
+            var request = new ConfirmRequest
+            {
+                Title = "Save before quitting?",
+                Body = $"Day {Sim.NightNumber} has changes since your last save (buildings, gold or repairs).",
+            };
+            request.Options.Add(("Save and exit", ConfirmSaveAndExit));
+            request.Options.Add(("Exit without these changes", () =>
+            {
+                PendingConfirm = null;
+                QuitApplication();
+            }));
+            request.Options.Add(("Cancel", CancelConfirm));
+            OpenConfirm(request);
+        }
+
+        /// <summary>Commits this exact Day through the normal save owner; exits only once that snapshot is durable.</summary>
+        public void ConfirmSaveAndExit()
+        {
+            PendingConfirm = null;
+            ExitAfterSave = true;
+            if (Persistence.CommitDay(Sim)) FinishExit();
+            // On failure the save-failed overlay offers Retry (exits after success) or leaving without saving.
+        }
+
+        void FinishExit()
+        {
+            ExitAfterSave = false;
+            QuitApplication();
+        }
+
+        public void CancelConfirm()
+        {
+            PendingConfirm = null;
+            ExitAfterSave = false;
+        }
+
+        void OpenConfirm(ConfirmRequest request)
+        {
+            Player.CancelTool();
+            PendingConfirm = request;
+        }
+
+        /// <summary>Day 1 exactly as created: nothing built, sold, repaired or rotated since the run began.</summary>
+        bool IsUntouchedDayOne() =>
+            Sim.State == RunState.Day && Sim.NightNumber == 1 && Sim.Stats.BuildingsPurchased == 0 && Sim.Gold == Definitions.StartingGold
+            && !Persistence.HasUnsavedDayEdits(Sim) && Persistence.LastDay != null && Persistence.LastDay.buildings.Length == 1;
 
         public void ApplySettings(GameSettings settings, bool persist)
         {

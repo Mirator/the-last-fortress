@@ -1,0 +1,330 @@
+# economy; seed=1; seed 1: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 10; Tower (9,9) (70g); Tower (11,11) (70g); Farm (4,13) (60g); House (6,13) (40g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 2, Walls 0; 23,2s
+  Reward LastStand,ThriftyConstruction,Sharpshooters -> Sharpshooters; dawn income +65
+Day 2: gold 75 -> 15; Farm (4,11) (60g); House (6,12) skipped: InsufficientGold
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 2, Walls 0; 30,3s
+  Reward ThriftyConstruction,FortressHeart,LastStand -> ThriftyConstruction; dawn income +90
+Day 3: gold 105 -> 42; Tower (9,11) (63g)
+  Night 3: Reward; Keep 490/500 (-10); defeated 20; lost 0; surviving Towers 3, Walls 0; 34,0s
+  Reward FortressHeart,EfficientFarming,ExpandedVision -> EfficientFarming; dawn income +106
+Day 4: gold 148 -> 65; Tower (11,9) (63g); Wall (9,10) (18g); repair Keep +10 (500/500)
+  Night 4: Reward; Keep 494/500 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward Recycling,ReinforcedTimber,FlamingArrows -> FlamingArrows; dawn income +106
+Day 5: gold 171 -> 52; Wall (11,10) (18g); Wall (10,9) (18g); Wall (10,11) (18g); Tower (8,10) (63g); Tower (12,10) skipped: InsufficientGold; repair Keep +6 (500/500)
+  Night 5: Reward; Keep 500/500 (-0); defeated 36; lost 0; surviving Towers 5, Walls 4; 41,5s
+  Reward Recycling,ExpandedVision,BarbedDefenses -> ExpandedVision; dawn income +106
+Day 6: gold 158 -> 14; Tower (10,8) (63g); Tower (10,12) (63g); Wall (7,10) skipped: ImpassableTerrain; Wall (13,10) (18g); Wall (10,7) skipped: InsufficientGold; Wall (10,13) skipped: InsufficientGold
+  Night 6: Victory; Keep 500/500 (-0); defeated 41; lost 0; surviving Towers 7, Walls 5; 54,0s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:490 N4:494 N5:500 N6:500; purchased 15; gold earned 473; perks [Sharpshooters,ThriftyConstruction,EfficientFarming,FlamingArrows,ExpandedVision]
+exit=0
+
+# economy; seed=2; seed 2: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 10; Tower (9,9) (70g); Tower (11,11) (70g); Farm (4,13) (60g); House (6,13) (40g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 2, Walls 0; 25,0s
+  Reward EfficientFarming,Recycling,FlamingArrows -> EfficientFarming; dawn income +74
+Day 2: gold 84 -> 24; Farm (4,11) (60g); House (6,12) skipped: InsufficientGold
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 2, Walls 0; 30,4s
+  Reward ThriftyConstruction,Sharpshooters,LastStand -> Sharpshooters; dawn income +106
+Day 3: gold 130 -> 60; Tower (9,11) (70g)
+  Night 3: Reward; Keep 490/500 (-10); defeated 20; lost 0; surviving Towers 3, Walls 0; 32,8s
+  Reward BarbedDefenses,FortressHeart,ReinforcedTimber -> FortressHeart; dawn income +106
+Day 4: gold 166 -> 74; Tower (11,9) (70g); Wall (9,10) (20g); repair Keep +10 (650/650)
+  Night 4: Reward; Keep 644/650 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward Recycling,FlamingArrows,LastStand -> FlamingArrows; dawn income +106
+Day 5: gold 180 -> 48; Wall (11,10) (20g); Wall (10,9) (20g); Wall (10,11) (20g); Tower (8,10) (70g); Tower (12,10) skipped: InsufficientGold; repair Keep +6 (650/650)
+  Night 5: Reward; Keep 650/650 (-0); defeated 36; lost 0; surviving Towers 5, Walls 4; 42,1s
+  Reward Recycling,BarbedDefenses,ThriftyConstruction -> ThriftyConstruction; dawn income +106
+Day 6: gold 154 -> 10; Tower (10,8) (63g); Tower (10,12) (63g); Wall (7,10) (18g); Wall (13,10) skipped: InsufficientGold; Wall (10,7) skipped: InsufficientGold; Wall (10,13) skipped: InsufficientGold
+  Night 6: Victory; Keep 650/650 (-0); defeated 41; lost 0; surviving Towers 7, Walls 5; 59,1s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:490 N4:644 N5:650 N6:650; purchased 15; gold earned 498; perks [EfficientFarming,Sharpshooters,FortressHeart,FlamingArrows,ThriftyConstruction]
+exit=0
+
+# economy; seed=3; seed 3: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 70; Tower (9,9) (70g); Tower (11,11) (70g); Farm (4,13) skipped: ImpassableTerrain; House (6,13) (40g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 2, Walls 0; 21,8s
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> FlamingArrows; dawn income +35
+Day 2: gold 105 -> 5; Farm (4,11) (60g); House (6,12) (40g)
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 2, Walls 0; 28,9s
+  Reward ExpandedVision,Sharpshooters,FortressHeart -> Sharpshooters; dawn income +80
+Day 3: gold 85 -> 15; Tower (9,11) (70g)
+  Night 3: Reward; Keep 456/500 (-44); defeated 20; lost 0; surviving Towers 3, Walls 0; 31,7s
+  Reward ThriftyConstruction,FortressHeart,ReinforcedTimber -> ThriftyConstruction; dawn income +80
+Day 4: gold 95 -> 5; Tower (11,9) (63g); Wall (9,10) (18g); repair Keep +44 (500/500)
+  Night 4: Reward; Keep 494/500 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward LastStand,EfficientFarming,Recycling -> EfficientFarming; dawn income +89
+Day 5: gold 94 -> 38; Wall (11,10) (18g); Wall (10,9) (18g); Wall (10,11) (18g); Tower (8,10) skipped: InsufficientGold; Tower (12,10) skipped: InsufficientGold; repair Keep +6 (500/500)
+  Night 5: Reward; Keep 500/500 (-0); defeated 36; lost 0; surviving Towers 4, Walls 4; 41,5s
+  Reward BarbedDefenses,ReinforcedTimber,FortressHeart -> FortressHeart; dawn income +89
+Day 6: gold 127 -> 1; Tower (10,8) (63g); Tower (10,12) (63g); Wall (7,10) skipped: InsufficientGold; Wall (13,10) skipped: InsufficientGold; Wall (10,7) skipped: InsufficientGold; Wall (10,13) skipped: InsufficientGold
+  Night 6: Victory; Keep 650/650 (-0); defeated 41; lost 1; surviving Towers 6, Walls 3; 54,6s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:456 N4:494 N5:500 N6:650; purchased 13; gold earned 373; perks [FlamingArrows,Sharpshooters,ThriftyConstruction,EfficientFarming,FortressHeart]
+exit=0
+
+# defense; seed=1; seed 1: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 21,5s
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> Sharpshooters; dawn income +20
+Day 2: gold 60 -> 60; Tower (11,9) skipped: InsufficientGold
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward BarbedDefenses,LastStand,Recycling -> BarbedDefenses; dawn income +20
+Day 3: gold 80 -> 0; Wall (9,10) (20g); Wall (11,10) (20g); Wall (10,9) (20g); Wall (10,11) (20g)
+  Night 3: Reward; Keep 500/500 (-0); defeated 20; lost 0; surviving Towers 3, Walls 4; 32,7s
+  Reward ExpandedVision,Recycling,FlamingArrows -> FlamingArrows; dawn income +20
+Day 4: gold 20 -> 20; Tower (8,10) skipped: InsufficientGold; Tower (12,10) skipped: InsufficientGold
+  Night 4: Reward; Keep 480/500 (-20); defeated 29; lost 1; surviving Towers 3, Walls 3; 36,6s
+  Reward LastStand,Recycling,ExpandedVision -> ExpandedVision; dawn income +20
+Day 5: gold 40 -> 36; Tower (10,8) skipped: InsufficientGold; Tower (10,12) skipped: InsufficientGold; repair Keep +20 (500/500)
+  Night 5: Reward; Keep 376/500 (-124); defeated 36; lost 0; surviving Towers 3, Walls 3; 45,6s
+  Reward EfficientFarming,LastStand,FortressHeart -> FortressHeart; dawn income +20
+Day 6: gold 56 -> 0; Wall (7,10) skipped: ImpassableTerrain; Wall (13,10) (20g); Wall (10,7) (20g); Wall (10,13) skipped: InsufficientGold; repair Keep +80 (606/650)
+  Night 6: Victory; Keep 150/650 (-456); defeated 41; lost 0; surviving Towers 3, Walls 5; 67,9s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:500 N4:480 N5:376 N6:150; purchased 9; gold earned 100; perks [Sharpshooters,BarbedDefenses,FlamingArrows,ExpandedVision,FortressHeart]
+exit=0
+
+# defense; seed=2; seed 2: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 23,1s
+  Reward Sharpshooters,ThriftyConstruction,FortressHeart -> Sharpshooters; dawn income +20
+Day 2: gold 60 -> 60; Tower (11,9) skipped: InsufficientGold
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward FlamingArrows,LastStand,BarbedDefenses -> FlamingArrows; dawn income +20
+Day 3: gold 80 -> 0; Wall (9,10) (20g); Wall (11,10) (20g); Wall (10,9) (20g); Wall (10,11) (20g)
+  Night 3: Reward; Keep 500/500 (-0); defeated 20; lost 0; surviving Towers 3, Walls 4; 32,7s
+  Reward Recycling,FortressHeart,ReinforcedTimber -> FortressHeart; dawn income +20
+Day 4: gold 20 -> 20; Tower (8,10) skipped: InsufficientGold; Tower (12,10) skipped: InsufficientGold
+  Night 4: Reward; Keep 530/650 (-120); defeated 29; lost 1; surviving Towers 3, Walls 3; 38,4s
+  Reward ExpandedVision,LastStand,ThriftyConstruction -> ExpandedVision; dawn income +20
+Day 5: gold 40 -> 16; Tower (10,8) skipped: InsufficientGold; Tower (10,12) skipped: InsufficientGold; repair Keep +120 (650/650)
+  Night 5: Reward; Keep 526/650 (-124); defeated 36; lost 0; surviving Towers 3, Walls 3; 45,6s
+  Reward EfficientFarming,BarbedDefenses,ThriftyConstruction -> BarbedDefenses; dawn income +20
+Day 6: gold 36 -> 0; Wall (7,10) (20g); Wall (13,10) skipped: InsufficientGold; Wall (10,7) skipped: InsufficientGold; Wall (10,13) skipped: InsufficientGold; repair Keep +80 (606/650)
+  Night 6: Victory; Keep 150/650 (-456); defeated 41; lost 0; surviving Towers 3, Walls 4; 67,9s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:500 N4:530 N5:526 N6:150; purchased 8; gold earned 100; perks [Sharpshooters,FlamingArrows,FortressHeart,ExpandedVision,BarbedDefenses]
+exit=0
+
+# defense; seed=3; seed 3: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 20,4s
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> FlamingArrows; dawn income +20
+Day 2: gold 60 -> 60; Tower (11,9) skipped: InsufficientGold
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 28,9s
+  Reward Sharpshooters,ReinforcedTimber,FortressHeart -> Sharpshooters; dawn income +20
+Day 3: gold 80 -> 0; Wall (9,10) (20g); Wall (11,10) (20g); Wall (10,9) (20g); Wall (10,11) (20g)
+  Night 3: Reward; Keep 500/500 (-0); defeated 20; lost 1; surviving Towers 3, Walls 3; 31,7s
+  Reward BarbedDefenses,Recycling,LastStand -> BarbedDefenses; dawn income +20
+Day 4: gold 20 -> 20; Tower (8,10) skipped: InsufficientGold; Tower (12,10) skipped: InsufficientGold
+  Night 4: Reward; Keep 278/500 (-222); defeated 29; lost 0; surviving Towers 3, Walls 3; 40,0s
+  Reward Recycling,ThriftyConstruction,ExpandedVision -> ExpandedVision; dawn income +20
+Day 5: gold 40 -> 0; Tower (10,8) skipped: InsufficientGold; Tower (10,12) skipped: InsufficientGold; repair Keep +200 (478/500)
+  Night 5: Defeat; Keep 0/500 (-478); defeated 30; lost 0; surviving Towers 3, Walls 3; 43,1s
+Result: Defeat; nights cleared 4; Keep by night N1:500 N2:500 N3:500 N4:278 N5:0; purchased 7; gold earned 80; perks [FlamingArrows,Sharpshooters,BarbedDefenses,ExpandedVision]
+exit=0
+
+# adaptive; seed=1; seed 1: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 21,5s
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> Sharpshooters; dawn income +20
+Day 2: gold 60 -> 20; House (6,13) (40g)
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward BarbedDefenses,LastStand,Recycling -> BarbedDefenses; dawn income +35
+Day 3: gold 55 -> 55; 
+  Night 3: Reward; Keep 490/500 (-10); defeated 20; lost 0; surviving Towers 3, Walls 0; 34,0s
+  Reward LastStand,ExpandedVision,FlamingArrows -> FlamingArrows; dawn income +35
+Day 4: gold 90 -> 0; Tower (11,9) (70g); Wall (9,10) (20g)
+  Night 4: Reward; Keep 484/500 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward LastStand,Recycling,ExpandedVision -> ExpandedVision; dawn income +35
+Day 5: gold 35 -> 11; Wall (11,10) (20g); repair Keep +16 (500/500)
+  Night 5: Reward; Keep 500/500 (-0); defeated 36; lost 0; surviving Towers 4, Walls 2; 41,6s
+  Reward EfficientFarming,LastStand,FortressHeart -> FortressHeart; dawn income +35
+Day 6: gold 46 -> 6; Wall (10,9) (20g); Wall (10,11) (20g)
+  Night 6: Victory; Keep 650/650 (-0); defeated 41; lost 1; surviving Towers 4, Walls 3; 63,1s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:490 N4:484 N5:500 N6:650; purchased 9; gold earned 160; perks [Sharpshooters,BarbedDefenses,FlamingArrows,ExpandedVision,FortressHeart]
+exit=0
+
+# adaptive; seed=2; seed 2: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 23,1s
+  Reward Sharpshooters,ThriftyConstruction,FortressHeart -> Sharpshooters; dawn income +20
+Day 2: gold 60 -> 20; House (6,13) (40g)
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward FlamingArrows,LastStand,BarbedDefenses -> FlamingArrows; dawn income +35
+Day 3: gold 55 -> 55; 
+  Night 3: Reward; Keep 490/500 (-10); defeated 20; lost 0; surviving Towers 3, Walls 0; 32,7s
+  Reward ThriftyConstruction,FortressHeart,Recycling -> FortressHeart; dawn income +35
+Day 4: gold 90 -> 0; Tower (11,9) (70g); Wall (9,10) (20g)
+  Night 4: Reward; Keep 634/650 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward ExpandedVision,LastStand,ThriftyConstruction -> ExpandedVision; dawn income +35
+Day 5: gold 35 -> 11; Wall (11,10) (20g); repair Keep +16 (650/650)
+  Night 5: Reward; Keep 644/650 (-6); defeated 36; lost 0; surviving Towers 4, Walls 2; 41,6s
+  Reward EfficientFarming,BarbedDefenses,ThriftyConstruction -> BarbedDefenses; dawn income +35
+Day 6: gold 46 -> 4; Wall (10,9) (20g); Wall (10,11) (20g); repair Keep +6 (650/650)
+  Night 6: Victory; Keep 650/650 (-0); defeated 41; lost 0; surviving Towers 4, Walls 4; 63,1s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:490 N4:634 N5:644 N6:650; purchased 9; gold earned 160; perks [Sharpshooters,FlamingArrows,FortressHeart,ExpandedVision,BarbedDefenses]
+exit=0
+
+# adaptive; seed=3; seed 3: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 20,4s
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> FlamingArrows; dawn income +20
+Day 2: gold 60 -> 20; House (6,13) (40g)
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 28,9s
+  Reward Sharpshooters,ReinforcedTimber,FortressHeart -> Sharpshooters; dawn income +35
+Day 3: gold 55 -> 55; 
+  Night 3: Reward; Keep 456/500 (-44); defeated 20; lost 0; surviving Towers 3, Walls 0; 31,7s
+  Reward LastStand,BarbedDefenses,ThriftyConstruction -> BarbedDefenses; dawn income +35
+Day 4: gold 90 -> 0; Tower (11,9) (70g); Wall (9,10) (20g)
+  Night 4: Reward; Keep 450/500 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward Recycling,ThriftyConstruction,ExpandedVision -> ExpandedVision; dawn income +35
+Day 5: gold 35 -> 5; Wall (11,10) (20g); repair Keep +50 (500/500)
+  Night 5: Reward; Keep 500/500 (-0); defeated 36; lost 0; surviving Towers 4, Walls 2; 41,9s
+  Reward Recycling,LastStand,ReinforcedTimber -> ReinforcedTimber; dawn income +35
+Day 6: gold 40 -> 0; Wall (10,9) (20g); Wall (10,11) (20g)
+  Night 6: Victory; Keep 500/500 (-0); defeated 41; lost 1; surviving Towers 4, Walls 3; 57,2s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:456 N4:450 N5:500 N6:500; purchased 9; gold earned 160; perks [FlamingArrows,Sharpshooters,BarbedDefenses,ExpandedVision,ReinforcedTimber]
+exit=0
+
+# pure-defense (DIAGNOSTIC: guaranteed Keep income only); seed=1; seed 1: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 21,5s
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> Sharpshooters; dawn income +20
+Day 2: gold 60 -> 60; 
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward BarbedDefenses,LastStand,Recycling -> BarbedDefenses; dawn income +20
+Day 3: gold 80 -> 10; Tower (11,9) (70g)
+  Night 3: Reward; Keep 500/500 (-0); defeated 20; lost 0; surviving Towers 4, Walls 0; 30,3s
+  Reward LastStand,ExpandedVision,FlamingArrows -> FlamingArrows; dawn income +20
+Day 4: gold 30 -> 10; Wall (9,10) (20g)
+  Night 4: Reward; Keep 494/500 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward LastStand,Recycling,ExpandedVision -> ExpandedVision; dawn income +20
+Day 5: gold 30 -> 8; Wall (11,10) (20g); repair Keep +6 (500/500)
+  Night 5: Reward; Keep 500/500 (-0); defeated 36; lost 0; surviving Towers 4, Walls 2; 41,6s
+  Reward EfficientFarming,LastStand,FortressHeart -> FortressHeart; dawn income +20
+Day 6: gold 28 -> 8; Wall (10,9) (20g)
+  Night 6: Victory; Keep 650/650 (-0); defeated 41; lost 0; surviving Towers 4, Walls 3; 59,7s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:500 N4:494 N5:500 N6:650; purchased 7; gold earned 100; perks [Sharpshooters,BarbedDefenses,FlamingArrows,ExpandedVision,FortressHeart]
+exit=0
+
+# pure-defense (DIAGNOSTIC: guaranteed Keep income only); seed=2; seed 2: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 23,1s
+  Reward Sharpshooters,ThriftyConstruction,FortressHeart -> Sharpshooters; dawn income +20
+Day 2: gold 60 -> 60; 
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward FlamingArrows,LastStand,BarbedDefenses -> FlamingArrows; dawn income +20
+Day 3: gold 80 -> 10; Tower (11,9) (70g)
+  Night 3: Reward; Keep 500/500 (-0); defeated 20; lost 0; surviving Towers 4, Walls 0; 31,7s
+  Reward ThriftyConstruction,FortressHeart,Recycling -> FortressHeart; dawn income +20
+Day 4: gold 30 -> 10; Wall (9,10) (20g)
+  Night 4: Reward; Keep 644/650 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward ExpandedVision,LastStand,ThriftyConstruction -> ExpandedVision; dawn income +20
+Day 5: gold 30 -> 8; Wall (11,10) (20g); repair Keep +6 (650/650)
+  Night 5: Reward; Keep 644/650 (-6); defeated 36; lost 0; surviving Towers 4, Walls 2; 41,6s
+  Reward EfficientFarming,BarbedDefenses,ThriftyConstruction -> BarbedDefenses; dawn income +20
+Day 6: gold 28 -> 6; Wall (10,9) (20g); repair Keep +6 (650/650)
+  Night 6: Victory; Keep 650/650 (-0); defeated 41; lost 0; surviving Towers 4, Walls 3; 61,6s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:500 N4:644 N5:644 N6:650; purchased 7; gold earned 100; perks [Sharpshooters,FlamingArrows,FortressHeart,ExpandedVision,BarbedDefenses]
+exit=0
+
+# pure-defense (DIAGNOSTIC: guaranteed Keep income only); seed=3; seed 3: generated (attempt 0); normal offered rewards
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 20,4s
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> FlamingArrows; dawn income +20
+Day 2: gold 60 -> 60; 
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 28,9s
+  Reward Sharpshooters,ReinforcedTimber,FortressHeart -> Sharpshooters; dawn income +20
+Day 3: gold 80 -> 10; Tower (11,9) (70g)
+  Night 3: Reward; Keep 482/500 (-18); defeated 20; lost 0; surviving Towers 4, Walls 0; 29,4s
+  Reward LastStand,BarbedDefenses,ThriftyConstruction -> BarbedDefenses; dawn income +20
+Day 4: gold 30 -> 6; Wall (9,10) (20g); repair Keep +18 (500/500)
+  Night 4: Reward; Keep 494/500 (-6); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward Recycling,ThriftyConstruction,ExpandedVision -> ExpandedVision; dawn income +20
+Day 5: gold 26 -> 4; Wall (11,10) (20g); repair Keep +6 (500/500)
+  Night 5: Reward; Keep 500/500 (-0); defeated 36; lost 0; surviving Towers 4, Walls 2; 41,9s
+  Reward Recycling,LastStand,ReinforcedTimber -> ReinforcedTimber; dawn income +20
+Day 6: gold 24 -> 4; Wall (10,9) (20g)
+  Night 6: Victory; Keep 500/500 (-0); defeated 41; lost 0; surviving Towers 4, Walls 3; 58,1s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:482 N4:494 N5:500 N6:500; purchased 7; gold earned 100; perks [FlamingArrows,Sharpshooters,BarbedDefenses,ExpandedVision,ReinforcedTimber]
+exit=0
+
+# economy; seed=1; seed 1: generated (attempt 0); DEBUG no-perk baseline
+Day 1: gold 250 -> 10; Tower (9,9) (70g); Tower (11,11) (70g); Farm (4,13) (60g); House (6,13) (40g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 2, Walls 0; 23,2s
+  Reward LastStand,ThriftyConstruction,Sharpshooters -> DEBUG skip; dawn income +65
+Day 2: gold 75 -> 15; Farm (4,11) (60g); House (6,12) skipped: InsufficientGold
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 2, Walls 0; 30,3s
+  Reward ExpandedVision,FortressHeart,Recycling -> DEBUG skip; dawn income +90
+Day 3: gold 105 -> 35; Tower (9,11) (70g)
+  Night 3: Reward; Keep 430/500 (-70); defeated 20; lost 0; surviving Towers 3, Walls 0; 34,0s
+  Reward FlamingArrows,EfficientFarming,ExpandedVision -> DEBUG skip; dawn income +90
+Day 4: gold 125 -> 21; Tower (11,9) (70g); Wall (9,10) (20g); repair Keep +70 (500/500)
+  Night 4: Reward; Keep 458/500 (-42); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward FortressHeart,ThriftyConstruction,FlamingArrows -> DEBUG skip; dawn income +90
+Day 5: gold 111 -> 42; Wall (11,10) (20g); Wall (10,9) (20g); Wall (10,11) (20g); Tower (8,10) skipped: InsufficientGold; Tower (12,10) skipped: InsufficientGold; repair Keep +42 (500/500)
+  Night 5: Reward; Keep 462/500 (-38); defeated 36; lost 1; surviving Towers 4, Walls 3; 42,8s
+  Reward ExpandedVision,Recycling,BarbedDefenses -> DEBUG skip; dawn income +90
+Day 6: gold 132 -> 0; Tower (10,8) (70g); Tower (10,12) skipped: InsufficientGold; Wall (7,10) skipped: ImpassableTerrain; Wall (13,10) (20g); Wall (10,7) (20g); Wall (10,13) (20g); repair Keep +10 (472/500)
+  Night 6: Victory; Keep 472/500 (-0); defeated 41; lost 0; surviving Towers 5, Walls 6; 61,4s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:430 N4:458 N5:462 N6:472; purchased 15; gold earned 425; perks []
+exit=0
+
+# defense; seed=1; seed 1: generated (attempt 0); DEBUG no-perk baseline
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 21,5s
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> DEBUG skip; dawn income +20
+Day 2: gold 60 -> 60; Tower (11,9) skipped: InsufficientGold
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward LastStand,Recycling,ThriftyConstruction -> DEBUG skip; dawn income +20
+Day 3: gold 80 -> 0; Wall (9,10) (20g); Wall (11,10) (20g); Wall (10,9) (20g); Wall (10,11) (20g)
+  Night 3: Reward; Keep 500/500 (-0); defeated 20; lost 1; surviving Towers 3, Walls 3; 33,5s
+  Reward FortressHeart,Recycling,ExpandedVision -> DEBUG skip; dawn income +20
+Day 4: gold 20 -> 20; Tower (8,10) skipped: InsufficientGold; Tower (12,10) skipped: InsufficientGold
+  Night 4: Reward; Keep 300/500 (-200); defeated 29; lost 0; surviving Towers 3, Walls 3; 41,0s
+  Reward FlamingArrows,ExpandedVision,Recycling -> DEBUG skip; dawn income +20
+Day 5: gold 40 -> 0; Tower (10,8) skipped: InsufficientGold; Tower (10,12) skipped: InsufficientGold; repair Keep +200 (500/500)
+  Night 5: Defeat; Keep 0/500 (-500); defeated 26; lost 0; surviving Towers 3, Walls 3; 41,1s
+Result: Defeat; nights cleared 4; Keep by night N1:500 N2:500 N3:500 N4:300 N5:0; purchased 7; gold earned 80; perks []
+exit=0
+
+# adaptive; seed=1; seed 1: generated (attempt 0); DEBUG no-perk baseline
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 21,5s
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> DEBUG skip; dawn income +20
+Day 2: gold 60 -> 20; House (6,13) (40g)
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward LastStand,Recycling,ThriftyConstruction -> DEBUG skip; dawn income +35
+Day 3: gold 55 -> 55; 
+  Night 3: Reward; Keep 430/500 (-70); defeated 20; lost 0; surviving Towers 3, Walls 0; 34,0s
+  Reward Sharpshooters,ExpandedVision,EfficientFarming -> DEBUG skip; dawn income +35
+Day 4: gold 90 -> 0; Tower (11,9) (70g); Wall (9,10) (20g)
+  Night 4: Reward; Keep 388/500 (-42); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward FlamingArrows,ExpandedVision,Recycling -> DEBUG skip; dawn income +35
+Day 5: gold 35 -> 0; Wall (11,10) (20g); repair Keep +75 (463/500)
+  Night 5: Reward; Keep 357/500 (-106); defeated 36; lost 0; surviving Towers 4, Walls 2; 42,3s
+  Reward ExpandedVision,ThriftyConstruction,BarbedDefenses -> DEBUG skip; dawn income +35
+Day 6: gold 35 -> 0; Wall (10,9) (20g); repair Keep +75 (432/500)
+  Night 6: Victory; Keep 392/500 (-40); defeated 41; lost 0; surviving Towers 4, Walls 3; 64,6s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:430 N4:388 N5:357 N6:392; purchased 8; gold earned 160; perks []
+exit=0
+
+# pure-defense (DIAGNOSTIC: guaranteed Keep income only); seed=1; seed 1: generated (attempt 0); DEBUG no-perk baseline
+Day 1: gold 250 -> 40; Tower (9,9) (70g); Tower (11,11) (70g); Tower (9,11) (70g)
+  Night 1: Reward; Keep 500/500 (-0); defeated 10; lost 0; surviving Towers 3, Walls 0; 21,5s
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> DEBUG skip; dawn income +20
+Day 2: gold 60 -> 60; 
+  Night 2: Reward; Keep 500/500 (-0); defeated 16; lost 0; surviving Towers 3, Walls 0; 30,3s
+  Reward LastStand,Recycling,ThriftyConstruction -> DEBUG skip; dawn income +20
+Day 3: gold 80 -> 10; Tower (11,9) (70g)
+  Night 3: Reward; Keep 490/500 (-10); defeated 20; lost 0; surviving Towers 4, Walls 0; 30,3s
+  Reward Sharpshooters,ExpandedVision,EfficientFarming -> DEBUG skip; dawn income +20
+Day 4: gold 30 -> 8; Wall (9,10) (20g); repair Keep +10 (500/500)
+  Night 4: Reward; Keep 458/500 (-42); defeated 29; lost 0; surviving Towers 4, Walls 1; 36,2s
+  Reward FlamingArrows,ExpandedVision,Recycling -> DEBUG skip; dawn income +20
+Day 5: gold 28 -> 0; Wall (11,10) (20g); repair Keep +40 (498/500)
+  Night 5: Reward; Keep 392/500 (-106); defeated 36; lost 0; surviving Towers 4, Walls 2; 42,3s
+  Reward ExpandedVision,ThriftyConstruction,BarbedDefenses -> DEBUG skip; dawn income +20
+Day 6: gold 20 -> 0; Wall (10,9) (20g)
+  Night 6: Victory; Keep 352/500 (-40); defeated 41; lost 0; surviving Towers 4, Walls 3; 64,6s
+Result: Victory; nights cleared 6; Keep by night N1:500 N2:500 N3:490 N4:458 N5:392 N6:352; purchased 7; gold earned 100; perks []
+exit=0
+

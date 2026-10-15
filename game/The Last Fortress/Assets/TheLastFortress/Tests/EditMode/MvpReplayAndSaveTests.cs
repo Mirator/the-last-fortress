@@ -176,6 +176,9 @@ namespace TheLastFortress.Tests
             RunToEnd(sim);
             RunToEnd(back);
             Assert.AreEqual(Normalize(sim.CaptureSnapshot()), Normalize(back.CaptureSnapshot()), "resumed combat is identical");
+            Assert.AreEqual((sim.LastNight.Night, sim.LastNight.EnemiesDefeated, sim.LastNight.KeepDamage, sim.LastNight.BuildingsLost),
+                (back.LastNight.Night, back.LastNight.EnemiesDefeated, back.LastNight.KeepDamage, back.LastNight.BuildingsLost),
+                "the replayed night's recap matches and is counted once");
         }
 
         [Test]

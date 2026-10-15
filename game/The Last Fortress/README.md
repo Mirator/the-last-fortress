@@ -91,7 +91,8 @@ Scene `Assets/TheLastFortress/Scenes/Mvp.unity` (content `Data/MvpContent.asset`
 | `R` | Rotate the Tower/House/Farm ghost, or the selected one (cosmetic; Walls auto-connect, Traps have no facing) |
 | Selection panel | Sell (floor(price/2)), Repair (5 HP per gold, exact quote), Rotate — Day only |
 | Reward cards | Choose one of three perks after Nights 1–5 |
-| **Menu** (top-right) | Resume, Save and Quit (Day only), Settings; **Restart** = same-seed retry |
+| **Menu** (top-right) | Resume, Save and Quit (Day only, back to the menu), Settings; **Restart** = retry the same seed from Day 1 (asks to confirm once the run has progressed; immediate after Victory/Defeat or on an untouched Day 1) |
+| **Quit game** (menu) | Exits directly when nothing is unsaved; with unsaved Day changes offers Save and exit / Exit without these changes / Cancel (exits only after the save succeeds); during Night/Reward explains that Continue replays the night from its Day checkpoint |
 
 Launch opens the menu: New Run (optional seed, invariant unsigned decimal), Continue (returns to the start of the current night), Recover backup (only offered when the latest save is damaged), Settings, Quit. Saves live in `%USERPROFILE%/AppData/LocalLow/DefaultCompany/The Last Fortress/Mvp/` (`run.json`, `run.json.bak`, `run-N.json` for runs started after a damaged save, `settings.json`).
 

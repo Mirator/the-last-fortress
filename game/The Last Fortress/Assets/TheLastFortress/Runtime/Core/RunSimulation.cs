@@ -55,6 +55,23 @@ namespace TheLastFortress
     }
 
     /// <summary>
+    /// What one night cost and achieved, counted in the authoritative kill/damage/destruction paths. Reset when a Night
+    /// starts and only written during that Night, so after it ends the values stay frozen through Reward, perks and Day
+    /// repairs. Transient by design: a resumed save replays the night from its Day checkpoint and recounts it once.
+    /// </summary>
+    public sealed class NightRecap
+    {
+        public int Night;
+        public int EnemiesDefeated;
+
+        /// <summary>HP actually removed from the Keep (capped at its HP before each hit; no overkill, no invulnerable hits).</summary>
+        public int KeepDamage;
+
+        /// <summary>Non-Keep buildings destroyed in combat (sales, scripted removal and resets never count).</summary>
+        public int BuildingsLost;
+    }
+
+    /// <summary>
     /// Authoritative run: placement, routing, fixed-step combat, phases, restart; optionally a multi-night campaign with
     /// income, rewards and perks. Step order: due spawns; movement and Trap entry; Tower attacks/burn applications; due burn
     /// ticks; enemy attacks with immediate non-recursive reflection; dead cleanup; defeat before a cleared Night.
@@ -134,6 +151,9 @@ namespace TheLastFortress
         public int ResetCount { get; private set; }
         public bool IsTerminal => State == RunState.Victory || State == RunState.Defeat;
         public RunStats Stats { get; private set; }
+
+        /// <summary>The current or most recently finished night's recap; null before the first Night of this run.</summary>
+        public NightRecap LastNight { get; private set; }
         public IReadOnlyList<string> OwnedPerks => ownedPerks;
         public IReadOnlyList<RewardOffer> OfferHistory => offerHistory;
 
@@ -170,6 +190,7 @@ namespace TheLastFortress
             placement = new PlacementService(grid, Definitions, Definitions.StartingGold);
             rewardRng = RunRandom.ForRewards(config.Seed);
             Stats = new RunStats();
+            LastNight = null;
             nextSpawnIndex = 0;
             nextBuildingId = 1;
             nextEnemyId = 1;
@@ -256,8 +277,20 @@ namespace TheLastFortress
             kind == BuildingKind.Tower || kind == BuildingKind.House || kind == BuildingKind.Farm;
 
         /// <summary>Income the next Day would pay with the current fortress and perks (same calculation as the payment).</summary>
-        public IncomeBreakdown IncomeForecast() =>
-            EconomyRules.DailyIncome(grid, Definitions, HasPerk(PerkRules.EfficientFarming) ? PerkRules.EfficientFarmingPercent : 0);
+        public IncomeBreakdown IncomeForecast() => EconomyRules.DailyIncome(grid, Definitions, FarmBonusPercent(HasPerk(PerkRules.EfficientFarming)));
+
+        /// <summary>
+        /// Read-only preview of the next payment if <paramref name="perkId"/> were owned (Reward cards). Never installs the
+        /// perk, draws rewards, pays gold or touches the fortress; equals <see cref="IncomeForecast"/> for perks that do not
+        /// change income.
+        /// </summary>
+        public IncomeBreakdown IncomeForecastWith(string perkId) =>
+            EconomyRules.DailyIncome(grid, Definitions, FarmBonusPercent(HasPerk(PerkRules.EfficientFarming) || perkId == PerkRules.EfficientFarming));
+
+        /// <summary>Effective daily income of one House/Farm with current perks (same rule as the payment).</summary>
+        public int BuildingIncome(Building b) => EconomyRules.BuildingIncome(grid, b, FarmBonusPercent(HasPerk(PerkRules.EfficientFarming)));
+
+        static int FarmBonusPercent(bool efficientFarming) => efficientFarming ? PerkRules.EfficientFarmingPercent : 0;
 
         /// <summary>Applies placements in order. Normal fixtures pay costs; stress fixtures bypass costs only.</summary>
         public List<string> ApplyLayout(LayoutFixture layout, bool bypassCost)
@@ -303,19 +336,23 @@ namespace TheLastFortress
         }
 
         /// <summary>Tower range: base, +10% with ExpandedVision (floating point).</summary>
-        public double TowerRange(Building tower) =>
-            tower.Definition.Range * (HasPerk(PerkRules.ExpandedVision) ? PerkRules.ExpandedVisionFactor : 1.0);
+        public double TowerRange(Building tower) => TowerRange(tower.Definition);
+
+        public double TowerRange(BuildingDefinition tower) =>
+            tower.Range * (HasPerk(PerkRules.ExpandedVision) ? PerkRules.ExpandedVisionFactor : 1.0);
 
         /// <summary>LastStand condition: Keep HP strictly below 30% of its current maximum.</summary>
         public bool LastStandActive => HasPerk(PerkRules.LastStand) && Keep.Hp * 100 < Keep.MaxHp * PerkRules.LastStandThresholdPercent;
 
         /// <summary>Direct Tower damage: percent bonuses add against the base, then floor once (10 → 16 with both).</summary>
-        public int TowerDamage(Building tower)
+        public int TowerDamage(Building tower) => TowerDamage(tower.Definition);
+
+        public int TowerDamage(BuildingDefinition tower)
         {
             var percent = 0;
             if (HasPerk(PerkRules.Sharpshooters)) percent += PerkRules.SharpshootersPercent;
             if (LastStandActive) percent += PerkRules.LastStandPercent;
-            return tower.Definition.AttackDamage * (100 + percent) / 100;
+            return tower.AttackDamage * (100 + percent) / 100;
         }
 
         /// <summary>Reflected damage per received melee hit: 3 with any adjacent trap, +3 with BarbedDefenses (max 6).</summary>
@@ -384,6 +421,7 @@ namespace TheLastFortress
             towerAttackTicks = PrototypeDefinitions.ToTicks(Definitions.Tower.AttackIntervalSeconds);
             Tick = 0;
             accumulatorNs = 0;
+            LastNight = new NightRecap { Night = NightNumber }; // before the time-zero spawn
             SetState(RunState.Night);
             ReleaseDueSpawns(); // the time-zero spawn appears on entering Night, before any movement step
             return true;
@@ -864,7 +902,8 @@ namespace TheLastFortress
             e.Alive = false;
             e.Burning = false;
             Stats.EnemiesDefeated++;
-            events.Add(new SimEvent(SimEventType.EnemyKilled, Tick, e.Id, sourceId, e.Cell));
+            if (LastNight != null) LastNight.EnemiesDefeated++;
+            events.Add(new SimEvent(SimEventType.EnemyKilled, Tick, e.Id, sourceId, e.Cell, e.X, e.Z, e.X, e.Z));
         }
 
         /// <summary>Base-range check (specification 002); live targeting uses <see cref="TowerRange"/>.</summary>
@@ -894,7 +933,8 @@ namespace TheLastFortress
 
                 if (target == null || Tick < t.AttackDueTick) continue;
                 t.AttackDueTick += towerAttackTicks;
-                events.Add(new SimEvent(SimEventType.TowerShot, Tick, t.Id, target.Id));
+                GridCoordinates.TileCenter(t.Cell, out var tx, out var tz);
+                events.Add(new SimEvent(SimEventType.TowerShot, Tick, t.Id, target.Id, target.Cell, tx, tz, target.X, target.Z));
                 DamageEnemy(target, TowerDamage(t), t.Id);
                 if (!target.Alive) t.TargetEnemyId = -1;
                 else if (HasPerk(PerkRules.FlamingArrows)) ApplyBurn(target);
@@ -979,13 +1019,18 @@ namespace TheLastFortress
         {
             events.Add(new SimEvent(SimEventType.EnemyAttacked, Tick, sourceId, target.Id, target.Cell));
             if (IsInvulnerable(target)) return;
+            var before = target.Hp;
             target.Hp = Math.Max(0, Math.Min(target.MaxHp, target.Hp - amount));
+            if (target.Kind == BuildingKind.Keep && LastNight != null) LastNight.KeepDamage += Math.Max(0, before - target.Hp);
             events.Add(new SimEvent(SimEventType.BuildingDamaged, Tick, sourceId, target.Id, target.Cell));
             if (target.Hp > 0) return;
             if (target.Kind == BuildingKind.Keep) return; // defeat is evaluated at the end of the step
             if (!grid.Release(target)) return; // occupancy is released exactly once, immediately
             Unregister(target);
-            events.Add(new SimEvent(SimEventType.BuildingDestroyed, Tick, target.Id, sourceId, target.Cell));
+            if (LastNight != null) LastNight.BuildingsLost++;
+            var half = target.Definition.FootprintSize / 2.0;
+            events.Add(new SimEvent(SimEventType.BuildingDestroyed, Tick, target.Id, sourceId, target.Cell,
+                target.Cell.X + half, target.Cell.Z + half, target.Cell.X + half, target.Cell.Z + half));
             if (!HasPerk(PerkRules.Recycling)) return;
             var refund = target.PurchasePrice / 4;
             placement.Earn(refund);

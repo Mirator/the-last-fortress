@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +15,13 @@ namespace TheLastFortress
         Resolution[] resolutions;
         int resolutionIndex = -1;
         string seedError;
+        Text keepHitText;
+        Image keepBarBack;
+        float keepHitTimer;
+        int keepHitAmount;
+
+        /// <summary>Damage shown by the current Keep-hit cue (0 when none is showing).</summary>
+        public int KeepHitShown => keepHitTimer > 0f ? keepHitAmount : 0;
         readonly GameObject[] entryMarkers = new GameObject[4];
         readonly Text[] entryMarkerTexts = new Text[4];
 
@@ -33,6 +41,23 @@ namespace TheLastFortress
         public Button RotateButton { get; private set; }
         public Button NewSeedButton { get; private set; }
         public Button RetrySaveButton { get; private set; }
+        public Button QuitButton { get; private set; }
+        public GameObject ConfirmPanel => confirmPanel;
+        public string ConfirmTitle => confirmTitle.text;
+        public string ConfirmBody => confirmBody.text;
+
+        /// <summary>Visible guard-dialog choices, in order (label, button).</summary>
+        public IEnumerable<(string label, Button button)> ConfirmOptions()
+        {
+            for (var i = 0; i < confirmButtons.Length; i++)
+                if (confirmButtons[i].gameObject.activeSelf) yield return (confirmLabels[i].text, confirmButtons[i]);
+        }
+
+        GameObject confirmPanel;
+        Text confirmTitle, confirmBody;
+        readonly Button[] confirmButtons = new Button[3];
+        readonly Text[] confirmLabels = new Text[3];
+        PrototypeBootstrap.ConfirmRequest shownConfirm;
         public InputField SeedInput => seedInput;
         public string MenuStatusText => menuStatus.text;
         public string SeedText => seedText != null ? seedText.text : null;
@@ -53,13 +78,19 @@ namespace TheLastFortress
         {
             // Terminal overlay: summary needs more room plus same-seed / new-seed / menu actions.
             var card = (RectTransform)terminalOverlay.transform.Find("Card");
-            card.sizeDelta = new Vector2(760, 470);
-            terminalBody.rectTransform.sizeDelta = new Vector2(720, 240);
+            card.sizeDelta = new Vector2(760, 520);
+            terminalBody.rectTransform.sizeDelta = new Vector2(720, 290);
             ((Text)TerminalRestartButton.GetComponentInChildren(typeof(Text))).text = "Retry same seed";
             var restartRect = (RectTransform)TerminalRestartButton.transform;
             restartRect.anchoredPosition = new Vector2(-250, 30);
             NewSeedButton = MakeButton(card, "New seed", new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(220, 70), () => game.NewRun(PrototypeBootstrap.NewSeed(), game.FlatMap), out _);
             MakeButton(card, "Main menu", new Vector2(0.5f, 0), new Vector2(250, 30), new Vector2(220, 70), game.QuitToMenuWithoutSaving, out _);
+
+            // Keep-hit cue beside the Keep health bar: readable when the Keep is off-screen or camera shake is off.
+            keepBarBack = keepFill.parent.GetComponent<Image>();
+            keepHitText = Label(keepText.transform.parent, "KeepHit", 24, TextAnchor.UpperRight, new Vector2(250, -58), new Vector2(110, 36), Palette.WarningCoral);
+            keepHitText.fontStyle = FontStyle.Bold;
+            keepHitText.text = "";
 
             // Entry markers: where tonight's enemies come from, pinned to the screen edge when that side is off-screen.
             var markerRoot = FullScreenRect(root, "EntryMarkers");
@@ -77,6 +108,21 @@ namespace TheLastFortress
                 entryMarkers[i] = m.gameObject;
                 m.gameObject.SetActive(false);
             }
+
+            // Guard dialog (Restart/Quit): blocks the world and every panel underneath until a choice is made.
+            confirmPanel = FullScreen(root, "Confirm", 0.65f);
+            var cbox = Panel(confirmPanel.transform, "Box", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900, 330));
+            cbox.pivot = new Vector2(0.5f, 0.5f);
+            confirmTitle = Label(cbox, "Title", 34, TextAnchor.UpperCenter, new Vector2(0, -22), new Vector2(860, 46), Palette.Amber, true);
+            confirmBody = Label(cbox, "Body", 22, TextAnchor.UpperCenter, new Vector2(0, -84), new Vector2(840, 130), Palette.HudText, true);
+            for (var i = 0; i < confirmButtons.Length; i++)
+            {
+                var index = i;
+                confirmButtons[i] = MakeButton(cbox, $"Choice{i}", new Vector2(0.5f, 0), new Vector2((i - 1) * 285, 28), new Vector2(270, 64), () => ChooseConfirm(index), out confirmLabels[i]);
+                confirmLabels[i].fontSize = 21;
+            }
+
+            confirmPanel.SetActive(false);
 
             // Save failure: blocks play until the same snapshot is written, or the player leaves without saving.
             saveFailedPanel = FullScreen(root, "SaveFailed", 0.6f);
@@ -108,7 +154,7 @@ namespace TheLastFortress
             ResumeButton = MakeButton(panel, "Resume", new Vector2(0.5f, 1), new Vector2(-145, -460), new Vector2(270, 56), game.CloseMenu, out _);
             SaveAndQuitButton = MakeButton(panel, "Save and Quit", new Vector2(0.5f, 1), new Vector2(145, -460), new Vector2(270, 56), () => game.SaveAndQuit(), out _);
             SettingsButton = MakeButton(panel, "Settings", new Vector2(0.5f, 1), new Vector2(-145, -528), new Vector2(270, 56), OpenSettings, out _);
-            MakeButton(panel, "Quit game", new Vector2(0.5f, 1), new Vector2(145, -528), new Vector2(270, 56), Application.Quit, out _);
+            QuitButton = MakeButton(panel, "Quit game", new Vector2(0.5f, 1), new Vector2(145, -528), new Vector2(270, 56), game.RequestQuit, out _);
             menuStatus = Label(panel, "Status", 20, TextAnchor.UpperCenter, new Vector2(0, -594), new Vector2(760, 90), Palette.HudText, true);
             Label(panel, "Controls", 18, TextAnchor.UpperCenter, new Vector2(0, -688), new Vector2(780, 60), Palette.HudText.WithAlpha(0.7f), true).text =
                 "Controls: 1–5 choose building · left click place / select · right click or Esc cancel · R rotate\n" +
@@ -224,6 +270,14 @@ namespace TheLastFortress
             settingsStatus.color = game.SettingsProblem == null ? Palette.RouteCyan : Palette.WarningCoral;
         }
 
+        /// <summary>Night-local consequences, e.g. "9 enemies defeated · Keep -40 HP · 1 building lost".</summary>
+        public static string RecapLine(NightRecap r)
+        {
+            var keep = r.KeepDamage > 0 ? $"Keep -{r.KeepDamage} HP" : "Keep unharmed";
+            var lost = r.BuildingsLost == 0 ? "no buildings lost" : r.BuildingsLost == 1 ? "1 building lost" : $"{r.BuildingsLost} buildings lost";
+            return $"{r.EnemiesDefeated} enemies defeated · {keep} · {lost}";
+        }
+
         static string SummaryText(RunSimulation sim)
         {
             var s = sim.Stats;
@@ -231,8 +285,61 @@ namespace TheLastFortress
             var head = sim.State == RunState.Victory
                 ? $"All {sim.TotalNights} nights survived. Keep {sim.Keep.Hp} / {sim.Keep.MaxHp} HP."
                 : $"The Keep fell on Night {sim.NightNumber} of {sim.TotalNights} after {sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture)} s; {sim.AliveEnemyCount} enemies were attacking.";
-            return $"{head}\n\nNights cleared {s.NightsCleared} / {sim.TotalNights}\nEnemies defeated {s.EnemiesDefeated}\nBuildings purchased {s.BuildingsPurchased}\n" +
+            var tonight = sim.State == RunState.Defeat && sim.LastNight != null ? "\nThis night: " + RecapLine(sim.LastNight) : "";
+            return $"{head}{tonight}\n\nRun: nights cleared {s.NightsCleared} / {sim.TotalNights}\nEnemies defeated {s.EnemiesDefeated}\nBuildings purchased {s.BuildingsPurchased}\n" +
                    $"Gold earned {s.GoldEarned} (starting 250 excluded)\nSynergies active {current} · ever {s.SynergiesEver.Count}\nSeed {sim.Seed.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        /// <summary>Called by the bootstrap for actual Keep HP loss; hits within the cue window add up.</summary>
+        public void KeepHit(int damage)
+        {
+            if (keepHitText == null || damage <= 0) return;
+            keepHitAmount = keepHitTimer > 0f ? keepHitAmount + damage : damage;
+            keepHitTimer = 0.9f;
+            keepHitText.text = $"-{keepHitAmount}";
+        }
+
+        /// <summary>Advances HUD cues by the presentation delta (frozen while paused or in the menu).</summary>
+        public void TickEffects(float dt)
+        {
+            if (keepHitText == null || keepHitTimer <= 0f) return;
+            keepHitTimer = Mathf.Max(0f, keepHitTimer - dt);
+            var t = keepHitTimer / 0.9f;
+            keepHitText.color = Palette.WarningCoral.WithAlpha(t);
+            keepBarBack.color = Color.Lerp(new Color(0, 0, 0, 0.5f), Palette.WarningCoral.WithAlpha(0.85f), t);
+            if (keepHitTimer <= 0f)
+            {
+                keepHitText.text = "";
+                keepHitAmount = 0;
+            }
+        }
+
+        void ChooseConfirm(int index)
+        {
+            var request = game.PendingConfirm;
+            if (request == null || request != shownConfirm || index >= request.Options.Count) return;
+            request.Options[index].action();
+        }
+
+        void RefreshConfirm()
+        {
+            var request = game.PendingConfirm;
+            if (confirmPanel.activeSelf != (request != null)) confirmPanel.SetActive(request != null);
+            shownConfirm = request;
+            if (request == null) return;
+            confirmPanel.transform.SetAsLastSibling();
+            Set(confirmTitle, request.Title);
+            Set(confirmBody, request.Body);
+            var count = request.Options.Count;
+            for (var i = 0; i < confirmButtons.Length; i++)
+            {
+                var show = i < count;
+                if (confirmButtons[i].gameObject.activeSelf != show) confirmButtons[i].gameObject.SetActive(show);
+                if (!show) continue;
+                Set(confirmLabels[i], request.Options[i].label);
+                // Centre two choices, spread three.
+                ((RectTransform)confirmButtons[i].transform).anchoredPosition = new Vector2(count == 2 ? (i - 0.5f) * 300 : (i - 1) * 285, 28);
+            }
         }
 
         void RefreshEntryMarkers(RunSimulation sim)
@@ -290,13 +397,14 @@ namespace TheLastFortress
             if (RotateButton.gameObject.activeSelf != canRotate) RotateButton.gameObject.SetActive(canRotate);
 
             RefreshEntryMarkers(sim);
+            RefreshConfirm();
 
             var persistence = game.Persistence;
             var pending = persistence != null && persistence.HasRun && persistence.SavePending;
             if (saveFailedPanel.activeSelf != pending) saveFailedPanel.SetActive(pending);
             if (pending)
                 Set(saveFailedText, $"{persistence.LastError}\n\nNothing after your last successful save is stored yet. Gameplay is paused until the save succeeds; " +
-                                    "quitting now keeps the previous checkpoint.");
+                                    "quitting now keeps the previous checkpoint." + (game.ExitAfterSave ? " The game exits only after Retry succeeds." : ""));
             if (pending) foreach (var b in rewardButtons) b.interactable = false;
             else foreach (var b in rewardButtons) b.interactable = true;
 

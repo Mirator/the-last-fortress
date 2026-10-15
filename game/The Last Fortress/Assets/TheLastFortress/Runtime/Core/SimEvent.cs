@@ -33,6 +33,15 @@ namespace TheLastFortress
         public readonly int TargetId;
         public readonly GridPos Cell;
 
+        /// <summary>
+        /// True when From/To carry world positions captured when the event happened (TowerShot: tower → target;
+        /// EnemyKilled and BuildingDestroyed: From = To = where it happened). They stay valid after the entities are
+        /// removed later in the same step, so presentation never has to look them up or fall back to <see cref="Cell"/>.
+        /// </summary>
+        public readonly bool HasPositions;
+
+        public readonly double FromX, FromZ, ToX, ToZ;
+
         public SimEvent(SimEventType type, long tick, int sourceId = -1, int targetId = -1, GridPos cell = default)
         {
             Type = type;
@@ -40,6 +49,18 @@ namespace TheLastFortress
             SourceId = sourceId;
             TargetId = targetId;
             Cell = cell;
+            HasPositions = false;
+            FromX = FromZ = ToX = ToZ = 0;
+        }
+
+        public SimEvent(SimEventType type, long tick, int sourceId, int targetId, GridPos cell, double fromX, double fromZ, double toX, double toZ)
+            : this(type, tick, sourceId, targetId, cell)
+        {
+            HasPositions = true;
+            FromX = fromX;
+            FromZ = fromZ;
+            ToX = toX;
+            ToZ = toZ;
         }
 
         public override string ToString() => $"{Tick}:{Type} src={SourceId} tgt={TargetId} cell={Cell}";
