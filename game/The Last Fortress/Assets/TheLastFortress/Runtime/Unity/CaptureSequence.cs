@@ -276,6 +276,16 @@ namespace TheLastFortress
             yield return new WaitForSeconds(0.6f);
             yield return Shot("006-03-night1-paused-frozen");
             log.AppendLine($"pause: state={game.Sim.State} paused={game.Sim.Paused} arrows={game.World.ActiveArrowCount} unchanged={before == string.Join(";", game.World.ArrowPositions())} cues {cuesBefore}->{game.World.VisibleCues().Count()}");
+            // Burn marker size: flag one enemy as burning for a paused frame only, then restore it.
+            var burning = game.Sim.Enemies.FirstOrDefault(en => !en.Burning);
+            if (burning != null)
+            {
+                burning.Burning = true;
+                game.SyncViews(0.05f);
+                yield return Shot("006-03b-burn-marker");
+                burning.Burning = false;
+            }
+
             game.TogglePause();
 
             game.OpenMenu();

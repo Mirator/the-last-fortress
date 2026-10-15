@@ -457,7 +457,7 @@ namespace TheLastFortress
                 if (showBar) SetFill(view.HpFill, fraction);
                 view.HpBar.transform.rotation = BarRotation;
                 if (view.Burn.activeSelf != e.Burning) view.Burn.SetActive(e.Burning);
-                if (e.Burning) view.Burn.transform.localScale = Vector3.one * (0.8f + 0.25f * Mathf.Sin(fxTime * 18f + e.Id));
+                if (e.Burning) view.Burn.transform.localScale = BurnSize * (0.8f + 0.25f * Mathf.Sin(fxTime * 18f + e.Id));
                 AnimateModel(view, pos, dt);
             }
 
@@ -552,7 +552,7 @@ namespace TheLastFortress
             var width = e.Kind == EnemyKind.SiegeGolem ? 1.0f : e.Kind == EnemyKind.Brute ? 0.7f : 0.5f;
             var bar = CreateBar(root.transform, height, width, hpFillEnemy, out var fill);
             // Burn feedback: a small flickering amber flame above the enemy (shape + motion, not color alone).
-            var burn = Prims.Create(PrimitiveType.Cube, root.transform, new Vector3(0, height - 0.18f, 0), new Vector3(0.14f, 0.2f, 0.14f), content.arrow, "Burn",
+            var burn = Prims.Create(PrimitiveType.Cube, root.transform, new Vector3(0, height - 0.18f, 0), BurnSize, content.arrow, "Burn",
                 Quaternion.Euler(0, 45, 0));
             burn.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             burn.SetActive(false);
@@ -579,6 +579,9 @@ namespace TheLastFortress
 
         /// <summary>HP bars share the fixed camera's yaw, so they read as horizontal on screen instead of following a world axis.</summary>
         static readonly Quaternion BarRotation = Quaternion.Euler(0f, CameraRig.Yaw, 0f);
+
+        /// <summary>Burn flame size; the flicker scales around it rather than replacing it.</summary>
+        static readonly Vector3 BurnSize = new Vector3(0.14f, 0.2f, 0.14f);
 
         static void SetFill(Transform pivot, float fraction) => pivot.localScale = new Vector3(Mathf.Clamp01(fraction), 1, 1);
 
