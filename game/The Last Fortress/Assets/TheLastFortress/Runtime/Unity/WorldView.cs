@@ -161,6 +161,8 @@ namespace TheLastFortress
             hpBack = Prims.Tinted(content.overlay, new Color(0.1f, 0.1f, 0.1f, 0.85f));
             hpFill = Prims.Tinted(content.overlay, Palette.RouteCyan);
             hpFillEnemy = Prims.Tinted(content.overlay, Palette.WarningCoral);
+            // Unsorted transparent overlay (no depth write): draw fills after the dark back so the back never covers them.
+            hpFill.renderQueue = hpFillEnemy.renderQueue = hpBack.renderQueue + 1;
             cueHit = Prims.Tinted(content.overlay, Palette.Amber);
             cueKill = Prims.Tinted(content.overlay, Palette.WarningCoral);
             cueDebris = content.timberShadow;
@@ -402,7 +404,12 @@ namespace TheLastFortress
                 var fraction = b.MaxHp > 0 ? (float)b.Hp / b.MaxHp : 1f;
                 var showBar = fraction < 0.999f;
                 if (view.HpBar.activeSelf != showBar) view.HpBar.SetActive(showBar);
-                if (showBar) SetFill(view.HpFill, fraction);
+                if (showBar)
+                {
+                    SetFill(view.HpFill, fraction);
+                    view.HpBar.transform.rotation = BarRotation; // flat to the screen whatever the building's facing
+                }
+
                 if (view.Flash > 0f)
                 {
                     view.Flash -= dt;
@@ -448,7 +455,7 @@ namespace TheLastFortress
                 var showBar = fraction < 0.999f;
                 if (view.HpBar.activeSelf != showBar) view.HpBar.SetActive(showBar);
                 if (showBar) SetFill(view.HpFill, fraction);
-                view.HpBar.transform.rotation = Quaternion.identity;
+                view.HpBar.transform.rotation = BarRotation;
                 if (view.Burn.activeSelf != e.Burning) view.Burn.SetActive(e.Burning);
                 if (e.Burning) view.Burn.transform.localScale = Vector3.one * (0.8f + 0.25f * Mathf.Sin(fxTime * 18f + e.Id));
                 AnimateModel(view, pos, dt);
@@ -569,6 +576,9 @@ namespace TheLastFortress
             bar.SetActive(false);
             return bar;
         }
+
+        /// <summary>HP bars share the fixed camera's yaw, so they read as horizontal on screen instead of following a world axis.</summary>
+        static readonly Quaternion BarRotation = Quaternion.Euler(0f, CameraRig.Yaw, 0f);
 
         static void SetFill(Transform pivot, float fraction) => pivot.localScale = new Vector3(Mathf.Clamp01(fraction), 1, 1);
 
