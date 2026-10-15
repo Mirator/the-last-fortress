@@ -1,0 +1,32 @@
+# Unity-generated folders (project lives in game/The Last Fortress/)
+/game/*/[Ll]ibrary/
+/game/*/[Tt]emp/
+/game/*/[Oo]bj/
+/game/*/[Ll]ogs/
+/game/*/[Uu]ser[Ss]ettings/
+/game/*/[Bb]uilds/
+/game/*/[Tt]est[Rr]esults/
+/game/*/[Mm]emoryCaptures/
+/game/*/[Rr]ecordings/
+
+# IDE / generated project files
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# OS
+Thumbs.db
+.DS_Store

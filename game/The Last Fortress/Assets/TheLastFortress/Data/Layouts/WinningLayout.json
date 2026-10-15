@@ -1,0 +1,31 @@
+{
+  "name": "Winning layout (250 gold budget)",
+  "expectedOutcome": "Victory",
+  "placements": [
+    {
+      "kind": "Tower",
+      "x": 9,
+      "z": 9
+    },
+    {
+      "kind": "Tower",
+      "x": 9,
+      "z": 11
+    },
+    {
+      "kind": "Tower",
+      "x": 11,
+      "z": 11
+    },
+    {
+      "kind": "Wall",
+      "x": 5,
+      "z": 10
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 10
+    }
+  ]
+}

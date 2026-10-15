@@ -1,0 +1,9 @@
+started=2026-10-15T11:15:17.7734885+02:00
+result=Succeeded
+platform=StandaloneWindows64 options=None
+output=C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Builds/NavigationPrototype/TheLastFortress.exe
+total_size_bytes=129782575
+duration=00:00:13.9121520
+errors=0 warnings=1
+scenes=Assets/TheLastFortress/Scenes/NavigationPrototype.unity
+unity=6000.3.16f1

@@ -1,0 +1,21 @@
+{
+    "name": "TheLastFortress.Editor",
+    "rootNamespace": "TheLastFortress.Editor",
+    "references": [
+        "TheLastFortress.Runtime",
+        "Unity.InputSystem",
+        "UnityEngine.UI",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

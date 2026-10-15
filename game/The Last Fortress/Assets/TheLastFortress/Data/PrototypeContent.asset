@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d08f956edcb6dd4f896ae357be1c7b0, type: 3}
+  m_Name: PrototypeContent
+  m_EditorClassIdentifier: TheLastFortress.Runtime::TheLastFortress.PrototypeContent
+  definitions: {fileID: 11400000, guid: c229310b3909f23458a7a699b261486e, type: 2}
+  keepPrefab: {fileID: 6440497214723432423, guid: 70ece24faa35d97489b2376f0ff687fe, type: 3}
+  wallPrefab: {fileID: 1998575460765660594, guid: 09b8bd1eeb48bbe4e82af639633f9c0b, type: 3}
+  towerPrefab: {fileID: 1112093812300093508, guid: 89778087862789f4482debc682862177, type: 3}
+  gruntPrefab: {fileID: 9036051224892743207, guid: 24da9229eb426d24cb5f5c34a780202c, type: 3}
+  grass: {fileID: 2100000, guid: 2ba6a866d2d7e934eab073c3516fcc38, type: 2}
+  water: {fileID: 2100000, guid: f9e2934e21fbb5d44b392f40f49c6d69, type: 2}
+  timberShadow: {fileID: 2100000, guid: ddadbc511bf2155428d1ab0ec762ebeb, type: 2}
+  overlay: {fileID: 2100000, guid: 96d63c55ca1a0fd498917d60f1d828e0, type: 2}
+  arrow: {fileID: 2100000, guid: a126e42a60d3c744b907fe9b0f133832, type: 2}
+  winningLayout: {fileID: 4900000, guid: bfb63b8742eaa864a970ef1c62ce91c9, type: 3}
+  losingLayout: {fileID: 4900000, guid: c2100436c31f16e4eb464ec3b6a6596c, type: 3}
+  stressLayout: {fileID: 4900000, guid: 79d3c75cab386a04bb542e5555532700, type: 3}

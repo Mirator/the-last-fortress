@@ -1,0 +1,206 @@
+{
+  "name": "Stress layout (spec 002: 30 Walls, 10 Towers)",
+  "expectedOutcome": "StressOnly",
+  "placements": [
+    {
+      "kind": "Wall",
+      "x": 8,
+      "z": 8
+    },
+    {
+      "kind": "Wall",
+      "x": 8,
+      "z": 9
+    },
+    {
+      "kind": "Wall",
+      "x": 8,
+      "z": 10
+    },
+    {
+      "kind": "Wall",
+      "x": 8,
+      "z": 11
+    },
+    {
+      "kind": "Wall",
+      "x": 8,
+      "z": 12
+    },
+    {
+      "kind": "Wall",
+      "x": 9,
+      "z": 8
+    },
+    {
+      "kind": "Wall",
+      "x": 9,
+      "z": 12
+    },
+    {
+      "kind": "Wall",
+      "x": 10,
+      "z": 8
+    },
+    {
+      "kind": "Wall",
+      "x": 10,
+      "z": 12
+    },
+    {
+      "kind": "Wall",
+      "x": 11,
+      "z": 8
+    },
+    {
+      "kind": "Wall",
+      "x": 11,
+      "z": 12
+    },
+    {
+      "kind": "Wall",
+      "x": 12,
+      "z": 8
+    },
+    {
+      "kind": "Wall",
+      "x": 12,
+      "z": 9
+    },
+    {
+      "kind": "Wall",
+      "x": 12,
+      "z": 10
+    },
+    {
+      "kind": "Wall",
+      "x": 12,
+      "z": 11
+    },
+    {
+      "kind": "Wall",
+      "x": 12,
+      "z": 12
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 3
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 4
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 5
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 6
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 7
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 8
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 9
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 10
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 11
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 12
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 13
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 14
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 15
+    },
+    {
+      "kind": "Wall",
+      "x": 6,
+      "z": 16
+    },
+    {
+      "kind": "Tower",
+      "x": 7,
+      "z": 8
+    },
+    {
+      "kind": "Tower",
+      "x": 7,
+      "z": 10
+    },
+    {
+      "kind": "Tower",
+      "x": 7,
+      "z": 12
+    },
+    {
+      "kind": "Tower",
+      "x": 13,
+      "z": 8
+    },
+    {
+      "kind": "Tower",
+      "x": 13,
+      "z": 10
+    },
+    {
+      "kind": "Tower",
+      "x": 13,
+      "z": 12
+    },
+    {
+      "kind": "Tower",
+      "x": 8,
+      "z": 7
+    },
+    {
+      "kind": "Tower",
+      "x": 10,
+      "z": 7
+    },
+    {
+      "kind": "Tower",
+      "x": 12,
+      "z": 7
+    },
+    {
+      "kind": "Tower",
+      "x": 10,
+      "z": 13
+    }
+  ]
+}
