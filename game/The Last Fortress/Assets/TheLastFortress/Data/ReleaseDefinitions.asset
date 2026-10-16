@@ -28,8 +28,8 @@ MonoBehaviour:
     repairReach: 0
   wall:
     displayName: Wall
-    cost: 20
-    maxHp: 100
+    cost: 14
+    maxHp: 80
     attackDamage: 0
     attackIntervalSeconds: 0
     range: 0
@@ -41,10 +41,10 @@ MonoBehaviour:
     repairReach: 0
   tower:
     displayName: Archer Tower
-    cost: 70
-    maxHp: 100
+    cost: 49
+    maxHp: 80
     attackDamage: 10
-    attackIntervalSeconds: 0.75
+    attackIntervalSeconds: 0.9
     range: 4
     dailyIncome: 0
     trapDamage: 0
@@ -54,12 +54,12 @@ MonoBehaviour:
     repairReach: 0
   house:
     displayName: House
-    cost: 40
-    maxHp: 80
+    cost: 28
+    maxHp: 64
     attackDamage: 0
     attackIntervalSeconds: 0
     range: 0
-    dailyIncome: 15
+    dailyIncome: 10
     trapDamage: 0
     splashRadius: 0
     rangeBonus: 0
@@ -67,12 +67,12 @@ MonoBehaviour:
     repairReach: 0
   farm:
     displayName: Farm
-    cost: 60
-    maxHp: 100
+    cost: 42
+    maxHp: 80
     attackDamage: 0
     attackIntervalSeconds: 0
     range: 0
-    dailyIncome: 25
+    dailyIncome: 17
     trapDamage: 0
     splashRadius: 0
     rangeBonus: 0
@@ -80,23 +80,23 @@ MonoBehaviour:
     repairReach: 0
   spikeTrap:
     displayName: Spike Trap
-    cost: 35
+    cost: 25
     maxHp: 0
     attackDamage: 0
     attackIntervalSeconds: 0
     range: 0
     dailyIncome: 0
-    trapDamage: 8
+    trapDamage: 7
     splashRadius: 0
     rangeBonus: 0
     repairBudget: 0
     repairReach: 0
   cannon:
     displayName: Cannon
-    cost: 110
-    maxHp: 150
+    cost: 77
+    maxHp: 120
     attackDamage: 20
-    attackIntervalSeconds: 2
+    attackIntervalSeconds: 2.5
     range: 4.5
     dailyIncome: 0
     trapDamage: 0
@@ -106,21 +106,21 @@ MonoBehaviour:
     repairReach: 0
   watchtower:
     displayName: Watchtower
-    cost: 45
-    maxHp: 80
+    cost: 32
+    maxHp: 64
     attackDamage: 0
     attackIntervalSeconds: 0
     range: 0
     dailyIncome: 0
     trapDamage: 0
     splashRadius: 0
-    rangeBonus: 1
+    rangeBonus: 0.8
     repairBudget: 0
     repairReach: 0
   repairStation:
     displayName: Repair Station
-    cost: 80
-    maxHp: 120
+    cost: 56
+    maxHp: 96
     attackDamage: 0
     attackIntervalSeconds: 0
     range: 0
@@ -128,7 +128,7 @@ MonoBehaviour:
     trapDamage: 0
     splashRadius: 0
     rangeBonus: 0
-    repairBudget: 50
+    repairBudget: 40
     repairReach: 2
   grunt:
     displayName: Grunt

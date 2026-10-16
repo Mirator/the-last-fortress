@@ -1,0 +1,11 @@
+night ended: Defeat after 27,1s; frames at fixed 1/60 s
+kind            frames  maxStep/expected  jumps(>1.6x)  stalls-while-moving  maxTurn/frame  snaps(>25deg)  maxModelStep  modelJerks(>0.04)
+Grunt             1963              1,00             0                    1            8,0              0         0,020                  0
+Runner            1703              1,00             0                    0           12,0              0         0,020                  0
+Brute             2582              1,00             0                    0            5,0              0         0,041                  5
+Bomber            1183              1,00             0                    0            8,0              0         0,008                  0
+Archer            2730              1,00             0                    1            8,0              0         0,020                  0
+SiegeGolem        2610              1,00             0                    0            3,0              0         0,007                  0
+SiegeCommander    2490              1,00             0                    0            3,0              0         0,006                  0
+enemy views removed: 5; removed while a drawn arrow/shell was still flying at them: 0
+building views removed: 14; building scale max step/frame 0,093, jerks(>0.05) 66

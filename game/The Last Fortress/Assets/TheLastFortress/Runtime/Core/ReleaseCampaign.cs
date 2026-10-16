@@ -11,7 +11,7 @@ namespace TheLastFortress
     {
         public const string RulesVersion = "release-rules-1";
         public const string CampaignId = "twelve-nights";
-        public const int ContentVersion = 1;
+        public const int ContentVersion = 2; // 2: cheaper, weaker buildings; content-1 saves are refused, not rescaled
         public const string Label = "Twelve nights";
         public const uint WaveSalt = 0x5BD1E995;
 

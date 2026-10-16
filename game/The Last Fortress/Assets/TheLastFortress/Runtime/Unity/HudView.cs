@@ -146,6 +146,7 @@ namespace TheLastFortress
             var rows = (kinds.Count + perRow - 1) / perRow;
             cardBarTop = 24f + rows * 120f + (rows - 1) * gap + 8f;
             var cardRow = Rect(root, "BuildCards", new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(perRow * (cardWidth + gap) - gap, rows * 120 + (rows - 1) * gap));
+            cardGroup = cardRow.gameObject.AddComponent<CanvasGroup>();
             for (var i = 0; i < kinds.Count; i++)
             {
                 var kind = kinds[i];
@@ -453,6 +454,10 @@ namespace TheLastFortress
 
             // Build cards
             var canBuild = sim.State == RunState.Day && !sim.StressMode;
+            // Nothing can be built at Night: the cards fade to a faint, click-through strip so they do not hide the fight.
+            var nightCards = sim.State == RunState.Night && game.IsMvp;
+            cardGroup.alpha = Mathf.MoveTowards(cardGroup.alpha, nightCards ? NightCardAlpha : 1f, Time.unscaledDeltaTime * 4f);
+            cardGroup.blocksRaycasts = !nightCards;
             foreach (var card in cards)
             {
                 var available = defs.For(card.Kind) != null; // a legacy six-night run has no release kinds
@@ -602,6 +607,13 @@ namespace TheLastFortress
 
         /// <summary>Canvas height of the build cards' top edge plus a small gap (two rows in the release).</summary>
         float cardBarTop = 24f + 120f + 8f;
+
+        CanvasGroup cardGroup;
+
+        /// <summary>Build-card opacity during Night (MVP scenes).</summary>
+        public const float NightCardAlpha = 0.18f;
+
+        public float CardBarAlpha => cardGroup.alpha;
 
         /// <summary>
         /// Ghost tooltip details: the numbers a placement decision needs, from effective values. Income buildings say how
@@ -806,14 +818,14 @@ namespace TheLastFortress
             switch (d.Kind)
             {
                 case BuildingKind.Wall: return "Blocks enemy paths";
-                case BuildingKind.Tower: return sim == null ? $"Shoots · range {d.Range:0}" : $"Shoots {sim.TowerDamage(d)} · range {sim.TowerRange(d):0.#}";
+                case BuildingKind.Tower: return sim == null ? $"Shoots · range {d.Range:0}" : $"Shoots {sim.TowerDamage(d)} · range {sim.TowerRange(d).ToString("0.#", CultureInfo.InvariantCulture)}";
                 case BuildingKind.House: return $"+{d.DailyIncome} gold per day";
                 case BuildingKind.Farm:
                     var farm = sim != null && sim.HasPerk(PerkRules.EfficientFarming) ? d.DailyIncome * (100 + PerkRules.EfficientFarmingPercent) / 100 : d.DailyIncome;
                     return $"+{farm}/day · 2x2 tiles";
                 case BuildingKind.SpikeTrap: return "Hurts enemies on it";
                 case BuildingKind.Cannon: return "Splash · slow · 2x2";
-                case BuildingKind.Watchtower: return $"+{d.RangeBonus:0.#} range nearby";
+                case BuildingKind.Watchtower: return $"+{d.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range nearby";
                 case BuildingKind.RepairStation: return "Repairs at dawn · 2x2";
                 default: return "";
             }

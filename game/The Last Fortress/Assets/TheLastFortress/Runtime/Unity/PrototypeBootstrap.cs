@@ -54,22 +54,35 @@ namespace TheLastFortress
         /// <summary>Definitions every new run starts with (the loaded run may use another profile's: see <see cref="Definitions"/>).</summary>
         public PrototypeDefinitions NewRunDefinitions { get; private set; }
 
-        /// <summary>Release: map profile used by the next New Run (title menu cycles it; -map overrides).</summary>
-        public string MapProfile { get; private set; } = MapProfiles.Ravine;
+        /// <summary>
+        /// Release: map profile for the next New Run; "" (the default) lets the seed pick one. The title cycles
+        /// by seed → Ravine → Crossing → Meadow; -map ravine|crossing|meadow|random overrides.
+        /// </summary>
+        public string MapProfile { get; private set; } = "";
 
         public void CycleMapProfile()
         {
-            var i = System.Array.IndexOf(MapProfiles.All, MapProfile);
-            MapProfile = MapProfiles.All[(i + 1) % MapProfiles.All.Length];
+            var i = System.Array.IndexOf(MapProfiles.All, MapProfile); // -1 for "by seed"
+            MapProfile = i + 1 < MapProfiles.All.Length ? MapProfiles.All[i + 1] : "";
         }
 
         public void SetMapProfile(string id)
         {
             if (MapProfiles.IsKnown(id)) MapProfile = id;
+            else if (id == "random") MapProfile = "";
         }
+
+        /// <summary>The profile a New Run on this seed will use.</summary>
+        public string MapProfileFor(uint seed) => MapProfile == "" ? MapProfiles.ForSeed(seed) : MapProfile;
 
         /// <summary>When false, Update does not advance the simulation (tests step it explicitly).</summary>
         public bool AutoAdvance { get; set; } = true;
+
+        /// <summary>
+        /// When true, Update leaves view syncing to the caller, so frame-exact captures and motion probes own the
+        /// presentation clock (otherwise each frame would advance effects twice).
+        /// </summary>
+        public bool ExternalViewClock { get; set; }
 
         // ---------- MVP: menu, persistence, settings ----------
 
@@ -229,7 +242,7 @@ namespace TheLastFortress
             if (!Suspended) Player.Tick(dt);
             else if (cameraRig.IsDragging) cameraRig.CancelDrag(); // a menu or dialog never keeps a drag (or its cursor)
             if (AutoAdvance && !Suspended) Sim.Advance(dt);
-            SyncViews(dt);
+            if (!ExternalViewClock) SyncViews(dt);
         }
 
         /// <summary>Pushes current simulation state to views and HUD (also used by tests after manual stepping).</summary>
@@ -418,9 +431,10 @@ namespace TheLastFortress
         /// </summary>
         public void NewRun(uint seed, bool flat)
         {
-            var terrain = flat ? TerrainMap.Flat() : IsRelease ? MapProfiles.Generate(MapProfile, seed) : MapGenerator.Generate(seed);
+            var profile = MapProfileFor(seed);
+            var terrain = flat ? TerrainMap.Flat() : IsRelease ? MapProfiles.Generate(profile, seed) : MapGenerator.Generate(seed);
             Debug.Log($"New run: {terrain.Describe()}");
-            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Seed = seed, Terrain = terrain, Campaign = CreateCampaign(seed, MapProfile) });
+            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Seed = seed, Terrain = terrain, Campaign = CreateCampaign(seed, profile) });
             MenuOpen = false;
             cameraRig.ResetView(); // the Keep and the western approach
             Onboarding?.BeginRun();

@@ -59,6 +59,9 @@ namespace TheLastFortress.Editor
                 ArcherCloth = PrototypeSetup.LitMaterial("ArcherCloth", Palette.Hex(0x6E7F3A), all, Palette.Hex(0x6E7F3A) * 0.2f),
                 BomberCloth = PrototypeSetup.LitMaterial("BomberCloth", Palette.Hex(0x3E3A52), all),
                 CommanderCloth = PrototypeSetup.LitMaterial("CommanderCloth", Palette.Hex(0x6B3F8C), all, Palette.Hex(0x6B3F8C) * 0.25f),
+                BomberHazard = PrototypeSetup.LitMaterial("BomberHazard", Palette.Hex(0xC8442C), all, Palette.Hex(0xC8442C) * 0.35f),
+                // Light oak with a faint warm emission, so the keg stays readable under night lighting.
+                BomberKeg = PrototypeSetup.LitMaterial("BomberKeg", Palette.Hex(0xC08A52), all, Palette.Hex(0xC08A52) * 0.18f),
             };
 
             var definitions = AssetDatabase.LoadAssetAtPath<ReleaseDefinitionsAsset>(DefinitionsPath);

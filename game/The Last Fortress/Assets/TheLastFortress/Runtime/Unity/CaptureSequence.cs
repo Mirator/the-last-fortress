@@ -88,6 +88,13 @@ namespace TheLastFortress
 
         IEnumerator Run()
         {
+            if (game.IsRelease && (captureSet == "motion" || captureSet == "fx"))
+            {
+                yield return RunMotionFrames(captureSet == "fx");
+                Application.Quit();
+                yield break;
+            }
+
             if (game.IsRelease)
             {
                 yield return RunPlan008();
@@ -568,6 +575,79 @@ namespace TheLastFortress
             game.Hud.HelpPanel.SetActive(false);
 
             File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-008-capture-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set motion (release build): consecutive frames at a fixed 1/30 s through a busy night on a close camera,
+        /// with a per-frame log of what happened, so motion (falls, strikes, collapses, shells) can be reviewed as strips.
+        /// </summary>
+        /// <param name="fx">-capture-set fx: Bombers reach a Wall unopposed (fuse, blast, scorch), a House burns at low HP,
+        /// a Cannon fires — the particle effects rather than the gait.</param>
+        IEnumerator RunMotionFrames(bool fx = false)
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            var kinds = fx
+                ? new[] { EnemyKind.Bomber, EnemyKind.Grunt, EnemyKind.Bomber, EnemyKind.Grunt, EnemyKind.Bomber }
+                : new[] { EnemyKind.Grunt, EnemyKind.Runner, EnemyKind.Brute, EnemyKind.Bomber, EnemyKind.Archer, EnemyKind.Grunt, EnemyKind.SiegeCommander };
+            var spawns = new System.Collections.Generic.List<SpawnEntry>();
+            for (var i = 0; i < kinds.Length; i++) spawns.Add(new SpawnEntry(i * 16, MvpCampaign.West, 0, kinds[i]));
+            var wave = new WavePlan("motion", spawns, new[] { MvpCampaign.West });
+            var calm = new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West });
+            var setup = new RunSimulation(new RunConfig
+            {
+                Definitions = game.NewRunDefinitions, Seed = 3, Terrain = TerrainMap.Flat(),
+                Campaign = new CampaignConfig
+                {
+                    Label = ReleaseCampaign.Label, Nights = new[] { wave, calm }, OffersRewards = true, RulesVersion = ReleaseCampaign.RulesVersion,
+                    CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
+                },
+            });
+            if (fx)
+            {
+                // Walls across the west lane (one gap the route takes), no Tower in reach: the Bombers light their fuses.
+                foreach (var z in new[] { 8, 9, 11, 12 }) setup.TryPlace(BuildingKind.Wall, new GridPos(4, z), out _);
+                setup.TryPlace(BuildingKind.Wall, new GridPos(6, 10), out _);
+                setup.TryPlace(BuildingKind.House, new GridPos(7, 12), out var house);
+                if (house != null) house.Hp = house.MaxHp / 5; // below a third: on fire
+                setup.TryPlace(BuildingKind.Cannon, new GridPos(8, 7), out _);
+            }
+            else
+            {
+                setup.TryPlace(BuildingKind.Tower, new GridPos(5, 8), out _);
+                setup.TryPlace(BuildingKind.Cannon, new GridPos(5, 11), out _);
+                setup.TryPlace(BuildingKind.Wall, new GridPos(8, 10), out _); // a breach point near the camera
+            }
+
+            ContinueSaved(setup, log);
+            game.CameraRig.SetView(fx ? new Vector3(6f, 0f, 10f) : new Vector3(6.5f, 0f, 10.5f), 3.2f);
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null; // night lighting at real frames; the simulation is not advancing
+            game.ExternalViewClock = true; // from here every frame advances presentation exactly once, by 1/30 s
+            var defeated = game.Sim.Stats.EnemiesDefeated;
+            var lost = 0;
+            for (var frame = 0; frame < (fx ? 660 : 330) && game.Sim.State == RunState.Night; frame++)
+            {
+                var keep = game.Sim.Keep.Hp;
+                var buildings = game.World.BuildingViewCount;
+                game.Sim.Advance(1.0 / 30.0);
+                game.SyncViews(1f / 30f);
+                yield return new WaitForEndOfFrame();
+                CaptureOffscreen(Path.Combine(dir, $"{Screen.width}x{Screen.height}-motion-{frame:000}.png"));
+                var notes = new System.Collections.Generic.List<string>();
+                if (game.Sim.Stats.EnemiesDefeated > defeated) notes.Add($"kill x{game.Sim.Stats.EnemiesDefeated - defeated}");
+                if (game.World.BuildingViewCount < buildings) notes.Add("building destroyed");
+                if (game.Sim.Keep.Hp < keep) notes.Add($"keep -{keep - game.Sim.Keep.Hp}");
+                if (game.World.ActiveShellCount > 0) notes.Add("shell");
+                if (game.Sim.Enemies.Any(e => e.FuseLit)) notes.Add("fuse");
+                if (game.World.DyingCount > 0) notes.Add($"dying {game.World.DyingCount}");
+                defeated = game.Sim.Stats.EnemiesDefeated;
+                log.AppendLine($"{frame:000} t={game.Sim.NightElapsedSeconds:0.00}s {string.Join(", ", notes)}");
+            }
+
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-motion-log.txt"), log.ToString());
         }
 
         IEnumerator RunPlan007()

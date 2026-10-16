@@ -16,6 +16,56 @@ namespace TheLastFortress
 
         public static readonly string[] All = { Ravine, Crossing, Meadow };
 
+        /// <summary>
+        /// Each seed shows its profile in one of the 8 symmetries of the square board (4 rotations, each optionally
+        /// mirrored), so the same profile changes which entries face its corridors, rivers and open land. Drawn from a
+        /// stream separate from waves, rewards and terrain variation.
+        /// </summary>
+        public const uint SymmetrySalt = 0x2545F491;
+
+        /// <summary>When the player leaves the map to chance, the seed picks the profile from this separate stream.</summary>
+        public const uint ProfileSalt = 0x68E31DA4;
+
+        public static int SymmetryFor(uint seed) => (int)new RunRandom(seed ^ SymmetrySalt).NextBounded(8);
+
+        public static string ForSeed(uint seed) => All[(int)new RunRandom(seed ^ ProfileSalt).NextBounded((uint)All.Length)];
+
+        public static readonly string[] SymmetryNames = { "", "turned 90°", "turned 180°", "turned 270°", "mirrored", "mirrored, turned 90°", "mirrored, turned 180°", "mirrored, turned 270°" };
+
+        /// <summary>Cell of the board after symmetry <paramref name="s"/>: optional mirror (x → 19 − x), then s mod 4 quarter turns.</summary>
+        public static GridPos Apply(int s, GridPos c)
+        {
+            var max = GridCoordinates.Size - 1;
+            if (s >= 4) c = new GridPos(max - c.X, c.Z);
+            for (var i = 0; i < (s & 3); i++) c = new GridPos(max - c.Z, c.X);
+            return c;
+        }
+
+        /// <summary>The map under symmetry <paramref name="s"/>; the ring maps to the ring, so the four entries stay land.</summary>
+        public static TerrainMap Transform(TerrainMap source, int s)
+        {
+            var map = new TerrainMap { Seed = source.Seed, Attempt = source.Attempt, Fallback = source.Fallback, Profile = source.Profile, Symmetry = s };
+            for (var z = 0; z < GridCoordinates.Size; z++)
+            for (var x = 0; x < GridCoordinates.Size; x++)
+            {
+                var to = Apply(s, new GridPos(x, z));
+                map.Cells[to.Z * GridCoordinates.Size + to.X] = source[new GridPos(x, z)];
+            }
+
+            return map;
+        }
+
+        /// <summary>The profile's own (untransformed) layout of a generated map, where its named constraint is defined.</summary>
+        public static TerrainMap Canonical(TerrainMap map)
+        {
+            if (map.Symmetry == 0) return map;
+            var canonical = new TerrainMap { Seed = map.Seed, Attempt = map.Attempt, Fallback = map.Fallback, Profile = map.Profile };
+            for (var z = 0; z < GridCoordinates.Size; z++)
+            for (var x = 0; x < GridCoordinates.Size; x++)
+                canonical.Cells[z * GridCoordinates.Size + x] = map[Apply(map.Symmetry, new GridPos(x, z))];
+            return canonical;
+        }
+
         public sealed class Profile
         {
             public string Id;
@@ -145,17 +195,23 @@ namespace TheLastFortress
             return p;
         }
 
-        /// <summary>The accepted map for a seed: first valid attempt, otherwise the validated skeleton marked as a fallback.</summary>
-        public static TerrainMap Generate(string id, uint seed)
+        /// <summary>The accepted map for a seed, in the seed's symmetry.</summary>
+        public static TerrainMap Generate(string id, uint seed) => Generate(id, seed, SymmetryFor(seed));
+
+        /// <summary>
+        /// First valid attempt in symmetry <paramref name="symmetry"/> (0 = the profile's own orientation), otherwise the
+        /// validated skeleton in that symmetry, marked as a fallback.
+        /// </summary>
+        public static TerrainMap Generate(string id, uint seed, int symmetry)
         {
             var profile = Get(id);
             for (var attempt = 0; attempt < MapGenerator.MaxAttempts; attempt++)
             {
-                var map = Candidate(profile, seed, attempt);
+                var map = Transform(Candidate(profile, seed, attempt), symmetry);
                 if (Validate(profile, map) == null) return map;
             }
 
-            var fallback = Skeleton(profile, seed);
+            var fallback = Transform(Skeleton(profile, seed), symmetry);
             fallback.Fallback = true;
             return fallback;
         }
@@ -194,14 +250,17 @@ namespace TheLastFortress
             return map;
         }
 
-        /// <summary>Null when the map satisfies the common rules and the profile's named constraint; otherwise the first failure.</summary>
+        /// <summary>
+        /// Null when the map (as shown) satisfies the common rules and the profile's named constraint holds for its own
+        /// layout; otherwise the first failure.
+        /// </summary>
         public static string Validate(Profile profile, TerrainMap map)
         {
             var common = MapGenerator.Validate(map); // open routes from all four entries, no isolated pocket, 2 Farm sites
             if (common != null) return common;
             var sites = CountDisjointSites(map);
             if (sites < profile.MinDisjointSites) return $"only {sites} disjoint buildable 2x2 sites (needs {profile.MinDisjointSites})";
-            return profile.Constraint(map);
+            return profile.Constraint(Canonical(map));
         }
 
         /// <summary>Greedy count of non-overlapping buildable 2x2 sites in (z,x) order (a lower bound on the best packing).</summary>

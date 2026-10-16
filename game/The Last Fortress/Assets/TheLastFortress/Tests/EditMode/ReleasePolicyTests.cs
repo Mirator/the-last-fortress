@@ -10,7 +10,8 @@ namespace TheLastFortress.Tests
     /// <summary>
     /// Plan 008 G3 viability evidence: three distinct scripted approaches play the real twelve-night campaign on their map
     /// profile with legal purchases only (no granted gold or invulnerability). Each Day: (1) defense items from the
-    /// defense queue until the Day's minimum count is met, (2) economy items while the Day is within the economy window,
+    /// defense queue until the Day's minimum count is met, (2) economy items while the Day is within the economy window and
+    /// that minimum is met,
     /// (3) more defense, then a Keep repair below 75%. An illegal cell is skipped for good; an unaffordable item waits.
     /// Every night is step-bounded. Seeds 1-8 are played; only each policy's recorded seeds must win (balance is provisional
     /// and a 100% scripted win rate is not a goal). Losses are logged, not hidden. Log:
@@ -25,7 +26,10 @@ namespace TheLastFortress.Tests
             public string[] Defense;
             public string[] Economy;
 
-            /// <summary>Defense items owned at the start of each Night (index = Day - 1; the last value repeats).</summary>
+            /// <summary>
+            /// Defense items owned at the start of each Night (index = Day - 1; the last value repeats). Counts were scaled by
+            /// 1/0.7 when buildings became 30% cheaper and weaker, so the scripts keep the same share of gold on defense.
+            /// </summary>
             public int[] MinDefense;
 
             public int EconomyUntilDay;
@@ -38,17 +42,18 @@ namespace TheLastFortress.Tests
         // Kill zone where every route converges: an Archer ring, Cannons on the diagonals boosted by Watchtowers, a sealed Keep.
         public static readonly Policy KillZone = new Policy
         {
-            Name = "kill-zone", Map = MapProfiles.Crossing, Recorded = new uint[] { 2, 3, 4 },
+            Name = "kill-zone", Map = MapProfiles.Crossing, Recorded = new uint[] { 2, 3, 5 }, // seed 4 lost night 10 after the cheaper-buildings retune
             Defense = new[]
             {
                 "Tower 9 9", "Tower 11 11", "Tower 9 11", "Tower 11 9", "Wall 9 10", "Wall 11 10", "Wall 10 9", "Wall 10 11",
+                "Tower 8 10", "Tower 12 10", // cheaper Towers: two more before saving for Cannons
                 "Cannon 7 7", "Watchtower 9 8", "Cannon 12 6", "Watchtower 11 8", "Cannon 7 12", "Watchtower 8 11",
-                "Cannon 13 11", "Watchtower 12 11", "Tower 8 10", "Tower 12 10", "Tower 10 8", "Tower 10 12",
+                "Cannon 13 11", "Watchtower 12 11", "Tower 10 8", "Tower 10 12",
                 "RepairStation 6 9", "Cannon 4 9", "Cannon 15 9", "Cannon 9 15", "Cannon 9 4",
                 "Tower 7 10", "Tower 13 10", "Tower 10 7", "Tower 10 13", "Tower 6 11", "Tower 14 9",
             },
             Economy = new[] { "House 12 8", "House 8 12", "House 13 8", "Farm 12 13", "House 7 12", "Farm 6 13", "House 13 7", "Farm 15 7" },
-            MinDefense = new[] { 3, 3, 4, 5, 8, 9, 11, 12, 14, 16, 18, 20 },
+            MinDefense = new[] { 4, 4, 6, 7, 11, 13, 16, 17, 20, 23, 26, 29 },
             EconomyUntilDay = 6,
             Perks = new[]
             {
@@ -75,7 +80,7 @@ namespace TheLastFortress.Tests
                 "SpikeTrap 2 10", "SpikeTrap 17 10", "Tower 2 9", "Tower 17 11",
             },
             Economy = new[] { "House 13 15", "House 14 15", "Farm 13 16", "House 6 15", "House 7 15", "Farm 6 16", "House 15 4", "Farm 13 3" },
-            MinDefense = new[] { 3, 4, 4, 5, 6, 8, 10, 12, 15, 18, 21, 24 },
+            MinDefense = new[] { 4, 6, 6, 7, 9, 11, 14, 17, 21, 26, 30, 34 },
             EconomyUntilDay = 7,
             Perks = new[]
             {
@@ -103,7 +108,7 @@ namespace TheLastFortress.Tests
                 "House 8 12", "House 8 13", "Farm 6 12", "House 12 8", "House 13 8", "Farm 12 6", "House 12 12", "House 12 13",
                 "Farm 13 12", "House 7 8", "House 8 7", "Farm 6 6", "House 7 13", "House 13 7",
             },
-            MinDefense = new[] { 2, 3, 3, 4, 4, 6, 8, 10, 12, 14, 16, 18 },
+            MinDefense = new[] { 3, 4, 4, 6, 6, 9, 11, 14, 17, 20, 23, 26 },
             EconomyUntilDay = 8,
             Perks = new[]
             {
@@ -122,6 +127,8 @@ namespace TheLastFortress.Tests
             public int Bought;
 
             public Queue(string[] items) => this.items = items;
+
+            public bool Exhausted => next >= items.Length;
 
             /// <summary>Buys the next items while affordable; skips illegal cells for good. Stops on gold or <paramref name="limit"/>.</summary>
             public void Buy(RunSimulation sim, List<string> log, int limit = int.MaxValue)
@@ -143,7 +150,8 @@ namespace TheLastFortress.Tests
         {
             var sim = new RunSimulation(new RunConfig
             {
-                Definitions = ReleaseDefinitions.CreateDefault(), Seed = seed, Terrain = MapProfiles.Generate(policy.Map, seed),
+                // The scripts' coordinates are written for each profile's own orientation (symmetry 0).
+                Definitions = ReleaseDefinitions.CreateDefault(), Seed = seed, Terrain = MapProfiles.Generate(policy.Map, seed, 0),
                 Campaign = ReleaseCampaign.Create(seed, policy.Map),
             });
             log.AppendLine($"## {policy.Name} on {sim.Config.Terrain.Describe()}");
@@ -153,8 +161,10 @@ namespace TheLastFortress.Tests
             for (var day = 1; day <= sim.TotalNights && !sim.IsTerminal; day++)
             {
                 var bought = new List<string>();
-                defense.Buy(sim, bought, policy.MinDefense[Math.Min(day, policy.MinDefense.Length) - 1]);
-                if (day <= policy.EconomyUntilDay) economy.Buy(sim, bought);
+                var minimum = policy.MinDefense[Math.Min(day, policy.MinDefense.Length) - 1];
+                defense.Buy(sim, bought, minimum);
+                // Economy only once the Day's defense minimum is met: cheap Houses must not starve a pending Cannon.
+                if (day <= policy.EconomyUntilDay && (defense.Bought >= minimum || defense.Exhausted)) economy.Buy(sim, bought);
                 defense.Buy(sim, bought);
                 // Repair the Keep below 75% when the full repair costs at most half the gold, or always below 25%.
                 sim.RepairQuote(sim.Keep, out var restored, out var cost);

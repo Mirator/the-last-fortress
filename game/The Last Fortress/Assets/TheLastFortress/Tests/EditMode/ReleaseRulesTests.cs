@@ -61,10 +61,11 @@ namespace TheLastFortress.Tests
             var tower = Place(sim, BuildingKind.Tower, 5, 9);
             var north = Place(sim, BuildingKind.Watchtower, 5, 8);
             var south = Place(sim, BuildingKind.Watchtower, 4, 9);
-            Assert.AreEqual(5.0, sim.TowerRange(tower), 1e-9, "two adjacent Watchtowers still give +1 once");
+            var boosted = 4.0 + sim.Definitions.Watchtower.RangeBonus;
+            Assert.AreEqual(boosted, sim.TowerRange(tower), 1e-9, "two adjacent Watchtowers still give the bonus once");
             CollectionAssert.AreEqual(new[] { tower }, sim.TowersBuffedBy(new GridPos(6, 9)), "ghost preview reports the tower it would reach");
             Assert.AreEqual(SellRejection.None, sim.TrySell(north));
-            Assert.AreEqual(5.0, sim.TowerRange(tower), 1e-9, "the remaining Watchtower keeps the bonus");
+            Assert.AreEqual(boosted, sim.TowerRange(tower), 1e-9, "the remaining Watchtower keeps the bonus");
 
             Assert.IsTrue(sim.StartNight());
             StepUntil(sim, () => tower.TargetEnemyId >= 0 && sim.Tick + 5 < tower.AttackDueTick
@@ -79,9 +80,12 @@ namespace TheLastFortress.Tests
         [Test]
         public void RepairStationRestoresOnceAtDawnLowestHpFractionFirstWithinReach()
         {
+            var defs = ReleaseDefinitions.CreateDefault();
+            // The split below is laid out for these values, not the current tuning.
+            (defs.RepairStation.RepairBudget, defs.Wall.MaxHp, defs.House.MaxHp, defs.Tower.MaxHp) = (50, 100, 80, 100);
             var sim = new RunSimulation(new RunConfig
             {
-                Definitions = ReleaseDefinitions.CreateDefault(), Seed = 1,
+                Definitions = defs, Seed = 1,
                 Campaign = new CampaignConfig { Label = "t", Nights = new[] { RewardAndPerkTests.Empty(), RewardAndPerkTests.Empty() }, OffersRewards = true },
             });
             Place(sim, BuildingKind.RepairStation, 4, 4); // cells 4..5, reach 2 → 2..7
@@ -123,12 +127,12 @@ namespace TheLastFortress.Tests
             var bomber = sim.Enemies[0];
             StepCollect(sim, b => b.Any(e => e.Type == SimEventType.FuseLit));
             Assert.IsTrue(bomber.FuseLit);
-            bomber.Hp = 1; // the next Archer Tower shot (every 0.75 s) lands within the 1.5 s fuse
+            bomber.Hp = 1; // the next Archer Tower shot (interval shorter than the 1.5 s fuse) lands within the fuse
             var events = StepCollect(sim, b => b.Any(e => e.Type == SimEventType.EnemyKilled && e.SourceId == bomber.Id));
             Assert.Less(sim.Tick, bomber.DetonateTick);
             RunToEnd(sim);
             Assert.IsFalse(events.Concat(Drain(sim)).Any(e => e.Type == SimEventType.BomberDetonated));
-            Assert.AreEqual(100, wall.Hp, "no blast");
+            Assert.AreEqual(wall.MaxHp, wall.Hp, "no blast");
             Assert.AreEqual(1, sim.Stats.EnemiesDefeated);
         }
 
@@ -145,7 +149,7 @@ namespace TheLastFortress.Tests
             var lit = events.Single(e => e.Type == SimEventType.FuseLit).Tick;
             Assert.AreEqual(lit + 30, events.Single(e => e.Type == SimEventType.BomberDetonated).Tick, "1.5 s fuse");
             Assert.IsFalse(wall.IsAlive, "60 x2 against a Wall");
-            Assert.AreEqual((60, 100), (house.Hp, other.Hp));
+            Assert.AreEqual((house.MaxHp - sim.Definitions.Bomber.BlastSplashDamage, other.MaxHp), (house.Hp, other.Hp));
             Assert.AreEqual(0, sim.Stats.EnemiesDefeated);
             Assert.IsFalse(events.Any(e => e.Type == SimEventType.EnemyKilled));
         }
@@ -166,6 +170,7 @@ namespace TheLastFortress.Tests
         {
             var defs = ReleaseDefinitions.CreateDefault();
             defs.RaiderArcher.AttackRange = 3.0; // the geometry below is laid out for this range, not the current tuning
+            (defs.Wall.MaxHp, defs.House.MaxHp) = (100, 80); // and the HP checks for these
             var sim = NewRelease(Wave((0, EnemyKind.Archer)), defs);
             var house = Place(sim, BuildingKind.House, 6, 12);
             var wall = Place(sim, BuildingKind.Wall, 6, 9);
@@ -269,14 +274,14 @@ namespace TheLastFortress.Tests
             CollectionAssert.AreEqual(sim.Config.Terrain.Cells, back.Config.Terrain.Cells, "the accepted terrain, not a regenerated one");
             for (var n = 0; n < 12; n++)
                 CollectionAssert.AreEqual(sim.Campaign.Nights[n].Spawns.Select(s => (s.Tick, s.Cell, s.Kind)), back.Campaign.Nights[n].Spawns.Select(s => (s.Tick, s.Cell, s.Kind)));
-            Assert.AreEqual(5.5, back.TowerRange(back.GetBuilding(cannon.Id)), 1e-9, "Watchtower adjacency rebuilt from occupancy");
+            Assert.AreEqual(4.5 + back.Definitions.Watchtower.RangeBonus, back.TowerRange(back.GetBuilding(cannon.Id)), 1e-9, "Watchtower adjacency rebuilt from occupancy");
 
             CheckpointCodec.Restore(JsonUtility.FromJson<RunCheckpoint>(json), new RulesCatalog(RulesProfile.SixNights(MvpDefinitions.CreateDefault())), out problem, out message);
             Assert.AreEqual(CheckpointProblem.IncompatibleRules, problem, "an MVP-only build never opens a twelve-night save");
             CheckpointCodec.Restore(JsonUtility.FromJson<RunCheckpoint>(json.Replace("\"schemaVersion\":2", "\"schemaVersion\":3")), ReleaseBuild, out problem, out message);
             Assert.AreEqual(CheckpointProblem.UnknownSchema, problem);
             StringAssert.Contains("newer version", message);
-            CheckpointCodec.Restore(JsonUtility.FromJson<RunCheckpoint>(json.Replace("\"contentVersion\":1", "\"contentVersion\":2")), ReleaseBuild, out problem, out _);
+            CheckpointCodec.Restore(JsonUtility.FromJson<RunCheckpoint>(json.Replace($"\"contentVersion\":{ReleaseCampaign.ContentVersion}", $"\"contentVersion\":{ReleaseCampaign.ContentVersion + 1}")), ReleaseBuild, out problem, out _);
             Assert.AreEqual(CheckpointProblem.IncompatibleRules, problem);
             var badPerk = JsonUtility.FromJson<RunCheckpoint>(json);
             (badPerk.checkpointNight, badPerk.lastPaidDay, badPerk.perks) = (2, 2, new[] { "NotAPerk" });
@@ -329,9 +334,11 @@ namespace TheLastFortress.Tests
                 var profile = MapProfiles.Get(id);
                 Assert.IsNull(MapProfiles.Validate(profile, MapProfiles.Skeleton(profile, 0)), $"{id}: the fallback skeleton is itself valid");
                 var fallbacks = 0;
+                var symmetries = new HashSet<int>();
                 for (uint seed = 0; seed < 200; seed++)
                 {
                     var map = MapProfiles.Generate(id, seed);
+                    symmetries.Add(map.Symmetry);
                     Assert.AreEqual(id, map.Profile);
                     if (map.Fallback) fallbacks++;
                     else Assert.IsNull(MapProfiles.Validate(profile, map), $"{id} seed {seed}");
@@ -348,6 +355,7 @@ namespace TheLastFortress.Tests
                 }
 
                 Assert.Less(fallbacks, 10, $"{id}: fallback must stay rare (<5%)");
+                Assert.AreEqual(8, symmetries.Count, $"{id}: seeds turn and mirror the layout in all 8 ways");
             }
         }
     }

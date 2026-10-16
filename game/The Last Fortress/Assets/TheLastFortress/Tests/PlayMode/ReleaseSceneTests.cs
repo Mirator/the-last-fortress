@@ -88,9 +88,10 @@ namespace TheLastFortress.Tests
         public IEnumerator NewKindsPlaceThroughInputAndEveryNewThreatIsPresentedWithinBudgets()
         {
             Assert.IsTrue(game.IsRelease && game.MenuOpen);
-            Assert.AreEqual(MapProfiles.Ravine, game.MapProfile);
+            Assert.AreEqual("", game.MapProfile, "by default the seed picks the map");
             game.Hud.MapButton.onClick.Invoke();
-            Assert.AreEqual(MapProfiles.Crossing, game.MapProfile, "the title cycles the map profile for the next New Run");
+            game.Hud.MapButton.onClick.Invoke();
+            Assert.AreEqual(MapProfiles.Crossing, game.MapProfile, "the title cycles by seed → Ravine → Crossing for the next New Run");
             game.NewRun(7, false);
             yield return null;
             Assert.AreEqual((12, MapProfiles.Crossing, MapProfiles.Crossing), (game.Sim.TotalNights, game.Sim.Campaign.MapProfile, game.Sim.Config.Terrain.Profile));
@@ -130,8 +131,8 @@ namespace TheLastFortress.Tests
             game.Player.CancelTool();
             game.Player.Select(cannon);
             game.SyncViews();
-            Assert.AreEqual(5.5f, game.Overlay.RangeRingRadius, 1e-4f, "ring = base 4.5 + Watchtower 1 from Core");
-            StringAssert.Contains("Watchtower +1", game.Hud.SelectionText);
+            Assert.AreEqual((float)(game.Sim.Definitions.Cannon.Range + game.Sim.Definitions.Watchtower.RangeBonus), game.Overlay.RangeRingRadius, 1e-4f, "ring = base + Watchtower bonus from Core");
+            StringAssert.Contains("Watchtower +" + game.Sim.Definitions.Watchtower.RangeBonus.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture), game.Hud.SelectionText);
 
             Assert.IsTrue(game.StartNight());
             bool shell = false, blast = false, fuse = false, aura = false, enemyArrow = false, boss = false;

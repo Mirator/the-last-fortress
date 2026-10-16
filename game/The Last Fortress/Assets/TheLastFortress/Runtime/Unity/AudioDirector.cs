@@ -379,7 +379,7 @@ namespace TheLastFortress
                 case SimEventType.TowerShot:
                     // A Cannon booms; its shell lands with the drawn shell like an arrow, never before it.
                     Play(sim.GetBuilding(e.SourceId) is Building shooter && shooter.Kind == BuildingKind.Cannon ? SoundId.CannonShot : SoundId.Shot);
-                    Schedule(SoundId.Impact, WorldView.ArrowSeconds);
+                    Schedule(SoundId.Impact, sim.GetBuilding(e.SourceId) is Building gun && gun.Kind == BuildingKind.Cannon ? WorldView.ShellSeconds : WorldView.ArrowSeconds);
                     break;
                 case SimEventType.RangedShot:
                     Play(SoundId.RaiderShot);

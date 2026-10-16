@@ -545,6 +545,19 @@ namespace TheLastFortress
             return lines.Count == 0 ? null : string.Join("\n", lines);
         }
 
+        /// <summary>Which map this is: the release profile by name (and how it is turned), else the MVP generator's wording.</summary>
+        static string MapLabel(TerrainMap map)
+        {
+            if (map == null || map.Authored) return "flat map";
+            if (map.Profile != "" && MapProfiles.IsKnown(map.Profile))
+            {
+                var turn = MapProfiles.SymmetryNames[map.Symmetry];
+                return $"{MapProfiles.Get(map.Profile).DisplayName}{(turn != "" ? " (" + turn + ")" : "")}{(map.Fallback ? " · fallback" : "")}";
+            }
+
+            return map.Fallback ? "FALLBACK flat map" : "generated map";
+        }
+
         /// <summary>What an enemy kind does, with values from its definition so tuning keeps the text true.</summary>
         static string Role(EnemyDefinition d)
         {
@@ -732,7 +745,7 @@ namespace TheLastFortress
         void RefreshMvpPanels(RunSimulation sim, PlayerController player)
         {
             var map = sim.Config.Terrain;
-            Set(seedText, sim.StressMode ? "Stress fixture (debug)" : $"Seed {sim.Seed.ToString(CultureInfo.InvariantCulture)} · {(map == null || map.Authored ? "flat map" : map.Fallback ? "FALLBACK flat map" : "generated map")}");
+            Set(seedText, sim.StressMode ? "Stress fixture (debug)" : $"Seed {sim.Seed.ToString(CultureInfo.InvariantCulture)} · {MapLabel(map)}");
 
             var sel = player.Selected;
             var canRotate = sel != null && sim.State == RunState.Day && !sim.StressMode && RunSimulation.IsRotatable(sel.Kind);
@@ -780,9 +793,17 @@ namespace TheLastFortress
             newRunRow.gameObject.SetActive(!hasRun); // in-run: Save and Quit first, so a New Run never replaces the active run
             if (MapButton != null)
             {
-                var profile = MapProfiles.Get(game.MapProfile);
-                Set(mapLabel, "Map: " + profile.DisplayName);
-                Set(menuSubtitle, hasRun ? "" : $"Twelve nights to the final siege. {profile.DisplayName}: {profile.Summary}");
+                if (game.MapProfile == "")
+                {
+                    Set(mapLabel, "Map: by seed");
+                    Set(menuSubtitle, hasRun ? "" : "Twelve nights to the final siege. The seed picks Ravine, Crossing or Meadow and turns it.");
+                }
+                else
+                {
+                    var profile = MapProfiles.Get(game.MapProfile);
+                    Set(mapLabel, "Map: " + profile.DisplayName);
+                    Set(menuSubtitle, hasRun ? "" : $"Twelve nights to the final siege. {profile.DisplayName}: {profile.Summary}");
+                }
             }
             seedRow.gameObject.SetActive(!hasRun && (seedExpanded || seedError != null));
             SaveAndQuitButton.gameObject.SetActive(hasRun);

@@ -29,6 +29,9 @@ namespace TheLastFortress
         /// <summary>Plan 008 map profile that produced it ("" for the MVP generator or the flat map).</summary>
         public string Profile = "";
 
+        /// <summary>Plan 008: which of the 8 board symmetries (rotations/mirrors) was applied to the profile layout.</summary>
+        public int Symmetry;
+
         public TerrainType this[GridPos c] => Cells[c.Z * GridCoordinates.Size + c.X];
 
         public List<GridPos> ImpassableCells()

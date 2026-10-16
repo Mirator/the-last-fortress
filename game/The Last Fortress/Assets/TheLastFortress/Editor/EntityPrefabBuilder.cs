@@ -211,7 +211,7 @@ namespace TheLastFortress.Editor
         /// <summary>Plan 008 release-only materials (created by the release setup).</summary>
         public sealed class ReleaseMaterials
         {
-            public Material Iron, ArcherCloth, BomberCloth, CommanderCloth;
+            public Material Iron, ArcherCloth, BomberCloth, CommanderCloth, BomberHazard, BomberKeg;
         }
 
         /// <summary>Low 2 x 2 gun emplacement: stone platform, iron barrel on a timber carriage. Pivot = footprint centre. Height ~1.1.</summary>
@@ -283,17 +283,38 @@ namespace TheLastFortress.Editor
             return root;
         }
 
-        /// <summary>Squat runner with a big round powder keg on its back. Height ~0.6; faces +Z.</summary>
+        /// <summary>
+        /// Hunched sapper carrying an oversized wooden powder keg (iron hoops, red hazard band, a wick) on its back and a lit
+        /// torch forward: "bomb" reads from the silhouette before any colour. Height ~0.8 (wick tip); faces +Z. The runtime
+        /// view finds "WickTip" and "TorchFlame" for its sparks and flame.
+        /// </summary>
         public static GameObject Bomber(Materials m, ReleaseMaterials r)
         {
             var root = Root("Bomber");
             var t = root.transform;
-            Prims.Create(PrimitiveType.Capsule, t, new Vector3(0, 0.22f, 0.06f), new Vector3(0.26f, 0.2f, 0.24f), m.EnemyBody, "Body");
-            Box(t, r.BomberCloth, new Vector3(0, 0.24f, 0.16f), new Vector3(0.22f, 0.22f, 0.06f), "Apron");
-            Prims.Create(PrimitiveType.Sphere, t, new Vector3(0, 0.4f, -0.12f), new Vector3(0.36f, 0.36f, 0.36f), r.BomberCloth, "Keg");
-            Box(t, m.Amber, new Vector3(0, 0.4f, -0.12f), new Vector3(0.38f, 0.04f, 0.38f), "KegBand");
-            Box(t, m.EnemyBody, new Vector3(-0.08f, 0.04f, 0.06f), new Vector3(0.07f, 0.08f, 0.08f), "Leg");
-            Box(t, m.EnemyBody, new Vector3(0.08f, 0.04f, 0.06f), new Vector3(0.07f, 0.08f, 0.08f), "Leg");
+            Box(t, m.EnemyBody, new Vector3(-0.08f, 0.05f, 0.08f), new Vector3(0.07f, 0.1f, 0.09f), "Leg");
+            Box(t, m.EnemyBody, new Vector3(0.08f, 0.05f, 0.08f), new Vector3(0.07f, 0.1f, 0.09f), "Leg");
+            Prims.Create(PrimitiveType.Capsule, t, new Vector3(0, 0.24f, 0.08f), new Vector3(0.24f, 0.18f, 0.22f), m.EnemyBody, "Body", Quaternion.Euler(18, 0, 0));
+            Box(t, r.BomberCloth, new Vector3(0, 0.22f, 0.18f), new Vector3(0.2f, 0.2f, 0.05f), "Apron", new Vector3(18, 0, 0));
+            Box(t, m.EnemyBody, new Vector3(0, 0.4f, 0.17f), new Vector3(0.14f, 0.13f, 0.14f), "Head", new Vector3(0, 45, 0));
+            Box(t, r.BomberHazard, new Vector3(0, 0.43f, 0.17f), new Vector3(0.16f, 0.04f, 0.16f), "Bandana", new Vector3(0, 45, 0));
+            Box(t, m.EnemyBody, new Vector3(0.13f, 0.3f, 0.06f), new Vector3(0.05f, 0.05f, 0.24f), "Strap", new Vector3(-30, 0, 0));
+            Box(t, m.EnemyBody, new Vector3(-0.13f, 0.3f, 0.06f), new Vector3(0.05f, 0.05f, 0.24f), "Strap", new Vector3(-30, 0, 0));
+
+            // The keg: an upright barrel taller than the carrier's head.
+            var keg = new Vector3(0, 0.5f, -0.15f);
+            Prims.Create(PrimitiveType.Cylinder, t, keg, new Vector3(0.4f, 0.24f, 0.4f), r.BomberKeg, "Keg");
+            foreach (var y in new[] { -0.18f, 0.18f })
+                Prims.Create(PrimitiveType.Cylinder, t, keg + new Vector3(0, y, 0), new Vector3(0.42f, 0.02f, 0.42f), r.Iron, "Hoop");
+            Prims.Create(PrimitiveType.Cylinder, t, keg, new Vector3(0.415f, 0.055f, 0.415f), r.BomberHazard, "HazardBand");
+            Prims.Create(PrimitiveType.Cylinder, t, keg + new Vector3(0, 0.24f, 0), new Vector3(0.33f, 0.012f, 0.33f), m.TimberShadow, "Lid");
+            Box(t, m.TimberShadow, keg + new Vector3(0.04f, 0.31f, 0), new Vector3(0.022f, 0.13f, 0.022f), "Wick", new Vector3(0, 0, -22));
+            Box(t, m.Amber, keg + new Vector3(0.07f, 0.38f, 0), new Vector3(0.04f, 0.04f, 0.04f), "WickTip", new Vector3(45, 45, 0));
+
+            // A burning torch held forward in the right hand.
+            Box(t, m.EnemyBody, new Vector3(0.16f, 0.27f, 0.17f), new Vector3(0.05f, 0.05f, 0.18f), "Arm", new Vector3(-25, 0, 0));
+            Box(t, m.Timber, new Vector3(0.17f, 0.36f, 0.27f), new Vector3(0.03f, 0.24f, 0.03f), "TorchStick", new Vector3(20, 0, 0));
+            Box(t, m.Amber, new Vector3(0.17f, 0.48f, 0.31f), new Vector3(0.06f, 0.07f, 0.06f), "TorchFlame");
             return root;
         }
 

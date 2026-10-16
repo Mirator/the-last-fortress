@@ -10,18 +10,30 @@ namespace TheLastFortress
         public static PrototypeDefinitions CreateDefault()
         {
             var d = MvpDefinitions.CreateDefault();
+            // Cheaper build (2026-10 tuning): every building costs 30% less (rounded) and does about 30% less — HP, fire
+            // rate, trap damage, income and repair are scaled down, so the player places more, smaller pieces. The MVP
+            // profile keeps its own values.
+            Scale(d.Wall, cost: 14, hp: 80);
+            Scale(d.Tower, cost: 49, hp: 80);
+            d.Tower.AttackIntervalSeconds = 0.9;
+            Scale(d.House, cost: 28, hp: 64);
+            d.House.DailyIncome = 10;
+            Scale(d.Farm, cost: 42, hp: 80);
+            d.Farm.DailyIncome = 17;
+            d.SpikeTrap.Cost = 25;
+            d.SpikeTrap.TrapDamage = 7;
             d.Cannon = new BuildingDefinition
             {
-                Kind = BuildingKind.Cannon, DisplayName = "Cannon", Cost = 110, MaxHp = 150,
-                AttackDamage = 20, AttackIntervalSeconds = 2.0, Range = 4.5, SplashRadius = 1.25,
+                Kind = BuildingKind.Cannon, DisplayName = "Cannon", Cost = 77, MaxHp = 120,
+                AttackDamage = 20, AttackIntervalSeconds = 2.5, Range = 4.5, SplashRadius = 1.25,
             };
             d.Watchtower = new BuildingDefinition
             {
-                Kind = BuildingKind.Watchtower, DisplayName = "Watchtower", Cost = 45, MaxHp = 80, RangeBonus = 1.0,
+                Kind = BuildingKind.Watchtower, DisplayName = "Watchtower", Cost = 32, MaxHp = 64, RangeBonus = 0.8,
             };
             d.RepairStation = new BuildingDefinition
             {
-                Kind = BuildingKind.RepairStation, DisplayName = "Repair Station", Cost = 80, MaxHp = 120, RepairBudget = 50, RepairReach = 2,
+                Kind = BuildingKind.RepairStation, DisplayName = "Repair Station", Cost = 56, MaxHp = 96, RepairBudget = 40, RepairReach = 2,
             };
             d.RaiderArcher = new EnemyDefinition
             {
@@ -41,6 +53,12 @@ namespace TheLastFortress
                 AuraRadius = 2.5, AuraDamagePercent = 50,
             };
             return d;
+        }
+
+        static void Scale(BuildingDefinition b, int cost, int hp)
+        {
+            b.Cost = cost;
+            b.MaxHp = hp;
         }
     }
 }

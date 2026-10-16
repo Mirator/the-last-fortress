@@ -190,7 +190,7 @@ The MVP random generator (`MapGenerator`, 30 scattered obstacles) is unchanged a
 ## 7. Saves and profiles
 
 - Run checkpoint schema **1** = legacy six-night MVP (`mvp-rules-1`), written by the MVP profile exactly as before and readable by every build that knows `mvp-rules-1`.
-- Schema **2** = profile-tagged: `rulesVersion` (`release-rules-1`), `campaignId` (`twelve-nights`), `contentVersion` (1), `mapProfile`, `difficulty`, plus all schema-1 fields. Stored nights hold up to 7 enemy kinds; stored buildings up to 9 kinds. New buildings carry no extra per-building state across Days (cooldowns reset at Day, dawn repair is stateless).
+- Schema **2** = profile-tagged: `rulesVersion` (`release-rules-1`), `campaignId` (`twelve-nights`), `contentVersion` (2; 1 before the cheaper-buildings retune in §8), `mapProfile`, `difficulty`, plus all schema-1 fields. Stored nights hold up to 7 enemy kinds; stored buildings up to 9 kinds. New buildings carry no extra per-building state across Days (cooldowns reset at Day, dawn repair is stateless).
 - Reading [I]: schema 1 → legacy profile only; schema 2 → the catalog must know its `rulesVersion` + `campaignId`, else `IncompatibleRules` with an actionable message; any other schema → `UnknownSchema`, file untouched ("made by a newer version; update to continue it"). A six-night save is never converted into twelve nights; it continues as six nights under MVP rules in any build that ships the legacy profile (the release build does).
 - Release and MVP builds share the save folder; a build that does not know a save's profile never overwrites it (a New Run takes the next slot).
 - Settings (v2) and onboarding profile (v1) are separate files with separate migrations; unchanged by 008.
@@ -204,4 +204,29 @@ Each change below was made inside the [P] bounds after a recorded scripted run (
 | Nights 7–12 counts and cadence | table first frozen above → current table | With the first table a sealed Keep with four Archer Towers and two Cannons won all 8 seeds after only 10–13 purchases (~400–600 gold earned), Keep near full HP. Late nights were raised; Nights 4–6 kept as frozen after a steeper mid-game made every approach collapse on Nights 6–7. |
 | Raider Archer range | 3.0 → 3.5 tiles | At 3.0 an Archer always stops inside a bare Archer Tower's 4.0 range and never threatens a ring. 4.5 (outranging every early defense) collapsed all approaches on Night 5. 3.5 makes a tight ring take real damage (kill-zone 6/8 wins, not 8/8) while corridor 5/8 and economy 4/8 stay viable. |
 
-Result at the current values: kill-zone (Crossing) 6/8, corridor (Ravine) 5/8, economy (Meadow) 4/8 wins over seeds 1–8; each loses on some seeds. The ring at the Keep is still the most forgiving approach; whether that is a problem is a human-playtest question (G3/G4), not something the scripts can settle.
+Result at those values: kill-zone (Crossing) 6/8, corridor (Ravine) 5/8, economy (Meadow) 4/8 wins over seeds 1–8; each loses on some seeds. The ring at the Keep is still the most forgiving approach; whether that is a problem is a human-playtest question (G3/G4), not something the scripts can settle.
+
+**Cheaper buildings (2026-10-16, content version 2).** Playtest feedback: "boring when I cannot build much" — the scripts bought only 11–28 buildings in a whole run. Every purchasable building now costs 30% less and does about 20% less; the MVP profile is unchanged. Content-1 release saves are refused (file untouched), not rescaled.
+
+| Building | Cost | HP | Effect |
+|---|---|---|---|
+| Wall | 20 → 14 | 100 → 80 | — |
+| Archer Tower | 70 → 49 | 100 → 80 | fires every 0.75 → 0.9 s (damage 10 kept: same shots-to-kill) |
+| House | 40 → 28 | 80 → 64 | income 15 → 10 |
+| Farm | 60 → 42 | 100 → 80 | income 25 → 17 |
+| Spike Trap | 35 → 25 | — | damage 8 → 7 |
+| Cannon | 110 → 77 | 150 → 120 | fires every 2.0 → 2.5 s |
+| Watchtower | 45 → 32 | 80 → 64 | range bonus 1.0 → 0.8 |
+| Repair Station | 80 → 56 | 120 → 96 | dawn budget 50 → 40 |
+
+Unchanged: starting gold 250, Keep (HP 500, income 20), all enemies, perks and their flat values. Income is cut harder (about ×0.67) than combat (×0.8) because flat economy bonuses (Farm + House +5, Market Square +4) grow relative to cheaper Houses and Farms.
+
+- A first try at −30% impact made every approach far weaker (6/24 wins): buildings at 70% HP died before paying back, and ring layouts lost coverage. ×0.8 was chosen instead.
+- Script changes, made so the scripts spend the gold as a player would rather than to make results pass:
+  - Each Day's minimum defense count was scaled by 1/0.7 (the same share of gold).
+  - Economy is bought only once that minimum is met, so cheap Houses no longer starve a pending Cannon.
+  - Kill-zone buys its two inner Towers before the first Cannon.
+  - Kill-zone's recorded seeds changed from 2, 3, 4 to 2, 3, 5, because seed 4 now loses on Night 10.
+- Result: kill-zone 6/8, corridor 7/8, economy 8/8 (21/24, up from 15/24); runs buy 14–42 buildings.
+
+The game is likely somewhat easier than before, and economy-first is now the most forgiving approach. That needs a human playtest. Evidence covers only symmetry 0 (each profile's own orientation).

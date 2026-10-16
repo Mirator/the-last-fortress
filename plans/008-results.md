@@ -46,6 +46,21 @@ No existing test or assertion was changed.
 - **Unity:** `ReleaseDefinitionsAsset`; `PrototypeContent` release references; bootstrap catalog, map-profile choice (title button, `-map`), legacy-profile loading; HUD two-row cards hidden per run profile, text for new kinds, any-boss bar/banner, release announcements, map selector; overlay range rings from Core, Watchtower boost outlines, Repair reach square; world shells/splash rings, enemy arrows, fuse, blast, aura, repair sparks; audio mapping; capture sequence `RunPlan008`.
 - **Editor:** `ReleaseSetup` (idempotent; never overwrites authored prefabs), `ReleaseContentValidation`, `BuildRelease`, `TacticsDiagnostic`; prefab blockouts; 3 icons in `icons.py` (existing icons regenerate byte-identical).
 
+## Motion and animation polish (measured, not watched)
+
+Three passes plus an independent harsh critic, all presentation-only (no rule changed). Tools: `Tests/PlayMode/MotionProbe` (explicit diagnostic: a mixed night at a fixed 60 fps through the real scene, per-frame enemy step, turn, model and building-scale change, deaths) and the release build's `-capture-set motion` (330 consecutive frames at 1/30 s on a close camera, with a per-frame log).
+
+| Pass | Found | Fixed |
+|---|---|---|
+| 0 | 90°-in-one-frame turns for every kind; slow enemies jumped up to 4× a frame's step when a night ended | rate-limited turning; always-interpolated position; 2×2 targets faced at their centre; standing spawns face the Keep |
+| 1 | 4 of 5 enemies vanished while the killing arrow/shell was still flying; Brute strike jerk; destroyed buildings popped out | death fall (0.35 s) that waits for the projectile; collapse (0.45 s); wind-up released over time |
+| 2 | Cannon never aimed; HP bar vanished when the shot was fired; splash disc nearly opaque | turret-only aim (base stays square); bar stays until the hit; lighter ring |
+| Critic | build cards covered the fight all night; Cannon un-aimed on its kill shot and fired from the building centre; HP dropped at fire time; shells flew like arrows; splash popped off; gait vibrated (Runner ~16 steps/s); one turn rate for all; enemies stood inside each other; strike peaked after contact; **and my capture/probe advanced the effects clock twice per frame**, so earlier timing evidence was invalid | cards fade to 18% and click-through at Night; aim held 0.6 s after a shot, shell and flash from the muzzle; bar holds until impact, then drains; shells 0.42 s with a high arc and a glowing ball, impact sound timed to it; ring expands in 0.1 s then fades; gait from a per-kind cadence (1.5–4.5 steps/s); turn rate by weight (720/480/300/180 °/s); fixed per-enemy world offset; strike rises over the last 0.1 s and peaks on the hit (this fixed an off-by-one-step timing bug that was the real cause of the old Brute jerk); `ExternalViewClock` so captures/probes advance presentation exactly once |
+
+Final probe ([`motion-after-fix.txt`](evidence/008/motion-after-fix.txt)): every kind moves exactly 1.00× its speed per frame, no jumps, max turn 3–12°/frame, no projectile-before-death pops; model step ≤ 0.02 (Brute 0.041, at the threshold). Strips: [`evidence/008/motion/`](evidence/008/motion/). Suites 105/105 and 18/18 (+1 skipped diagnostic), both builds green after the last change.
+
+Not addressed from the critique: entry labels can sit over enemies at the spawn edge; the Commander's aura disc draws over water and shore; the Bomber blast marker is a 1.5-radius disc while its damage area is the 3×3 square; dying bodies hold their last gait pose during the kill delay; the building hit pulse is still an instant +6% (deliberate punch). None of this replaces watching it at 1×.
+
 ## Known issues and limits
 
 - **Ring dominance is reduced, not resolved.** The converged Keep ring is still the most forgiving scripted approach (6/8). Whether players find it dominant or boring needs G3/G4 human sessions.
