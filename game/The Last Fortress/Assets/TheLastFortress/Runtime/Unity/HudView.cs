@@ -23,7 +23,7 @@ namespace TheLastFortress
 
         Text goldText, keepText, incomeText, stateText, infoText, routeText, tooltipText, breachText, selectionTitle, selectionBody,
             terminalTitle, terminalBody, diagnosticText, primaryLabel, stressText, repairLabel;
-        RectTransform keepFill, tooltipRect, breachRect;
+        RectTransform keepFill, tooltipRect, breachRect, statusRect, resourcesRect;
         GameObject selectionPanel, tooltipPanel, breachLabel, terminalOverlay, stressBanner, diagnosticPanel, rewardOverlay, bossPanel;
         Image primaryImage;
         readonly List<BuildCard> cards = new List<BuildCard>();
@@ -69,6 +69,7 @@ namespace TheLastFortress
         public string TooltipText => tooltipPanel.activeSelf ? tooltipText.text : null;
         public string PrimaryButtonLabel => primaryLabel.text;
         public RectTransform CanvasRect => canvasRect;
+        public Canvas Canvas => canvasRect.GetComponent<Canvas>();
 
         static readonly Color CardIdle = Palette.HudSurface.WithAlpha(0.94f);
         static readonly Color CardActive = Palette.Hex(0x35525C);
@@ -92,7 +93,9 @@ namespace TheLastFortress
 
             // Top-left: gold and Keep health
             var resources = Panel(root, "Resources", new Vector2(0, 1), new Vector2(24, -24), new Vector2(380, game.IsMvp ? 196 : 132));
-            Swatch(resources, new Vector2(20, -22), Palette.Amber, true);
+            resourcesRect = resources;
+            if (game.Content.goldIcon != null) Icon(resources, game.Content.goldIcon, new Vector2(18, -20), 32f, Palette.Amber);
+            else Swatch(resources, new Vector2(20, -22), Palette.Amber, true);
             goldText = Label(resources, "Gold", 28, TextAnchor.UpperLeft, new Vector2(62, -14), new Vector2(300, 40), Palette.HudText);
             Swatch(resources, new Vector2(20, -70), Palette.WarningCoral, false);
             keepText = Label(resources, "Keep", 24, TextAnchor.UpperLeft, new Vector2(62, -60), new Vector2(300, 36), Palette.HudText);
@@ -109,10 +112,11 @@ namespace TheLastFortress
             // Top-center: phase and enemies
             var mvp = game.IsMvp;
             var status = Panel(root, "Status", new Vector2(0.5f, 1), new Vector2(0, -24), new Vector2(mvp ? 860 : 760, mvp ? 158 : 150));
+            statusRect = status;
             stateText = Label(status, "State", 34, TextAnchor.UpperCenter, new Vector2(0, -10), new Vector2(840, 44), Palette.Amber, true);
             infoText = Label(status, "Info", mvp ? 22 : 21, TextAnchor.UpperCenter, new Vector2(0, -56), new Vector2(840, mvp ? 58 : 32), Palette.HudText, true);
             routeText = Label(status, "Route", 21, TextAnchor.UpperCenter, new Vector2(0, mvp ? -116 : -98), new Vector2(840, 36), Palette.RouteCyan, true);
-            perksText = Label(resources, "Perks", 17, TextAnchor.UpperLeft, new Vector2(20, -170), new Vector2(350, 24), Palette.Amber);
+            perksText = Label(resources, "Perks", 18, TextAnchor.UpperLeft, new Vector2(20, -170), new Vector2(350, 24), Palette.Amber);
 
             // Boss health (only while a Siege Golem is alive)
             bossPanel = Panel(root, "BossBar", new Vector2(0.5f, 1), new Vector2(0, mvp ? -192 : -186), new Vector2(620, 54)).gameObject;
@@ -128,24 +132,29 @@ namespace TheLastFortress
 
             // Top-right: menu
             var mvpMenu = game.IsMvp;
-            var menu = Panel(root, "Menu", new Vector2(1, 1), new Vector2(-24, -24), new Vector2(mvpMenu ? 470 : 430, mvpMenu ? 112 : 76));
-            MenuRestartButton = MakeButton(menu, "Restart", new Vector2(0, 1), new Vector2(12, -12), new Vector2(mvpMenu ? 140 : 196, 52), game.RequestRestart, out var restartTop);
-            ResetCameraButton = MakeButton(menu, "Reset Camera", new Vector2(0, 1), new Vector2(mvpMenu ? 160 : 220, -12), new Vector2(mvpMenu ? 150 : 198, 52), game.ResetCamera, out var resetTop);
+            var menu = Panel(root, "Menu", new Vector2(1, 1), new Vector2(-24, -24), new Vector2(mvpMenu ? 500 : 430, mvpMenu ? 112 : 76));
+            MenuRestartButton = MakeButton(menu, "Restart", new Vector2(0, 1), new Vector2(12, -12), new Vector2(mvpMenu ? 116 : 196, 52), game.RequestRestart, out var restartTop);
+            ResetCameraButton = MakeButton(menu, "Reset Camera", new Vector2(0, 1), new Vector2(mvpMenu ? 136 : 220, -12), new Vector2(mvpMenu ? 140 : 198, 52), game.ResetCamera, out var resetTop);
             if (mvpMenu) restartTop.fontSize = resetTop.fontSize = 21;
             if (game.IsMvp) BuildRunMenuRow(menu);
 
-            // Bottom-center: build cards
+            // Bottom-center: build cards (the release's eight kinds wrap into two rows of four; row 0 is the lower one).
             var kinds = game.PurchasableKinds;
-            var cardWidth = kinds.Count > 2 ? 196f : 240f;
-            var gap = kinds.Count > 2 ? 12f : 20f;
-            var cardRow = Rect(root, "BuildCards", new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(kinds.Count * (cardWidth + gap) - gap, 120));
+            var cardWidth = kinds.Count > 2 ? 204f : 240f;
+            var gap = kinds.Count > 2 ? 10f : 20f;
+            var perRow = kinds.Count > 5 ? 4 : kinds.Count;
+            var rows = (kinds.Count + perRow - 1) / perRow;
+            cardBarTop = 24f + rows * 120f + (rows - 1) * gap + 8f;
+            var cardRow = Rect(root, "BuildCards", new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(perRow * (cardWidth + gap) - gap, rows * 120 + (rows - 1) * gap));
+            cardGroup = cardRow.gameObject.AddComponent<CanvasGroup>();
             for (var i = 0; i < kinds.Count; i++)
             {
                 var kind = kinds[i];
                 var def = game.Definitions.For(kind);
                 var buildCard = new BuildCard { Kind = kind };
-                buildCard.Button = Card(cardRow, def.DisplayName, def.Cost, (i + 1).ToString(), new Vector2(i * (cardWidth + gap), 0), cardWidth,
-                    () => game.Player.SetTool(kind), out buildCard.Image, out buildCard.Cost, game.IsMvp ? CardEffect(def) : null);
+                var row = rows - 1 - i / perRow; // first four on top, read left to right like the hotkeys
+                buildCard.Button = Card(cardRow, def.DisplayName, def.Cost, (i + 1).ToString(), new Vector2(i % perRow * (cardWidth + gap), row * (120 + gap)), cardWidth,
+                    () => game.Player.SetTool(kind), out buildCard.Image, out buildCard.Cost, game.IsMvp ? CardEffect(def) : null, game.Content.IconFor(kind));
                 if (game.IsMvp) buildCard.Effect = buildCard.Button.transform.Find("Effect").GetComponent<Text>();
                 cards.Add(buildCard);
             }
@@ -260,6 +269,24 @@ namespace TheLastFortress
             if (game.IsMvp) BuildMvpPanels(root);
         }
 
+        /// <summary>
+        /// MVP: every in-run panel moves under one layer that the menus hide as a whole, so the title screen shows only
+        /// the world and its menu. Order (and so layering) is preserved; dialogs, save failure and menus stay on the root.
+        /// </summary>
+        RectTransform BuildGameplayLayer(RectTransform root, params string[] names)
+        {
+            var layer = FullScreenRect(root, "Gameplay");
+            layer.SetAsFirstSibling();
+            foreach (var n in names)
+            {
+                var child = root.Find(n);
+                if (child != null) child.SetParent(layer, false);
+            }
+
+            return layer;
+        }
+
+
         void Choose(int index)
         {
             if (shownOfferId == null || shownPerks == null || index >= shownPerks.Length) return;
@@ -288,7 +315,7 @@ namespace TheLastFortress
                 if (!has) continue;
                 var id = offer.PerkIds[i];
                 Set(rewardTitles[i], PerkRules.Title(id));
-                Set(rewardBodies[i], PerkRules.Effect(id) + "\n\n" + Relevance(sim, id) + IncomePreview(sim, id));
+                Set(rewardBodies[i], PerkRules.Effect(id) + "\n\n" + Relevance(sim, id) + Condition(sim, id) + IncomePreview(sim, id));
             }
         }
 
@@ -307,9 +334,26 @@ namespace TheLastFortress
             var damage = sim.TowerDamage(tower);
             var range = sim.TowerRange(tower);
             var text = $"Damage {damage}{(damage != def.AttackDamage ? $" (base {def.AttackDamage})" : "")} every {def.AttackIntervalSeconds.ToString("0.##", CultureInfo.InvariantCulture)} s · range {range.ToString("0.0#", CultureInfo.InvariantCulture)}";
+            if (sim.IsWatchtowerBuffed(tower)) text += " (Watchtower +" + sim.Definitions.Watchtower.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture) + ")";
+            if (tower.Kind == BuildingKind.Cannon)
+                return text + $"\nHits every enemy within {sim.SplashRadius(tower).ToString("0.0#", CultureInfo.InvariantCulture)} tiles of its target";
             if (sim.HasPerk(PerkRules.LastStand)) text += sim.LastStandActive ? " · Last Stand active" : " · Last Stand below 30% Keep";
             if (sim.HasPerk(PerkRules.FlamingArrows)) text += $"\n+ burn {PerkRules.BurnDamage}/s for 3 s";
             return text;
+        }
+
+        static string WatchtowerDetails(RunSimulation sim, Building watchtower)
+        {
+            var n = sim.TowersBuffedBy(watchtower.Cell).Count;
+            var reach = sim.HasPerk(PerkRules.SignalFires) ? "within 2 tiles" : "touching it";
+            return $"+{watchtower.Definition.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range to Archer Towers and Cannons {reach} (never stacks) · boosting {n}";
+        }
+
+        static string RepairStationDetails(RunSimulation sim, BuildingDefinition d)
+        {
+            var budget = d.RepairBudget + (sim.HasPerk(PerkRules.FieldEngineers) ? PerkRules.FieldEngineersBudget : 0);
+            var keep = sim.HasPerk(PerkRules.FieldEngineers) ? ", the Keep too" : "";
+            return $"At dawn restores up to {budget} HP to damaged buildings within {d.RepairReach} tiles{keep}, weakest first";
         }
 
         /// <summary>A House/Farm's own effective daily income with the reasons it differs from base.</summary>
@@ -319,6 +363,14 @@ namespace TheLastFortress
             if (b.Kind == BuildingKind.Farm && EconomyRules.FarmHasAdjacentHouse(sim.Grid, b)) text += " · House link";
             if (b.Kind == BuildingKind.Farm && sim.HasPerk(PerkRules.EfficientFarming)) text += " · Efficient Farming";
             return text;
+        }
+
+        /// <summary>Conditional perks: whether the condition holds now (never a prediction of later nights).</summary>
+        static string Condition(RunSimulation sim, string id)
+        {
+            if (id != PerkRules.LastStand) return "";
+            var pct = sim.Keep.MaxHp > 0 ? sim.Keep.Hp * 100 / sim.Keep.MaxHp : 0;
+            return pct < PerkRules.LastStandThresholdPercent ? "\nActive now: Keep at " + pct + "%." : $"\nNot active now: Keep at {pct}% (needs below {PerkRules.LastStandThresholdPercent}%).";
         }
 
         static string Relevance(RunSimulation sim, string id)
@@ -402,8 +454,15 @@ namespace TheLastFortress
 
             // Build cards
             var canBuild = sim.State == RunState.Day && !sim.StressMode;
+            // Nothing can be built at Night: the cards fade to a faint, click-through strip so they do not hide the fight.
+            var nightCards = sim.State == RunState.Night && game.IsMvp;
+            cardGroup.alpha = Mathf.MoveTowards(cardGroup.alpha, nightCards ? NightCardAlpha : 1f, Time.unscaledDeltaTime * 4f);
+            cardGroup.blocksRaycasts = !nightCards;
             foreach (var card in cards)
             {
+                var available = defs.For(card.Kind) != null; // a legacy six-night run has no release kinds
+                if (card.Button.gameObject.activeSelf != available) card.Button.gameObject.SetActive(available);
+                if (!available) continue;
                 card.Button.interactable = canBuild;
                 card.Image.color = player.Tool == card.Kind ? CardActive : CardIdle;
                 var price = sim.PriceFor(card.Kind);
@@ -433,6 +492,8 @@ namespace TheLastFortress
                 PrimaryButton.interactable = false;
             }
 
+            if (PrimaryButton.gameObject.activeSelf == sim.IsTerminal) PrimaryButton.gameObject.SetActive(!sim.IsTerminal); // the outcome card has its own actions
+
             // Selection panel
             var sel = player.Selected;
             if (selectionPanel.activeSelf != (sel != null)) selectionPanel.SetActive(sel != null);
@@ -440,7 +501,9 @@ namespace TheLastFortress
             {
                 Set(selectionTitle, sel.Definition.DisplayName);
                 var body = sel.Definition.HasHp ? $"HP {sel.Hp} / {sel.MaxHp}   at {sel.Cell}" : $"{sel.Definition.TrapDamage} damage on entry · walkable   at {sel.Cell}";
-                if (sel.Kind == BuildingKind.Tower) body += "\n" + TowerDetails(sim, sel);
+                if (sel.Kind == BuildingKind.Tower || sel.Kind == BuildingKind.Cannon) body += "\n" + TowerDetails(sim, sel);
+                if (sel.Kind == BuildingKind.Watchtower) body += "\n" + WatchtowerDetails(sim, sel);
+                if (sel.Kind == BuildingKind.RepairStation) body += "\n" + RepairStationDetails(sim, sel.Definition);
                 if (sel.Definition.DailyIncome > 0 && campaign) body += "\n" + IncomeDetails(sim, sel);
                 if (sel.Kind == BuildingKind.Wall && sim.WallReflection(sel) > 0) body += $"\nReflects {sim.WallReflection(sel)} per hit (Spike Trap link)";
                 var day = sim.State == RunState.Day && !sim.StressMode;
@@ -470,9 +533,10 @@ namespace TheLastFortress
                 var size = def.FootprintSize > 1 ? $" ({def.FootprintSize}x{def.FootprintSize})" : "";
                 var price = sim.PriceFor(player.Tool.Value);
                 var extra = !campaign ? "" : player.Tool == BuildingKind.Wall ? " · Automatic connections" : RunSimulation.IsRotatable(player.Tool.Value) ? " · R rotates" : "";
+                var detail = campaign ? "\n" + BuildDetail(sim, def) : "";
                 Set(tooltipText, overlay.GhostValid
-                    ? $"{def.DisplayName}{size} — {price} gold\n[OK] Valid placement{extra}"
-                    : $"{def.DisplayName}{size} — {price} gold\n[X] {PlacementText.Describe(overlay.GhostRejection)}");
+                    ? $"{def.DisplayName}{size} — {price} gold\nOK: can build here{extra}{detail}"
+                    : $"{def.DisplayName}{size} — {price} gold\nCan't build: {PlacementText.Describe(overlay.GhostRejection)}");
                 tooltipText.color = overlay.GhostValid ? Palette.HudText : Palette.WarningCoral;
                 var anchor = player.HoverOverride.HasValue ? rig.CellToScreen(player.HoverOverride.Value) : player.PointerPosition;
                 if (game.IsMvp) PlaceTooltip(ScreenToCanvas(anchor));
@@ -494,7 +558,7 @@ namespace TheLastFortress
             Set(perksText, sim.OwnedPerks.Count == 0 ? "" : "Perks: " + string.Join(", ", PerkTitles(sim)));
             Enemy boss = null;
             foreach (var e in sim.Enemies)
-                if (e.Alive && e.Kind == EnemyKind.SiegeGolem) boss = e;
+                if (e.Alive && e.Definition.IsBoss) boss = e;
             var showBoss = boss != null && sim.State == RunState.Night;
             if (bossPanel.activeSelf != showBoss) bossPanel.SetActive(showBoss);
             if (showBoss)
@@ -541,6 +605,50 @@ namespace TheLastFortress
 
         const float TooltipWidth = 390f, TooltipMargin = 8f;
 
+        /// <summary>Canvas height of the build cards' top edge plus a small gap (two rows in the release).</summary>
+        float cardBarTop = 24f + 120f + 8f;
+
+        CanvasGroup cardGroup;
+
+        /// <summary>Build-card opacity during Night (MVP scenes).</summary>
+        public const float NightCardAlpha = 0.18f;
+
+        public float CardBarAlpha => cardGroup.alpha;
+
+        /// <summary>
+        /// Ghost tooltip details: the numbers a placement decision needs, from effective values. Income buildings say how
+        /// many dawns are left to pay them back (no income after the last night).
+        /// </summary>
+        static string BuildDetail(RunSimulation sim, BuildingDefinition d)
+        {
+            switch (d.Kind)
+            {
+                case BuildingKind.Tower:
+                    return $"{sim.TowerDamage(d)} damage every {d.AttackIntervalSeconds.ToString("0.##", CultureInfo.InvariantCulture)} s · range {sim.TowerRange(d).ToString("0.0#", CultureInfo.InvariantCulture)}";
+                case BuildingKind.SpikeTrap:
+                    return $"{d.TrapDamage} damage to each enemy that steps on it · walkable";
+                case BuildingKind.Wall:
+                    var heavy = sim.Definitions.Brute != null ? sim.Definitions.Brute.WallDamageMultiplier : 1;
+                    var bombers = sim.Definitions.Bomber != null ? " · Bombers blow up what blocks them" : "";
+                    return heavy > 1 ? $"Seal every route and enemies break through · Brutes/Golems hit Walls {heavy}x{bombers}" : "Seal every route and enemies break through";
+                case BuildingKind.Cannon:
+                    return $"{d.AttackDamage} damage to every enemy within {d.SplashRadius.ToString("0.0#", CultureInfo.InvariantCulture)} tiles of its target every {d.AttackIntervalSeconds.ToString("0.##", CultureInfo.InvariantCulture)} s · range {d.Range.ToString("0.0#", CultureInfo.InvariantCulture)} · 2x2";
+                case BuildingKind.Watchtower:
+                    return $"+{d.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range to Archer Towers and Cannons touching it (never stacks)";
+                case BuildingKind.RepairStation:
+                    return RepairStationDetails(sim, d) + " · 2x2";
+                case BuildingKind.House:
+                case BuildingKind.Farm:
+                    var dawns = Mathf.Max(0, sim.TotalNights - sim.NightNumber);
+                    var perDay = d.Kind == BuildingKind.Farm && sim.HasPerk(PerkRules.EfficientFarming) ? d.DailyIncome * (100 + PerkRules.EfficientFarmingPercent) / 100 : d.DailyIncome;
+                    if (dawns == 0) return "No dawns left: it would never pay";
+                    var more = d.Kind == BuildingKind.Farm ? " (more next to a House)" : "";
+                    return $"Pays at {dawns} more dawn{(dawns == 1 ? "" : "s")}: +{perDay * dawns} gold{more}";
+                default:
+                    return "";
+            }
+        }
+
         /// <summary>The tooltip's current canvas-local rectangle (x, y = bottom-left).</summary>
         public Rect TooltipCanvasRect
         {
@@ -568,7 +676,8 @@ namespace TheLastFortress
             var x = pointer.x + 28f;
             var top = pointer.y - 12f;
             if (x + size.x > canvas.x - TooltipMargin) x = pointer.x - 28f - size.x; // flip left
-            if (top - size.y < TooltipMargin) top = pointer.y + 12f + size.y; // flip above
+            var floor = game.IsMvp ? cardBarTop : TooltipMargin; // MVP: stay clear of the build cards
+            if (top - size.y < floor) top = pointer.y + 12f + size.y; // flip above
             x = Mathf.Clamp(x, TooltipMargin, Mathf.Max(TooltipMargin, canvas.x - size.x - TooltipMargin));
             top = Mathf.Clamp(top, size.y + TooltipMargin, Mathf.Max(size.y + TooltipMargin, canvas.y - TooltipMargin));
             tooltipRect.anchoredPosition = new Vector2(x, top);
@@ -665,13 +774,39 @@ namespace TheLastFortress
             img.color = Palette.Hex(0x35525C);
             var button = rt.gameObject.AddComponent<Button>();
             button.targetGraphic = img;
-            var colors = button.colors;
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-            button.colors = colors;
+            ApplyStates(button);
             button.onClick.AddListener(onClick);
+            button.onClick.AddListener(ClickSound);
             text = Label(rt, "Label", 24, TextAnchor.MiddleCenter, Vector2.zero, size, Palette.HudText, true);
             text.text = label;
             return button;
+        }
+
+        /// <summary>One state language for every button and card: hover brightens, press darkens, focus stays visible, disabled fades.</summary>
+        static void ApplyStates(Selectable selectable)
+        {
+            var colors = selectable.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.22f, 1.22f, 1.22f, 1f);
+            colors.selectedColor = new Color(1.12f, 1.12f, 1.12f, 1f);
+            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.06f;
+            selectable.colors = colors;
+        }
+
+        /// <summary>Short tactile click (hover never makes a sound).</summary>
+        void ClickSound() => game.Audio?.Play(SoundId.UiClick);
+
+        static RawImage Icon(Transform parent, Texture2D texture, Vector2 position, float size, Color tint)
+        {
+            var rt = Rect(parent, "Icon", new Vector2(0, 1), position, new Vector2(size, size));
+            var img = rt.gameObject.AddComponent<RawImage>();
+            img.texture = texture;
+            img.color = tint;
+            img.raycastTarget = false;
+            return img;
         }
 
         /// <summary>
@@ -683,29 +818,36 @@ namespace TheLastFortress
             switch (d.Kind)
             {
                 case BuildingKind.Wall: return "Blocks enemy paths";
-                case BuildingKind.Tower: return sim == null ? $"Shoots · range {d.Range:0}" : $"Shoots {sim.TowerDamage(d)} · range {sim.TowerRange(d):0.#}";
+                case BuildingKind.Tower: return sim == null ? $"Shoots · range {d.Range:0}" : $"Shoots {sim.TowerDamage(d)} · range {sim.TowerRange(d).ToString("0.#", CultureInfo.InvariantCulture)}";
                 case BuildingKind.House: return $"+{d.DailyIncome} gold per day";
                 case BuildingKind.Farm:
                     var farm = sim != null && sim.HasPerk(PerkRules.EfficientFarming) ? d.DailyIncome * (100 + PerkRules.EfficientFarmingPercent) / 100 : d.DailyIncome;
                     return $"+{farm}/day · 2x2 tiles";
-                case BuildingKind.SpikeTrap: return $"Damages enemies on it";
+                case BuildingKind.SpikeTrap: return "Hurts enemies on it";
+                case BuildingKind.Cannon: return "Splash · slow · 2x2";
+                case BuildingKind.Watchtower: return $"+{d.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range nearby";
+                case BuildingKind.RepairStation: return "Repairs at dawn · 2x2";
                 default: return "";
             }
         }
 
         Button Card(Transform parent, string title, int cost, string hotkey, Vector2 position, float width,
-            UnityEngine.Events.UnityAction onClick, out Image image, out Text costText, string effect = null)
+            UnityEngine.Events.UnityAction onClick, out Image image, out Text costText, string effect = null, Texture2D icon = null)
         {
             var rt = Rect(parent, title.Replace(" ", "") + "Card", new Vector2(0, 0), position, new Vector2(width, 120));
             image = rt.gameObject.AddComponent<Image>();
             image.color = CardIdle;
             var button = rt.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
+            ApplyStates(button);
             button.onClick.AddListener(onClick);
+            button.onClick.AddListener(ClickSound);
             var compact = effect != null;
-            Label(rt, "Title", width < 240 ? 23 : 26, TextAnchor.UpperLeft, new Vector2(16, compact ? -8 : -12), new Vector2(width - 30, 34), Palette.HudText).text = title;
+            var titleX = icon != null ? 52f : 16f;
+            if (icon != null) Icon(rt, icon, new Vector2(12, -8), 34f, Palette.HudText);
+            Label(rt, "Title", width < 240 ? 22 : 26, TextAnchor.UpperLeft, new Vector2(titleX, compact ? -10 : -12), new Vector2(width - titleX - 10, 34), Palette.HudText).text = title;
             if (compact)
-                Label(rt, "Effect", 17, TextAnchor.UpperLeft, new Vector2(16, -38), new Vector2(width - 24, 24), Palette.HudText.WithAlpha(0.75f)).text = effect;
+                Label(rt, "Effect", 18, TextAnchor.UpperLeft, new Vector2(16, -38), new Vector2(width - 24, 24), Palette.HudText.WithAlpha(0.75f)).text = effect;
             costText = Label(rt, "Cost", compact ? 25 : 28, TextAnchor.UpperLeft, new Vector2(16, compact ? -70 : -52), new Vector2(width - 90, 40), Palette.Amber);
             costText.text = $"{cost} gold";
             var keyX = width - 62;

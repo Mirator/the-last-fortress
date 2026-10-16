@@ -1,4 +1,4 @@
-# The Last Fortress — navigation prototype and six-night MVP
+# The Last Fortress — navigation prototype, six-night MVP and twelve-night release profile
 
 One-wave proof for plan `plans/001-navigation-prototype.md` and specification `specs/002-navigation-prototype.md`: buy Walls and Archer Towers, preview the route, start one Grunt wave, watch automatic combat, win or lose, restart. The six-night MVP (`specs/003`, plans 003–005) is a separate scene; see **Six-night MVP** below.
 
@@ -75,7 +75,7 @@ Example measurement on the reference machine:
 
 ## Current limitations
 
-- Primitive blockout art only; no audio. HUD text uses the built-in legacy font (TMP Essentials not imported, to keep assets inside `Assets/TheLastFortress/`). SVG icons from `design/icons/` are not imported; simple shapes stand in for them.
+- Primitive blockout art. The one-wave prototype scene has no audio; the MVP has synthesized audio (see below). HUD text uses the built-in legacy font (TMP Essentials not imported, to keep assets inside `Assets/TheLastFortress/`). The SVGs in `design/icons/` are not imported as SVG. The MVP HUD uses PNGs rasterized from them (`UI/Icons`).
 - Units overlap visually; there is no crowd avoidance (by spec).
 - Overlay lines can be hidden behind tall Towers; the BREACH label is screen-space, so it stays visible.
 - Real frame deltas above 0.25 s are not caught up (prevents a spiral after hitches). Simulation results do not depend on frame rate.
@@ -88,13 +88,18 @@ Scene `Assets/TheLastFortress/Scenes/Mvp.unity` (content `Data/MvpContent.asset`
 | Input | Action |
 |---|---|
 | `1`–`5` or cards | Wall 20, Archer Tower 70, House 40, Farm 60 (2 x 2), Spike Trap 35 |
+| Right mouse drag | Move around the map (the board follows the pointer, move cursor while dragging); a right click without dragging still cancels the tool |
 | `R` | Rotate the Tower/House/Farm ghost, or the selected one (cosmetic; Walls auto-connect, Traps have no facing) |
 | Selection panel | Sell (floor(price/2)), Repair (5 HP per gold, exact quote), Rotate — Day only |
 | Reward cards | Choose one of three perks after Nights 1–5 |
-| **Menu** (top-right) | Resume, Save and Quit (Day only, back to the menu), Settings; **Restart** = retry the same seed from Day 1 (asks to confirm once the run has progressed; immediate after Victory/Defeat or on an untouched Day 1) |
+| **Menu** (top-right) | Resume, Save and Quit (Day only, back to the menu), Settings, Help; **Restart** = retry the same seed from Day 1 (asks to confirm once the run has progressed; immediate after Victory/Defeat or on an untouched Day 1) |
+| **Help** (top-right) | Goal, rules in brief and the full controls list; **Show guide** resumes the first-run guide |
+| Guide (top-right, first run) | Five skippable steps that advance only when the action has happened: build a Tower, inspect its range, optional income, Start Night, choose a reward. **Hide** closes it for now; **Skip guide** saves that choice in `profile.json` |
 | **Quit game** (menu) | Exits directly when nothing is unsaved; with unsaved Day changes offers Save and exit / Exit without these changes / Cancel (exits only after the save succeeds); during Night/Reward explains that Continue replays the night from its Day checkpoint |
 
-Launch opens the menu: New Run (optional seed, invariant unsigned decimal), Continue (returns to the start of the current night), Recover backup (only offered when the latest save is damaged), Settings, Quit. Saves live in `%USERPROFILE%/AppData/LocalLow/DefaultCompany/The Last Fortress/Mvp/` (`run.json`, `run.json.bak`, `run-N.json` for runs started after a damaged save, `settings.json`).
+Launch opens the title menu over a staged settlement: New Run (**Seed…** reveals the optional seed, invariant unsigned decimal), Continue (returns to the start of the current night), Recover backup (only offered when the latest save is damaged), Settings, Help, Credits, Quit, plus the version and build id for bug reports. Saves live in `%USERPROFILE%/AppData/LocalLow/DefaultCompany/The Last Fortress/Mvp/` (`run.json`, `run.json.bak`, `run-N.json` for runs started after a damaged save, `settings.json` v2 with volumes, `profile.json` for the guide). If you already had run saves when the guide was added, it starts skipped.
+
+Audio (MVP): 28 clips synthesized by `Assets/TheLastFortress/Audio/Source~/synth.py`. Provenance is in `Audio/credits.md`. Settings has Master/Music/Effects volume; changes play at once, and 0 is silence. `AudioDirector` gets the same event batch as the world view, once per frame. It allows at most 24 voices, at most 4 of one sound, and two music tracks during a crossfade. Combat sounds pause with the night, and arrow impacts sound when the drawn arrow lands. **The mix has not been listened to yet.** Regenerating clips or icons: run the scripts, then **The Last Fortress > Link Audio and Icons** (batch: `-executeMethod TheLastFortress.Editor.PresentationSetup.Run`).
 
 Editor: **The Last Fortress > Setup MVP Scene** (idempotent; never overwrites `MvpDefinitions.asset`, only fills newly added enemy kinds) and **The Last Fortress > Build MVP** → `Builds/Mvp/TheLastFortress.exe` (Windows x64, non-development, `Mvp.unity` only). Batch: `-executeMethod TheLastFortress.Editor.BuildMvp.BuildWindows`.
 
@@ -106,5 +111,29 @@ Editor: **The Last Fortress > Setup MVP Scene** (idempotent; never overwrites `M
 | `-saves <dir>` | Save directory override (tests, captures) |
 | `-stress [-measure <file>]` | Labeled MVP stress fixture: 100 maintained enemies (per entry 15 Grunt, 5 Runner, 4 Brute, 1 Golem), invulnerable Keep/Walls, debug House/Farm/Trap |
 | `-capture <dir>` | Evidence screenshots (use with `-saves`) and quit |
+| `-capture <dir> -offscreen` | The same, but rendered into a texture: works with a hidden or minimized window (`Start-Process -WindowStyle Hidden`) |
+| `-capture-set 007` | Only the plan 007 sequence: title, guide, Help, Credits, Settings, announcements, Nights 4 and 6 at 1x with audio voice statistics, five Menu → New Run → end cycles. It writes `<res>-007-capture-log.txt` |
 
 PlayMode tests set `SaveStore.DirectoryOverride` to a temp folder; storage tests use temp folders. Live-Editor test runs export XML to `TestResults/` as before.
+
+## Twelve-night release profile (plan 008)
+
+A third scene, `Assets/TheLastFortress/Scenes/Release.unity`, plays the plan 008 rules (`plans/008-rules.md`): twelve stored nights, nine building kinds (adds **Cannon**, **Watchtower**, **Repair Station**), seven enemy kinds (adds **Raider Archer**, **Bomber**, **Siege Commander**), a 24-perk reward pool and three map profiles. The six-night MVP scene, its tuning and its saves are unchanged and remain the regression build.
+
+| Input | Action |
+|---|---|
+| `1`–`8` or the two rows of cards | Wall, Archer Tower, House, Farm, Spike Trap, Cannon, Watchtower, Repair Station |
+| **Map: …** (title, next to New Run) | Cycles the map profile for the next New Run: Ravine (corridors), Crossing (split fronts at river fords), Meadow (open economy) |
+| Hover a Cannon/Tower ghost or select one | Range ring from the simulation (perks and the Watchtower bonus included) |
+| Watchtower ghost / selection | Outlines the towers it boosts (+1 range, never stacks) |
+| Repair Station ghost / selection | The square it repairs at dawn |
+
+- Saves share the MVP folder. A six-night save **continues in the release build as six nights under its own rules** (release cards are hidden for it); an MVP build reports a twelve-night save as incompatible and never overwrites it. Release runs save checkpoint schema 2.
+- Tuning: `Data/ReleaseDefinitions.asset` (created once by setup; never overwritten). Map profiles, the night table and perks are code (`Runtime/Core/MapProfiles.cs`, `ReleaseCampaign.cs`, `PerkRules.cs`).
+- Setup: **The Last Fortress > Setup Release Scene** (or `-executeMethod TheLastFortress.Editor.ReleaseSetup.SetupBatch`). Requires the MVP setup first. It regenerates only the `Prefabs/Release*.prefab` blockouts that the content asset still points to. Note: it calls the shared material generator, which rewrites a few MVP `.mat` files without visual change; restore them from git if they show up as modified.
+- Validate: `-batchmode -nographics -quit -executeMethod TheLastFortress.Editor.ReleaseContentValidation.ValidateAll` → `TestResults/008/release-validation.txt`; throws on any error.
+- Build: `-batchmode -nographics -quit -executeMethod TheLastFortress.Editor.BuildRelease.BuildWindows` → `Builds/Release/TheLastFortress.exe` + `build-report.txt` (validates first, release scene only).
+- Extra command-line options: `-map ravine|crossing|meadow` (New Run map); `-capture <dir> -offscreen` in the release build runs the plan 008 evidence sequence (`<res>-008-capture-log.txt`).
+- G0 diagnostic: `-executeMethod TheLastFortress.Editor.TacticsDiagnostic.Run` → `TestResults/008/tactics-diagnostic.txt`.
+
+Art and audio for the new kinds are generated blockouts and reused 007 clips; see `plans/008-art-and-audio-bible.md`. Human validation of the release is pending (`plans/008-results.md`).

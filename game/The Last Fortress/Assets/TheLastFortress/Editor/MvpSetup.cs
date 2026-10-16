@@ -104,6 +104,7 @@ namespace TheLastFortress.Editor
             content.winningLayout = null;
             content.losingLayout = null;
             content.stressLayout = prototype.stressLayout;
+            PresentationSetup.Link(content); // audio and HUD icons (optional; absent files stay silent / text-only)
             EditorUtility.SetDirty(content);
             AssetDatabase.SaveAssets();
 

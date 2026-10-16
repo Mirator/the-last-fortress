@@ -5,20 +5,31 @@ using System.Globalization;
 namespace TheLastFortress
 {
     /// <summary>
-    /// Versioned plain-data Day checkpoint (schema v1). Stable definition IDs only; uint values are invariant decimal strings.
+    /// Versioned plain-data Day checkpoint. Schema 1 is the six-night MVP (unchanged since plan 005); schema 2 (plan 008)
+    /// adds the rules profile: campaign, content version, map profile and difficulty. Stable definition IDs only; uint
+    /// values are invariant decimal strings.
     /// Holds the actual terrain and wave plans so resume never reruns an evolved generator. Never deserialized into the
     /// live world: <see cref="CheckpointCodec.Restore"/> validates everything and builds a fresh simulation.
     /// </summary>
     [Serializable]
     public sealed class RunCheckpoint
     {
-        public const int CurrentSchema = 1;
+        /// <summary>Newest schema this build writes (release profiles). The MVP keeps writing <see cref="MvpSchema"/>.</summary>
+        public const int CurrentSchema = 2;
+
+        public const int MvpSchema = 1;
 
         // Defaults are deliberately invalid so an empty or truncated JSON object is rejected, not read as version 1.
         public int schemaVersion;
         public string rulesVersion = "";
         public string seed = "0";
         public string profile = "";
+
+        // Schema 2 (plan 008): which rules profile the run plays. Absent (empty) in schema 1, which implies the six-night MVP.
+        public string campaignId = "";
+        public int contentVersion;
+        public string mapProfile = "";
+        public string difficulty = "";
         public bool flatMap;
         public bool mapFallback;
         public int mapAttempt = -1;
@@ -102,8 +113,8 @@ namespace TheLastFortress
     /// <summary>Conversion between a live Day simulation and <see cref="RunCheckpoint"/>, with full validation on load.</summary>
     public static class CheckpointCodec
     {
-        /// <summary>Bump when rules/tuning semantics change; old saves are then rejected, never converted.</summary>
-        public const string RulesVersion = "mvp-rules-1";
+        /// <summary>The six-night MVP rules. Bump a profile's version when its semantics change; old saves are then rejected, never converted.</summary>
+        public const string RulesVersion = MvpCampaign.RulesVersion;
 
         static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
@@ -117,12 +128,18 @@ namespace TheLastFortress
             if (sim.State != RunState.Day) throw new InvalidOperationException("Checkpoints are Day-only.");
             if (!sim.IsCampaign) throw new InvalidOperationException("Only campaign runs are saved.");
             var cfg = sim.Config;
+            var campaign = sim.Campaign;
+            var release = campaign.RulesVersion != MvpCampaign.RulesVersion;
             var cp = new RunCheckpoint
             {
-                schemaVersion = RunCheckpoint.CurrentSchema,
-                rulesVersion = RulesVersion,
+                schemaVersion = release ? RunCheckpoint.CurrentSchema : RunCheckpoint.MvpSchema,
+                rulesVersion = campaign.RulesVersion,
                 seed = U(cfg.Seed),
-                profile = sim.Campaign.Label ?? "",
+                profile = campaign.Label ?? "",
+                campaignId = release ? campaign.CampaignId : "",
+                contentVersion = release ? ReleaseCampaign.ContentVersion : 0,
+                mapProfile = release ? campaign.MapProfile ?? "" : "",
+                difficulty = release ? campaign.Difficulty ?? "" : "",
                 flatMap = cfg.Terrain == null || cfg.Terrain.Authored,
                 mapFallback = cfg.Terrain != null && cfg.Terrain.Fallback,
                 mapAttempt = cfg.Terrain?.Attempt ?? -1,
@@ -186,13 +203,17 @@ namespace TheLastFortress
         /// Validates the record completely, then builds and returns a fresh simulation at the checkpoint Day. On any problem
         /// returns null with a reason; nothing outside the returned object is touched.
         /// </summary>
-        public static RunSimulation Restore(RunCheckpoint cp, PrototypeDefinitions defs, out CheckpointProblem problem, out string message)
+        public static RunSimulation Restore(RunCheckpoint cp, PrototypeDefinitions defs, out CheckpointProblem problem, out string message) =>
+            Restore(cp, new RulesCatalog(RulesProfile.SixNights(defs)), out problem, out message);
+
+        /// <summary>Restores with the profiles this build ships; a save of any other profile is incompatible and untouched.</summary>
+        public static RunSimulation Restore(RunCheckpoint cp, RulesCatalog catalog, out CheckpointProblem problem, out string message)
         {
             problem = CheckpointProblem.Invalid;
             message = null;
             try
             {
-                return RestoreUnchecked(cp, defs, out problem, out message);
+                return RestoreUnchecked(cp, catalog, out problem, out message);
             }
             catch (Exception e)
             {
@@ -209,13 +230,55 @@ namespace TheLastFortress
             return null;
         }
 
-        static RunSimulation RestoreUnchecked(RunCheckpoint cp, PrototypeDefinitions defs, out CheckpointProblem problem, out string message)
+        /// <summary>
+        /// Resolves the save's rules profile. Schema 1 is always the six-night MVP; schema 2 names its profile; anything else
+        /// is from a newer build. Never converts a save into another profile.
+        /// </summary>
+        static RulesProfile ResolveProfile(RunCheckpoint cp, RulesCatalog catalog, out CheckpointProblem problem, out string message)
+        {
+            problem = CheckpointProblem.None;
+            message = null;
+            RulesProfile profile;
+            if (cp.schemaVersion == RunCheckpoint.MvpSchema)
+            {
+                profile = cp.rulesVersion == MvpCampaign.RulesVersion ? catalog.Find(MvpCampaign.RulesVersion, MvpCampaign.CampaignId) : null;
+                if (profile == null)
+                {
+                    problem = CheckpointProblem.IncompatibleRules;
+                    message = $"Save uses rules '{cp.rulesVersion}', this build does not include them. The file was left untouched.";
+                }
+
+                return profile;
+            }
+
+            if (cp.schemaVersion != RunCheckpoint.CurrentSchema)
+            {
+                problem = CheckpointProblem.UnknownSchema;
+                message = $"Unknown save schema {cp.schemaVersion} (this build reads {RunCheckpoint.MvpSchema}-{RunCheckpoint.CurrentSchema}). " +
+                          "It was probably made by a newer version; the file was left untouched — update the game to continue it.";
+                return null;
+            }
+
+            profile = catalog.Find(cp.rulesVersion, cp.campaignId);
+            if (profile == null || cp.contentVersion != profile.ContentVersion)
+            {
+                problem = CheckpointProblem.IncompatibleRules;
+                message = $"Save uses rules '{cp.rulesVersion}' / campaign '{cp.campaignId}' (content {cp.contentVersion}), which this build does not include. The file was left untouched.";
+                return null;
+            }
+
+            return profile;
+        }
+
+        static RunSimulation RestoreUnchecked(RunCheckpoint cp, RulesCatalog catalog, out CheckpointProblem problem, out string message)
         {
             if (cp == null) return Fail("Save is empty.", out problem, out message);
-            if (cp.schemaVersion != RunCheckpoint.CurrentSchema)
-                return Fail($"Unknown save schema {cp.schemaVersion} (this build reads {RunCheckpoint.CurrentSchema}).", out problem, out message, CheckpointProblem.UnknownSchema);
-            if (cp.rulesVersion != RulesVersion)
-                return Fail($"Save uses rules '{cp.rulesVersion}', this build uses '{RulesVersion}'.", out problem, out message, CheckpointProblem.IncompatibleRules);
+            var profile = ResolveProfile(cp, catalog, out problem, out message);
+            if (profile == null) return null;
+            var defs = profile.Definitions;
+            var release = cp.schemaVersion == RunCheckpoint.CurrentSchema;
+            if (release && cp.mapProfile != "" && !MapProfiles.IsKnown(cp.mapProfile)) return Fail($"Unknown map profile '{cp.mapProfile}'.", out problem, out message);
+            if (release && cp.difficulty != "standard") return Fail($"Unknown difficulty '{cp.difficulty}'.", out problem, out message);
             if (cp.status != "Active")
                 return Fail($"This run already ended ({cp.status}).", out problem, out message, CheckpointProblem.Terminal);
             if (!TryParseU(cp.seed, out var seed)) return Fail("Bad seed.", out problem, out message);
@@ -224,7 +287,7 @@ namespace TheLastFortress
             // Terrain
             const int cells = GridCoordinates.Size * GridCoordinates.Size;
             if (cp.terrain == null || cp.terrain.Length != cells) return Fail("Terrain size mismatch.", out problem, out message);
-            var map = new TerrainMap { Seed = seed, Attempt = cp.mapAttempt, Fallback = cp.mapFallback, Authored = cp.flatMap };
+            var map = new TerrainMap { Seed = seed, Attempt = cp.mapAttempt, Fallback = cp.mapFallback, Authored = cp.flatMap, Profile = release ? cp.mapProfile : "" };
             for (var i = 0; i < cells; i++)
             {
                 if (cp.terrain[i] < 0 || cp.terrain[i] > (int)TerrainType.Water) return Fail("Unknown terrain type.", out problem, out message);
@@ -252,7 +315,7 @@ namespace TheLastFortress
                 long last = 0;
                 foreach (var s in n.spawns)
                 {
-                    if (s == null || s.tick < last || s.entry < 0 || s.entry >= entries.Length || s.kind < 0 || s.kind > (int)EnemyKind.SiegeGolem)
+                    if (s == null || s.tick < last || s.entry < 0 || s.entry >= entries.Length || s.kind < 0 || s.kind > (int)EnemyKind.SiegeCommander)
                         return Fail("Malformed spawn.", out problem, out message);
                     if (entries[s.entry] != new GridPos(s.x, s.z) || defs.EnemyFor((EnemyKind)s.kind) == null)
                         return Fail("Spawn does not match its entry or definitions.", out problem, out message);
@@ -271,7 +334,7 @@ namespace TheLastFortress
             var perks = cp.perks ?? new string[0];
             var perkSet = new HashSet<string>();
             foreach (var p in perks)
-                if (!PerkRules.IsKnown(p) || !perkSet.Add(p)) return Fail($"Unknown or duplicate perk '{p}'.", out problem, out message);
+                if (!PerkRules.InPool(profile.PerkPool, p) || !perkSet.Add(p)) return Fail($"Unknown or duplicate perk '{p}'.", out problem, out message);
             if (perks.Length > cp.checkpointNight - 1) return Fail("More perks than cleared nights.", out problem, out message);
 
             RewardOffer pending = null;
@@ -282,7 +345,7 @@ namespace TheLastFortress
                     return Fail("Malformed pending reward offer.", out problem, out message);
                 var ids = new HashSet<string>();
                 foreach (var p in o.perks)
-                    if (!PerkRules.IsKnown(p) || perkSet.Contains(p) || !ids.Add(p)) return Fail("Pending offer lists an invalid perk.", out problem, out message);
+                    if (!PerkRules.InPool(profile.PerkPool, p) || perkSet.Contains(p) || !ids.Add(p)) return Fail("Pending offer lists an invalid perk.", out problem, out message);
                 if (!TryParseU(o.rngBefore, out var before) || !TryParseU(o.rngAfter, out var after) || after == 0)
                     return Fail("Pending offer RNG state invalid.", out problem, out message);
                 pending = new RewardOffer { ClearedNight = o.clearedNight, OfferId = o.offerId, PerkIds = (string[])o.perks.Clone(), RngBefore = before, RngAfter = after };
@@ -300,7 +363,12 @@ namespace TheLastFortress
             var config = new RunConfig
             {
                 Definitions = defs, Seed = seed, Terrain = map,
-                Campaign = new CampaignConfig { Label = cp.profile ?? "", Nights = nights, OffersRewards = true },
+                Campaign = new CampaignConfig
+                {
+                    Label = cp.profile ?? "", Nights = nights, OffersRewards = true,
+                    RulesVersion = profile.RulesVersion, CampaignId = profile.CampaignId, PerkPool = profile.PerkPool,
+                    MapProfile = release ? cp.mapProfile : "", Difficulty = release ? cp.difficulty : "standard",
+                },
             };
             var sim = new RunSimulation(config); // fresh object; the live run is untouched whatever happens below
             var error = sim.ApplyCheckpoint(cp, perks, pending, history, rngState);

@@ -291,6 +291,14 @@ namespace TheLastFortress.Tests
             var stored = game.Persistence.Store.ReadSettings(out var problem);
             Assert.IsNull(problem);
             Assert.AreEqual((1.5f, false), (stored.cameraSensitivity, stored.cameraShake), "persisted separately from the run");
+
+            // Master volume to zero: real silence at once (preview), persisted on save.
+            for (var i = 0; i < 12; i++) panel.Find("Mastervolume<Button").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+            Assert.AreEqual(0f, AudioListener.volume, "preview mutes immediately");
+            Assert.AreEqual(0f, game.Audio.EffectiveSfxVolume);
+            panel.Find("SavesettingsButton").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+            Assert.AreEqual(0f, game.Persistence.Store.ReadSettings(out _).masterVolume, "mute persisted");
+            Assert.AreEqual(0f, game.Settings.masterVolume);
         }
 
         [UnityTest]
@@ -322,21 +330,32 @@ namespace TheLastFortress.Tests
             Assert.IsFalse(game.World.HasEnemyView(first.Id), "dead enemy removed from the board");
             Assert.IsTrue(game.World.ArrowTargets().Any(t => Flat(t, deathAt) < 0.01f), "lethal shot still gets an arrow to where the target died");
 
-            // Pause and menu suspend combat presentation: nothing moves, lands or appears.
+            // Pause and menu suspend combat presentation: nothing moves, lands or appears — and no impact sound plays early.
             var frozen = game.World.ArrowPositions().ToList();
+            var impacts = game.Audio.PlayCount(SoundId.Impact);
+            var pendingImpacts = game.Audio.PendingCount;
+            Assert.Greater(pendingImpacts, 0, "the in-flight arrow's impact is scheduled for its landing");
             game.Sim.SetPaused(true);
             game.SyncViews(0.5f);
             CollectionAssert.AreEqual(frozen, game.World.ArrowPositions().ToList(), "paused: arrows hold");
+            Assert.IsTrue(game.Audio.CombatPaused, "combat sounds pause with the night");
             game.Sim.SetPaused(false);
             game.OpenMenu();
             game.SyncViews(0.5f);
             CollectionAssert.AreEqual(frozen, game.World.ArrowPositions().ToList(), "menu open: arrows hold");
             Assert.IsFalse(game.World.VisibleCues().Any(c => c.kind == CueKind.Kill), "the kill cue waits for its arrow");
+            Assert.AreEqual((impacts, pendingImpacts), (game.Audio.PlayCount(SoundId.Impact), game.Audio.PendingCount), "impacts wait with their arrows");
             game.CloseMenu();
 
             game.SyncViews(WorldView.ArrowSeconds + 0.01f);
             Assert.IsTrue(game.World.VisibleCues().Any(c => c.kind == CueKind.Kill && Flat(c.position, deathAt) < 0.01f), "kill cue at the recorded death position");
             Assert.IsTrue(game.World.VisibleCues().Any(c => c.kind == CueKind.Hit), "landing arrows show hit cues");
+            Assert.IsFalse(game.Audio.CombatPaused);
+            Assert.Greater(game.Audio.PlayCount(SoundId.Impact), impacts, "the impact sounds when its arrow lands");
+            Assert.AreEqual(game.World.EventsSeen, game.Audio.EventsConsumed, "world and audio received the same events");
+            Assert.AreEqual(game.World.BatchesSeen, game.Audio.BatchesConsumed, "one batch per frame for both");
+            Assert.LessOrEqual(game.Audio.ActiveVoicesOf(SoundId.Impact), AudioDirector.MaxPerFamily);
+
 
             // The last kill's effects finish after the night ends instead of being stranded.
             for (var i = 0; i < 20000 && game.Sim.State == RunState.Night; i++) game.Sim.Step();
@@ -388,6 +407,57 @@ namespace TheLastFortress.Tests
                 Assert.LessOrEqual(b.anchoredPosition.y, bodyBottom, $"{button.name} sits below the details");
                 Assert.GreaterOrEqual(game.Hud.SelectionPanelRect.sizeDelta.y, -(b.anchoredPosition.y - b.sizeDelta.y), $"{button.name} inside the panel");
             }
+        }
+
+        [UnityTest]
+        public IEnumerator GuideAdvancesOnRealActionsSkipPersistsAndContinueLeavesCheckpointUntouched()
+        {
+            yield return null;
+            Assert.IsFalse(game.Hud.GameplayLayer.activeSelf, "the title shows only the world and its menu");
+            game.NewRun(7, flat: true);
+            game.AutoAdvance = false;
+            game.SyncViews();
+            Assert.IsTrue(game.Hud.GameplayLayer.activeSelf);
+            StringAssert.Contains("GUIDE 1 / 5", game.Hud.GuideText, "a first run starts the guide");
+
+            // An invalid placement completes nothing; a real Tower does.
+            yield return Press(Key.Digit2);
+            yield return Click(game.CameraRig.CellToScreen(new GridPos(10, 10))); // onto the Keep: rejected
+            Assert.AreNotEqual(PlacementRejection.None, game.Player.LastRejection, "the click really attempted a placement");
+            Assert.AreEqual(0, game.Sim.Stats.BuildingsPurchased);
+            StringAssert.Contains("GUIDE 1 / 5", game.Hud.GuideText, "a rejected placement does not advance");
+            Assert.AreEqual(PlacementRejection.None, game.Sim.TryPlace(BuildingKind.Tower, new GridPos(4, 9), out var tower));
+            game.SyncViews();
+            StringAssert.Contains("GUIDE 2 / 5", game.Hud.GuideText);
+            game.Player.Select(tower);
+            game.SyncViews();
+            StringAssert.Contains("GUIDE 3 / 5", game.Hud.GuideText, "inspecting the Tower shows its range");
+
+            game.Hud.SkipGuideButton.onClick.Invoke();
+            game.SyncViews();
+            Assert.IsNull(game.Hud.GuideText, "Skip hides the guide");
+            Assert.IsTrue(game.Persistence.Store.ReadProfile().skipped, "and is saved apart from the run");
+            Assert.IsTrue(game.StartNight(), "the guide never blocks Start Night");
+            game.QuitToMenuWithoutSaving();
+
+            // Continue: the old run resumes without the guide and without rewriting its checkpoint.
+            var file = game.Persistence.Store.SlotPath(game.Persistence.Store.LatestSlot());
+            var durable = File.ReadAllBytes(file);
+            var music = game.Audio.MusicClip;
+            for (var i = 0; i < 3; i++)
+            {
+                game.OpenMenu();
+                game.SyncViews(0.1f);
+            }
+
+            Assert.LessOrEqual(game.Audio.MusicTracks, AudioDirector.MaxMusicTracks, "reopening the menu never stacks music");
+            Assert.AreSame(music, game.Audio.MusicClip);
+            game.Hud.ContinueButton.onClick.Invoke();
+            game.SyncViews();
+            Assert.AreEqual(RunState.Day, game.Sim.State, "continues at the Day checkpoint before that night");
+            Assert.IsNull(game.Hud.GuideText);
+            CollectionAssert.AreEqual(durable, File.ReadAllBytes(file), "Continue does not mutate the checkpoint");
+            yield return null;
         }
 
         void Choose(string label)

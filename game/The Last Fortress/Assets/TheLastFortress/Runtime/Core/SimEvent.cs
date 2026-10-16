@@ -22,6 +22,22 @@ namespace TheLastFortress
         OfferCreated,
         PerkAcquired,
         BurnTick,
+
+        // Plan 008 (release profile).
+        /// <summary>A Cannon shot also hit this enemy (source Cannon, target enemy). The primary hit is the TowerShot.</summary>
+        SplashHit,
+
+        /// <summary>A Raider Archer's shot (source enemy, target building; positions archer → building centre).</summary>
+        RangedShot,
+
+        /// <summary>A Bomber reached its target and lit its fuse (source enemy, target building).</summary>
+        FuseLit,
+
+        /// <summary>A Bomber exploded at its cell (source enemy, target building or -1; positions = blast centre).</summary>
+        BomberDetonated,
+
+        /// <summary>A Repair Station spent its dawn budget (source station, target = HP restored in total).</summary>
+        DawnRepair,
     }
 
     /// <summary>Notification for presentation adapters. Simulation state stays authoritative.</summary>

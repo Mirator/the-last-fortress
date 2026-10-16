@@ -26,6 +26,12 @@ namespace TheLastFortress
         /// <summary>True for the explicitly selected flat authored map (not a generation result).</summary>
         public bool Authored;
 
+        /// <summary>Plan 008 map profile that produced it ("" for the MVP generator or the flat map).</summary>
+        public string Profile = "";
+
+        /// <summary>Plan 008: which of the 8 board symmetries (rotations/mirrors) was applied to the profile layout.</summary>
+        public int Symmetry;
+
         public TerrainType this[GridPos c] => Cells[c.Z * GridCoordinates.Size + c.X];
 
         public List<GridPos> ImpassableCells()
@@ -38,7 +44,10 @@ namespace TheLastFortress
 
         public static TerrainMap Flat() => new TerrainMap { Authored = true };
 
-        public string Describe() => Authored ? "flat authored map" : Fallback ? $"seed {Seed}: FALLBACK flat map (20 attempts invalid)" : $"seed {Seed}: generated (attempt {Attempt})";
+        public string Describe() =>
+            Authored ? "flat authored map"
+            : Profile != "" ? (Fallback ? $"{Profile} seed {Seed}: FALLBACK skeleton (20 attempts invalid)" : $"{Profile} seed {Seed}: generated (attempt {Attempt})")
+            : Fallback ? $"seed {Seed}: FALLBACK flat map (20 attempts invalid)" : $"seed {Seed}: generated (attempt {Attempt})";
     }
 
     /// <summary>

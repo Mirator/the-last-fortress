@@ -147,6 +147,31 @@ namespace TheLastFortress.Tests
             yield return Click(Screen(0, 6));
             Assert.AreEqual(PlacementRejection.ReservedRing, game.Player.LastRejection);
 
+            // Right drag pans like grabbing the board (the ground point stays under the pointer) and keeps the tool.
+            var from = Screen(8, 8);
+            var to = from + new Vector2(140, -60);
+            Assert.IsTrue(game.CameraRig.TryScreenToWorld(from, out var grabbed));
+            var focus = game.CameraRig.Focus;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = from });
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = from }.WithButton(MouseButton.Right, true));
+            yield return null;
+            for (var i = 1; i <= 4; i++)
+            {
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = Vector2.Lerp(from, to, i / 4f) }.WithButton(MouseButton.Right, true));
+                yield return null;
+            }
+
+            Assert.IsTrue(game.CameraRig.IsDragging);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = to });
+            yield return null;
+            yield return null;
+            Assert.IsFalse(game.CameraRig.IsDragging);
+            Assert.Greater((game.CameraRig.Focus - focus).magnitude, 0.5f, "right drag moves the camera");
+            Assert.IsTrue(game.CameraRig.TryScreenToWorld(to, out var under));
+            Assert.Less(new Vector2(under.x - grabbed.x, under.z - grabbed.z).magnitude, 0.05f, "the grabbed ground point follows the pointer");
+            Assert.AreEqual(BuildingKind.Tower, game.Player.Tool, "a drag is not a cancel click");
+
             yield return Click(Screen(5, 5), MouseButton.Right);
             Assert.IsNull(game.Player.Tool, "right click cancels the tool");
             Assert.IsFalse(game.World.BuildGridVisible);
@@ -219,7 +244,8 @@ namespace TheLastFortress.Tests
 
             var focus = game.CameraRig.Focus;
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.D));
-            for (var i = 0; i < 10; i++) yield return null;
+            // Pan speed follows real frame time: hold the key until it moves (bounded), not for a fixed frame count.
+            for (var i = 0; i < 600 && (game.CameraRig.Focus - focus).magnitude <= 0.05f; i++) yield return null;
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
             Assert.Greater((game.CameraRig.Focus - focus).magnitude, 0.05f, "camera pans while paused");

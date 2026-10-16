@@ -3,7 +3,11 @@ using UnityEngine.InputSystem;
 
 namespace TheLastFortress
 {
-    /// <summary>Fixed-orientation orthographic camera: pan and zoom, no rotation.</summary>
+    /// <summary>
+    /// Fixed-orientation orthographic camera: pan (WASD/arrows or right-button drag) and zoom, no rotation.
+    /// Dragging "grabs" the board: the ground point under the pointer stays under it. A right press that moves less
+    /// than <see cref="DragThresholdPixels"/> is still a plain right click (cancel), see <see cref="RightReleaseWasDrag"/>.
+    /// </summary>
     [RequireComponent(typeof(Camera))]
     public sealed class CameraRig : MonoBehaviour
     {
@@ -17,6 +21,19 @@ namespace TheLastFortress
         Vector3 focus = DefaultFocus;
         float size = DefaultSize;
         float shake;
+        bool dragArmed, dragging;
+        Vector2 dragStart, dragLast;
+
+        /// <summary>Pointer travel before a held right button becomes a pan drag instead of a click.</summary>
+        public const float DragThresholdPixels = 6f;
+
+        /// <summary>Cursor shown while dragging (MVP content; null keeps the system cursor).</summary>
+        public Texture2D PanCursor { get; set; }
+
+        public bool IsDragging => dragging;
+
+        /// <summary>True on the frame the right button is released after a drag: that release is not a cancel click.</summary>
+        public bool RightReleaseWasDrag { get; private set; }
 
         /// <summary>Settings multiplier for pan speed and zoom step (MVP settings; 1 = prototype behavior).</summary>
         public float Sensitivity { get; set; } = 1f;
@@ -77,11 +94,39 @@ namespace TheLastFortress
                 var right = rot * Vector3.right;
                 var forward = rot * Vector3.forward;
                 focus += (right * move.x + forward * move.y).normalized * (PanSpeed * Sensitivity * dt * size / DefaultSize);
-                focus.x = Mathf.Clamp(focus.x, -2f, 22f);
-                focus.z = Mathf.Clamp(focus.z, -2f, 22f);
+                ClampFocus();
             }
 
-            if (mouse != null && !pointerOverUi)
+            RightReleaseWasDrag = false;
+            if (mouse != null)
+            {
+                var pointer = mouse.position.ReadValue();
+                if (mouse.rightButton.wasPressedThisFrame && !pointerOverUi)
+                {
+                    dragArmed = true;
+                    dragStart = dragLast = pointer;
+                }
+
+                if (dragArmed && mouse.rightButton.isPressed)
+                {
+                    if (!dragging && (pointer - dragStart).sqrMagnitude >= DragThresholdPixels * DragThresholdPixels) SetDragging(true);
+                    if (dragging && pointer != dragLast && TryScreenToWorld(dragLast, out var from) && TryScreenToWorld(pointer, out var to))
+                    {
+                        focus += new Vector3(from.x - to.x, 0f, from.z - to.z);
+                        ClampFocus();
+                    }
+
+                    if (dragging) dragLast = pointer; // until the threshold, travel is kept, so the grab starts exact
+                }
+
+                if (mouse.rightButton.wasReleasedThisFrame)
+                {
+                    RightReleaseWasDrag = dragging;
+                    CancelDrag();
+                }
+            }
+
+            if (mouse != null && !pointerOverUi && !dragging)
             {
                 var scroll = mouse.scroll.ReadValue().y;
                 if (Mathf.Abs(scroll) > 0.01f) size = Mathf.Clamp(size - Mathf.Sign(scroll) * 0.8f * Sensitivity, MinSize, MaxSize);
@@ -90,6 +135,28 @@ namespace TheLastFortress
             shake = Mathf.MoveTowards(shake, 0f, dt * 0.8f);
             Apply();
         }
+
+        void ClampFocus()
+        {
+            focus.x = Mathf.Clamp(focus.x, -2f, 22f);
+            focus.z = Mathf.Clamp(focus.z, -2f, 22f);
+        }
+
+        /// <summary>Ends any drag and restores the system cursor (button released, menu or dialog opened, run reset).</summary>
+        public void CancelDrag()
+        {
+            dragArmed = false;
+            SetDragging(false);
+        }
+
+        void SetDragging(bool value)
+        {
+            if (dragging == value) return;
+            dragging = value;
+            if (PanCursor != null) Cursor.SetCursor(value ? PanCursor : null, value ? new Vector2(PanCursor.width / 2f, PanCursor.height / 2f) : Vector2.zero, CursorMode.Auto);
+        }
+
+        void OnDisable() => CancelDrag();
 
         void Apply()
         {

@@ -14,7 +14,10 @@ namespace TheLastFortress
         /// <summary>Farms that currently receive the Farm + House adjacency bonus.</summary>
         public int LinkedFarms;
 
-        public int Total => Keep + Houses + Farms;
+        /// <summary>Conditional dawn bonus (War Bonds); never part of a Day forecast.</summary>
+        public int Bonus;
+
+        public int Total => Keep + Houses + Farms + Bonus;
     }
 
     /// <summary>Fixed MVP economy rules from specification 003. Pure functions over authoritative grid state.</summary>
@@ -49,6 +52,18 @@ namespace TheLastFortress
             return false;
         }
 
+        /// <summary>Market Square: whether another surviving House shares an edge with this House.</summary>
+        public static bool HouseHasAdjacentHouse(GridState grid, Building house)
+        {
+            foreach (var d in GridPos.CardinalOrder)
+            {
+                var other = grid.GetOccupant(house.Cell + d);
+                if (other != null && other != house && other.Kind == BuildingKind.House && other.IsAlive) return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Unique surviving Farm/House pairs sharing an edge (for highlighting and the run summary).</summary>
         public static List<(Building farm, Building house)> FarmHousePairs(GridState grid)
         {
@@ -75,7 +90,7 @@ namespace TheLastFortress
         /// <summary>
         /// Keep income plus surviving Houses and Farms. Per Farm: floor((base + adjacency) * (100 + farmBonusPercent) / 100).
         /// </summary>
-        public static IncomeBreakdown DailyIncome(GridState grid, PrototypeDefinitions defs, int farmBonusPercent = 0)
+        public static IncomeBreakdown DailyIncome(GridState grid, PrototypeDefinitions defs, int farmBonusPercent = 0, int houseLinkBonus = 0)
         {
             var r = new IncomeBreakdown();
             if (grid.Keep != null && grid.Keep.IsAlive) r.Keep = defs.Keep.DailyIncome;
@@ -84,7 +99,7 @@ namespace TheLastFortress
                 if (!b.IsAlive) continue;
                 if (b.Kind == BuildingKind.House)
                 {
-                    r.Houses += BuildingIncome(grid, b, farmBonusPercent);
+                    r.Houses += BuildingIncome(grid, b, farmBonusPercent, houseLinkBonus);
                     r.HouseCount++;
                 }
                 else if (b.Kind == BuildingKind.Farm)
@@ -102,10 +117,10 @@ namespace TheLastFortress
         /// Daily income of one surviving House or Farm (0 for anything else). The single per-building rule used by the
         /// payment, the forecast and the HUD: Farm = floor((base + 5 if any edge-adjacent House) * (100 + bonus) / 100).
         /// </summary>
-        public static int BuildingIncome(GridState grid, Building b, int farmBonusPercent)
+        public static int BuildingIncome(GridState grid, Building b, int farmBonusPercent, int houseLinkBonus = 0)
         {
             if (b == null || !b.IsAlive) return 0;
-            if (b.Kind == BuildingKind.House) return b.Definition.DailyIncome;
+            if (b.Kind == BuildingKind.House) return b.Definition.DailyIncome + (houseLinkBonus > 0 && HouseHasAdjacentHouse(grid, b) ? houseLinkBonus : 0);
             if (b.Kind != BuildingKind.Farm) return 0;
             var gross = b.Definition.DailyIncome + (FarmHasAdjacentHouse(grid, b) ? FarmHouseBonus : 0);
             return gross * (100 + farmBonusPercent) / 100;

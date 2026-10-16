@@ -1,0 +1,29 @@
+title: map=crossing
+day 1 ravine: ravine seed 7: generated (attempt 0) info=[Tonight: West 10 Grunts (0.0–13.5 s)]
+day 1 crossing: crossing seed 7: generated (attempt 0) info=[Tonight: West 10 Grunts (0.0–13.5 s)]
+day 1 meadow: meadow seed 7: generated (attempt 0) info=[Tonight: West 10 Grunts (0.0–13.5 s)]
+cannon ghost: ring 4,50 tooltip=[Cannon (2x2) — 110 gold
+OK: can build here · R rotates
+20 damage to every enemy within 1.25 tiles of its target every 2 s · range 4.5 · 2x2]
+watchtower ghost: marks 1 tooltip=[Watchtower — 45 gold
+OK: can build here · R rotates
++1 range to Archer Towers and Cannons touching it (never stacks)]
+repair ghost: reach visible True tooltip=[Repair Station (2x2) — 80 gold
+OK: can build here · R rotates
+At dawn restores up to 50 HP to damaged buildings within 2 tiles, weakest first · 2x2]
+place Cannon (6,8): None
+place Watchtower (8,9): None
+place House (7,12): None
+cannon splash: True
+raider archer: True
+bomber fuse: True
+bomber blast: True
+commander: True banner=[]
+threat night: Defeat keep 0/500
+reward: LastStand,Recycling,KillZone
+announcement: [FINAL SIEGE — Night 2 of 2: survive it and the run is won.
+NEW ENEMY: Runner — fast and fragile (20 HP, 1.75 tiles/s).
+NEW ENEMY: Brute — slow and heavy (150 HP, 0.6 tiles/s, 2x damage to Walls).
+NEW ENEMY: Raider Archer — stops 3.5 tiles away and shoots, Houses and Farms first (35 HP, 0.9 tiles/s).
+NEW ENEMY: Bomber — blows up whatever blocks it, a Wall or the Keep, 1.5 s after arriving (60, 2x to Walls) unless killed first (40 HP, 1.0 tiles/s).
+NEW ENEMY: Siege Commander — the final boss: enemies within 2.5 tiles hit 50% harder (1000 HP, 0.4 tiles/s, 2x damage to Walls).] info=[Tonight: 40 Grunts, 18 Runners, 10 Brutes, 10 Bombers, 12 Raider Archers | from West 23 · East 23 · North 22 · South 22 (0.0–62.3 s) | BOSS: Siege Commander from North at 30.0 s]

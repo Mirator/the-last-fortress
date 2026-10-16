@@ -15,10 +15,20 @@ namespace TheLastFortress
         PrototypeBootstrap game;
         string dir;
 
+        /// <summary>-offscreen: render camera and HUD into a texture, so a hidden or minimized window still yields real frames.</summary>
+        bool offscreen;
+
+        /// <summary>-capture-set 007: only the plan 007 sequence (faster iteration); default runs every MVP sequence.</summary>
+        string captureSet;
+
         public void Begin(PrototypeBootstrap game, string directory)
         {
             this.game = game;
             dir = directory;
+            var args = System.Environment.GetCommandLineArgs();
+            offscreen = System.Array.IndexOf(args, "-offscreen") >= 0;
+            var setIndex = System.Array.IndexOf(args, "-capture-set");
+            captureSet = setIndex >= 0 && setIndex + 1 < args.Length ? args[setIndex + 1] : null;
             Application.runInBackground = true; // an unfocused window must keep rendering
             Directory.CreateDirectory(dir);
             StartCoroutine(Run());
@@ -28,18 +38,79 @@ namespace TheLastFortress
         {
             game.SyncViews();
             yield return null;
+            // Scripted jumps (FastForward, perk choice) skip the frames real play would have: let presentation catch up —
+            // the light blend, arrows and cues in flight, the Keep-hit cue after a night — bounded, before the frame is taken.
+            var settleUntil = Time.unscaledTime + 1.5f;
+            while (Time.unscaledTime < settleUntil && !Settled()) yield return null;
             yield return new WaitForEndOfFrame();
-            ScreenCapture.CaptureScreenshot(Path.Combine(dir, $"{Screen.width}x{Screen.height}-{name}.png"));
+            var path = Path.Combine(dir, $"{Screen.width}x{Screen.height}-{name}.png");
+            if (offscreen) CaptureOffscreen(path);
+            else ScreenCapture.CaptureScreenshot(path);
             yield return null;
             yield return null;
         }
 
+        bool Settled()
+        {
+            var night = game.Sim.State == RunState.Night || game.Sim.State == RunState.Reward || game.Sim.State == RunState.Defeat || game.Sim.StressMode;
+            var lightDone = Mathf.Approximately(game.World.NightBlend, night ? 1f : 0f) || game.CombatFrozen;
+            var combatQuiet = game.Sim.State == RunState.Night || game.CombatFrozen || game.World.ActiveArrowCount == 0 && game.Hud.KeepHitShown == 0;
+            return lightDone && combatQuiet;
+        }
+
+        /// <summary>One camera render with the HUD temporarily drawn by that camera, read back to a PNG.</summary>
+        void CaptureOffscreen(string path)
+        {
+            var cam = game.CameraRig.Camera;
+            var canvas = game.Hud.Canvas;
+            int w = Screen.width, h = Screen.height;
+            var rt = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+            var mode = canvas.renderMode;
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = cam;
+            canvas.planeDistance = cam.nearClipPlane + 0.5f;
+            Canvas.ForceUpdateCanvases();
+            cam.targetTexture = rt;
+            cam.Render();
+            cam.targetTexture = null;
+            canvas.renderMode = mode;
+            canvas.worldCamera = null;
+            var previous = RenderTexture.active;
+            RenderTexture.active = rt;
+            var tex = new Texture2D(w, h, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, w, h), 0, 0);
+            tex.Apply();
+            RenderTexture.active = previous;
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            Destroy(tex);
+            RenderTexture.ReleaseTemporary(rt);
+        }
+
         IEnumerator Run()
         {
+            if (game.IsRelease && (captureSet == "motion" || captureSet == "fx"))
+            {
+                yield return RunMotionFrames(captureSet == "fx");
+                Application.Quit();
+                yield break;
+            }
+
+            if (game.IsRelease)
+            {
+                yield return RunPlan008();
+                Application.Quit();
+                yield break;
+            }
+
             if (game.IsMvp)
             {
-                yield return RunMvp();
-                yield return RunPlan006();
+                if (captureSet != "007")
+                {
+                    yield return RunMvp();
+                    yield return RunPlan006();
+                }
+
+                yield return RunPlan007();
                 Application.Quit();
                 yield break;
             }
@@ -365,5 +436,377 @@ namespace TheLastFortress
 
             File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-006-capture-log.txt"), log.ToString());
         }
+
+        /// <summary>
+        /// Plan 007 rendered checks: title, first-run guide on a generated map, Help, Credits, Settings with volumes,
+        /// escalation announcements (Days 2, 3, 6), a damaged building, Night lighting, the Golem banner, and Nights 4
+        /// and 6 at real speed (1x, simulation not skipped) with audio voice statistics sampled every frame.
+        /// </summary>
+        /// <summary>Writes a Day checkpoint for <paramref name="sim"/> and continues it through the menu, as a relaunch would.</summary>
+        void ContinueSaved(RunSimulation sim, StringBuilder log)
+        {
+            // A new slot after every earlier run (New Run never reuses an active slot), so Continue picks exactly this one.
+            if (!game.Persistence.Store.WriteRun(game.Persistence.Store.LatestSlot() + 1, CheckpointCodec.Capture(sim), out var error)) log.AppendLine("save failed: " + error);
+            game.OpenMenu();
+            game.Continue();
+        }
+
+        /// <summary>Steps the paused-to-us simulation until the condition holds (bounded), then freezes it for the frame.</summary>
+        bool StepUntil(System.Func<bool> condition, int maxSteps)
+        {
+            for (var i = 0; i < maxSteps && game.Sim.State == RunState.Night; i++)
+            {
+                if (condition()) break;
+                game.Sim.Step();
+                game.SyncViews(0.05f);
+            }
+
+            var ok = condition();
+            if (game.Sim.State == RunState.Night) game.Sim.SetPaused(true); // presentation frozen: the cue is still there
+            return ok;
+        }
+
+        GridPos? FirstLegal(BuildingKind kind, int x0, int z0, int x1, int z1)
+        {
+            for (var x = x0; x <= x1; x++)
+            for (var z = z0; z <= z1; z++)
+                if (game.Sim.CheckPlacement(kind, new GridPos(x, z)) == PlacementRejection.None) return new GridPos(x, z);
+            return null;
+        }
+
+        /// <summary>
+        /// Plan 008 release evidence: title with the map selector, Day 1 on each map profile with the two-row build cards,
+        /// the Cannon/Watchtower/Repair Station previews, every new threat in combat (Cannon splash, Bomber fuse, Raider
+        /// Archer, Siege Commander aura and bar), the final-siege announcement and the release reward cards.
+        /// </summary>
+        IEnumerator RunPlan008()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            game.QuitToMenuWithoutSaving();
+            yield return Shot("008-01-title-ravine");
+            game.Hud.MapButton.onClick.Invoke();
+            yield return Shot("008-01b-title-crossing");
+            log.AppendLine($"title: map={game.MapProfile}");
+
+            var n = 2;
+            foreach (var id in MapProfiles.All)
+            {
+                game.SetMapProfile(id);
+                game.NewRun(7, false);
+                yield return Shot($"008-0{n++}-day1-{id}");
+                log.AppendLine($"day 1 {id}: {game.Sim.Config.Terrain.Describe()} info=[{game.Hud.InfoText.Replace("\n", " | ")}]");
+            }
+
+            // Ravine previews: Cannon range, Watchtower boost, Repair Station reach.
+            game.SetMapProfile(MapProfiles.Ravine);
+            game.NewRun(7, false);
+            game.Sim.TryPlace(BuildingKind.Tower, new GridPos(8, 9), out _);
+            game.Player.SetTool(BuildingKind.Cannon);
+            game.Player.HoverOverride = FirstLegal(BuildingKind.Cannon, 5, 8, 7, 11);
+            yield return Shot("008-05-cannon-ghost-range");
+            log.AppendLine($"cannon ghost: ring {game.Overlay.RangeRingRadius:0.00} tooltip=[{game.Hud.TooltipText}]");
+            game.Player.SetTool(BuildingKind.Watchtower);
+            game.Player.HoverOverride = new GridPos(8, 8);
+            yield return Shot("008-06-watchtower-ghost-boost");
+            log.AppendLine($"watchtower ghost: marks {game.Overlay.BuffMarkCount} tooltip=[{game.Hud.TooltipText}]");
+            game.Player.SetTool(BuildingKind.RepairStation);
+            game.Player.HoverOverride = FirstLegal(BuildingKind.RepairStation, 11, 11, 14, 14);
+            yield return Shot("008-07-repair-station-reach");
+            log.AppendLine($"repair ghost: reach visible {game.Overlay.ReachVisible} tooltip=[{game.Hud.TooltipText}]");
+            game.Player.HoverOverride = null;
+            game.Player.CancelTool();
+
+            // Every new threat on one stored night, loaded through the real save path.
+            var wave = new WavePlan("threats", new[]
+            {
+                new SpawnEntry(0, MvpCampaign.West, 0, EnemyKind.Grunt), new SpawnEntry(0, MvpCampaign.West, 0, EnemyKind.Grunt),
+                new SpawnEntry(4, MvpCampaign.West, 0, EnemyKind.Grunt), new SpawnEntry(4, MvpCampaign.West, 0, EnemyKind.Runner),
+                new SpawnEntry(10, MvpCampaign.East, 1, EnemyKind.Bomber), new SpawnEntry(10, MvpCampaign.West, 0, EnemyKind.Archer),
+                new SpawnEntry(30, MvpCampaign.West, 0, EnemyKind.SiegeCommander), new SpawnEntry(40, MvpCampaign.West, 0, EnemyKind.Grunt),
+                new SpawnEntry(44, MvpCampaign.West, 0, EnemyKind.Grunt), new SpawnEntry(48, MvpCampaign.West, 0, EnemyKind.Brute),
+            }, new[] { MvpCampaign.West, MvpCampaign.East });
+            var calm = new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West });
+            CampaignConfig Custom(params WavePlan[] nights) => new CampaignConfig
+            {
+                Label = ReleaseCampaign.Label, Nights = nights, OffersRewards = true, RulesVersion = ReleaseCampaign.RulesVersion,
+                CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
+            };
+            var setup = new RunSimulation(new RunConfig { Definitions = game.NewRunDefinitions, Seed = 7, Terrain = MapProfiles.Generate(MapProfiles.Meadow, 7), Campaign = Custom(wave, calm) });
+            ContinueSaved(setup, log);
+            foreach (var (kind, cell) in new[] { (BuildingKind.Cannon, new GridPos(6, 8)), (BuildingKind.Watchtower, new GridPos(8, 9)), (BuildingKind.House, new GridPos(7, 12)) })
+                log.AppendLine($"place {kind} {cell}: {game.Sim.TryPlace(kind, cell, out _)}");
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null; // light blend to night at real frames, simulation not advancing
+            log.AppendLine($"cannon splash: {StepUntil(() => game.World.VisibleCues().Any(c => c.kind == CueKind.Blast), 800)}");
+            yield return Shot("008-08-cannon-splash");
+            game.Sim.SetPaused(false);
+            log.AppendLine($"raider archer: {StepUntil(() => game.Sim.Enemies.Any(e => e.Kind == EnemyKind.Archer && e.TargetBuildingId >= 0) && game.World.ActiveArrowCount > 0, 1200)}");
+            yield return Shot("008-09-raider-archer-shooting");
+            game.Sim.SetPaused(false);
+            log.AppendLine($"bomber fuse: {StepUntil(() => game.Sim.Enemies.Any(e => e.FuseLit), 1200)}");
+            yield return Shot("008-10-bomber-fuse");
+            game.Sim.SetPaused(false);
+            log.AppendLine($"bomber blast: {StepUntil(() => game.World.VisibleCues().Any(c => c.kind == CueKind.Blast && c.position.x > 9f), 200)}");
+            yield return Shot("008-11-bomber-blast");
+            game.Sim.SetPaused(false);
+            log.AppendLine($"commander: {StepUntil(() => game.Sim.Enemies.Any(e => e.Kind == EnemyKind.SiegeCommander && e.X > 4.0), 1500)} banner=[{game.Hud.GolemBannerText}]");
+            yield return Shot("008-12-commander-aura-boss-bar");
+            game.Sim.SetPaused(false);
+            StepUntil(() => game.Sim.State != RunState.Night, 6000);
+            log.AppendLine($"threat night: {game.Sim.State} keep {game.Sim.Keep.Hp}/{game.Sim.Keep.MaxHp}");
+
+            // The real Night 12 after a calm night: release reward cards, then the final-siege announcement.
+            var real = ReleaseCampaign.Create(7, MapProfiles.Meadow);
+            setup = new RunSimulation(new RunConfig { Definitions = game.NewRunDefinitions, Seed = 7, Terrain = MapProfiles.Generate(MapProfiles.Meadow, 7), Campaign = Custom(calm, real.Nights[11]) });
+            ContinueSaved(setup, log);
+            game.StartNight();
+            game.Sim.Step();
+            yield return Shot("008-13-reward-release-perks");
+            log.AppendLine($"reward: {string.Join(",", game.Sim.CurrentOffer?.PerkIds ?? new string[0])}");
+            if (game.Sim.CurrentOffer != null) game.ChoosePerk(game.Sim.CurrentOffer.OfferId, game.Sim.CurrentOffer.PerkIds[0]);
+            yield return Shot("008-14-final-siege-announcement");
+            log.AppendLine($"announcement: [{game.Hud.AnnouncementText}] info=[{game.Hud.InfoText.Replace("\n", " | ")}]");
+
+            game.Hud.HelpButton.onClick.Invoke();
+            yield return Shot("008-15-help");
+            game.Hud.HelpPanel.SetActive(false);
+
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-008-capture-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set motion (release build): consecutive frames at a fixed 1/30 s through a busy night on a close camera,
+        /// with a per-frame log of what happened, so motion (falls, strikes, collapses, shells) can be reviewed as strips.
+        /// </summary>
+        /// <param name="fx">-capture-set fx: Bombers reach a Wall unopposed (fuse, blast, scorch), a House burns at low HP,
+        /// a Cannon fires — the particle effects rather than the gait.</param>
+        IEnumerator RunMotionFrames(bool fx = false)
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            var kinds = fx
+                ? new[] { EnemyKind.Bomber, EnemyKind.Grunt, EnemyKind.Bomber, EnemyKind.Grunt, EnemyKind.Bomber }
+                : new[] { EnemyKind.Grunt, EnemyKind.Runner, EnemyKind.Brute, EnemyKind.Bomber, EnemyKind.Archer, EnemyKind.Grunt, EnemyKind.SiegeCommander };
+            var spawns = new System.Collections.Generic.List<SpawnEntry>();
+            for (var i = 0; i < kinds.Length; i++) spawns.Add(new SpawnEntry(i * 16, MvpCampaign.West, 0, kinds[i]));
+            var wave = new WavePlan("motion", spawns, new[] { MvpCampaign.West });
+            var calm = new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West });
+            var setup = new RunSimulation(new RunConfig
+            {
+                Definitions = game.NewRunDefinitions, Seed = 3, Terrain = TerrainMap.Flat(),
+                Campaign = new CampaignConfig
+                {
+                    Label = ReleaseCampaign.Label, Nights = new[] { wave, calm }, OffersRewards = true, RulesVersion = ReleaseCampaign.RulesVersion,
+                    CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
+                },
+            });
+            if (fx)
+            {
+                // Walls across the west lane (one gap the route takes), no Tower in reach: the Bombers light their fuses.
+                foreach (var z in new[] { 8, 9, 11, 12 }) setup.TryPlace(BuildingKind.Wall, new GridPos(4, z), out _);
+                setup.TryPlace(BuildingKind.Wall, new GridPos(6, 10), out _);
+                setup.TryPlace(BuildingKind.House, new GridPos(7, 12), out var house);
+                if (house != null) house.Hp = house.MaxHp / 5; // below a third: on fire
+                setup.TryPlace(BuildingKind.Cannon, new GridPos(8, 7), out _);
+            }
+            else
+            {
+                setup.TryPlace(BuildingKind.Tower, new GridPos(5, 8), out _);
+                setup.TryPlace(BuildingKind.Cannon, new GridPos(5, 11), out _);
+                setup.TryPlace(BuildingKind.Wall, new GridPos(8, 10), out _); // a breach point near the camera
+            }
+
+            ContinueSaved(setup, log);
+            game.CameraRig.SetView(fx ? new Vector3(6f, 0f, 10f) : new Vector3(6.5f, 0f, 10.5f), 3.2f);
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null; // night lighting at real frames; the simulation is not advancing
+            game.ExternalViewClock = true; // from here every frame advances presentation exactly once, by 1/30 s
+            var defeated = game.Sim.Stats.EnemiesDefeated;
+            var lost = 0;
+            for (var frame = 0; frame < (fx ? 660 : 330) && game.Sim.State == RunState.Night; frame++)
+            {
+                var keep = game.Sim.Keep.Hp;
+                var buildings = game.World.BuildingViewCount;
+                game.Sim.Advance(1.0 / 30.0);
+                game.SyncViews(1f / 30f);
+                yield return new WaitForEndOfFrame();
+                CaptureOffscreen(Path.Combine(dir, $"{Screen.width}x{Screen.height}-motion-{frame:000}.png"));
+                var notes = new System.Collections.Generic.List<string>();
+                if (game.Sim.Stats.EnemiesDefeated > defeated) notes.Add($"kill x{game.Sim.Stats.EnemiesDefeated - defeated}");
+                if (game.World.BuildingViewCount < buildings) notes.Add("building destroyed");
+                if (game.Sim.Keep.Hp < keep) notes.Add($"keep -{keep - game.Sim.Keep.Hp}");
+                if (game.World.ActiveShellCount > 0) notes.Add("shell");
+                if (game.Sim.Enemies.Any(e => e.FuseLit)) notes.Add("fuse");
+                if (game.World.DyingCount > 0) notes.Add($"dying {game.World.DyingCount}");
+                defeated = game.Sim.Stats.EnemiesDefeated;
+                log.AppendLine($"{frame:000} t={game.Sim.NightElapsedSeconds:0.00}s {string.Join(", ", notes)}");
+            }
+
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-motion-log.txt"), log.ToString());
+        }
+
+        IEnumerator RunPlan007()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+
+            game.QuitToMenuWithoutSaving();
+            yield return Shot("007-01-title");
+            log.AppendLine($"title: gameplay layer visible={game.Hud.GameplayLayer.activeSelf} music={game.Audio.MusicClip?.name}");
+            game.Hud.CreditsButton.onClick.Invoke();
+            yield return Shot("007-02-credits");
+            game.Hud.CreditsPanel.SetActive(false);
+            game.Hud.SettingsButton.onClick.Invoke();
+            yield return Shot("007-03-settings-audio");
+            game.Hud.SettingsPanel.SetActive(false);
+
+            // A first run on an ordinary generated map: guide step 1, then the guide after a Tower, then Help.
+            game.ReopenOnboarding();
+            game.NewRun(3, flat: false);
+            yield return Shot("007-04-generated-day1-guide");
+            log.AppendLine($"generated day 1: {game.Sim.Config.Terrain.Describe()} guide=[{game.Hud.GuideText}]");
+            var placed = false;
+            for (var x = 5; x < 9 && !placed; x++)
+            for (var z = 8; z < 12 && !placed; z++)
+                placed = game.Sim.TryPlace(BuildingKind.Tower, new GridPos(x, z), out _) == PlacementRejection.None;
+            game.Player.SetTool(BuildingKind.Wall);
+            game.Player.HoverOverride = new GridPos(1, 1); // invalid edge placement next to the guide
+            yield return Shot("007-05-guide-step2-invalid-edge");
+            log.AppendLine($"after tower: guide=[{game.Hud.GuideText}] tooltip=[{game.Hud.TooltipText}]");
+            game.Player.SetTool(BuildingKind.House);
+            GridPos? houseCell = null;
+            for (var x = 4; x < 16 && houseCell == null; x++)
+            for (var z = 4; z < 16 && houseCell == null; z++)
+                if (game.Sim.CheckPlacement(BuildingKind.House, new GridPos(x, z)) == PlacementRejection.None) houseCell = new GridPos(x, z);
+            game.Player.HoverOverride = houseCell;
+            yield return Shot("007-05b-house-payback-tooltip");
+            log.AppendLine($"house tooltip: [{game.Hud.TooltipText}]");
+            game.Player.HoverOverride = null;
+            game.Player.CancelTool();
+            game.Hud.HelpButton.onClick.Invoke();
+            yield return Shot("007-06-help");
+            game.Hud.HelpPanel.SetActive(false);
+
+            // Escalation on the recorded economy script (flat fixture): Runner on Day 2, Brute on Day 3, final siege on Day 6.
+            game.NewRun(1, flat: true);
+            var audio = game.Audio;
+            for (var day = 1; day <= 6 && !game.Sim.IsTerminal; day++)
+            {
+                PlayDay(day);
+                if (day == 2 || day == 3 || day == 6)
+                {
+                    yield return Shot($"007-07-day{day}-announcement");
+                    log.AppendLine($"day {day} announcement: [{game.Hud.AnnouncementText}]");
+                }
+
+                if (day == 3)
+                {
+                    var house = game.Sim.Grid.GetOccupant(new GridPos(6, 13));
+                    if (house != null)
+                    {
+                        var hp = house.Hp;
+                        house.Hp = Mathf.Max(1, house.MaxHp / 4);
+                        game.CameraRig.SetView(new Vector3(6f, 0f, 12f), 4.5f);
+                        game.SyncViews(0.4f);
+                        yield return Shot("007-08-damaged-house-smoke");
+                        log.AppendLine($"damaged house: smoke={game.World.IsShowingDamage(house.Id)}");
+                        house.Hp = hp;
+                        game.CameraRig.ResetView();
+                    }
+                }
+
+                game.StartNight();
+                if (day == 4 || day == 6) yield return RealTimeNight(day, log);
+                while (game.Sim.State == RunState.Night) game.FastForward(1.0);
+                log.AppendLine($"night {day}: {game.Sim.State} keep={game.Sim.Keep.Hp}");
+                if (game.Sim.State != RunState.Reward) break;
+                ChooseFirstPerk();
+            }
+
+            yield return Shot("007-12-outcome-" + game.Sim.State);
+            log.AppendLine($"outcome: {game.Sim.State} music={audio.MusicClip?.name} victory={audio.PlayCount(SoundId.Victory)} defeat={audio.PlayCount(SoundId.Defeat)}");
+
+            // Five Menu -> New Run -> end cycles (an undefended Keep falls on Night 1): nothing may accumulate.
+            for (var cycle = 1; cycle <= 5; cycle++)
+            {
+                game.QuitToMenuWithoutSaving();
+                yield return null;
+                game.NewRun((uint)(100 + cycle), flat: false);
+                game.StartNight();
+                game.AutoAdvance = true;
+                var until = Time.unscaledTime + 8f;
+                while (game.Sim.State == RunState.Night && Time.unscaledTime < until) yield return null; // a few real-time seconds of combat
+                game.AutoAdvance = false;
+                while (game.Sim.State == RunState.Night) game.FastForward(1.0);
+                var settle = Time.unscaledTime + 3f;
+                while (Time.unscaledTime < settle) yield return null;
+                log.AppendLine($"cycle {cycle}: {game.Sim.State} voices={audio.ActiveVoices} pending={audio.PendingCount} musicTracks={audio.MusicTracks} " +
+                               $"arrows={game.World.ActiveArrowCount} cues={game.World.PendingCueCount} enemyViews={game.World.EnemyViewCount} " +
+                               $"audioSources={audio.GetComponentsInChildren<AudioSource>().Length} objects={Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).Length}");
+            }
+
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-007-capture-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// Night at normal speed: the simulation advances by real frame time (AutoAdvance), shots every few seconds, and the
+        /// audio director's voice counts are sampled every frame to show the limits hold in the densest fights.
+        /// </summary>
+        IEnumerator RealTimeNight(int night, StringBuilder log)
+        {
+            var audio = game.Audio;
+            var start = new int[System.Enum.GetValues(typeof(SoundId)).Length];
+            for (var i = 0; i < start.Length; i++) start[i] = audio.PlayCount((SoundId)i);
+            int maxVoices = 0, maxImpacts = 0, maxShots = 0, frames = 0;
+            var maxTracks = 0;
+            var nextShot = 4f;
+            var shot = 0;
+            var began = Time.unscaledTime;
+            game.AutoAdvance = true;
+            var golemShot = false;
+            while (game.Sim.State == RunState.Night && Time.unscaledTime - began < 90f)
+            {
+                frames++;
+                maxVoices = Mathf.Max(maxVoices, audio.ActiveVoices);
+                maxImpacts = Mathf.Max(maxImpacts, audio.ActiveVoicesOf(SoundId.Impact));
+                maxShots = Mathf.Max(maxShots, audio.ActiveVoicesOf(SoundId.Shot));
+                maxTracks = Mathf.Max(maxTracks, audio.MusicTracks);
+                if (!golemShot && game.Hud.GolemBannerText != null)
+                {
+                    golemShot = true;
+                    yield return Shot($"007-10-night{night}-golem-banner");
+                    log.AppendLine($"golem banner: [{game.Hud.GolemBannerText}] at {game.Sim.NightElapsedSeconds:0.0}s");
+                    continue;
+                }
+
+                if (Time.unscaledTime - began >= nextShot && shot < 4)
+                {
+                    nextShot += 8f;
+                    yield return Shot($"007-{(night == 4 ? "09" : "11")}-night{night}-1x-{shot++}");
+                    continue;
+                }
+
+                yield return null;
+            }
+
+            game.AutoAdvance = false;
+            var played = new StringBuilder();
+            for (var i = 0; i < start.Length; i++)
+            {
+                var n = audio.PlayCount((SoundId)i) - start[i];
+                if (n > 0) played.Append($"{(SoundId)i}={n} ");
+            }
+
+            log.AppendLine($"night {night} at 1x: {Time.unscaledTime - began:0.0}s wall clock, {frames} frames, sim {game.Sim.NightElapsedSeconds:0.0}s, " +
+                           $"max voices {maxVoices}/{AudioDirector.MaxVoices}, max impacts {maxImpacts}, max shots {maxShots}/{AudioDirector.MaxPerFamily}, " +
+                           $"max music tracks {maxTracks}, lighting blend {game.World.NightBlend:0.00}; played {played}");
+        }
+
     }
 }

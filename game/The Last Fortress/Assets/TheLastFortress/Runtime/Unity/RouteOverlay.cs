@@ -15,7 +15,8 @@ namespace TheLastFortress
         const int MaxEntries = 4;
 
         PrototypeContent content;
-        LineRenderer committedLine, primaryLine, rangeRing, selectionSquare;
+        LineRenderer committedLine, primaryLine, rangeRing, selectionSquare, reachSquare;
+        readonly List<LineRenderer> buffMarks = new List<LineRenderer>();
         readonly LineRenderer[] extraLines = new LineRenderer[MaxEntries];
         readonly GameObject[] extraBreach = new GameObject[MaxEntries];
         readonly Route[] extraDrawn = new Route[MaxEntries];
@@ -54,6 +55,15 @@ namespace TheLastFortress
         /// <summary>Visible synergy links (Farm-House and Wall-Trap pairs).</summary>
         public int VisibleLinkCount { get; private set; }
 
+        /// <summary>Radius of the drawn range ring (0 when hidden): the effective range of the hovered/selected attacker.</summary>
+        public float RangeRingRadius { get; private set; }
+
+        /// <summary>Towers outlined because the Watchtower ghost or selection boosts them.</summary>
+        public int BuffMarkCount { get; private set; }
+
+        /// <summary>Whether the Repair Station reach square is drawn.</summary>
+        public bool ReachVisible => reachSquare.positionCount > 0;
+
         /// <summary>Breach markers of additional entries (index 1..), for screen-space labels.</summary>
         public IEnumerable<Vector3> ExtraBreachPositions()
         {
@@ -72,6 +82,8 @@ namespace TheLastFortress
             rangeRing.loop = true;
             selectionSquare = Prims.Line(transform, "Selection", lineMat, Palette.RouteCyan, 0.06f);
             selectionSquare.loop = true;
+            reachSquare = Prims.Line(transform, "RepairReach", lineMat, Palette.RouteCyan.WithAlpha(0.6f), 0.05f);
+            reachSquare.loop = true;
             dashRoot = new GameObject("BreachRemainderDashes").transform;
             dashRoot.SetParent(transform, false);
             dashMat = Prims.Tinted(lineMat, Palette.WarningCoral.WithAlpha(0.85f));
@@ -185,6 +197,8 @@ namespace TheLastFortress
             primaryLine.positionCount = 0;
             rangeRing.positionCount = 0;
             selectionSquare.positionCount = 0;
+            reachSquare.positionCount = 0;
+            foreach (var m in buffMarks) m.positionCount = 0;
             foreach (var d in dashes) d.SetActive(false);
             breachMarker.SetActive(false);
             ghostRoot.SetActive(false);
@@ -423,6 +437,18 @@ namespace TheLastFortress
             return dashes[index];
         }
 
+        /// <summary>Outline of a size x size cell square from its lowest corner cell, inset by <paramref name="inset"/>.</summary>
+        static void Square(LineRenderer line, GridPos min, int size, float inset)
+        {
+            var a = new Vector3(min.X + inset, 0.06f, min.Z + inset);
+            var s = size - inset * 2f;
+            line.positionCount = 4;
+            line.SetPosition(0, a);
+            line.SetPosition(1, a + new Vector3(0, 0, s));
+            line.SetPosition(2, a + new Vector3(s, 0, s));
+            line.SetPosition(3, a + new Vector3(s, 0, 0));
+        }
+
         static void SetLine(LineRenderer line, Route route, int lastIndex)
         {
             if (route == null || !route.Found || lastIndex < 0)
@@ -435,25 +461,70 @@ namespace TheLastFortress
             for (var i = 0; i <= lastIndex; i++) line.SetPosition(i, Prims.CellCenter(route.Cells[i], LineY));
         }
 
+        static bool IsAttacker(BuildingKind kind) => kind == BuildingKind.Tower || kind == BuildingKind.Cannon;
+
         void UpdateRangeAndSelection(RunSimulation sim, PlayerController player)
         {
-            GridPos? rangeCenter = null;
-            if (ghostRoot.activeSelf && player.Tool == BuildingKind.Tower && player.HoverCell.HasValue) rangeCenter = player.HoverCell;
-            else if (player.Selected != null && player.Selected.Kind == BuildingKind.Tower) rangeCenter = player.Selected.Cell;
+            // Range ring from Core values: a ghost shows its base range (plus a Watchtower it would touch is not guessed),
+            // a placed Archer Tower/Cannon its effective range including perks and any Watchtower bonus.
+            Vector3? rangeCenter = null;
+            var radius = 0f;
+            var ghostKind = ghostRoot.activeSelf && player.Tool.HasValue && player.HoverCell.HasValue ? player.Tool : null;
+            if (ghostKind.HasValue && IsAttacker(ghostKind.Value))
+            {
+                rangeCenter = Prims.CellCenter(player.HoverCell.Value, 0.05f) + FootprintOffset(ghostKind.Value);
+                radius = (float)sim.TowerRange(sim.Definitions.For(ghostKind.Value));
+            }
+            else if (player.Selected != null && IsAttacker(player.Selected.Kind))
+            {
+                rangeCenter = new Vector3((float)player.Selected.CenterX, 0.05f, (float)player.Selected.CenterZ);
+                radius = (float)sim.TowerRange(player.Selected);
+            }
 
+            RangeRingRadius = rangeCenter.HasValue ? radius : 0f;
             if (rangeCenter.HasValue)
             {
                 const int n = 64;
-                var r = (float)(sim.Definitions.Tower.Range * (sim.HasPerk(PerkRules.ExpandedVision) ? PerkRules.ExpandedVisionFactor : 1.0));
                 rangeRing.positionCount = n;
-                var c = Prims.CellCenter(rangeCenter.Value, 0.05f);
                 for (var i = 0; i < n; i++)
                 {
                     var a = i * Mathf.PI * 2f / n;
-                    rangeRing.SetPosition(i, c + new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r));
+                    rangeRing.SetPosition(i, rangeCenter.Value + new Vector3(Mathf.Cos(a) * radius, 0, Mathf.Sin(a) * radius));
                 }
             }
             else rangeRing.positionCount = 0;
+
+            // Watchtower: outline every tower the ghost (or the selected Watchtower) would boost.
+            GridPos? watch = null;
+            if (ghostKind == BuildingKind.Watchtower && GhostValid) watch = player.HoverCell;
+            else if (player.Selected != null && player.Selected.Kind == BuildingKind.Watchtower) watch = player.Selected.Cell;
+            var marks = 0;
+            if (watch.HasValue)
+                foreach (var t in sim.TowersBuffedBy(watch.Value))
+                {
+                    while (buffMarks.Count <= marks)
+                    {
+                        var line = Prims.Line(transform, "WatchtowerBoost", lineMat, Palette.Amber, 0.07f);
+                        line.loop = true;
+                        buffMarks.Add(line);
+                    }
+
+                    Square(buffMarks[marks++], t.Cell, t.Definition.FootprintSize, 0.1f);
+                }
+
+            for (var i = marks; i < buffMarks.Count; i++) buffMarks[i].positionCount = 0;
+            BuffMarkCount = marks;
+
+            // Repair Station: the square it repairs at dawn (Chebyshev reach around its footprint).
+            GridPos? station = null;
+            if (ghostKind == BuildingKind.RepairStation) station = player.HoverCell;
+            else if (player.Selected != null && player.Selected.Kind == BuildingKind.RepairStation) station = player.Selected.Cell;
+            if (station.HasValue && sim.Definitions.RepairStation != null)
+            {
+                var reach = sim.Definitions.RepairStation.RepairReach;
+                Square(reachSquare, new GridPos(station.Value.X - reach, station.Value.Z - reach), 2 + reach * 2, 0f);
+            }
+            else reachSquare.positionCount = 0;
 
             if (player.Selected != null)
             {
