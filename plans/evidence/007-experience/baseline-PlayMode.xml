@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="15" result="Failed(Child)" total="15" passed="14" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-16 06:37:27Z" end-time="2026-10-16 06:37:36Z" duration="9,3797021">
+  <test-suite type="TestSuite" id="1024" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="15" result="Failed" site="Child" start-time="2026-10-16 06:37:27Z" end-time="2026-10-16 06:37:36Z" duration="9.379702" total="15" passed="14" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1018" name="TheLastFortress.PlayMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.PlayMode.Tests.dll" runstate="Runnable" testcasecount="15" result="Failed" site="Child" start-time="2026-10-16 06:37:27Z" end-time="2026-10-16 06:37:36Z" duration="9.369728" total="15" passed="14" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="39848" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1019" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="15" result="Failed" site="Child" start-time="2026-10-16 06:37:27Z" end-time="2026-10-16 06:37:36Z" duration="9.368558" total="15" passed="14" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1020" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="15" result="Failed" site="Child" start-time="2026-10-16 06:37:27Z" end-time="2026-10-16 06:37:36Z" duration="9.367948" total="15" passed="14" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1001" name="MvpSceneTests" fullname="TheLastFortress.Tests.MvpSceneTests" classname="TheLastFortress.Tests.MvpSceneTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-16 06:37:27Z" end-time="2026-10-16 06:37:31Z" duration="4.345717" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1002" name="FarmHotkeyPlacesFootprintThenRewardChoicePaysIncomeBeforeManualStart" fullname="TheLastFortress.Tests.MvpSceneTests.FarmHotkeyPlacesFootprintThenRewardChoicePaysIncomeBeforeManualStart" methodname="FarmHotkeyPlacesFootprintThenRewardChoicePaysIncomeBeforeManualStart" classname="TheLastFortress.Tests.MvpSceneTests" runstate="Runnable" seed="1314776468" result="Passed" start-time="2026-10-16 06:37:27Z" end-time="2026-10-16 06:37:29Z" duration="2.622887" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: flat authored map
+]]></output>
+            </test-case>
+            <test-case id="1004" name="LethalShotCueSurvivesRemovalAndCombatEffectsFreezeWhenSuspended" fullname="TheLastFortress.Tests.MvpSceneTests.LethalShotCueSurvivesRemovalAndCombatEffectsFreezeWhenSuspended" methodname="LethalShotCueSurvivesRemovalAndCombatEffectsFreezeWhenSuspended" classname="TheLastFortress.Tests.MvpSceneTests" runstate="Runnable" seed="213238963" result="Passed" start-time="2026-10-16 06:37:29Z" end-time="2026-10-16 06:37:30Z" duration="0.500415" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: flat authored map
+]]></output>
+            </test-case>
+            <test-case id="1003" name="MenuSeededRunCheckpointContinueOutcomeRetryAndSettings" fullname="TheLastFortress.Tests.MvpSceneTests.MenuSeededRunCheckpointContinueOutcomeRetryAndSettings" methodname="MenuSeededRunCheckpointContinueOutcomeRetryAndSettings" classname="TheLastFortress.Tests.MvpSceneTests" runstate="Runnable" seed="2121582580" result="Passed" start-time="2026-10-16 06:37:30Z" end-time="2026-10-16 06:37:30Z" duration="0.798661" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: seed 424242: generated (attempt 0)
+Could not save to C:\Users\MIROSL~1\AppData\Local\Temp\tlf-playmode-7264be580d694c28a37027f4c21e4469\run.json: Access to the path 'C:\Users\MIROSL~1\AppData\Local\Temp\tlf-playmode-7264be580d694c28a37027f4c21e4469\run.json.tmp' is denied.. Check disk space and folder permissions, then Retry.
+]]></output>
+            </test-case>
+            <test-case id="1005" name="TooltipStaysOnScreenAtEveryCornerAndSelectionActionsClearDetails" fullname="TheLastFortress.Tests.MvpSceneTests.TooltipStaysOnScreenAtEveryCornerAndSelectionActionsClearDetails" methodname="TooltipStaysOnScreenAtEveryCornerAndSelectionActionsClearDetails" classname="TheLastFortress.Tests.MvpSceneTests" runstate="Runnable" seed="1273525933" result="Passed" start-time="2026-10-16 06:37:30Z" end-time="2026-10-16 06:37:31Z" duration="0.404782" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: flat authored map
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1006" name="PrototypeSceneTests" fullname="TheLastFortress.Tests.PrototypeSceneTests" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" testcasecount="11" result="Failed" site="Child" start-time="2026-10-16 06:37:31Z" end-time="2026-10-16 06:37:36Z" duration="5.020392" total="11" passed="10" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1009" name="ClickOnHudNeverPlacesBehindIt" fullname="TheLastFortress.Tests.PrototypeSceneTests.ClickOnHudNeverPlacesBehindIt" methodname="ClickOnHudNeverPlacesBehindIt" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="2044486672" result="Passed" start-time="2026-10-16 06:37:31Z" end-time="2026-10-16 06:37:31Z" duration="0.427034" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1012" name="DestroyedWallReleasesOccupancyAndRemovesVisual" fullname="TheLastFortress.Tests.PrototypeSceneTests.DestroyedWallReleasesOccupancyAndRemovesVisual" methodname="DestroyedWallReleasesOccupancyAndRemovesVisual" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="778832281" result="Passed" start-time="2026-10-16 06:37:31Z" end-time="2026-10-16 06:37:32Z" duration="0.401936" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1008" name="HotkeyToolAndClickPlaceThroughInputSystem" fullname="TheLastFortress.Tests.PrototypeSceneTests.HotkeyToolAndClickPlaceThroughInputSystem" methodname="HotkeyToolAndClickPlaceThroughInputSystem" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="2019553998" result="Passed" start-time="2026-10-16 06:37:32Z" end-time="2026-10-16 06:37:32Z" duration="0.389538" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1011" name="PausedNightBlocksBuildingButKeepsCameraAndInspection" fullname="TheLastFortress.Tests.PrototypeSceneTests.PausedNightBlocksBuildingButKeepsCameraAndInspection" methodname="PausedNightBlocksBuildingButKeepsCameraAndInspection" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="431599463" result="Failed" start-time="2026-10-16 06:37:32Z" end-time="2026-10-16 06:37:32Z" duration="0.381424" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  camera pans while paused
+  Expected: greater than 0.0500000007f
+  But was:  0.0472840443f
+]]></message>
+                <stack-trace><![CDATA[at TheLastFortress.Tests.PrototypeSceneTests+<PausedNightBlocksBuildingButKeepsCameraAndInspection>d__19.MoveNext () [0x00250] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\PlayMode\PrototypeSceneTests.cs:225
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@aebcb98460c6\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1015" name="RecordedLayoutsReproduceOutcomes" fullname="TheLastFortress.Tests.PrototypeSceneTests.RecordedLayoutsReproduceOutcomes" methodname="RecordedLayoutsReproduceOutcomes" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="837771084" result="Passed" start-time="2026-10-16 06:37:32Z" end-time="2026-10-16 06:37:33Z" duration="0.387360" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1017" name="RoutePreviewMatchesPlannerAndShowsBreach" fullname="TheLastFortress.Tests.PrototypeSceneTests.RoutePreviewMatchesPlannerAndShowsBreach" methodname="RoutePreviewMatchesPlannerAndShowsBreach" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="1346582456" result="Passed" start-time="2026-10-16 06:37:33Z" end-time="2026-10-16 06:37:33Z" duration="0.380751" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1007" name="SavedSceneStartsInDayWithOneBootstrapAndOneKeep" fullname="TheLastFortress.Tests.PrototypeSceneTests.SavedSceneStartsInDayWithOneBootstrapAndOneKeep" methodname="SavedSceneStartsInDayWithOneBootstrapAndOneKeep" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="287853400" result="Passed" start-time="2026-10-16 06:37:33Z" end-time="2026-10-16 06:37:34Z" duration="0.371883" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1014" name="SceneReloadDoesNotDuplicateBootstrapsOrSubscriptions" fullname="TheLastFortress.Tests.PrototypeSceneTests.SceneReloadDoesNotDuplicateBootstrapsOrSubscriptions" methodname="SceneReloadDoesNotDuplicateBootstrapsOrSubscriptions" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="266916668" result="Passed" start-time="2026-10-16 06:37:34Z" end-time="2026-10-16 06:37:35Z" duration="1.100193" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1010" name="StartNightDoubleClickStartsExactlyOneWave" fullname="TheLastFortress.Tests.PrototypeSceneTests.StartNightDoubleClickStartsExactlyOneWave" methodname="StartNightDoubleClickStartsExactlyOneWave" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="1682075999" result="Passed" start-time="2026-10-16 06:37:35Z" end-time="2026-10-16 06:37:35Z" duration="0.369379" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1016" name="StressModeIsLabeledAndDoesNotLeakIntoNormalMode" fullname="TheLastFortress.Tests.PrototypeSceneTests.StressModeIsLabeledAndDoesNotLeakIntoNormalMode" methodname="StressModeIsLabeledAndDoesNotLeakIntoNormalMode" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="1877109365" result="Passed" start-time="2026-10-16 06:37:35Z" end-time="2026-10-16 06:37:36Z" duration="0.418281" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1013" name="TerminalOverlaysOfferRestartToExactInitialState" fullname="TheLastFortress.Tests.PrototypeSceneTests.TerminalOverlaysOfferRestartToExactInitialState" methodname="TerminalOverlaysOfferRestartToExactInitialState" classname="TheLastFortress.Tests.PrototypeSceneTests" runstate="Runnable" seed="1485465715" result="Passed" start-time="2026-10-16 06:37:36Z" end-time="2026-10-16 06:37:36Z" duration="0.389474" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\PlayMode-20261016-083736.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

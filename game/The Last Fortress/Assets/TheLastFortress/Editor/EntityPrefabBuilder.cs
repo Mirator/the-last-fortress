@@ -208,6 +208,112 @@ namespace TheLastFortress.Editor
             return root;
         }
 
+        /// <summary>Plan 008 release-only materials (created by the release setup).</summary>
+        public sealed class ReleaseMaterials
+        {
+            public Material Iron, ArcherCloth, BomberCloth, CommanderCloth;
+        }
+
+        /// <summary>Low 2 x 2 gun emplacement: stone platform, iron barrel on a timber carriage. Pivot = footprint centre. Height ~1.1.</summary>
+        public static GameObject Cannon(Materials m, ReleaseMaterials r)
+        {
+            var root = Root("Cannon");
+            var t = root.transform;
+            Box(t, m.Limestone, new Vector3(0, 0.12f, 0), new Vector3(1.7f, 0.24f, 1.7f), "Platform");
+            Box(t, m.TimberShadow, new Vector3(0, 0.3f, 0), new Vector3(1.5f, 0.12f, 1.5f), "Deck");
+            foreach (var c in new[] { new Vector2(1, 1), new Vector2(1, -1), new Vector2(-1, 1), new Vector2(-1, -1) })
+                Box(t, m.Limestone, new Vector3(c.x * 0.72f, 0.48f, c.y * 0.72f), new Vector3(0.26f, 0.5f, 0.26f), "Merlon");
+            Box(t, m.Timber, new Vector3(0, 0.5f, -0.1f), new Vector3(0.6f, 0.3f, 0.8f), "Carriage");
+            Prims.Create(PrimitiveType.Cylinder, t, new Vector3(0, 0.82f, 0.18f), new Vector3(0.34f, 0.62f, 0.34f), r.Iron, "Barrel", Quaternion.Euler(70, 0, 0));
+            Prims.Create(PrimitiveType.Cylinder, t, new Vector3(0, 1.0f, 0.74f), new Vector3(0.42f, 0.06f, 0.42f), r.Iron, "Muzzle", Quaternion.Euler(70, 0, 0));
+            foreach (var x in new[] { -0.36f, 0.36f })
+                Prims.Create(PrimitiveType.Cylinder, t, new Vector3(x, 0.52f, -0.1f), new Vector3(0.44f, 0.05f, 0.44f), m.TimberShadow, "Wheel", Quaternion.Euler(0, 0, 90));
+            Box(t, r.Iron, new Vector3(-0.55f, 0.42f, -0.55f), new Vector3(0.22f, 0.22f, 0.22f), "Shot");
+            return root;
+        }
+
+        /// <summary>Very tall thin lookout on stilts with a pennant: reads as support, not a weapon. Height 2.5.</summary>
+        public static GameObject Watchtower(Materials m)
+        {
+            var root = Root("Watchtower");
+            var t = root.transform;
+            Box(t, m.Limestone, new Vector3(0, 0.05f, 0), new Vector3(0.6f, 0.1f, 0.6f), "Footing");
+            foreach (var c in new[] { new Vector2(1, 1), new Vector2(1, -1), new Vector2(-1, 1), new Vector2(-1, -1) })
+                Box(t, m.Timber, new Vector3(c.x * 0.2f, 1.0f, c.y * 0.2f), new Vector3(0.07f, 2.0f, 0.07f), "Stilt");
+            Box(t, m.TimberShadow, new Vector3(0, 1.0f, 0), new Vector3(0.46f, 0.05f, 0.46f), "Brace");
+            Box(t, m.Timber, new Vector3(0, 2.02f, 0), new Vector3(0.56f, 0.08f, 0.56f), "Lookout");
+            Box(t, m.TimberShadow, new Vector3(0, 2.14f, 0), new Vector3(0.5f, 0.14f, 0.5f), "Rail");
+            Box(t, m.Timber, new Vector3(0, 2.36f, 0), new Vector3(0.4f, 0.14f, 0.4f), "Roof", new Vector3(0, 45, 0));
+            Box(t, m.TimberShadow, new Vector3(0.12f, 2.62f, 0), new Vector3(0.03f, 0.4f, 0.03f), "Pole");
+            Box(t, m.Amber, new Vector3(0.26f, 2.74f, 0), new Vector3(0.26f, 0.13f, 0.02f), "Pennant");
+            return root;
+        }
+
+        /// <summary>2 x 2 workshop with a timber crane and stacked planks. Pivot = footprint centre. Height ~1.4.</summary>
+        public static GameObject RepairStation(Materials m)
+        {
+            var root = Root("RepairStation");
+            var t = root.transform;
+            Box(t, m.TimberShadow, new Vector3(0, 0.03f, 0), new Vector3(1.75f, 0.06f, 1.75f), "Yard");
+            Box(t, m.Limestone, new Vector3(-0.35f, 0.35f, 0.3f), new Vector3(0.9f, 0.7f, 0.8f), "Workshop");
+            Box(t, m.Timber, new Vector3(-0.35f, 0.86f, 0.3f), new Vector3(0.7f, 0.7f, 0.96f), "Roof", new Vector3(0, 0, 45));
+            Box(t, m.Door, new Vector3(-0.35f, 0.22f, -0.11f), new Vector3(0.3f, 0.42f, 0.03f), "Door");
+            Box(t, m.Timber, new Vector3(0.55f, 0.7f, -0.45f), new Vector3(0.1f, 1.4f, 0.1f), "Mast");
+            Box(t, m.Timber, new Vector3(0.3f, 1.36f, -0.45f), new Vector3(0.7f, 0.08f, 0.08f), "Jib");
+            Box(t, m.TimberShadow, new Vector3(0.0f, 1.1f, -0.45f), new Vector3(0.02f, 0.5f, 0.02f), "Rope");
+            Box(t, m.Amber, new Vector3(0.0f, 0.82f, -0.45f), new Vector3(0.1f, 0.1f, 0.1f), "Hook");
+            for (var i = 0; i < 3; i++)
+                Box(t, m.Timber, new Vector3(0.45f, 0.08f + i * 0.09f, 0.45f), new Vector3(0.6f, 0.08f, 0.16f), "Plank", new Vector3(0, i * 12f, 0));
+            return root;
+        }
+
+        /// <summary>Slim hooded archer holding a tall bow sideways; olive cloth. Height ~0.65; faces +Z.</summary>
+        public static GameObject RaiderArcher(Materials m, ReleaseMaterials r)
+        {
+            var root = Root("RaiderArcher");
+            var t = root.transform;
+            Prims.Create(PrimitiveType.Capsule, t, new Vector3(0, 0.26f, 0), new Vector3(0.22f, 0.22f, 0.2f), m.EnemyBody, "Body");
+            Box(t, r.ArcherCloth, new Vector3(0, 0.26f, 0.08f), new Vector3(0.2f, 0.26f, 0.06f), "Cloak");
+            Box(t, r.ArcherCloth, new Vector3(0, 0.52f, 0), new Vector3(0.16f, 0.16f, 0.16f), "Hood", new Vector3(0, 45, 0));
+            Box(t, m.EnemyBody, new Vector3(-0.07f, 0.05f, 0), new Vector3(0.06f, 0.1f, 0.08f), "Leg");
+            Box(t, m.EnemyBody, new Vector3(0.07f, 0.05f, 0), new Vector3(0.06f, 0.1f, 0.08f), "Leg");
+            Box(t, m.Timber, new Vector3(-0.17f, 0.36f, 0.12f), new Vector3(0.03f, 0.56f, 0.03f), "BowStave", new Vector3(0, 0, 8));
+            Box(t, m.Limestone, new Vector3(-0.13f, 0.36f, 0.12f), new Vector3(0.01f, 0.5f, 0.01f), "BowString");
+            Box(t, m.TimberShadow, new Vector3(0.1f, 0.38f, -0.12f), new Vector3(0.08f, 0.24f, 0.08f), "Quiver", new Vector3(15, 0, 0));
+            return root;
+        }
+
+        /// <summary>Squat runner with a big round powder keg on its back. Height ~0.6; faces +Z.</summary>
+        public static GameObject Bomber(Materials m, ReleaseMaterials r)
+        {
+            var root = Root("Bomber");
+            var t = root.transform;
+            Prims.Create(PrimitiveType.Capsule, t, new Vector3(0, 0.22f, 0.06f), new Vector3(0.26f, 0.2f, 0.24f), m.EnemyBody, "Body");
+            Box(t, r.BomberCloth, new Vector3(0, 0.24f, 0.16f), new Vector3(0.22f, 0.22f, 0.06f), "Apron");
+            Prims.Create(PrimitiveType.Sphere, t, new Vector3(0, 0.4f, -0.12f), new Vector3(0.36f, 0.36f, 0.36f), r.BomberCloth, "Keg");
+            Box(t, m.Amber, new Vector3(0, 0.4f, -0.12f), new Vector3(0.38f, 0.04f, 0.38f), "KegBand");
+            Box(t, m.EnemyBody, new Vector3(-0.08f, 0.04f, 0.06f), new Vector3(0.07f, 0.08f, 0.08f), "Leg");
+            Box(t, m.EnemyBody, new Vector3(0.08f, 0.04f, 0.06f), new Vector3(0.07f, 0.08f, 0.08f), "Leg");
+            return root;
+        }
+
+        /// <summary>Tall armoured boss carrying a raised banner pole. Height ~1.5 (banner 2.0), inside 0.9 x 0.9; faces +Z.</summary>
+        public static GameObject SiegeCommander(Materials m, ReleaseMaterials r)
+        {
+            var root = Root("SiegeCommander");
+            var t = root.transform;
+            Box(t, r.Iron, new Vector3(-0.16f, 0.2f, 0), new Vector3(0.2f, 0.4f, 0.24f), "LegL");
+            Box(t, r.Iron, new Vector3(0.16f, 0.2f, 0), new Vector3(0.2f, 0.4f, 0.24f), "LegR");
+            Box(t, r.Iron, new Vector3(0, 0.72f, 0), new Vector3(0.6f, 0.62f, 0.42f), "Breastplate");
+            Box(t, r.CommanderCloth, new Vector3(0, 0.6f, -0.24f), new Vector3(0.62f, 0.8f, 0.05f), "Cape");
+            Box(t, r.Iron, new Vector3(0, 1.18f, 0), new Vector3(0.3f, 0.3f, 0.3f), "Helm");
+            Box(t, m.GolemGlow, new Vector3(0, 1.2f, 0.16f), new Vector3(0.16f, 0.04f, 0.02f), "Visor");
+            Box(t, m.Timber, new Vector3(0.38f, 1.05f, 0.05f), new Vector3(0.05f, 1.9f, 0.05f), "BannerPole");
+            Box(t, r.CommanderCloth, new Vector3(0.38f, 1.78f, 0.2f), new Vector3(0.04f, 0.42f, 0.3f), "Banner");
+            Box(t, m.Amber, new Vector3(0.38f, 1.78f, 0.2f), new Vector3(0.05f, 0.12f, 0.12f), "Crest");
+            return root;
+        }
+
         /// <summary>Small hooded mass with one blunt weapon arm. Height 0.55; faces +Z.</summary>
         public static GameObject Grunt(Materials m)
         {

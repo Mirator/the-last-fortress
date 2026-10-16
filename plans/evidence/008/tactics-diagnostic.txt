@@ -1,0 +1,208 @@
+## Summary
+tower-ring     seed 1: Victory nights 6/6, Keep damage 608, buildings lost 1, spent 310, final gold 0
+corridor       seed 1: Defeat  nights 3/6, Keep damage 548, buildings lost 0, spent 290, final gold 10
+trap-corridor  seed 1: Defeat  nights 3/6, Keep damage 542, buildings lost 0, spent 285, final gold 16
+tower-ring     seed 2: Victory nights 6/6, Keep damage 608, buildings lost 1, spent 310, final gold 0
+corridor       seed 2: Defeat  nights 4/6, Keep damage 848, buildings lost 0, spent 290, final gold 0
+trap-corridor  seed 2: Defeat  nights 4/6, Keep damage 699, buildings lost 0, spent 320, final gold 0
+tower-ring     seed 3: Victory nights 6/6, Keep damage 608, buildings lost 1, spent 310, final gold 0
+corridor       seed 3: Defeat  nights 3/6, Keep damage 548, buildings lost 0, spent 290, final gold 10
+trap-corridor  seed 3: Defeat  nights 3/6, Keep damage 524, buildings lost 0, spent 285, final gold 20
+
+# Plan 008 G0 tactics diagnostic — six-night MVP rules, flat map, same purchases and reward policy
+Damage is nominal per hit (shots x current damage, trap entries, burn ticks, reflections), overkill included.
+
+## tower-ring seed=1
+Day 1: gold 40; Tower 9 9; Tower 11 11; Tower 9 11
+  routes (cells): West 10 open
+  Night 1: Reward in 20,4s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> Sharpshooters; income +20
+Day 2: gold 60; Tower 11 9 SKIPPED InsufficientGold
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 28,9s; Keep -0 (500/500); lost 0; damage tower 528 (44 shots) trap 0 burn 0 reflect 0
+  Reward BarbedDefenses,LastStand,Recycling -> BarbedDefenses; income +20
+Day 3: gold 0; Wall 9 10; Wall 11 10; Wall 10 9; Wall 10 11
+  routes (cells): West 10 breach, East 9 breach
+  Night 3: Reward in 31,7s; Keep -0 (500/500); lost 1; damage tower 864 (72 shots) trap 0 burn 0 reflect 36
+  Reward ExpandedVision,Recycling,FlamingArrows -> FlamingArrows; income +20
+Day 4: gold 20; Tower 8 10 SKIPPED InsufficientGold; Tower 12 10 SKIPPED InsufficientGold
+  routes (cells): West 16 open, East 9 open, North 13 open
+  Night 4: Reward in 36,2s; Keep -126 (374/500); lost 0; damage tower 1272 (106 shots) trap 0 burn 54 reflect 0
+  Reward LastStand,Recycling,ExpandedVision -> ExpandedVision; income +20
+Day 5: gold 14; Tower 10 8 SKIPPED InsufficientGold; Tower 10 12 SKIPPED InsufficientGold; repair Keep +126
+  routes (cells): West 16 open, East 9 open, North 13 open
+  Night 5: Reward in 43,2s; Keep -138 (362/500); lost 0; damage tower 1608 (134 shots) trap 0 burn 74 reflect 0
+  Reward EfficientFarming,LastStand,FortressHeart -> FortressHeart; income +20
+Day 6: gold 0; Wall 7 10; Wall 13 10 SKIPPED InsufficientGold; Wall 10 7 SKIPPED InsufficientGold; Wall 10 13 SKIPPED InsufficientGold; repair Keep +70
+  routes (cells): West 16 open, East 9 open, North 13 open, South 12 open
+  Night 6: Victory in 67,2s; Keep -344 (238/650); lost 0; damage tower 2508 (209 shots) trap 0 burn 98 reflect 0
+Result: tower-ring     seed 1: Victory nights 6/6, Keep damage 608, buildings lost 1, spent 310, final gold 0
+
+## corridor seed=1
+Day 1: gold 40; Tower 6 9; Tower 13 11; Tower 8 11
+  routes (cells): West 10 open
+  Night 1: Reward in 18,8s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> Sharpshooters; income +20
+Day 2: gold 60; Tower 11 9 SKIPPED InsufficientGold
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 26,9s; Keep -0 (500/500); lost 0; damage tower 528 (44 shots) trap 0 burn 0 reflect 0
+  Reward BarbedDefenses,LastStand,Recycling -> BarbedDefenses; income +20
+Day 3: gold 0; Wall 4 10; Wall 4 11; Wall 15 10; Wall 15 9
+  routes (cells): West 12 open, East 11 open
+  Night 3: Reward in 31,1s; Keep -48 (452/500); lost 0; damage tower 912 (76 shots) trap 0 burn 0 reflect 0
+  Reward ExpandedVision,Recycling,FlamingArrows -> FlamingArrows; income +20
+Day 4: gold 10; Tower 4 9 SKIPPED InsufficientGold; Tower 15 11 SKIPPED InsufficientGold; repair Keep +48
+  routes (cells): West 12 open, East 11 open, North 9 open
+  Night 4: Defeat in 36,1s; Keep -500 (0/500); lost 0; damage tower 1188 (99 shots) trap 0 burn 58 reflect 0
+Result: corridor       seed 1: Defeat  nights 3/6, Keep damage 548, buildings lost 0, spent 290, final gold 10
+
+## trap-corridor seed=1
+Day 1: gold 40; Tower 6 9; Tower 13 11; Tower 8 11
+  routes (cells): West 10 open
+  Night 1: Reward in 18,8s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward Recycling,Sharpshooters,ReinforcedTimber -> Sharpshooters; income +20
+Day 2: gold 25; Tower 11 9 SKIPPED InsufficientGold; SpikeTrap 5 10
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 26,9s; Keep -0 (500/500); lost 0; damage tower 528 (44 shots) trap 0 burn 0 reflect 0
+  Reward BarbedDefenses,LastStand,Recycling -> BarbedDefenses; income +20
+Day 3: gold 5; Wall 4 10; Wall 4 11; Wall 15 10 SKIPPED InsufficientGold; Wall 15 9 SKIPPED InsufficientGold; SpikeTrap 14 11 SKIPPED InsufficientGold
+  routes (cells): West 12 open, East 9 open
+  Night 3: Reward in 31,1s; Keep -42 (458/500); lost 0; damage tower 876 (73 shots) trap 24 burn 0 reflect 0
+  Reward ExpandedVision,Recycling,FlamingArrows -> FlamingArrows; income +20
+Day 4: gold 16; Tower 4 9 SKIPPED InsufficientGold; Tower 15 11 SKIPPED InsufficientGold; SpikeTrap 7 10 SKIPPED InsufficientGold; SpikeTrap 12 10 SKIPPED InsufficientGold; repair Keep +42
+  routes (cells): West 12 open, East 9 open, North 9 open
+  Night 4: Defeat in 33,1s; Keep -500 (0/500); lost 0; damage tower 1092 (91 shots) trap 0 burn 56 reflect 0
+Result: trap-corridor  seed 1: Defeat  nights 3/6, Keep damage 542, buildings lost 0, spent 285, final gold 16
+
+## tower-ring seed=2
+Day 1: gold 40; Tower 9 9; Tower 11 11; Tower 9 11
+  routes (cells): West 10 open
+  Night 1: Reward in 20,4s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward Sharpshooters,ThriftyConstruction,FortressHeart -> Sharpshooters; income +20
+Day 2: gold 60; Tower 11 9 SKIPPED InsufficientGold
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 28,9s; Keep -0 (500/500); lost 0; damage tower 528 (44 shots) trap 0 burn 0 reflect 0
+  Reward FlamingArrows,LastStand,BarbedDefenses -> FlamingArrows; income +20
+Day 3: gold 0; Wall 9 10; Wall 11 10; Wall 10 9; Wall 10 11
+  routes (cells): West 10 breach, East 9 breach
+  Night 3: Reward in 31,7s; Keep -0 (500/500); lost 1; damage tower 888 (74 shots) trap 0 burn 32 reflect 0
+  Reward Recycling,FortressHeart,ReinforcedTimber -> FortressHeart; income +20
+Day 4: gold 20; Tower 8 10 SKIPPED InsufficientGold; Tower 12 10 SKIPPED InsufficientGold
+  routes (cells): West 16 open, East 9 open, North 13 open
+  Night 4: Reward in 36,2s; Keep -126 (524/650); lost 0; damage tower 1272 (106 shots) trap 0 burn 54 reflect 0
+  Reward ExpandedVision,LastStand,ThriftyConstruction -> ExpandedVision; income +20
+Day 5: gold 14; Tower 10 8 SKIPPED InsufficientGold; Tower 10 12 SKIPPED InsufficientGold; repair Keep +126
+  routes (cells): West 16 open, East 9 open, North 13 open
+  Night 5: Reward in 43,2s; Keep -138 (512/650); lost 0; damage tower 1608 (134 shots) trap 0 burn 74 reflect 0
+  Reward EfficientFarming,BarbedDefenses,ThriftyConstruction -> BarbedDefenses; income +20
+Day 6: gold 0; Wall 7 10; Wall 13 10 SKIPPED InsufficientGold; Wall 10 7 SKIPPED InsufficientGold; Wall 10 13 SKIPPED InsufficientGold; repair Keep +70
+  routes (cells): West 16 open, East 9 open, North 13 open, South 12 open
+  Night 6: Victory in 67,2s; Keep -344 (238/650); lost 0; damage tower 2508 (209 shots) trap 0 burn 98 reflect 0
+Result: tower-ring     seed 2: Victory nights 6/6, Keep damage 608, buildings lost 1, spent 310, final gold 0
+
+## corridor seed=2
+Day 1: gold 40; Tower 6 9; Tower 13 11; Tower 8 11
+  routes (cells): West 10 open
+  Night 1: Reward in 18,8s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward Sharpshooters,ThriftyConstruction,FortressHeart -> Sharpshooters; income +20
+Day 2: gold 60; Tower 11 9 SKIPPED InsufficientGold
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 26,9s; Keep -0 (500/500); lost 0; damage tower 528 (44 shots) trap 0 burn 0 reflect 0
+  Reward FlamingArrows,LastStand,BarbedDefenses -> FlamingArrows; income +20
+Day 3: gold 0; Wall 4 10; Wall 4 11; Wall 15 10; Wall 15 9
+  routes (cells): West 12 open, East 11 open
+  Night 3: Reward in 30,3s; Keep -48 (452/500); lost 0; damage tower 888 (74 shots) trap 0 burn 48 reflect 0
+  Reward Recycling,FortressHeart,ReinforcedTimber -> FortressHeart; income +20
+Day 4: gold 10; Tower 4 9 SKIPPED InsufficientGold; Tower 15 11 SKIPPED InsufficientGold; repair Keep +48
+  routes (cells): West 12 open, East 11 open, North 9 open
+  Night 4: Reward in 38,5s; Keep -536 (114/650); lost 0; damage tower 1272 (106 shots) trap 0 burn 58 reflect 0
+  Reward ExpandedVision,LastStand,ThriftyConstruction -> ExpandedVision; income +20
+Day 5: gold 0; Tower 9 14 SKIPPED InsufficientGold; Tower 11 6 SKIPPED InsufficientGold; repair Keep +150
+  routes (cells): West 12 open, East 11 open, North 9 open
+  Night 5: Defeat in 29,1s; Keep -264 (0/650); lost 0; damage tower 960 (80 shots) trap 0 burn 48 reflect 0
+Result: corridor       seed 2: Defeat  nights 4/6, Keep damage 848, buildings lost 0, spent 290, final gold 0
+
+## trap-corridor seed=2
+Day 1: gold 40; Tower 6 9; Tower 13 11; Tower 8 11
+  routes (cells): West 10 open
+  Night 1: Reward in 18,8s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward Sharpshooters,ThriftyConstruction,FortressHeart -> Sharpshooters; income +20
+Day 2: gold 25; Tower 11 9 SKIPPED InsufficientGold; SpikeTrap 5 10
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 26,9s; Keep -0 (500/500); lost 0; damage tower 528 (44 shots) trap 0 burn 0 reflect 0
+  Reward FlamingArrows,LastStand,BarbedDefenses -> FlamingArrows; income +20
+Day 3: gold 5; Wall 4 10; Wall 4 11; Wall 15 10 SKIPPED InsufficientGold; Wall 15 9 SKIPPED InsufficientGold; SpikeTrap 14 11 SKIPPED InsufficientGold
+  routes (cells): West 12 open, East 9 open
+  Night 3: Reward in 30,3s; Keep -24 (476/500); lost 0; damage tower 852 (71 shots) trap 24 burn 48 reflect 0
+  Reward Recycling,FortressHeart,ReinforcedTimber -> FortressHeart; income +20
+Day 4: gold 20; Tower 4 9 SKIPPED InsufficientGold; Tower 15 11 SKIPPED InsufficientGold; SpikeTrap 7 10 SKIPPED InsufficientGold; SpikeTrap 12 10 SKIPPED InsufficientGold; repair Keep +24
+  routes (cells): West 12 open, East 9 open, North 9 open
+  Night 4: Reward in 39,2s; Keep -630 (20/650); lost 0; damage tower 1272 (106 shots) trap 0 burn 60 reflect 0
+  Reward ExpandedVision,LastStand,ThriftyConstruction -> ExpandedVision; income +20
+Day 5: gold 0; Tower 9 14 SKIPPED InsufficientGold; Tower 11 6 SKIPPED InsufficientGold; SpikeTrap 10 14; SpikeTrap 10 6 SKIPPED InsufficientGold; repair Keep +25
+  routes (cells): West 12 open, East 9 open, North 9 open
+  Night 5: Defeat in 22,9s; Keep -45 (0/650); lost 0; damage tower 708 (59 shots) trap 48 burn 34 reflect 0
+Result: trap-corridor  seed 2: Defeat  nights 4/6, Keep damage 699, buildings lost 0, spent 320, final gold 0
+
+## tower-ring seed=3
+Day 1: gold 40; Tower 9 9; Tower 11 11; Tower 9 11
+  routes (cells): West 10 open
+  Night 1: Reward in 20,4s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> FlamingArrows; income +20
+Day 2: gold 60; Tower 11 9 SKIPPED InsufficientGold
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 28,9s; Keep -0 (500/500); lost 0; damage tower 440 (44 shots) trap 0 burn 8 reflect 0
+  Reward Sharpshooters,ReinforcedTimber,FortressHeart -> Sharpshooters; income +20
+Day 3: gold 0; Wall 9 10; Wall 11 10; Wall 10 9; Wall 10 11
+  routes (cells): West 10 breach, East 9 breach
+  Night 3: Reward in 31,7s; Keep -0 (500/500); lost 1; damage tower 888 (74 shots) trap 0 burn 32 reflect 0
+  Reward BarbedDefenses,Recycling,LastStand -> BarbedDefenses; income +20
+Day 4: gold 20; Tower 8 10 SKIPPED InsufficientGold; Tower 12 10 SKIPPED InsufficientGold
+  routes (cells): West 16 open, East 9 open, North 13 open
+  Night 4: Reward in 36,2s; Keep -126 (374/500); lost 0; damage tower 1272 (106 shots) trap 0 burn 54 reflect 0
+  Reward Recycling,ThriftyConstruction,ExpandedVision -> ExpandedVision; income +20
+Day 5: gold 14; Tower 10 8 SKIPPED InsufficientGold; Tower 10 12 SKIPPED InsufficientGold; repair Keep +126
+  routes (cells): West 16 open, East 9 open, North 13 open
+  Night 5: Reward in 43,2s; Keep -138 (362/500); lost 0; damage tower 1608 (134 shots) trap 0 burn 74 reflect 0
+  Reward Recycling,LastStand,ReinforcedTimber -> ReinforcedTimber; income +20
+Day 6: gold 0; Wall 7 10; Wall 13 10 SKIPPED InsufficientGold; Wall 10 7 SKIPPED InsufficientGold; Wall 10 13 SKIPPED InsufficientGold; repair Keep +70
+  routes (cells): West 16 open, East 9 open, North 13 open, South 12 open
+  Night 6: Victory in 67,2s; Keep -344 (88/500); lost 0; damage tower 2508 (209 shots) trap 0 burn 98 reflect 0
+Result: tower-ring     seed 3: Victory nights 6/6, Keep damage 608, buildings lost 1, spent 310, final gold 0
+
+## corridor seed=3
+Day 1: gold 40; Tower 6 9; Tower 13 11; Tower 8 11
+  routes (cells): West 10 open
+  Night 1: Reward in 18,8s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> FlamingArrows; income +20
+Day 2: gold 60; Tower 11 9 SKIPPED InsufficientGold
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 26,9s; Keep -0 (500/500); lost 0; damage tower 440 (44 shots) trap 0 burn 24 reflect 0
+  Reward Sharpshooters,ReinforcedTimber,FortressHeart -> Sharpshooters; income +20
+Day 3: gold 0; Wall 4 10; Wall 4 11; Wall 15 10; Wall 15 9
+  routes (cells): West 12 open, East 11 open
+  Night 3: Reward in 30,3s; Keep -48 (452/500); lost 0; damage tower 888 (74 shots) trap 0 burn 48 reflect 0
+  Reward BarbedDefenses,Recycling,LastStand -> BarbedDefenses; income +20
+Day 4: gold 10; Tower 4 9 SKIPPED InsufficientGold; Tower 15 11 SKIPPED InsufficientGold; repair Keep +48
+  routes (cells): West 12 open, East 11 open, North 9 open
+  Night 4: Defeat in 36,1s; Keep -500 (0/500); lost 0; damage tower 1188 (99 shots) trap 0 burn 58 reflect 0
+Result: corridor       seed 3: Defeat  nights 3/6, Keep damage 548, buildings lost 0, spent 290, final gold 10
+
+## trap-corridor seed=3
+Day 1: gold 40; Tower 6 9; Tower 13 11; Tower 8 11
+  routes (cells): West 10 open
+  Night 1: Reward in 18,8s; Keep -0 (500/500); lost 0; damage tower 300 (30 shots) trap 0 burn 0 reflect 0
+  Reward FlamingArrows,ReinforcedTimber,LastStand -> FlamingArrows; income +20
+Day 2: gold 25; Tower 11 9 SKIPPED InsufficientGold; SpikeTrap 5 10
+  routes (cells): West 10 open, East 9 open
+  Night 2: Reward in 26,9s; Keep -0 (500/500); lost 0; damage tower 440 (44 shots) trap 0 burn 24 reflect 0
+  Reward Sharpshooters,ReinforcedTimber,FortressHeart -> Sharpshooters; income +20
+Day 3: gold 5; Wall 4 10; Wall 4 11; Wall 15 10 SKIPPED InsufficientGold; Wall 15 9 SKIPPED InsufficientGold; SpikeTrap 14 11 SKIPPED InsufficientGold
+  routes (cells): West 12 open, East 9 open
+  Night 3: Reward in 30,3s; Keep -24 (476/500); lost 0; damage tower 852 (71 shots) trap 24 burn 48 reflect 0
+  Reward BarbedDefenses,Recycling,LastStand -> BarbedDefenses; income +20
+Day 4: gold 20; Tower 4 9 SKIPPED InsufficientGold; Tower 15 11 SKIPPED InsufficientGold; SpikeTrap 7 10 SKIPPED InsufficientGold; SpikeTrap 12 10 SKIPPED InsufficientGold; repair Keep +24
+  routes (cells): West 12 open, East 9 open, North 9 open
+  Night 4: Defeat in 33,1s; Keep -500 (0/500); lost 0; damage tower 1092 (91 shots) trap 0 burn 56 reflect 0
+Result: trap-corridor  seed 3: Defeat  nights 3/6, Keep damage 524, buildings lost 0, spent 285, final gold 20
+

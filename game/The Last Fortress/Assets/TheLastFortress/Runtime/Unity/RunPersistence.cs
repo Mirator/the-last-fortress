@@ -34,13 +34,16 @@ namespace TheLastFortress
         /// Picks the slot for a new run: an ended (or absent) latest run's slot is reused; an active or damaged one is never
         /// overwritten, so the new run goes to the next slot file.
         /// </summary>
-        public void BeginNewRun(PrototypeDefinitions defs)
+        public void BeginNewRun(PrototypeDefinitions defs) => BeginNewRun(new RulesCatalog(RulesProfile.SixNights(defs)));
+
+        /// <summary>As above with the build's profiles: a save this build cannot read is never reused or overwritten.</summary>
+        public void BeginNewRun(RulesCatalog catalog)
         {
             var latest = Store.LatestSlot();
             if (latest < 0) Slot = 0;
             else
             {
-                var existing = Store.Read(latest, defs);
+                var existing = Store.Read(latest, catalog);
                 Slot = existing.Status == SaveStatus.Terminal || existing.Status == SaveStatus.None ? latest : latest + 1;
             }
 

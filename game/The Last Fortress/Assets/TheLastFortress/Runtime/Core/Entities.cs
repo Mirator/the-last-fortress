@@ -51,6 +51,46 @@ namespace TheLastFortress
                 if (c == cell) return true;
             return false;
         }
+
+        /// <summary>World centre of the footprint: the cell centre for 1x1, the shared corner of the four cells for 2x2.</summary>
+        public double CenterX => Cell.X + Definition.FootprintSize / 2.0;
+
+        public double CenterZ => Cell.Z + Definition.FootprintSize / 2.0;
+
+        /// <summary>Smallest Chebyshev distance between any footprint cell and <paramref name="cell"/>.</summary>
+        public int ChebyshevTo(GridPos cell)
+        {
+            var best = int.MaxValue;
+            foreach (var c in Cells)
+            {
+                var d = System.Math.Max(System.Math.Abs(c.X - cell.X), System.Math.Abs(c.Z - cell.Z));
+                if (d < best) best = d;
+            }
+
+            return best;
+        }
+
+        /// <summary>Smallest Chebyshev distance between the two footprints.</summary>
+        public int ChebyshevTo(Building other)
+        {
+            var best = int.MaxValue;
+            foreach (var c in other.Cells)
+            {
+                var d = ChebyshevTo(c);
+                if (d < best) best = d;
+            }
+
+            return best;
+        }
+
+        /// <summary>Whether any footprint cell shares an edge with a cell of <paramref name="other"/>.</summary>
+        public bool SharesEdgeWith(Building other)
+        {
+            foreach (var a in Cells)
+            foreach (var b in other.Cells)
+                if (a.IsCardinalNeighbor(b)) return true;
+            return false;
+        }
     }
 
     public sealed class Enemy
@@ -65,6 +105,9 @@ namespace TheLastFortress
 
         /// <summary>Fixed-point movement budget per step (1200 units = one tile).</summary>
         public readonly int MoveUnitsPerStep;
+
+        /// <summary>Bomber fuse length in steps (0 for every other kind).</summary>
+        public readonly int FuseTicks;
 
         public int Hp;
         public bool Alive = true;
@@ -97,6 +140,11 @@ namespace TheLastFortress
         public int TargetBuildingId = -1;
         public long AttackDueTick;
 
+        /// <summary>Bomber: fuse lit at its attack cell; it never moves or retargets again and detonates at <see cref="DetonateTick"/>.</summary>
+        public bool FuseLit;
+
+        public long DetonateTick;
+
         public Enemy(int id, int entryIndex, EnemyDefinition definition, GridPos cell)
         {
             Id = id;
@@ -105,6 +153,7 @@ namespace TheLastFortress
             Kind = definition.Kind;
             AttackTicks = PrototypeDefinitions.ToTicks(definition.AttackIntervalSeconds);
             MoveUnitsPerStep = definition.MoveUnitsPerStep;
+            FuseTicks = definition.FuseSeconds > 0 ? PrototypeDefinitions.ToTicks(definition.FuseSeconds) : 0;
             Hp = definition.MaxHp;
             Cell = cell;
             NextCell = cell;

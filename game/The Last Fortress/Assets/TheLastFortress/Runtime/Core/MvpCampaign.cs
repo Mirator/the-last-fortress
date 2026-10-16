@@ -14,11 +14,31 @@ namespace TheLastFortress
         /// <summary>Nights 1..N-1 end in a Reward choice (plan 004). False for the plan 003 foundation fixture.</summary>
         public bool OffersRewards;
 
+        /// <summary>Rules profile this run plays under (saved; plan 008). Defaults describe the six-night MVP.</summary>
+        public string RulesVersion = MvpCampaign.RulesVersion;
+
+        public string CampaignId = MvpCampaign.CampaignId;
+
+        /// <summary>Perk IDs this run can be offered, in ordinal order. The MVP pool unless a release profile sets it.</summary>
+        public IReadOnlyList<string> PerkPool = PerkRules.AllIds;
+
+        /// <summary>Release map profile ID ("" for the MVP generator / flat map) and difficulty; saved with the run.</summary>
+        public string MapProfile = "";
+
+        public string Difficulty = "standard";
+
+        public bool IsRelease => RulesVersion == ReleaseCampaign.RulesVersion;
+
         public int TotalNights => Nights.Count;
     }
 
     public static class MvpCampaign
     {
+        /// <summary>Rules version of the six-night MVP; its saves use checkpoint schema 1 and are never converted.</summary>
+        public const string RulesVersion = "mvp-rules-1";
+
+        public const string CampaignId = "six-nights";
+
         public static readonly GridPos West = new GridPos(0, 10);
         public static readonly GridPos East = new GridPos(19, 10);
         public static readonly GridPos North = new GridPos(10, 19);

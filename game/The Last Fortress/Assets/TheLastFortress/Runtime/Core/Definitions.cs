@@ -12,6 +12,9 @@ namespace TheLastFortress
         House = 3,
         Farm = 4,
         SpikeTrap = 5,
+        Cannon = 6,
+        Watchtower = 7,
+        RepairStation = 8,
     }
 
     /// <summary>Tuning values for a structure. Shared and read-only during a run; perks never mutate it.</summary>
@@ -31,6 +34,17 @@ namespace TheLastFortress
         /// <summary>Damage dealt once to an enemy completing entry into the cell (Spike Trap only).</summary>
         public int TrapDamage;
 
+        /// <summary>Cannon: every enemy within this many tiles of the primary target also takes the shot's damage.</summary>
+        public double SplashRadius;
+
+        /// <summary>Watchtower: flat range added (once) to adjacent Archer Towers and Cannons.</summary>
+        public double RangeBonus;
+
+        /// <summary>Repair Station: HP restored per dawn across nearby buildings, and its Chebyshev reach in tiles.</summary>
+        public int RepairBudget;
+
+        public int RepairReach;
+
         public bool CanAttack => AttackDamage > 0;
         public bool Purchasable => Kind != BuildingKind.Keep;
 
@@ -39,10 +53,11 @@ namespace TheLastFortress
 
         public bool HasHp => Kind != BuildingKind.SpikeTrap;
 
-        /// <summary>Square footprint edge length. Fixed by the rules, not tuning: Farm is 2 x 2, everything else 1 x 1.</summary>
+        /// <summary>Square footprint edge length. Fixed by the rules, not tuning: Farm, Cannon and Repair Station are 2 x 2, everything else 1 x 1.</summary>
         public int FootprintSize => FootprintSizeOf(Kind);
 
-        public static int FootprintSizeOf(BuildingKind kind) => kind == BuildingKind.Farm ? 2 : 1;
+        public static int FootprintSizeOf(BuildingKind kind) =>
+            kind == BuildingKind.Farm || kind == BuildingKind.Cannon || kind == BuildingKind.RepairStation ? 2 : 1;
 
         /// <summary>Footprint cells from the lowest (x,z) anchor, in offset order (0,0),(1,0),(0,1),(1,1).</summary>
         public static GridPos[] FootprintCells(BuildingKind kind, GridPos anchor)
@@ -64,6 +79,9 @@ namespace TheLastFortress
         Runner = 1,
         Brute = 2,
         SiegeGolem = 3,
+        Archer = 4,
+        Bomber = 5,
+        SiegeCommander = 6,
     }
 
     public sealed class EnemyDefinition
@@ -77,6 +95,28 @@ namespace TheLastFortress
 
         /// <summary>Damage multiplier applied only when the target is a Wall (Brute/Golem x2).</summary>
         public int WallDamageMultiplier = 1;
+
+        /// <summary>Raider Archer: stops on its route and shoots buildings within this many tiles. 0 = melee.</summary>
+        public double AttackRange;
+
+        /// <summary>Bomber: fuse length, primary blast damage (Wall multiplier applies) and splash to buildings around it.</summary>
+        public double FuseSeconds;
+
+        public int BlastDamage;
+        public int BlastSplashDamage;
+
+        /// <summary>Siege Commander: other non-boss enemies within this radius hit harder by this percentage.</summary>
+        public double AuraRadius;
+
+        public int AuraDamagePercent;
+
+        public bool IsRanged => AttackRange > 0;
+        public bool IsBomber => Kind == EnemyKind.Bomber;
+        public bool IsBoss => IsBossKind(Kind);
+
+        public static bool IsBossKind(EnemyKind kind) => kind == EnemyKind.SiegeGolem || kind == EnemyKind.SiegeCommander;
+
+        public const int KindCount = 7;
 
         /// <summary>Fixed-point movement: one tile = this many units.</summary>
         public const int UnitsPerTile = 1200;
@@ -104,6 +144,14 @@ namespace TheLastFortress
         public EnemyDefinition Runner;
         public EnemyDefinition Brute;
         public EnemyDefinition SiegeGolem;
+
+        // Plan 008 release kinds (null in the prototype and the six-night MVP).
+        public BuildingDefinition Cannon;
+        public BuildingDefinition Watchtower;
+        public BuildingDefinition RepairStation;
+        public EnemyDefinition RaiderArcher;
+        public EnemyDefinition Bomber;
+        public EnemyDefinition SiegeCommander;
 
         /// <summary>Initial tuning from specification 002, "Initial combat tuning".</summary>
         public static PrototypeDefinitions CreateDefault() => new PrototypeDefinitions
@@ -133,6 +181,9 @@ namespace TheLastFortress
                 case BuildingKind.House: return House;
                 case BuildingKind.Farm: return Farm;
                 case BuildingKind.SpikeTrap: return SpikeTrap;
+                case BuildingKind.Cannon: return Cannon;
+                case BuildingKind.Watchtower: return Watchtower;
+                case BuildingKind.RepairStation: return RepairStation;
                 default: throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
             }
         }
@@ -146,6 +197,9 @@ namespace TheLastFortress
                 case EnemyKind.Runner: return Runner;
                 case EnemyKind.Brute: return Brute;
                 case EnemyKind.SiegeGolem: return SiegeGolem;
+                case EnemyKind.Archer: return RaiderArcher;
+                case EnemyKind.Bomber: return Bomber;
+                case EnemyKind.SiegeCommander: return SiegeCommander;
                 default: throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
             }
         }
@@ -172,6 +226,26 @@ namespace TheLastFortress
                 if (SpikeTrap.TrapDamage <= 0) errors.Add("Spike Trap damage must be positive.");
             }
 
+            if (Cannon != null)
+            {
+                ValidateBuilding(Cannon, BuildingKind.Cannon, errors);
+                if (!Cannon.CanAttack) errors.Add("Cannon damage must be positive.");
+                if (!(Cannon.SplashRadius >= 0)) errors.Add("Cannon splash radius must not be negative.");
+            }
+
+            if (Watchtower != null)
+            {
+                ValidateBuilding(Watchtower, BuildingKind.Watchtower, errors);
+                if (!(Watchtower.RangeBonus > 0)) errors.Add("Watchtower range bonus must be positive.");
+            }
+
+            if (RepairStation != null)
+            {
+                ValidateBuilding(RepairStation, BuildingKind.RepairStation, errors);
+                if (RepairStation.RepairBudget <= 0) errors.Add("Repair Station budget must be positive.");
+                if (RepairStation.RepairReach < 1) errors.Add("Repair Station reach must be at least 1.");
+            }
+
             if (Grunt == null)
             {
                 errors.Add("Grunt definition missing.");
@@ -182,7 +256,33 @@ namespace TheLastFortress
             if (Runner != null) ValidateEnemy(Runner, errors);
             if (Brute != null) ValidateEnemy(Brute, errors);
             if (SiegeGolem != null) ValidateEnemy(SiegeGolem, errors);
+            ValidateRelease(errors);
             return errors;
+        }
+
+        void ValidateRelease(List<string> errors)
+        {
+            if (RaiderArcher != null)
+            {
+                ValidateEnemy(RaiderArcher, errors);
+                if (RaiderArcher.Kind != EnemyKind.Archer) errors.Add($"Raider Archer definition has kind {RaiderArcher.Kind}.");
+                if (!(RaiderArcher.AttackRange >= 1)) errors.Add("Raider Archer range must be at least 1 tile.");
+            }
+
+            if (Bomber != null)
+            {
+                ValidateEnemy(Bomber, errors);
+                if (Bomber.Kind != EnemyKind.Bomber) errors.Add($"Bomber definition has kind {Bomber.Kind}.");
+                ValidateInterval("Bomber fuse", Bomber.FuseSeconds, errors);
+                if (Bomber.BlastDamage <= 0 || Bomber.BlastSplashDamage < 0) errors.Add("Bomber blast damage must be positive and splash not negative.");
+            }
+
+            if (SiegeCommander != null)
+            {
+                ValidateEnemy(SiegeCommander, errors);
+                if (SiegeCommander.Kind != EnemyKind.SiegeCommander) errors.Add($"Siege Commander definition has kind {SiegeCommander.Kind}.");
+                if (!(SiegeCommander.AuraRadius > 0) || SiegeCommander.AuraDamagePercent <= 0) errors.Add("Siege Commander aura radius and bonus must be positive.");
+            }
         }
 
         static void ValidateEnemy(EnemyDefinition e, List<string> errors)

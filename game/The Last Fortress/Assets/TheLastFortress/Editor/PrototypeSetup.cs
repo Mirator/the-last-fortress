@@ -87,7 +87,7 @@ namespace TheLastFortress.Editor
             AssetDatabase.CreateFolder(parent, Path.GetFileName(path));
         }
 
-        static Material LitMaterial(string name, Color color, Dictionary<string, Material> all, Color? emission = null)
+        internal static Material LitMaterial(string name, Color color, Dictionary<string, Material> all, Color? emission = null)
         {
             var path = $"{Root}/Materials/{name}.mat";
             var shader = Shader.Find("Universal Render Pipeline/Lit");

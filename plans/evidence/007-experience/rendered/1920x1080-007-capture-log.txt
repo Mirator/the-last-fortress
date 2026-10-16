@@ -1,0 +1,30 @@
+title: gameplay layer visible=False music=music_planning
+generated day 1: seed 3: generated (attempt 0) guide=[GUIDE 1 / 5 · Goal: hold the Keep for 6 nights
+Build an Archer Tower: press 2 or pick its card, then click a free tile beside the path the enemies will take.]
+after tower: guide=[GUIDE 2 / 5 · Goal: hold the Keep for 6 nights
+Click your Tower to see its range. The cyan line is the route enemies follow to the Keep.] tooltip=[Wall — 20 gold
+OK: can build here · Automatic connections
+Seal every route and enemies break through · Brutes/Golems hit Walls 2x]
+house tooltip: [House — 40 gold
+Can't build: Impassable terrain]
+night 1: Reward keep=500
+day 2 announcement: [NEW ENEMY: Runner — fast and fragile (20 HP, 1.75 tiles/s).]
+night 2: Reward keep=500
+day 3 announcement: [NEW ENEMY: Brute — slow and heavy (150 HP, 0.6 tiles/s, 2x damage to Walls).]
+damaged house: smoke=True
+night 3: Reward keep=264
+night 4 at 1x: 36,2s wall clock, 105424 frames, sim 36,2s, max voices 14/24, max impacts 4, max shots 4/4, max music tracks 1, lighting blend 1,00; played Repair=1 Reward=1 Shot=115 Impact=118 KeepHit=3 NightStart=1 Dawn=1 
+night 4: Reward keep=614
+night 5: Reward keep=536
+day 6 announcement: [FINAL SIEGE — Night 6 of 6: survive it and the run is won.
+NEW ENEMY: Siege Golem — a massive siege boss (800 HP, 0.4 tiles/s, 2x damage to Walls).]
+golem banner: [THE SIEGE GOLEM HAS ARRIVED
+From West · 800 HP · hits for 40, 2x on Walls] at 30,2s
+night 6 at 1x: 62,2s wall clock, 190548 frames, sim 62,2s, max voices 8/24, max impacts 4, max shots 4/4, max music tracks 2, lighting blend 1,00; played Shot=231 Impact=230 NightStart=1 GolemArrival=1 Victory=1 
+night 6: Victory keep=556
+outcome: Victory music=music_conclusion victory=2 defeat=1
+cycle 1: Defeat voices=1 pending=0 musicTracks=1 arrows=0 cues=0 enemyViews=10 audioSources=28 objects=479
+cycle 2: Defeat voices=1 pending=0 musicTracks=1 arrows=0 cues=0 enemyViews=10 audioSources=28 objects=479
+cycle 3: Defeat voices=1 pending=0 musicTracks=1 arrows=0 cues=0 enemyViews=10 audioSources=28 objects=479
+cycle 4: Defeat voices=1 pending=0 musicTracks=1 arrows=0 cues=0 enemyViews=10 audioSources=28 objects=479
+cycle 5: Defeat voices=1 pending=0 musicTracks=1 arrows=0 cues=0 enemyViews=10 audioSources=28 objects=479

@@ -1,0 +1,5 @@
+# Release content validation 2026-10-16T17:30:09.1439230+02:00
+rules=release-rules-1 campaign=twelve-nights content=1
+map profiles 3 x seeds 0..49: 0 fallbacks
+buildings 9 (incl. Keep), enemies 7, perks 24, nights 12
+errors=0

@@ -293,5 +293,38 @@ namespace TheLastFortress.Tests
                 if (Directory.Exists(dir)) Directory.Delete(dir, true);
             }
         }
+
+        [Test]
+        public void SettingsFromBeforeAudioMigrateAndVolumesStayInRange()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), "tlf-settings-tests-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var store = new SaveStore(dir);
+                var file = Path.Combine(dir, SaveStore.SettingsFile);
+                Directory.CreateDirectory(dir);
+
+                // Exactly what a pre-audio build wrote: version 1, no volume fields.
+                File.WriteAllText(file, "{\n    \"version\": 1,\n    \"cameraSensitivity\": 1.75,\n    \"cameraShake\": false,\n    \"fullscreen\": true,\n    \"width\": 1600,\n    \"height\": 900\n}");
+                var old = store.ReadSettings(out var problem);
+                Assert.IsNull(problem, "a version 1 file is migrated, not rejected as unknown");
+                Assert.AreEqual((1.75f, false, true, 1600, 900), (old.cameraSensitivity, old.cameraShake, old.fullscreen, old.width, old.height), "existing choices kept");
+                Assert.AreEqual((GameSettings.DefaultMasterVolume, GameSettings.DefaultMusicVolume, GameSettings.DefaultSfxVolume), (old.masterVolume, old.musicVolume, old.sfxVolume));
+                Assert.AreEqual(GameSettings.CurrentVersion, old.version);
+
+                File.WriteAllText(file, "{ \"version\": 2, \"masterVolume\": 2.5, \"musicVolume\": -1, \"sfxVolume\": 0 }");
+                var odd = store.ReadSettings(out problem);
+                Assert.IsNull(problem);
+                Assert.AreEqual((1f, 0f, 0f), (odd.masterVolume, odd.musicVolume, odd.sfxVolume), "clamped to 0–1; zero stays silence");
+
+                Assert.IsTrue(store.WriteSettings(new GameSettings { masterVolume = 0.3f, musicVolume = 0f, sfxVolume = 0.6f }, out _));
+                var back = store.ReadSettings(out problem);
+                Assert.AreEqual((0.3f, 0f, 0.6f), (back.masterVolume, back.musicVolume, back.sfxVolume), "saved volumes load back");
+            }
+            finally
+            {
+                if (Directory.Exists(dir)) Directory.Delete(dir, true);
+            }
+        }
     }
 }

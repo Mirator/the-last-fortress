@@ -5,11 +5,15 @@ using UnityEngine.UI;
 
 namespace TheLastFortress
 {
-    /// <summary>MVP-only HUD: main menu, in-run menu, settings, run summary, seed display and save-failure handling.</summary>
+    /// <summary>
+    /// MVP-only HUD: title/in-run menu, settings, help, credits, first-run guide, escalation announcements, run
+    /// summary, seed display and save-failure handling.
+    /// </summary>
     public sealed partial class HudView
     {
-        GameObject menuOverlay, settingsPanel, saveFailedPanel;
-        Text menuStatus, menuContinueLabel, seedText, saveFailedText, settingsSensitivity, settingsShake, settingsWindow, settingsResolution, settingsStatus;
+        GameObject menuOverlay, settingsPanel, saveFailedPanel, helpPanel, creditsPanel, guidePanel, announcePanel, golemBanner;
+        Text menuStatus, menuContinueLabel, seedText, saveFailedText, settingsSensitivity, settingsShake, settingsWindow, settingsResolution, settingsStatus,
+            settingsMaster, settingsMusic, settingsSfx, menuTitle, menuPromise, guideHeader, guideBody, announceText, golemTitle, golemBody;
         InputField seedInput;
         GameSettings editing;
         Resolution[] resolutions;
@@ -19,6 +23,16 @@ namespace TheLastFortress
         Image keepBarBack;
         float keepHitTimer;
         int keepHitAmount;
+        RectTransform gameplayLayer, menuPanel, seedRow, newRunRow;
+        readonly List<(GameObject go, float height)> menuStack = new List<(GameObject, float)>();
+        bool seedExpanded;
+        Button showGuideButton;
+        float golemBannerTimer;
+        int golemBannerReset = -1, golemBannerNight = -1;
+        RunSimulation golemBannerSim;
+
+        /// <summary>How long the Golem's arrival banner stays (presentation time; it never blocks input or the outcome).</summary>
+        public const float GolemBannerSeconds = 3.5f;
 
         /// <summary>Damage shown by the current Keep-hit cue (0 when none is showing).</summary>
         public int KeepHitShown => keepHitTimer > 0f ? keepHitAmount : 0;
@@ -31,7 +45,22 @@ namespace TheLastFortress
         public GameObject MenuOverlay => menuOverlay;
         public GameObject SettingsPanel => settingsPanel;
         public GameObject SaveFailedPanel => saveFailedPanel;
+        public GameObject HelpPanel => helpPanel;
+        public GameObject CreditsPanel => creditsPanel;
+        public GameObject GuidePanel => guidePanel;
+
+        /// <summary>The in-run HUD layer; hidden as a whole while a menu is open.</summary>
+        public GameObject GameplayLayer => gameplayLayer.gameObject;
+
+        public string GuideText => guidePanel.activeSelf ? guideHeader.text + "\n" + guideBody.text : null;
+        public string AnnouncementText => announcePanel.activeSelf ? announceText.text : null;
+        public string GolemBannerText => golemBanner.activeSelf ? golemTitle.text + "\n" + golemBody.text : null;
         public Button NewRunButton { get; private set; }
+
+        /// <summary>Release title only: cycles the map profile used by the next New Run.</summary>
+        public Button MapButton { get; private set; }
+
+        Text mapLabel, menuSubtitle;
         public Button ContinueButton { get; private set; }
         public Button RecoverButton { get; private set; }
         public Button ResumeButton { get; private set; }
@@ -42,6 +71,12 @@ namespace TheLastFortress
         public Button NewSeedButton { get; private set; }
         public Button RetrySaveButton { get; private set; }
         public Button QuitButton { get; private set; }
+        public Button HelpButton { get; private set; }
+        public Button MenuHelpButton { get; private set; }
+        public Button CreditsButton { get; private set; }
+        public Button SkipGuideButton { get; private set; }
+        public Button HideGuideButton { get; private set; }
+        public Button ShowGuideButton => showGuideButton;
         public GameObject ConfirmPanel => confirmPanel;
         public string ConfirmTitle => confirmTitle.text;
         public string ConfirmBody => confirmBody.text;
@@ -63,12 +98,24 @@ namespace TheLastFortress
         public string SeedText => seedText != null ? seedText.text : null;
         public string TerminalBody => terminalBody.text;
 
+        /// <summary>"v0.1.0 · build 1a2b3c4d" for bug reports (the build id is absent in the Editor).</summary>
+        public static string VersionText
+        {
+            get
+            {
+                var guid = Application.buildGUID;
+                return string.IsNullOrEmpty(guid) ? $"Version {Application.version} (editor)" : $"Version {Application.version} · build {guid.Substring(0, Mathf.Min(8, guid.Length))}";
+            }
+        }
+
         void BuildRunMenuRow(RectTransform menu)
         {
-            RunMenuButton = MakeButton(menu, "Menu", new Vector2(0, 1), new Vector2(318, -12), new Vector2(140, 52), game.OpenMenu, out var menuLabel);
+            RunMenuButton = MakeButton(menu, "Menu", new Vector2(0, 1), new Vector2(284, -12), new Vector2(100, 52), game.OpenMenu, out var menuLabel);
             menuLabel.fontSize = 21;
-            seedText = Label(menu, "Seed", 17, TextAnchor.MiddleLeft, new Vector2(14, -68), new Vector2(330, 34), Palette.HudText);
-            MakeButton(menu, "Copy seed", new Vector2(0, 1), new Vector2(348, -68), new Vector2(110, 34), CopySeed, out var copyLabel);
+            HelpButton = MakeButton(menu, "Help", new Vector2(0, 1), new Vector2(392, -12), new Vector2(96, 52), OpenHelp, out var helpLabel);
+            helpLabel.fontSize = 21;
+            seedText = Label(menu, "Seed", 18, TextAnchor.MiddleLeft, new Vector2(14, -68), new Vector2(360, 34), Palette.HudText);
+            MakeButton(menu, "Copy seed", new Vector2(0, 1), new Vector2(378, -68), new Vector2(110, 34), CopySeed, out var copyLabel);
             copyLabel.fontSize = 18;
         }
 
@@ -76,15 +123,20 @@ namespace TheLastFortress
 
         void BuildMvpPanels(RectTransform root)
         {
-            // Terminal overlay: summary needs more room plus same-seed / new-seed / menu actions.
+            // Terminal overlay: summary needs more room plus same-seed / new run / menu actions.
             var card = (RectTransform)terminalOverlay.transform.Find("Card");
             card.sizeDelta = new Vector2(760, 520);
             terminalBody.rectTransform.sizeDelta = new Vector2(720, 290);
-            ((Text)TerminalRestartButton.GetComponentInChildren(typeof(Text))).text = "Retry same seed";
+            var retryLabel = (Text)TerminalRestartButton.GetComponentInChildren(typeof(Text));
+            retryLabel.text = "Retry same seed";
+            retryLabel.fontSize = 24;
             var restartRect = (RectTransform)TerminalRestartButton.transform;
-            restartRect.anchoredPosition = new Vector2(-250, 30);
-            NewSeedButton = MakeButton(card, "New seed", new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(220, 70), () => game.NewRun(PrototypeBootstrap.NewSeed(), game.FlatMap), out _);
-            MakeButton(card, "Main menu", new Vector2(0.5f, 0), new Vector2(250, 30), new Vector2(220, 70), game.QuitToMenuWithoutSaving, out _);
+            restartRect.anchoredPosition = new Vector2(-240, 30);
+            restartRect.sizeDelta = new Vector2(224, 70);
+            retryLabel.rectTransform.sizeDelta = restartRect.sizeDelta;
+            NewSeedButton = MakeButton(card, "New seed", new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(224, 70), () => game.NewRun(PrototypeBootstrap.NewSeed(), game.FlatMap), out var newSeedLabel);
+            newSeedLabel.text = "New Run";
+            MakeButton(card, "Main menu", new Vector2(0.5f, 0), new Vector2(240, 30), new Vector2(224, 70), game.QuitToMenuWithoutSaving, out _);
 
             // Keep-hit cue beside the Keep health bar: readable when the Keep is off-screen or camera shake is off.
             keepBarBack = keepFill.parent.GetComponent<Image>();
@@ -108,6 +160,44 @@ namespace TheLastFortress
                 entryMarkers[i] = m.gameObject;
                 m.gameObject.SetActive(false);
             }
+
+            // Day announcement under the status panel (the boss bar's slot, which only shows at Night): a new enemy
+            // type or the final siege, read from the stored wave.
+            announcePanel = Panel(root, "Announcement", new Vector2(0.5f, 1), new Vector2(0, -192), new Vector2(860, 64)).gameObject;
+            announcePanel.GetComponent<Image>().raycastTarget = false;
+            var stripe = Rect(announcePanel.transform, "Stripe", new Vector2(0, 0.5f), Vector2.zero, new Vector2(8, 64));
+            stripe.anchorMin = new Vector2(0, 0);
+            stripe.anchorMax = new Vector2(0, 1);
+            stripe.offsetMin = stripe.offsetMax = Vector2.zero;
+            stripe.sizeDelta = new Vector2(8, 0);
+            var stripeImg = stripe.gameObject.AddComponent<Image>();
+            stripeImg.color = Palette.WarningCoral;
+            stripeImg.raycastTarget = false;
+            announceText = Label(announcePanel.transform, "Text", 21, TextAnchor.UpperCenter, new Vector2(0, -8), new Vector2(820, 52), Palette.HudText, true);
+            announcePanel.SetActive(false);
+
+            // Siege Golem arrival: a short, non-blocking banner (the boss bar keeps its health afterwards).
+            golemBanner = Panel(root, "GolemBanner", new Vector2(0.5f, 1), new Vector2(0, -262), new Vector2(760, 92)).gameObject;
+            var gImg = golemBanner.GetComponent<Image>();
+            gImg.color = Palette.HudSurface.WithAlpha(0.88f);
+            gImg.raycastTarget = false;
+            golemTitle = Label(golemBanner.transform, "Title", 34, TextAnchor.UpperCenter, new Vector2(0, -8), new Vector2(740, 44), Palette.WarningCoral, true);
+            golemTitle.fontStyle = FontStyle.Bold;
+            golemBody = Label(golemBanner.transform, "Body", 21, TextAnchor.UpperCenter, new Vector2(0, -54), new Vector2(740, 30), Palette.HudText, true);
+            golemBanner.SetActive(false);
+
+            // First-run guide: top-right under the run menu; never blocks Start Night.
+            guidePanel = Panel(root, "Guide", new Vector2(1, 1), new Vector2(-24, -146), new Vector2(500, 150)).gameObject;
+            guideHeader = Label(guidePanel.transform, "Header", 18, TextAnchor.UpperLeft, new Vector2(18, -10), new Vector2(470, 26), Palette.Amber);
+            guideHeader.fontStyle = FontStyle.Bold;
+            guideBody = Label(guidePanel.transform, "Body", 20, TextAnchor.UpperLeft, new Vector2(18, -38), new Vector2(464, 60), Palette.HudText);
+            HideGuideButton = MakeButton(guidePanel.transform, "Hide", new Vector2(1, 0), new Vector2(-152, 10), new Vector2(90, 38), () => game.Onboarding.Hidden = true, out var hideLabel);
+            SkipGuideButton = MakeButton(guidePanel.transform, "Skip guide", new Vector2(1, 0), new Vector2(-12, 10), new Vector2(132, 38), game.SkipOnboarding, out var skipLabel);
+            hideLabel.fontSize = skipLabel.fontSize = 18;
+            guidePanel.SetActive(false);
+
+            gameplayLayer = BuildGameplayLayer(root, "EntryMarkers", "Resources", "Status", "BossBar", "Menu", "BuildCards", "Actions", "Selection", "Hint",
+                "Tooltip", "BreachLabel", "StressBanner", "Diagnostic", "Announcement", "GolemBanner", "TerminalOverlay", "RewardOverlay", "Guide");
 
             // Guard dialog (Restart/Quit): blocks the world and every panel underneath until a choice is made.
             confirmPanel = FullScreen(root, "Confirm", 0.65f);
@@ -134,48 +224,154 @@ namespace TheLastFortress
             MakeButton(box, "Quit without saving", new Vector2(0.5f, 0), new Vector2(170, 28), new Vector2(300, 64), game.QuitToMenuWithoutSaving, out _);
             saveFailedPanel.SetActive(false);
 
-            // Main / in-run menu
-            menuOverlay = FullScreen(root, "MainMenu", 0.82f);
-            var panel = Panel(menuOverlay.transform, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820, 760));
-            panel.pivot = new Vector2(0.5f, 0.5f);
-            var title = Label(panel, "Title", 64, TextAnchor.UpperCenter, new Vector2(0, -26), new Vector2(780, 80), Palette.Amber, true);
-            title.text = "THE LAST FORTRESS";
-            title.fontStyle = FontStyle.Bold;
-            Label(panel, "Subtitle", 22, TextAnchor.UpperCenter, new Vector2(0, -108), new Vector2(780, 30), Palette.HudText, true).text =
-                "Six nights · build by day, hold the Keep by night";
+            BuildMenu(root);
+            BuildSettings(root);
+            BuildHelp(root);
+            BuildCredits(root);
+        }
 
-            Label(panel, "SeedLabel", 22, TextAnchor.MiddleLeft, new Vector2(70, -170), new Vector2(240, 50), Palette.HudText).text = "Seed (optional)";
-            seedInput = MakeInput(panel, new Vector2(300, -170), new Vector2(450, 50), "random");
-            NewRunButton = MakeButton(panel, "New Run", new Vector2(0.5f, 1), new Vector2(0, -240), new Vector2(560, 64), StartNewRunFromMenu, out var newLabel);
+        /// <summary>
+        /// Title and in-run menu: a column on the left with the world visible beside it. Buttons stack by visibility, so
+        /// the title (New Run, Continue, …) and the in-run menu (Resume, Save and Quit, …) never leave gaps.
+        /// </summary>
+        void BuildMenu(RectTransform root)
+        {
+            menuOverlay = FullScreen(root, "MainMenu", 0.3f);
+            menuPanel = Panel(menuOverlay.transform, "Panel", new Vector2(0, 0.5f), new Vector2(96, 0), new Vector2(700, 940));
+            menuPanel.GetComponent<Image>().color = Palette.HudSurface.WithAlpha(0.95f);
+            menuTitle = Label(menuPanel, "Title", 56, TextAnchor.UpperCenter, new Vector2(0, -40), new Vector2(680, 72), Palette.Amber, true);
+            menuTitle.horizontalOverflow = HorizontalWrapMode.Overflow;
+            menuTitle.text = "THE LAST FORTRESS";
+            menuTitle.fontStyle = FontStyle.Bold;
+            menuPromise = Label(menuPanel, "Promise", 30, TextAnchor.UpperCenter, new Vector2(0, -116), new Vector2(660, 40), Palette.HudText, true);
+            menuPromise.text = "Build by day. Hold until dawn.";
+            menuSubtitle = Label(menuPanel, "Subtitle", 20, TextAnchor.UpperCenter, new Vector2(0, -160), new Vector2(660, 30), Palette.HudText.WithAlpha(0.75f), true);
+            menuSubtitle.text = "Protect the Keep through six nights and a final siege.";
+
+            newRunRow = Rect(menuPanel, "NewRunRow", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 64));
+            var release = game.IsRelease;
+            NewRunButton = MakeButton(newRunRow, "New Run", new Vector2(0, 1), Vector2.zero, new Vector2(release ? 290 : 440, 64), StartNewRunFromMenu, out var newLabel);
+            if (release)
+            {
+                // Map profile for the next New Run: cycles Ravine → Crossing → Meadow; its one-line summary is the subtitle.
+                MapButton = MakeButton(newRunRow, "Map", new Vector2(0, 1), new Vector2(300, 0), new Vector2(144, 64), game.CycleMapProfile, out mapLabel);
+                mapLabel.fontSize = 19;
+            }
             newLabel.fontSize = 28;
-            ContinueButton = MakeButton(panel, "Continue", new Vector2(0.5f, 1), new Vector2(0, -316), new Vector2(560, 64), game.Continue, out menuContinueLabel);
-            menuContinueLabel.fontSize = 22;
-            RecoverButton = MakeButton(panel, "Recover backup", new Vector2(0.5f, 1), new Vector2(0, -392), new Vector2(560, 56), () => game.RecoverBackup(), out _);
-            ResumeButton = MakeButton(panel, "Resume", new Vector2(0.5f, 1), new Vector2(-145, -460), new Vector2(270, 56), game.CloseMenu, out _);
-            SaveAndQuitButton = MakeButton(panel, "Save and Quit", new Vector2(0.5f, 1), new Vector2(145, -460), new Vector2(270, 56), () => game.SaveAndQuit(), out _);
-            SettingsButton = MakeButton(panel, "Settings", new Vector2(0.5f, 1), new Vector2(-145, -528), new Vector2(270, 56), OpenSettings, out _);
-            QuitButton = MakeButton(panel, "Quit game", new Vector2(0.5f, 1), new Vector2(145, -528), new Vector2(270, 56), game.RequestQuit, out _);
-            menuStatus = Label(panel, "Status", 20, TextAnchor.UpperCenter, new Vector2(0, -594), new Vector2(760, 90), Palette.HudText, true);
-            Label(panel, "Controls", 18, TextAnchor.UpperCenter, new Vector2(0, -688), new Vector2(780, 60), Palette.HudText.WithAlpha(0.7f), true).text =
-                "Controls: 1–5 choose building · left click place / select · right click or Esc cancel · R rotate\n" +
-                "WASD / arrows pan · mouse wheel zoom · Space pause at night";
-            menuOverlay.SetActive(false);
+            NewRunButton.GetComponent<Image>().color = Palette.Amber;
+            newLabel.color = Palette.HudSurface;
+            MakeButton(newRunRow, "Seed…", new Vector2(0, 1), new Vector2(452, 0), new Vector2(108, 64), () => seedExpanded = !seedExpanded, out var seedToggle);
+            seedToggle.fontSize = 20;
 
-            // Settings (on top of the menu)
+            seedRow = Rect(menuPanel, "SeedRow", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 50));
+            Label(seedRow, "SeedLabel", 20, TextAnchor.MiddleLeft, new Vector2(0, 0), new Vector2(200, 50), Palette.HudText).text = "Seed (optional)";
+            seedInput = MakeInput(seedRow, new Vector2(200, 0), new Vector2(360, 50), "random");
+
+            ContinueButton = MakeButton(menuPanel, "Continue", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 64), game.Continue, out menuContinueLabel);
+            menuContinueLabel.fontSize = 22;
+            RecoverButton = MakeButton(menuPanel, "Recover backup", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () => game.RecoverBackup(), out _);
+            ResumeButton = MakeButton(menuPanel, "Resume", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 64), game.CloseMenu, out _);
+            SaveAndQuitButton = MakeButton(menuPanel, "Save and Quit", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () => game.SaveAndQuit(), out _);
+            SettingsButton = MakeButton(menuPanel, "Settings", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), OpenSettings, out _);
+            MenuHelpButton = MakeButton(menuPanel, "Help", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), OpenHelp, out _);
+            CreditsButton = MakeButton(menuPanel, "Credits", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () => creditsPanel.SetActive(true), out _);
+            QuitButton = MakeButton(menuPanel, "Quit game", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), game.RequestQuit, out _);
+            menuStack.Add((newRunRow.gameObject, 64));
+            menuStack.Add((seedRow.gameObject, 50));
+            menuStack.Add((ContinueButton.gameObject, 64));
+            menuStack.Add((RecoverButton.gameObject, 56));
+            menuStack.Add((ResumeButton.gameObject, 64));
+            menuStack.Add((SaveAndQuitButton.gameObject, 56));
+            menuStack.Add((SettingsButton.gameObject, 56));
+            menuStack.Add((MenuHelpButton.gameObject, 56));
+            menuStack.Add((CreditsButton.gameObject, 56));
+            menuStack.Add((QuitButton.gameObject, 56));
+            menuStatus = Label(menuPanel, "Status", 19, TextAnchor.UpperCenter, Vector2.zero, new Vector2(640, 110), Palette.HudText, true);
+            Label(menuPanel, "Version", 18, TextAnchor.LowerCenter, new Vector2(0, -904), new Vector2(660, 26), Palette.HudText.WithAlpha(0.7f), true).text = VersionText;
+            menuOverlay.SetActive(false);
+        }
+
+        void BuildSettings(RectTransform root)
+        {
             settingsPanel = FullScreen(root, "Settings", 0.4f);
-            var sp = Panel(settingsPanel.transform, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820, 600));
+            var sp = Panel(settingsPanel.transform, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820, 780));
+            Opaque(sp);
             sp.pivot = new Vector2(0.5f, 0.5f);
             Label(sp, "Title", 44, TextAnchor.UpperCenter, new Vector2(0, -24), new Vector2(780, 56), Palette.Amber, true).text = "SETTINGS";
             settingsSensitivity = SettingRow(sp, -110, "Camera sensitivity", () => StepSensitivity(-0.25f), () => StepSensitivity(0.25f));
-            settingsShake = SettingRow(sp, -180, "Camera shake on Keep hits", ToggleShake, ToggleShake);
-            settingsWindow = SettingRow(sp, -250, "Window mode", ToggleWindow, ToggleWindow);
-            settingsResolution = SettingRow(sp, -320, "Resolution", () => StepResolution(-1), () => StepResolution(1));
-            var audio = Label(sp, "Audio", 21, TextAnchor.MiddleLeft, new Vector2(40, -390), new Vector2(740, 40), Palette.HudText.WithAlpha(0.55f));
-            audio.text = "Master / music / effects volume: unavailable — this build has no audio.";
+            settingsShake = SettingRow(sp, -175, "Camera shake on Keep hits", ToggleShake, ToggleShake);
+            settingsWindow = SettingRow(sp, -240, "Window mode", ToggleWindow, ToggleWindow);
+            settingsResolution = SettingRow(sp, -305, "Resolution", () => StepResolution(-1), () => StepResolution(1));
+            settingsMaster = SettingRow(sp, -385, "Master volume", () => StepVolume(0, -0.1f), () => StepVolume(0, 0.1f));
+            settingsMusic = SettingRow(sp, -450, "Music volume", () => StepVolume(1, -0.1f), () => StepVolume(1, 0.1f));
+            settingsSfx = SettingRow(sp, -515, "Effects volume", () => StepVolume(2, -0.1f), () => StepVolume(2, 0.1f));
+            Label(sp, "AudioNote", 18, TextAnchor.UpperCenter, new Vector2(0, -575), new Vector2(760, 30), Palette.HudText.WithAlpha(0.6f), true).text =
+                "Changes preview immediately. Save settings keeps them; Back discards them.";
             MakeButton(sp, "Save settings", new Vector2(0.5f, 0), new Vector2(-160, 30), new Vector2(280, 60), SaveSettings, out _);
-            MakeButton(sp, "Back", new Vector2(0.5f, 0), new Vector2(160, 30), new Vector2(280, 60), () => settingsPanel.SetActive(false), out _);
-            settingsStatus = Label(sp, "Status", 19, TextAnchor.UpperCenter, new Vector2(0, -440), new Vector2(760, 50), Palette.WarningCoral, true);
+            MakeButton(sp, "Back", new Vector2(0.5f, 0), new Vector2(160, 30), new Vector2(280, 60), CloseSettings, out _);
+            settingsStatus = Label(sp, "Status", 19, TextAnchor.UpperCenter, new Vector2(0, -612), new Vector2(760, 50), Palette.WarningCoral, true);
             settingsPanel.SetActive(false);
+        }
+
+        void BuildHelp(RectTransform root)
+        {
+            helpPanel = FullScreen(root, "Help", 0.5f);
+            var hp = Panel(helpPanel.transform, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 660));
+            Opaque(hp);
+            hp.pivot = new Vector2(0.5f, 0.5f);
+            Label(hp, "Title", 44, TextAnchor.UpperCenter, new Vector2(0, -24), new Vector2(940, 56), Palette.Amber, true).text = "HELP";
+            Label(hp, "Goal", 22, TextAnchor.UpperLeft, new Vector2(44, -96), new Vector2(900, 90), Palette.HudText).text =
+                (game.IsRelease
+                    ? "Goal: keep the Keep standing through twelve nights; Siege Golems come on Nights 6, 9 and 11, the Siege Commander on Night 12.\n"
+                    : "Goal: keep the Keep standing through six nights; the last one is a siege with a Siege Golem.\n") +
+                "Build by day, then start the night. Towers fire on their own. Enemies take the open route to the Keep; " +
+                "if Walls seal it, they break through the first structure in the way.";
+            Label(hp, "Controls", 21, TextAnchor.UpperLeft, new Vector2(44, -210), new Vector2(900, 300), Palette.HudText).text =
+                (game.IsRelease
+                    ? "1–8  choose Wall, Archer Tower, House, Farm, Spike Trap, Cannon, Watchtower, Repair Station\n"
+                    : "1–5  choose Wall, Archer Tower, House, Farm, Spike Trap\n") +
+                "Left click  place / select a building\n" +
+                "Right click or Esc  cancel the building tool or selection\n" +
+                "Hold right mouse button and drag  move around the map\n" +
+                "R  rotate the ghost or the selected building (Walls connect automatically)\n" +
+                "WASD / arrow keys  pan · mouse wheel  zoom · Reset Camera  back to the whole board\n" +
+                "Space or PAUSE  pause and resume the night (inspection still works)\n" +
+                "Menu  save and quit by day, settings, credits";
+            showGuideButton = MakeButton(hp, "Show guide", new Vector2(0.5f, 0), new Vector2(-160, 30), new Vector2(280, 60), () =>
+            {
+                game.ReopenOnboarding();
+                helpPanel.SetActive(false);
+            }, out _);
+            MakeButton(hp, "Close", new Vector2(0.5f, 0), new Vector2(160, 30), new Vector2(280, 60), () => helpPanel.SetActive(false), out _);
+            helpPanel.SetActive(false);
+        }
+
+        void BuildCredits(RectTransform root)
+        {
+            creditsPanel = FullScreen(root, "Credits", 0.5f);
+            var cp = Panel(creditsPanel.transform, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 640));
+            Opaque(cp);
+            cp.pivot = new Vector2(0.5f, 0.5f);
+            Label(cp, "Title", 44, TextAnchor.UpperCenter, new Vector2(0, -24), new Vector2(940, 56), Palette.Amber, true).text = "CREDITS";
+            Label(cp, "Body", 20, TextAnchor.UpperLeft, new Vector2(44, -100), new Vector2(900, 440), Palette.HudText).text =
+                "The Last Fortress — design, code, models and icons made for this project.\n\n" +
+                "Music and sound: synthesized for this project by its own script (Audio/Source~/synth.py); no recordings, " +
+                "sample libraries or third-party sounds are used.\n\n" +
+                "Icons: project line icons (design/icons) and new drawings in the same style.\n\n" +
+                "Font: the runtime font shipped with the Unity Engine (LegacyRuntime.ttf).\n\n" +
+                "Made with Unity " + Application.unityVersion + ", Universal Render Pipeline and Input System, under the Unity Engine licence.\n\n" +
+                VersionText;
+            MakeButton(cp, "Close", new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(280, 60), () => creditsPanel.SetActive(false), out _);
+            creditsPanel.SetActive(false);
+        }
+
+        /// <summary>Dialogs drawn over the menu use an opaque surface so the text underneath never shows through.</summary>
+        static void Opaque(RectTransform panel) => panel.GetComponent<Image>().color = Palette.HudSurface;
+
+        void OpenHelp()
+        {
+            helpPanel.transform.SetAsLastSibling();
+            helpPanel.SetActive(true);
         }
 
         RectTransform FullScreenRect(Transform parent, string name)
@@ -200,6 +396,7 @@ namespace TheLastFortress
             var img = rt.gameObject.AddComponent<Image>();
             img.color = new Color(0.08f, 0.1f, 0.12f, 1f);
             var field = rt.gameObject.AddComponent<InputField>();
+            ApplyStates(field);
             var text = Label(rt, "Text", 26, TextAnchor.MiddleLeft, new Vector2(14, 0), size - new Vector2(28, 0), Palette.HudText);
             text.rectTransform.anchorMin = text.rectTransform.anchorMax = text.rectTransform.pivot = new Vector2(0, 0.5f);
             text.supportRichText = false;
@@ -236,24 +433,51 @@ namespace TheLastFortress
             }
 
             if (uint.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var seed)) game.NewRun(seed, game.FlatMap);
-            else seedError = "Seed must be a whole number from 0 to 4294967295.";
+            else
+            {
+                seedError = "Seed must be a whole number from 0 to 4294967295.";
+                seedExpanded = true;
+                game.Audio?.Play(SoundId.UiReject);
+            }
         }
 
         void OpenSettings()
         {
-            editing = JsonUtility.FromJson<GameSettings>(JsonUtility.ToJson(game.Settings));
+            editing = game.Settings.Clone();
             resolutions = Screen.resolutions;
             resolutionIndex = -1;
             for (var i = 0; i < resolutions.Length; i++)
                 if (resolutions[i].width == (editing.width > 0 ? editing.width : Screen.width) && resolutions[i].height == (editing.height > 0 ? editing.height : Screen.height))
                     resolutionIndex = i;
             Set(settingsStatus, game.SettingsProblem ?? "");
+            settingsPanel.transform.SetAsLastSibling();
             settingsPanel.SetActive(true);
+        }
+
+        /// <summary>Back without saving: the previewed volumes return to the saved ones.</summary>
+        void CloseSettings()
+        {
+            var saved = game.Settings;
+            game.Audio?.ApplyVolumes(saved.masterVolume, saved.musicVolume, saved.sfxVolume);
+            settingsPanel.SetActive(false);
         }
 
         void StepSensitivity(float delta) => editing.cameraSensitivity = Mathf.Clamp(Mathf.Round((editing.cameraSensitivity + delta) * 4f) / 4f, 0.25f, 3f);
         void ToggleShake() => editing.cameraShake = !editing.cameraShake;
         void ToggleWindow() => editing.fullscreen = !editing.fullscreen;
+
+        /// <summary>Steps a volume by 10% and previews it at once (effects play a sample at the new level).</summary>
+        void StepVolume(int which, float delta)
+        {
+            float Step(float v) => Mathf.Clamp01(Mathf.Round((v + delta) * 10f) / 10f);
+            if (which == 0) editing.masterVolume = Step(editing.masterVolume);
+            else if (which == 1) editing.musicVolume = Step(editing.musicVolume);
+            else editing.sfxVolume = Step(editing.sfxVolume);
+            game.Audio?.ApplyVolumes(editing.masterVolume, editing.musicVolume, editing.sfxVolume);
+            if (which != 1) game.Audio?.Play(SoundId.UiConfirm);
+        }
+
+        static string Percent(float v) => v <= 0f ? "Off" : Mathf.RoundToInt(v * 100f).ToString(CultureInfo.InvariantCulture) + "%";
 
         void StepResolution(int step)
         {
@@ -265,7 +489,7 @@ namespace TheLastFortress
 
         void SaveSettings()
         {
-            game.ApplySettings(editing, true);
+            game.ApplySettings(editing.Clone(), true);
             Set(settingsStatus, game.SettingsProblem ?? "Settings saved.");
             settingsStatus.color = game.SettingsProblem == null ? Palette.RouteCyan : Palette.WarningCoral;
         }
@@ -287,7 +511,54 @@ namespace TheLastFortress
                 : $"The Keep fell on Night {sim.NightNumber} of {sim.TotalNights} after {sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture)} s; {sim.AliveEnemyCount} enemies were attacking.";
             var tonight = sim.State == RunState.Defeat && sim.LastNight != null ? "\nThis night: " + RecapLine(sim.LastNight) : "";
             return $"{head}{tonight}\n\nRun: nights cleared {s.NightsCleared} / {sim.TotalNights}\nEnemies defeated {s.EnemiesDefeated}\nBuildings purchased {s.BuildingsPurchased}\n" +
-                   $"Gold earned {s.GoldEarned} (starting 250 excluded)\nSynergies active {current} · ever {s.SynergiesEver.Count}\nSeed {sim.Seed.ToString(CultureInfo.InvariantCulture)}";
+                   $"Gold earned {s.GoldEarned} (starting 250 excluded)\nBuilding links active {current} · formed this run {s.SynergiesEver.Count}\nSeed {sim.Seed.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        /// <summary>
+        /// Day announcement from the stored campaign: the first night an enemy type appears, and the final siege. Values
+        /// come from the definitions, so the text stays true if they are tuned. Null when there is nothing new.
+        /// </summary>
+        public static string Announcement(RunSimulation sim)
+        {
+            if (!sim.IsCampaign || sim.State != RunState.Day || sim.StressMode) return null;
+            var tonight = sim.Campaign.Nights[sim.NightNumber - 1];
+            var lines = new List<string>();
+            var seenKinds = new bool[EnemyDefinition.KindCount];
+            for (var n = 0; n < sim.NightNumber - 1; n++)
+                foreach (var s in sim.Campaign.Nights[n].Spawns)
+                    seenKinds[(int)s.Kind] = true;
+            var newKinds = new bool[EnemyDefinition.KindCount];
+            foreach (var s in tonight.Spawns)
+                if (!seenKinds[(int)s.Kind]) newKinds[(int)s.Kind] = true;
+
+            var final = sim.NightNumber == sim.TotalNights && sim.TotalNights > 1;
+            if (final) lines.Add($"FINAL SIEGE — Night {sim.NightNumber} of {sim.TotalNights}: survive it and the run is won.");
+            for (var k = 1; k < EnemyDefinition.KindCount; k++)
+            {
+                if (!newKinds[k]) continue;
+                var d = sim.Definitions.EnemyFor((EnemyKind)k);
+                var speed = d.SpeedTilesPerSecond.ToString("0.0#", CultureInfo.InvariantCulture);
+                var walls = d.WallDamageMultiplier > 1 && !d.IsBomber ? $", {d.WallDamageMultiplier}x damage to Walls" : "";
+                lines.Add($"NEW ENEMY: {d.DisplayName} — {Role(d)} ({d.MaxHp} HP, {speed} tiles/s{walls}).");
+            }
+
+            return lines.Count == 0 ? null : string.Join("\n", lines);
+        }
+
+        /// <summary>What an enemy kind does, with values from its definition so tuning keeps the text true.</summary>
+        static string Role(EnemyDefinition d)
+        {
+            var inv = CultureInfo.InvariantCulture;
+            switch (d.Kind)
+            {
+                case EnemyKind.Runner: return "fast and fragile";
+                case EnemyKind.Brute: return "slow and heavy";
+                case EnemyKind.SiegeGolem: return "a massive siege boss";
+                case EnemyKind.Archer: return $"stops {d.AttackRange.ToString("0.#", inv)} tiles away and shoots, Houses and Farms first";
+                case EnemyKind.Bomber: return $"blows up whatever blocks it, a Wall or the Keep, {d.FuseSeconds.ToString("0.#", inv)} s after arriving ({d.BlastDamage}, {d.WallDamageMultiplier}x to Walls) unless killed first";
+                case EnemyKind.SiegeCommander: return $"the final boss: enemies within {d.AuraRadius.ToString("0.#", inv)} tiles hit {d.AuraDamagePercent}% harder";
+                default: return "";
+            }
         }
 
         /// <summary>Called by the bootstrap for actual Keep HP loss; hits within the cue window add up.</summary>
@@ -302,6 +573,13 @@ namespace TheLastFortress
         /// <summary>Advances HUD cues by the presentation delta (frozen while paused or in the menu).</summary>
         public void TickEffects(float dt)
         {
+            if (golemBanner != null && golemBannerTimer > 0f)
+            {
+                golemBannerTimer = Mathf.Max(0f, golemBannerTimer - dt);
+                var g = golemBannerTimer > 0f && game.Sim.State == RunState.Night;
+                if (golemBanner.activeSelf != g) golemBanner.SetActive(g);
+            }
+
             if (keepHitText == null || keepHitTimer <= 0f) return;
             keepHitTimer = Mathf.Max(0f, keepHitTimer - dt);
             var t = keepHitTimer / 0.9f;
@@ -366,7 +644,8 @@ namespace TheLastFortress
                 var p = ScreenToCanvas(new Vector2(sp.x, sp.y));
                 if (sp.z < 0) p = size - p;
                 var minX = halfWidth + 16f;
-                const float minY = 170f, topReserve = 260f;
+                const float minY = 170f;
+                var topReserve = Mathf.Max(260f, topPanelsBottom + 30f); // stay clear of status, boss bar, announcement, banner and guide
                 var clamped = new Vector2(Mathf.Clamp(p.x, minX, size.x - minX), Mathf.Clamp(p.y, minY, size.y - topReserve));
                 var off = (clamped - p).sqrMagnitude > 1f;
                 var arrow = !off ? "" : p.x < minX ? "< " : p.x > size.x - minX ? "> " : p.y > size.y - topReserve ? "^ " : "v ";
@@ -387,6 +666,69 @@ namespace TheLastFortress
             return true;
         }
 
+        void RefreshGuide(RunSimulation sim)
+        {
+            var guide = game.Onboarding;
+            var step = guide != null && !game.MenuOpen && !sim.IsTerminal ? guide.Shown(sim) : null;
+            if (guidePanel.activeSelf != step.HasValue) guidePanel.SetActive(step.HasValue);
+            if (!step.HasValue) return;
+            Set(guideHeader, $"GUIDE {(int)step.Value + 1} / {OnboardingState.StepCount} · Goal: hold the Keep for {sim.TotalNights} nights");
+            Set(guideBody, OnboardingState.Text(step.Value));
+            var h = Mathf.Max(48f, Mathf.Ceil(guideBody.preferredHeight));
+            guideBody.rectTransform.sizeDelta = new Vector2(464, h);
+            ((RectTransform)guidePanel.transform).sizeDelta = new Vector2(500, 38 + h + 58);
+        }
+
+        static readonly Color GuideCard = Palette.Hex(0x5C4C2E);
+
+        /// <summary>While the guide asks for a Tower or an income building, that card is tinted amber (not color alone: the guide names it).</summary>
+        void HighlightGuideCards(RunSimulation sim, PlayerController player)
+        {
+            var step = guidePanel.activeSelf && game.Onboarding != null ? game.Onboarding.Shown(sim) : null;
+            foreach (var card in cards)
+            {
+                var wanted = step == OnboardingStep.PlaceTower && card.Kind == BuildingKind.Tower ||
+                             step == OnboardingStep.Economy && (card.Kind == BuildingKind.House || card.Kind == BuildingKind.Farm);
+                if (wanted && player.Tool != card.Kind) card.Image.color = GuideCard;
+            }
+        }
+
+        void RefreshAnnouncements(RunSimulation sim)
+        {
+            var text = game.MenuOpen ? null : Announcement(sim);
+            if (announcePanel.activeSelf != (text != null)) announcePanel.SetActive(text != null);
+            if (text != null)
+            {
+                Set(announceText, text);
+                var h = Mathf.Ceil(announceText.preferredHeight);
+                announceText.rectTransform.sizeDelta = new Vector2(820, h);
+                ((RectTransform)announcePanel.transform).sizeDelta = new Vector2(860, h + 18);
+            }
+
+            // Golem arrival: once per actual appearance in a run's night, from the live simulation (not on load replays).
+            Enemy boss = null;
+            foreach (var e in sim.Enemies)
+                if (e.Alive && e.Definition.IsBoss) boss = e;
+            if (boss != null && sim.State == RunState.Night && (golemBannerSim != sim || golemBannerReset != sim.ResetCount || golemBannerNight != sim.NightNumber))
+            {
+                golemBannerSim = sim;
+                golemBannerReset = sim.ResetCount;
+                golemBannerNight = sim.NightNumber;
+                golemBannerTimer = GolemBannerSeconds;
+                var bd = boss.Definition;
+                Set(golemTitle, $"THE {bd.DisplayName.ToUpperInvariant()} HAS ARRIVED");
+                var aura = bd.AuraDamagePercent > 0 ? $" · aura +{bd.AuraDamagePercent}% nearby" : "";
+                Set(golemBody, $"From {WaveText.EntryName(boss.Cell)} · {bd.MaxHp} HP · hits for {bd.AttackDamage}, {bd.WallDamageMultiplier}x on Walls{aura}");
+                // One line at 720p: the aura's numbers are on the Day announcement and the Help; the banner keeps the gist.
+                golemBanner.SetActive(true);
+            }
+            else if (sim.State != RunState.Night && golemBanner.activeSelf)
+            {
+                golemBannerTimer = 0f;
+                golemBanner.SetActive(false);
+            }
+        }
+
         void RefreshMvpPanels(RunSimulation sim, PlayerController player)
         {
             var map = sim.Config.Terrain;
@@ -396,11 +738,16 @@ namespace TheLastFortress
             var canRotate = sel != null && sim.State == RunState.Day && !sim.StressMode && RunSimulation.IsRotatable(sel.Kind);
             if (RotateButton.gameObject.activeSelf != canRotate) RotateButton.gameObject.SetActive(canRotate);
 
+            RefreshGuide(sim);
+            HighlightGuideCards(sim, player);
+            RefreshAnnouncements(sim);
+            LayoutTop();
             RefreshEntryMarkers(sim);
             RefreshConfirm();
 
             var persistence = game.Persistence;
-            var pending = persistence != null && persistence.HasRun && persistence.SavePending;
+            var hasRunNow = persistence != null && persistence.HasRun;
+            var pending = hasRunNow && persistence.SavePending;
             if (saveFailedPanel.activeSelf != pending) saveFailedPanel.SetActive(pending);
             if (pending)
                 Set(saveFailedText, $"{persistence.LastError}\n\nNothing after your last successful save is stored yet. Gameplay is paused until the save succeeds; " +
@@ -408,10 +755,15 @@ namespace TheLastFortress
             if (pending) foreach (var b in rewardButtons) b.interactable = false;
             else foreach (var b in rewardButtons) b.interactable = true;
 
+            if (showGuideButton.gameObject.activeSelf != (hasRunNow && game.Onboarding != null)) showGuideButton.gameObject.SetActive(hasRunNow && game.Onboarding != null);
+
+            // Menus replace the in-run HUD; dialogs and the save-failure overlay stay above both.
+            if (gameplayLayer.gameObject.activeSelf == game.MenuOpen) gameplayLayer.gameObject.SetActive(!game.MenuOpen);
             if (menuOverlay.activeSelf != game.MenuOpen) menuOverlay.SetActive(game.MenuOpen);
             if (!game.MenuOpen)
             {
-                if (settingsPanel.activeSelf) settingsPanel.SetActive(false);
+                if (settingsPanel.activeSelf) CloseSettings();
+                if (creditsPanel.activeSelf) creditsPanel.SetActive(false);
                 return;
             }
 
@@ -425,9 +777,19 @@ namespace TheLastFortress
                                            save.Status == SaveStatus.Invalid || save.Status == SaveStatus.IoError);
             RecoverButton.gameObject.SetActive(!hasRun && damaged);
             ResumeButton.gameObject.SetActive(hasRun);
-            NewRunButton.gameObject.SetActive(!hasRun); // in-run: Save and Quit first, so a New Run never replaces the active run
+            newRunRow.gameObject.SetActive(!hasRun); // in-run: Save and Quit first, so a New Run never replaces the active run
+            if (MapButton != null)
+            {
+                var profile = MapProfiles.Get(game.MapProfile);
+                Set(mapLabel, "Map: " + profile.DisplayName);
+                Set(menuSubtitle, hasRun ? "" : $"Twelve nights to the final siege. {profile.DisplayName}: {profile.Summary}");
+            }
+            seedRow.gameObject.SetActive(!hasRun && (seedExpanded || seedError != null));
             SaveAndQuitButton.gameObject.SetActive(hasRun);
             SaveAndQuitButton.interactable = hasRun && sim.State == RunState.Day && !pending;
+            CreditsButton.gameObject.SetActive(!hasRun);
+            Set(menuPromise, hasRun ? $"Paused — {(sim.State == RunState.Day ? "Day" : sim.State == RunState.Night ? "Night" : "Reward")} {sim.NightNumber} of {sim.TotalNights}" : "Build by day. Hold until dawn.");
+            LayoutMenu();
 
             string status;
             if (hasRun)
@@ -448,7 +810,60 @@ namespace TheLastFortress
                 Set(settingsShake, editing.cameraShake ? "On" : "Off");
                 Set(settingsWindow, editing.fullscreen ? "Fullscreen" : "Windowed");
                 Set(settingsResolution, editing.width > 0 ? $"{editing.width} x {editing.height}" : $"{Screen.width} x {Screen.height} (current)");
+                Set(settingsMaster, Percent(editing.masterVolume));
+                Set(settingsMusic, Percent(editing.musicVolume));
+                Set(settingsSfx, Percent(editing.sfxVolume));
             }
+        }
+
+        float topPanelsBottom;
+
+        /// <summary>
+        /// Sizes the status panel to its text (a four-entry preview with a boss line wraps to four lines), then stacks
+        /// the boss bar / announcement and the Golem banner beneath it, and grows the resources panel to fit its perks.
+        /// </summary>
+        void LayoutTop()
+        {
+            var infoH = Mathf.Max(28f, Mathf.Ceil(infoText.preferredHeight));
+            infoText.rectTransform.sizeDelta = new Vector2(840, infoH);
+            var routeY = -56f - infoH - 6f;
+            routeText.rectTransform.anchoredPosition = new Vector2(0, routeY);
+            var routeH = string.IsNullOrEmpty(routeText.text) ? 0f : Mathf.Ceil(routeText.preferredHeight);
+            routeText.rectTransform.sizeDelta = new Vector2(840, Mathf.Max(1f, routeH));
+            statusRect.sizeDelta = new Vector2(860, Mathf.Max(112f, -routeY + routeH + 10f));
+
+            var y = -(24f + statusRect.sizeDelta.y + 10f);
+            ((RectTransform)bossPanel.transform).anchoredPosition = new Vector2(0, y);
+            ((RectTransform)announcePanel.transform).anchoredPosition = new Vector2(0, y);
+            var bottom = -y - 10f;
+            if (bossPanel.activeSelf) bottom = -y + 54f;
+            if (announcePanel.activeSelf) bottom = Mathf.Max(bottom, -y + ((RectTransform)announcePanel.transform).sizeDelta.y);
+            ((RectTransform)golemBanner.transform).anchoredPosition = new Vector2(0, -(bottom + 12f));
+            if (golemBanner.activeSelf) bottom += 12f + 92f;
+            if (guidePanel.activeSelf) bottom = Mathf.Max(bottom, 146f + ((RectTransform)guidePanel.transform).sizeDelta.y);
+            topPanelsBottom = bottom;
+
+            var incomeH = Mathf.Max(24f, Mathf.Ceil(incomeText.preferredHeight));
+            incomeText.rectTransform.sizeDelta = new Vector2(350, incomeH);
+            var perksY = -122f - incomeH - 4f;
+            perksText.rectTransform.anchoredPosition = new Vector2(20, perksY);
+            var perksH = string.IsNullOrEmpty(perksText.text) ? 0f : Mathf.Ceil(perksText.preferredHeight);
+            perksText.rectTransform.sizeDelta = new Vector2(350, Mathf.Max(1f, perksH));
+            resourcesRect.sizeDelta = new Vector2(380, Mathf.Max(196f, -perksY + perksH + 12f));
+        }
+
+        /// <summary>Stacks the visible menu rows under the title, then the status text.</summary>
+        void LayoutMenu()
+        {
+            var y = -214f;
+            foreach (var (go, height) in menuStack)
+            {
+                if (!go.activeSelf) continue;
+                ((RectTransform)go.transform).anchoredPosition = new Vector2(0, y);
+                y -= height + 12f;
+            }
+
+            menuStatus.rectTransform.anchoredPosition = new Vector2(0, y - 6f);
         }
     }
 }

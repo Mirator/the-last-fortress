@@ -59,12 +59,17 @@ namespace TheLastFortress
             return true;
         }
 
+        /// <summary>A scene card kind that the current run also defines (a legacy six-night save has no release kinds).</summary>
         bool IsBuildable(BuildingKind kind)
         {
+            if (game.Sim.Definitions.For(kind) == null) return false;
             foreach (var k in game.PurchasableKinds)
                 if (k == kind) return true;
             return false;
         }
+
+        static readonly Key[] DigitKeys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9 };
+        static readonly Key[] NumpadKeys = { Key.Numpad1, Key.Numpad2, Key.Numpad3, Key.Numpad4, Key.Numpad5, Key.Numpad6, Key.Numpad7, Key.Numpad8, Key.Numpad9 };
 
         public void CancelTool() => Tool = null;
 
@@ -87,11 +92,9 @@ namespace TheLastFortress
 
             if (keyboard != null)
             {
-                if (keyboard.digit1Key.wasPressedThisFrame || keyboard.numpad1Key.wasPressedThisFrame) SetTool(BuildingKind.Wall);
-                if (keyboard.digit2Key.wasPressedThisFrame || keyboard.numpad2Key.wasPressedThisFrame) SetTool(BuildingKind.Tower);
-                if (keyboard.digit3Key.wasPressedThisFrame || keyboard.numpad3Key.wasPressedThisFrame) SetTool(BuildingKind.House);
-                if (keyboard.digit4Key.wasPressedThisFrame || keyboard.numpad4Key.wasPressedThisFrame) SetTool(BuildingKind.Farm);
-                if (keyboard.digit5Key.wasPressedThisFrame || keyboard.numpad5Key.wasPressedThisFrame) SetTool(BuildingKind.SpikeTrap);
+                // Hotkey N selects the Nth build card (1 Wall, 2 Tower, 3 House, 4 Farm, 5 Trap, 6 Cannon, 7 Watchtower, 8 Repair).
+                for (var i = 0; i < game.PurchasableKinds.Count && i < DigitKeys.Length; i++)
+                    if (keyboard[DigitKeys[i]].wasPressedThisFrame || keyboard[NumpadKeys[i]].wasPressedThisFrame) SetTool(game.PurchasableKinds[i]);
                 if (keyboard.escapeKey.wasPressedThisFrame)
                 {
                     if (Tool.HasValue) Tool = null;
@@ -102,13 +105,13 @@ namespace TheLastFortress
                 if (keyboard.rKey.wasPressedThisFrame && sim.State == RunState.Day && game.IsMvp) RotateClockwise();
             }
 
+            // Camera first: it decides whether this frame's right release ended a pan drag or was a plain click.
+            game.CameraRig.Tick(keyboard, mouse, PointerOverUi, dt);
             if (mouse != null)
             {
-                if (mouse.rightButton.wasPressedThisFrame) Tool = null;
+                if (mouse.rightButton.wasReleasedThisFrame && !game.CameraRig.RightReleaseWasDrag) Tool = null; // right click cancels; right drag pans
                 if (mouse.leftButton.wasPressedThisFrame && !PointerOverUi) Click();
             }
-
-            game.CameraRig.Tick(keyboard, mouse, PointerOverUi, dt);
         }
 
         void Click()
@@ -125,6 +128,7 @@ namespace TheLastFortress
             {
                 // Re-validated on click inside TryPlace; an invalid preview can never become a placement.
                 LastRejection = sim.TryPlace(Tool.Value, cell, GhostOrientation, out _);
+                if (LastRejection != PlacementRejection.None) game.Audio?.Play(SoundId.UiReject); // success sounds from the placement event
                 return;
             }
 

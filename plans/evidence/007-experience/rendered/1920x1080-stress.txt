@@ -1,0 +1,21 @@
+# The Last Fortress stress measurement
+date_utc=2026-10-16T07:25:38.6317796Z
+build_type=non-development
+platform=WindowsPlayer editor=False
+resolution=1920x1080 fullscreen=Windowed
+quality=PC vsync=0 targetFrameRate=-1
+cpu=AMD Ryzen 5 3600 6-Core Processor  gpu=NVIDIA GeForce GTX 1660 SUPER ram_mb=32666 api=Direct3D12
+unity=6000.3.16f1 rules_version=mvp-rules-1 scene=MVP (MVP prefabs, connected Walls, effects)
+fixture=MVP STRESS FIXTURE entries=(0,10) (19,10) (10,0) (10,19) maintained_per_entry=[15 Grunt, 5 Runner, 4 Brute, 1 SiegeGolem] respawn=same archetype at same entry; Keep/Walls invulnerable (fixture only)
+layout=Wall(6,3) Farm(15,3) Wall(6,4) Wall(6,5) Wall(6,6) Wall(6,7) Tower(8,7) Tower(10,7) Tower(12,7) Wall(6,8) Tower(7,8) Wall(8,8) Wall(9,8) Wall(10,8) Wall(11,8) Wall(12,8) Tower(13,8) Wall(8,9) Wall(12,9) Wall(6,10) Tower(7,10) Wall(8,10) Keep(10,10) Wall(12,10) Tower(13,10) Wall(6,11) Wall(8,11) Wall(12,11) Wall(6,12) Tower(7,12) Wall(8,12) Wall(9,12) Wall(10,12) Wall(11,12) Wall(12,12) Tower(13,12) Wall(6,13) Tower(10,13) Wall(6,14) Wall(6,15) House(15,15) Wall(6,16) SpikeTrap(4,10)
+warmup_s=10 measured_s=60 samples=170252
+sim_steps_during_measure=1200
+active_enemies_min=100 max=100
+median_ms=0.322 p95_ms=0.471 p99_ms=0.683 max_ms=14.954 mean_ms=0.352
+percentile_definition=sorted[ceil(p*count)-1]
+event_target=(6,9) kind=Wall attackers_immediately_before=24
+event_revision=43->44 west_route_after=breach at (8,9)
+event_valid=True
+event_sample_index=85340 frames_around_event_ms=0.311 0.303 [1.804] 0.979 0.324 0.308 
+spikes_over_33.3ms=
+gate_pass=True

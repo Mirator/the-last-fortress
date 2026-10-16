@@ -27,14 +27,46 @@ namespace TheLastFortress
         public WorldView World { get; private set; }
         public RouteOverlay Overlay { get; private set; }
         public HudView Hud { get; private set; }
+
+        /// <summary>MVP sound (null in the one-wave prototype). Receives the same event batch as <see cref="World"/>.</summary>
+        public AudioDirector Audio { get; private set; }
+
+        /// <summary>MVP first-run guide (null in the prototype); observes the run, never changes it.</summary>
+        public OnboardingState Onboarding { get; private set; }
         public PrototypeContent Content => content;
         public bool IsStressMode => Sim != null && Sim.StressMode;
 
         /// <summary>Multi-night MVP scene (content carries MVP definitions); false for the one-wave prototype.</summary>
         public bool IsMvp => content.IsMvp;
 
-        /// <summary>Build cards/hotkeys in order: 1 Wall, 2 Tower, then (MVP) 3 House, 4 Farm, 5 Spike Trap.</summary>
+        /// <summary>Plan 008 release scene: twelve nights on a chosen map profile; old six-night saves still continue.</summary>
+        public bool IsRelease => content.IsRelease;
+
+        /// <summary>
+        /// Build cards/hotkeys in order: 1 Wall, 2 Tower, then (MVP) 3 House, 4 Farm, 5 Spike Trap, then (release) 6 Cannon,
+        /// 7 Watchtower, 8 Repair Station. A card whose kind the loaded run does not define (a legacy save) is hidden.
+        /// </summary>
         public IReadOnlyList<BuildingKind> PurchasableKinds { get; private set; }
+
+        /// <summary>Rules profiles this scene can play and restore; the first one starts every New Run (MVP scenes only).</summary>
+        public RulesCatalog Catalog { get; private set; }
+
+        /// <summary>Definitions every new run starts with (the loaded run may use another profile's: see <see cref="Definitions"/>).</summary>
+        public PrototypeDefinitions NewRunDefinitions { get; private set; }
+
+        /// <summary>Release: map profile used by the next New Run (title menu cycles it; -map overrides).</summary>
+        public string MapProfile { get; private set; } = MapProfiles.Ravine;
+
+        public void CycleMapProfile()
+        {
+            var i = System.Array.IndexOf(MapProfiles.All, MapProfile);
+            MapProfile = MapProfiles.All[(i + 1) % MapProfiles.All.Length];
+        }
+
+        public void SetMapProfile(string id)
+        {
+            if (MapProfiles.IsKnown(id)) MapProfile = id;
+        }
 
         /// <summary>When false, Update does not advance the simulation (tests step it explicitly).</summary>
         public bool AutoAdvance { get; set; } = true;
@@ -74,6 +106,16 @@ namespace TheLastFortress
         /// <summary>Combat and input are suspended by the menu or a guard dialog.</summary>
         public bool Suspended => MenuOpen || PendingConfirm != null;
 
+        /// <summary>The launch/title menu: no run is active behind it.</summary>
+        public bool TitleScreen => MenuOpen && (Persistence == null || !Persistence.HasRun);
+
+        /// <summary>Title composition: the Keep sits right of the menu panel, closer than the play view.</summary>
+        public static readonly Vector3 TitleFocus = new Vector3(7.7f, 0f, 13.3f);
+        public const float TitleSize = 7f;
+
+        /// <summary>This frame's simulation events: drained once here and shared read-only by world view and audio.</summary>
+        readonly List<SimEvent> frameEvents = new List<SimEvent>();
+
         RunState observedState;
         int observedNight;
         int observedKeepHp;
@@ -81,12 +123,29 @@ namespace TheLastFortress
         void Awake()
         {
             if (content == null || cameraRig == null) throw new InvalidOperationException("PrototypeBootstrap is missing scene references; run The Last Fortress > Setup Prototype Scene.");
-            Definitions = IsMvp ? content.mvpDefinitions.ToDefinitions() : content.definitions.ToDefinitions();
+            if (IsRelease)
+            {
+                var release = RulesProfile.TwelveNights(content.releaseDefinitions.ToDefinitions());
+                var legacy = RulesProfile.SixNights(content.mvpDefinitions != null ? content.mvpDefinitions.ToDefinitions() : MvpDefinitions.CreateDefault());
+                Catalog = new RulesCatalog(release, legacy);
+                Definitions = release.Definitions;
+                PurchasableKinds = RulesProfile.ReleaseKinds;
+            }
+            else if (IsMvp)
+            {
+                Catalog = new RulesCatalog(RulesProfile.SixNights(content.mvpDefinitions.ToDefinitions()));
+                Definitions = Catalog.Default.Definitions;
+                PurchasableKinds = RulesProfile.MvpKinds;
+            }
+            else
+            {
+                Definitions = content.definitions.ToDefinitions();
+                PurchasableKinds = new[] { BuildingKind.Wall, BuildingKind.Tower };
+            }
+
+            NewRunDefinitions = Definitions;
             var errors = Definitions.Validate();
             if (errors.Count > 0) Debug.LogError("Invalid definitions: " + string.Join("; ", errors));
-            PurchasableKinds = IsMvp
-                ? new[] { BuildingKind.Wall, BuildingKind.Tower, BuildingKind.House, BuildingKind.Farm, BuildingKind.SpikeTrap }
-                : new[] { BuildingKind.Wall, BuildingKind.Tower };
 
             var args = Environment.GetCommandLineArgs();
             if (IsMvp)
@@ -97,12 +156,23 @@ namespace TheLastFortress
                 Settings = Persistence.Store.ReadSettings(out var problem);
                 SettingsProblem = problem;
                 FlatMap = HasArg(args, "-flat");
+                var map = ArgValue(args, "-map");
+                if (map != null) SetMapProfile(map);
             }
 
             Player = new PlayerController(this);
             World = new GameObject("World").AddComponent<WorldView>();
             World.transform.SetParent(transform, false);
             World.Initialize(content, sun);
+            cameraRig.PanCursor = content.panCursor;
+            if (IsMvp)
+            {
+                Audio = new GameObject("Audio").AddComponent<AudioDirector>();
+                Audio.transform.SetParent(transform, false);
+                Audio.Initialize(content.audio);
+                Onboarding = new OnboardingState(Persistence.Store.ReadProfile());
+            }
+
             Overlay = new GameObject("RouteOverlay").AddComponent<RouteOverlay>();
             Overlay.transform.SetParent(transform, false);
             Overlay.Initialize(content, PurchasableKinds);
@@ -157,6 +227,7 @@ namespace TheLastFortress
             }
 
             if (!Suspended) Player.Tick(dt);
+            else if (cameraRig.IsDragging) cameraRig.CancelDrag(); // a menu or dialog never keeps a drag (or its cursor)
             if (AutoAdvance && !Suspended) Sim.Advance(dt);
             SyncViews(dt);
         }
@@ -166,11 +237,46 @@ namespace TheLastFortress
         {
             ObserveTransitions();
             var fxDt = PresentationDelta(dt);
+            frameEvents.Clear();
+            Sim.DrainEvents(frameEvents); // the only drain: both consumers see each batch exactly once
             World.SetBuildGridVisible(Player.Tool.HasValue && Sim.State == RunState.Day);
-            World.Sync(Sim, fxDt);
+            if (Overlay.gameObject.activeSelf == TitleScreen) Overlay.gameObject.SetActive(!TitleScreen); // no route lines on the title view
+            World.Sync(Sim, frameEvents, fxDt);
+            Audio?.Consume(Sim, frameEvents, fxDt, dt, CombatFrozen, Suspended, TitleScreen);
+            ObserveOnboarding();
             Overlay.Refresh(Sim, Player);
             Hud.Refresh(Sim, Player, Overlay, cameraRig);
             Hud.TickEffects(fxDt);
+        }
+
+        /// <summary>Night paused, menu or guard dialog: the presentation clock is frozen.</summary>
+        public bool CombatFrozen => Suspended || (Sim.State == RunState.Night && Sim.Paused);
+
+        void ObserveOnboarding()
+        {
+            if (Onboarding != null && Onboarding.Observe(Sim, Player)) SaveProfile();
+        }
+
+        /// <summary>Guide progress is a convenience record: a failed write is logged, never blocks play.</summary>
+        void SaveProfile()
+        {
+            if (!Persistence.Store.WriteProfile(Onboarding.Profile, out var error)) Debug.LogWarning(error);
+        }
+
+        /// <summary>The guide's Skip: saved at once so later runs and restarts do not show it again.</summary>
+        public void SkipOnboarding()
+        {
+            if (Onboarding == null) return;
+            Onboarding.Skip();
+            SaveProfile();
+        }
+
+        /// <summary>Help's "Show guide": resumes the guide for this run at its first unfinished step.</summary>
+        public void ReopenOnboarding()
+        {
+            if (Onboarding == null) return;
+            Onboarding.Reopen();
+            SaveProfile();
         }
 
         /// <summary>
@@ -188,6 +294,7 @@ namespace TheLastFortress
             if (IsMvp && Sim.Keep.Hp < observedKeepHp && (Sim.State == RunState.Night || Sim.State == RunState.Defeat))
             {
                 Hud.KeepHit(observedKeepHp - Sim.Keep.Hp);
+                Audio?.KeepHit();
                 if (Settings.cameraShake) cameraRig.Kick(0.12f);
             }
 
@@ -203,19 +310,47 @@ namespace TheLastFortress
 
         // ---------- commands (HUD buttons, hotkeys, tests) ----------
 
-        public void EnterNormalMode() => CreateRun(IsMvp
-            ? new RunConfig { Definitions = Definitions, Campaign = CreateCampaign(), Terrain = TerrainMap.Flat() }
-            : new RunConfig { Definitions = Definitions, Wave = WavePlan.CreateMainWave() });
+        /// <summary>
+        /// Prototype: the one-wave run. MVP: the never-saved placeholder behind the menu, staged as the title view — a
+        /// small settlement on a generated island (decorative placements; failures on terrain are simply skipped).
+        /// </summary>
+        public void EnterNormalMode()
+        {
+            if (!IsMvp)
+            {
+                CreateRun(new RunConfig { Definitions = Definitions, Wave = WavePlan.CreateMainWave() });
+                return;
+            }
 
-        /// <summary>All wave plans are stored before Day 1.</summary>
-        static CampaignConfig CreateCampaign() => MvpCampaign.CreateSixNights();
+            var terrain = IsRelease ? MapProfiles.Generate(MapProfiles.Meadow, TitleSeed) : MapGenerator.Generate(TitleSeed);
+            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Campaign = CreateCampaign(TitleSeed, MapProfiles.Meadow), Terrain = terrain });
+            Sim.ApplyLayout(TitleLayout, bypassCost: true);
+            Audio?.ResetRun(Sim); // staging is not construction: no build sounds for it
+        }
+
+        const uint TitleSeed = 3;
+
+        static readonly LayoutFixture TitleLayout = new LayoutFixture("Title settlement", new[]
+        {
+            new Placement(BuildingKind.Tower, new GridPos(8, 9)), new Placement(BuildingKind.Tower, new GridPos(12, 11)),
+            new Placement(BuildingKind.Tower, new GridPos(9, 12)), new Placement(BuildingKind.House, new GridPos(11, 8)),
+            new Placement(BuildingKind.House, new GridPos(12, 13)), new Placement(BuildingKind.House, new GridPos(7, 12)),
+            new Placement(BuildingKind.Farm, new GridPos(4, 12)), new Placement(BuildingKind.Wall, new GridPos(7, 9)),
+            new Placement(BuildingKind.Wall, new GridPos(7, 10)), new Placement(BuildingKind.Wall, new GridPos(7, 8)),
+            new Placement(BuildingKind.Wall, new GridPos(13, 10)), new Placement(BuildingKind.Wall, new GridPos(13, 11)),
+            new Placement(BuildingKind.SpikeTrap, new GridPos(6, 10)),
+        });
+
+        /// <summary>All wave plans are stored before Day 1 (release: seeded entry variation for the chosen map profile).</summary>
+        CampaignConfig CreateCampaign(uint seed, string mapProfile) =>
+            IsRelease ? ReleaseCampaign.Create(seed, mapProfile) : MvpCampaign.CreateSixNights();
 
         /// <summary>Stress fixture: prototype Grunts in the prototype scene; mixed MVP archetypes in the MVP scene.</summary>
         public void EnterStressMode()
         {
             Persistence?.Detach();
             MenuOpen = false;
-            CreateRun(new RunConfig { Definitions = Definitions, Wave = IsMvp ? WavePlan.CreateMvpStressWave() : WavePlan.CreateStressWave(), StressMode = true });
+            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Wave = IsMvp ? WavePlan.CreateMvpStressWave() : WavePlan.CreateStressWave(), StressMode = true });
         }
 
         void CreateRun(RunConfig config)
@@ -227,10 +362,13 @@ namespace TheLastFortress
         void LoadRun(RunSimulation sim)
         {
             Sim = sim;
+            Definitions = sim.Definitions; // a loaded legacy save plays with its own profile's definitions
             observedState = sim.State;
             observedNight = sim.NightNumber;
             observedKeepHp = sim.Keep.Hp;
             World.SetTerrain(sim.Config.Terrain);
+            Onboarding?.EndRun(); // only NewRun guides a run; a loaded or placeholder run never restarts the guide
+            Audio?.ResetRun(sim); // pending sounds cleared; the load's own events are not replayed
             ResetPresentation();
         }
 
@@ -259,7 +397,7 @@ namespace TheLastFortress
             if (Sim.StressMode) SetUpStressRun();
             else if (Persistence != null && Persistence.HasRun)
             {
-                Persistence.BeginNewRun(Definitions);
+                Persistence.BeginNewRun(Catalog);
                 Persistence.CommitDay(Sim);
             }
         }
@@ -274,36 +412,43 @@ namespace TheLastFortress
             return s == 0 ? 1u : s;
         }
 
-        /// <summary>Starts a fresh saved run: terrain from the seed (or the flat authored map), six stored waves, Day 1 checkpoint.</summary>
+        /// <summary>
+        /// Starts a fresh saved run: terrain from the seed (release: from the chosen map profile; or the flat authored map),
+        /// all waves stored, Day 1 checkpoint.
+        /// </summary>
         public void NewRun(uint seed, bool flat)
         {
-            var terrain = flat ? TerrainMap.Flat() : MapGenerator.Generate(seed);
+            var terrain = flat ? TerrainMap.Flat() : IsRelease ? MapProfiles.Generate(MapProfile, seed) : MapGenerator.Generate(seed);
             Debug.Log($"New run: {terrain.Describe()}");
-            CreateRun(new RunConfig { Definitions = Definitions, Seed = seed, Terrain = terrain, Campaign = CreateCampaign() });
+            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Seed = seed, Terrain = terrain, Campaign = CreateCampaign(seed, MapProfile) });
             MenuOpen = false;
-            Persistence.BeginNewRun(Definitions);
+            cameraRig.ResetView(); // the Keep and the western approach
+            Onboarding?.BeginRun();
+            Persistence.BeginNewRun(Catalog);
             Persistence.CommitDay(Sim);
         }
 
         public void Continue()
         {
-            var load = Persistence.Store.Read(Persistence.Store.LatestSlot(), Definitions);
+            var load = Persistence.Store.Read(Persistence.Store.LatestSlot(), Catalog);
             if (!load.CanContinue) return;
             LoadRun(load.Sim);
             Persistence.Adopt(load);
             MenuOpen = false;
+            cameraRig.ResetView();
         }
 
         /// <summary>Explicit recovery of the previous checkpoint (.bak) when the latest save is damaged.</summary>
         public bool RecoverBackup()
         {
             var slot = Persistence.Store.LatestSlot();
-            var load = Persistence.Store.Read(slot, Definitions, backup: true);
+            var load = Persistence.Store.Read(slot, Catalog, backup: true);
             if (!load.CanContinue) return false;
             LoadRun(load.Sim);
             Persistence.Adopt(load);
             Persistence.CommitDay(Sim);
             MenuOpen = false;
+            cameraRig.ResetView();
             return true;
         }
 
@@ -312,8 +457,9 @@ namespace TheLastFortress
             if (!IsMvp) return;
             MenuOpen = true;
             Player.CancelTool();
+            if (!Persistence.HasRun) cameraRig.SetView(TitleFocus, TitleSize);
             var slot = Persistence.Store.LatestSlot();
-            LatestSave = slot >= 0 ? Persistence.Store.Read(slot, Definitions) : new SaveLoad { Status = SaveStatus.None };
+            LatestSave = slot >= 0 ? Persistence.Store.Read(slot, Catalog) : new SaveLoad { Status = SaveStatus.None };
             if (LatestSave.Status == SaveStatus.Ok || LatestSave.Status == SaveStatus.Terminal) LatestSave.Message ??= "";
         }
 
@@ -460,7 +606,7 @@ namespace TheLastFortress
 
         /// <summary>Day 1 exactly as created: nothing built, sold, repaired or rotated since the run began.</summary>
         bool IsUntouchedDayOne() =>
-            Sim.State == RunState.Day && Sim.NightNumber == 1 && Sim.Stats.BuildingsPurchased == 0 && Sim.Gold == Definitions.StartingGold
+            Sim.State == RunState.Day && Sim.NightNumber == 1 && Sim.Stats.BuildingsPurchased == 0 && Sim.Gold == Sim.Definitions.StartingGold
             && !Persistence.HasUnsavedDayEdits(Sim) && Persistence.LastDay != null && Persistence.LastDay.buildings.Length == 1;
 
         public void ApplySettings(GameSettings settings, bool persist)
@@ -468,6 +614,7 @@ namespace TheLastFortress
             Settings = settings;
             cameraRig.Sensitivity = Mathf.Clamp(settings.cameraSensitivity, 0.25f, 3f);
             cameraRig.ShakeEnabled = settings.cameraShake;
+            Audio?.ApplyVolumes(settings.masterVolume, settings.musicVolume, settings.sfxVolume);
             // Window mode applies on its own; resolution falls back to the current size until one is chosen.
             if (!Application.isEditor && persist)
                 Screen.SetResolution(settings.width > 0 ? settings.width : Screen.width, settings.height > 0 ? settings.height : Screen.height,
@@ -495,7 +642,12 @@ namespace TheLastFortress
         public bool StartNight()
         {
             if (Sim.State != RunState.Day) return false;
-            if (Persistence != null && Persistence.HasRun && (Persistence.SavePending || !Persistence.CommitDay(Sim))) return false;
+            if (Persistence != null && Persistence.HasRun && (Persistence.SavePending || !Persistence.CommitDay(Sim)))
+            {
+                Audio?.Play(SoundId.UiReject);
+                return false;
+            }
+
             var started = Sim.StartNight();
             if (!started) return false;
             observedState = RunState.Night;
@@ -514,8 +666,9 @@ namespace TheLastFortress
 
         public void RepairSelected()
         {
-            if (Player.Selected != null) Sim.TryRepair(Player.Selected);
+            if (Player.Selected != null && Sim.TryRepair(Player.Selected) != RepairRejection.None) Audio?.Play(SoundId.UiReject);
         }
+
 
         public void RotateSelected()
         {
