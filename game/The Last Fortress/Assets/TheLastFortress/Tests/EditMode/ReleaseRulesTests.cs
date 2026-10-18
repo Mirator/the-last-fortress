@@ -272,6 +272,9 @@ namespace TheLastFortress.Tests
             Assert.AreEqual(sim.CaptureSnapshot().Replace(" rev=" + sim.Grid.Revision, ""), back.CaptureSnapshot().Replace(" rev=" + back.Grid.Revision, ""));
             Assert.AreEqual((12, MapProfiles.Crossing), (back.TotalNights, back.Campaign.MapProfile));
             CollectionAssert.AreEqual(sim.Config.Terrain.Cells, back.Config.Terrain.Cells, "the accepted terrain, not a regenerated one");
+            var fords = MapProfiles.RiverCrossings(sim.Config.Terrain);
+            Assert.AreEqual(12, fords.Count, "two rivers: two 2-cell fords and two ring crossings each");
+            CollectionAssert.AreEquivalent(fords, MapProfiles.RiverCrossings(back.Config.Terrain), "a restored save (no stored symmetry) draws the same river");
             for (var n = 0; n < 12; n++)
                 CollectionAssert.AreEqual(sim.Campaign.Nights[n].Spawns.Select(s => (s.Tick, s.Cell, s.Kind)), back.Campaign.Nights[n].Spawns.Select(s => (s.Tick, s.Cell, s.Kind)));
             Assert.AreEqual(4.5 + back.Definitions.Watchtower.RangeBonus, back.TowerRange(back.GetBuilding(cannon.Id)), 1e-9, "Watchtower adjacency rebuilt from occupancy");

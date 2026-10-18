@@ -173,6 +173,42 @@ namespace TheLastFortress
             return p;
         }
 
+        static readonly int[] RiverColumns = { 5, 14 };
+
+        /// <summary>
+        /// Presentation only: the walkable cells on a Crossing river's line (its fords, and where it passes under the
+        /// boundary ring). Found by matching the map's own water against the skeleton, so a restored save, which does not
+        /// store its symmetry, draws the same river. Empty for any other profile.
+        /// </summary>
+        public static List<GridPos> RiverCrossings(TerrainMap map)
+        {
+            var cells = new List<GridPos>();
+            if (map == null || map.Profile != Crossing) return cells;
+            var skeleton = CreateCrossing().Skeleton;
+            for (var s = 0; s < 8; s++)
+            {
+                var matches = true;
+                foreach (var kv in skeleton)
+                {
+                    if (kv.Value != TerrainType.Water || map[Apply(s, kv.Key)] == TerrainType.Water) continue;
+                    matches = false;
+                    break;
+                }
+
+                if (!matches) continue;
+                foreach (var x in RiverColumns)
+                for (var z = 0; z < GridCoordinates.Size; z++)
+                {
+                    var c = Apply(s, new GridPos(x, z));
+                    if (map[c] == TerrainType.Land) cells.Add(c);
+                }
+
+                break;
+            }
+
+            return cells;
+        }
+
         static bool Crosses(Route route, GridPos[] fords)
         {
             foreach (var c in route.Cells)

@@ -243,7 +243,8 @@ namespace TheLastFortress
         readonly List<int> scratch = new List<int>();
         bool? nightTarget;
         GameObject terrainRoot;
-        Material poolWater;
+        Material poolWater, shallowWater, bankSand, bridgeTimber;
+        readonly List<Mesh> terrainMeshes = new List<Mesh>();
         int topologyRevision = -1;
         int topologyReset = -1;
 
@@ -469,6 +470,8 @@ namespace TheLastFortress
         public void SetTerrain(TerrainMap map)
         {
             if (terrainRoot != null) Destroy(terrainRoot);
+            foreach (var m in terrainMeshes) Destroy(m);
+            terrainMeshes.Clear();
             terrainRoot = null;
             TerrainDecorationCount = 0;
             if (map == null || content.foliage == null) return;
@@ -502,18 +505,148 @@ namespace TheLastFortress
                         Prims.Create(PrimitiveType.Cube, root, new Vector3(0.22f, 0.1f, -0.2f), new Vector3(0.26f, 0.2f, 0.24f), content.rock, "Stone", Quaternion.Euler(-6, 10 + h * 80, 0));
                         break;
                     case TerrainType.Water:
-                        // Raised clear of the ground top (y = 0) so the faces never z-fight, with a pale rim so a pool reads
-                        // differently from the sea around the board.
-                        Prims.Create(PrimitiveType.Cube, root, new Vector3(0, 0.007f, 0), new Vector3(0.98f, 0.014f, 0.98f), content.rock, "Rim")
-                            .GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                        var pool = Prims.Create(PrimitiveType.Cube, root, new Vector3(0, 0.018f, 0), new Vector3(0.84f, 0.012f, 0.84f), poolWater, "Pool");
-                        pool.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                        Prims.Create(PrimitiveType.Cube, root, new Vector3(0.28f, 0.03f, 0.3f), new Vector3(0.16f, 0.06f, 0.1f), content.rock, "ShoreStone", Quaternion.Euler(0, 25, 0));
-                        break;
+                        break; // drawn below as one connected surface with the river's fords
                 }
 
                 TerrainDecorationCount++;
             }
+
+            BuildWater(map);
+        }
+
+        const float BankWidth = 0.12f;
+        const float WaterY = 0.02f;
+        const float BankY = 0.03f;
+
+        /// <summary>
+        /// Water as connected surfaces: a cell's water runs to every side whose neighbor is also water (or a ford / ring
+        /// crossing on a Crossing river) and has a sand bank on the others, so rivers read as one stream and pools as ponds.
+        /// Fords get shallow water and stepping stones, ring crossings a bridge, and a river at the board edge spills onto
+        /// the beach. Decoration only: everything stays below the route lines and never touches the simulation.
+        /// </summary>
+        void BuildWater(TerrainMap map)
+        {
+            if (shallowWater == null) shallowWater = Prims.Tinted(content.water, Palette.Hex(0x6A9DB2));
+            if (bankSand == null) bankSand = Prims.Tinted(content.rock, Palette.Hex(0xC9B98F));
+            if (bridgeTimber == null) bridgeTimber = Prims.Tinted(content.timberShadow, Palette.Hex(0x8A6A48));
+            var crossings = new HashSet<GridPos>(MapProfiles.RiverCrossings(map));
+            bool IsRiver(GridPos c) => GridCoordinates.IsInBounds(c) && (map[c] == TerrainType.Water || crossings.Contains(c));
+
+            var deep = (new List<Vector3>(), new List<int>());
+            var shallow = (new List<Vector3>(), new List<int>());
+            var banks = (new List<Vector3>(), new List<int>());
+            var props = new GameObject("RiverProps").transform;
+            props.SetParent(terrainRoot.transform, false);
+            for (var i = 0; i < map.Cells.Length; i++)
+            {
+                var cell = new GridPos(i % GridCoordinates.Size, i / GridCoordinates.Size);
+                var ford = crossings.Contains(cell);
+                if (map.Cells[i] != TerrainType.Water && !ford) continue;
+                bool Joined(int dx, int dz)
+                {
+                    var n = new GridPos(cell.X + dx, cell.Z + dz);
+                    return IsRiver(n) || (ford && !GridCoordinates.IsInBounds(n)); // a ring crossing flows on off the board
+                }
+
+                bool w = Joined(-1, 0), e = Joined(1, 0), s = Joined(0, -1), n = Joined(0, 1);
+                float x0 = cell.X, z0 = cell.Z, x1 = cell.X + 1, z1 = cell.Z + 1;
+                var ring = GridCoordinates.IsReservedRing(cell);
+                AddQuad((ford && !ring ? shallow : deep).Item1, (ford && !ring ? shallow : deep).Item2,
+                    new Vector3(x0 + (w ? 0 : BankWidth), WaterY, z0 + (s ? 0 : BankWidth)), new Vector3(x1 - (e ? 0 : BankWidth), WaterY, z1 - (n ? 0 : BankWidth)));
+                if (!w) AddQuad(banks.Item1, banks.Item2, new Vector3(x0, BankY, z0), new Vector3(x0 + BankWidth, BankY, z1));
+                if (!e) AddQuad(banks.Item1, banks.Item2, new Vector3(x1 - BankWidth, BankY, z0), new Vector3(x1, BankY, z1));
+                if (!s) AddQuad(banks.Item1, banks.Item2, new Vector3(x0, BankY, z0), new Vector3(x1, BankY, z0 + BankWidth));
+                if (!n) AddQuad(banks.Item1, banks.Item2, new Vector3(x0, BankY, z1 - BankWidth), new Vector3(x1, BankY, z1));
+                if (!ford) continue;
+
+                // The river runs along z when it continues north/south of this cell; enemies cross it along the other axis.
+                var alongZ = n || s;
+                var across = alongZ ? Vector3.right : Vector3.forward;
+                var center = Prims.CellCenter(cell);
+                if (ring)
+                {
+                    var deck = Prims.Create(PrimitiveType.Cube, props, center + new Vector3(0, 0.04f, 0),
+                        alongZ ? new Vector3(1f, 0.03f, 0.78f) : new Vector3(0.78f, 0.03f, 1f), bridgeTimber, "BridgeDeck");
+                    deck.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    foreach (var side in new[] { -0.39f, 0.39f })
+                        Prims.Create(PrimitiveType.Cube, props, center + (alongZ ? Vector3.forward : Vector3.right) * side + new Vector3(0, 0.055f, 0),
+                            alongZ ? new Vector3(1f, 0.03f, 0.05f) : new Vector3(0.05f, 0.03f, 1f), content.timberShadow, "BridgeRail");
+                    if (content.IsMvp) AddOutlet(deep, cell, alongZ);
+                }
+                else
+                {
+                    var h = (cell.X * 73 + cell.Z * 151) % 7 / 7f;
+                    for (var k = -1; k <= 1; k++)
+                    {
+                        var jitter = (alongZ ? Vector3.forward : Vector3.right) * (((h + k * 0.31f) % 1f) - 0.5f) * 0.2f;
+                        Prims.Create(PrimitiveType.Cube, props, center + across * (k * 0.3f) + jitter + new Vector3(0, 0.035f, 0),
+                            new Vector3(0.17f, 0.04f, 0.15f), content.rock, "SteppingStone", Quaternion.Euler(0, 20 + h * 50 + k * 25, 0));
+                    }
+                }
+            }
+
+            MeshChild("RiverWater", deep, poolWater);
+            MeshChild("Ford", shallow, shallowWater);
+            MeshChild("RiverBank", banks, bankSand);
+        }
+
+        /// <summary>Where a river leaves the board: down the island edge and across the beach to the sea.</summary>
+        static void AddOutlet((List<Vector3>, List<int>) mesh, GridPos cell, bool alongZ)
+        {
+            var max = GridCoordinates.Size;
+            Vector3 outward, a, b;
+            if (alongZ)
+            {
+                var edge = cell.Z == 0 ? 0f : max;
+                outward = cell.Z == 0 ? Vector3.back : Vector3.forward;
+                a = new Vector3(cell.X + BankWidth, 0, edge);
+                b = new Vector3(cell.X + 1 - BankWidth, 0, edge);
+            }
+            else
+            {
+                var edge = cell.X == 0 ? 0f : max;
+                outward = cell.X == 0 ? Vector3.left : Vector3.right;
+                a = new Vector3(edge, 0, cell.Z + BankWidth);
+                b = new Vector3(edge, 0, cell.Z + 1 - BankWidth);
+            }
+
+            // ground side (top 0 .. -0.2), island-edge top (0.2 wide at -0.2), its face, then the beach top (-0.26) to the sea
+            (float t, float y)[] profile = { (0.005f, WaterY), (0.005f, -0.195f), (0.205f, -0.195f), (0.205f, -0.25f), (0.75f, -0.25f) };
+            for (var k = 0; k + 1 < profile.Length; k++)
+            {
+                var (t0, y0) = profile[k];
+                var (t1, y1) = profile[k + 1];
+                AddQuadBothSides(mesh.Item1, mesh.Item2, a + outward * t0 + Vector3.up * y0, b + outward * t0 + Vector3.up * y0,
+                    b + outward * t1 + Vector3.up * y1, a + outward * t1 + Vector3.up * y1);
+            }
+        }
+
+        static void AddQuadBothSides(List<Vector3> v, List<int> t, Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        {
+            // Separate vertices per side: shared ones would get opposite face normals averaged to zero (rendered black).
+            var i = v.Count;
+            v.Add(a); v.Add(b); v.Add(c); v.Add(d);
+            v.Add(a); v.Add(b); v.Add(c); v.Add(d);
+            t.Add(i); t.Add(i + 1); t.Add(i + 2);
+            t.Add(i); t.Add(i + 2); t.Add(i + 3);
+            t.Add(i + 4); t.Add(i + 6); t.Add(i + 5);
+            t.Add(i + 4); t.Add(i + 7); t.Add(i + 6);
+        }
+
+        void MeshChild(string name, (List<Vector3>, List<int>) data, Material material)
+        {
+            if (data.Item2.Count == 0) return;
+            var mesh = new Mesh { name = name };
+            terrainMeshes.Add(mesh);
+            mesh.SetVertices(data.Item1);
+            mesh.SetTriangles(data.Item2, 0);
+            mesh.RecalculateNormals();
+            var go = new GameObject(name);
+            go.transform.SetParent(terrainRoot.transform, false);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         }
 
         public void ClearAll()
