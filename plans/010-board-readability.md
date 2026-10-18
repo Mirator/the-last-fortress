@@ -1,6 +1,6 @@
 # Plan 010 — Board readability: entries, terrain and decoration from one layout
 
-Status: **Stages 1 and 2.2 DONE (2026-10-18); Stages 2.1, 2.3 and 3 TODO.** See [Results](#results). Source: owner's solo playtest on the release build after the continuous-river change (`d5f4ab3`), seed 305509965, Crossing (turned 90°).
+Status: **Stages 1, 2.2 and 3 DONE (2026-10-18); Stages 2.1 and 2.3 optional, TODO.** See [Results](#results). Source: owner's solo playtest on the release build after the continuous-river change (`d5f4ab3`), seed 305509965, Crossing (turned 90°).
 
 ## Problem
 
@@ -128,6 +128,14 @@ Caveat: these symmetry-0 numbers come after the "cheaper buildings" retune (`2f2
 - Offscreen 1080p captures of Day 1, seed 7, on all three profiles: [Crossing](evidence/010/day1-crossing-seed7.png) (the North front crosses a ford), [Ravine](evidence/010/day1-ravine-seed7.png) (the North front runs down its channel), [Meadow](evidence/010/day1-meadow-seed7.png). No ground patches.
 - Not done: captures of all four rotations per profile (that needs a new capture set), and the owner replaying seeds 3065211399 and 305509965.
 
-### Still open
+### Stage 3: entries readable in the world (done)
 
-Stage 3 (world-space entry gates, route direction, label moved off the route) is the remaining fix for "where do enemies come from". It hasn't been started.
+- **Gates** (`RouteOverlay.UpdateGates`): every entry of tonight's wave gets a timber gate with a coral banner. The gate stands on the beach just past the board edge, so it is never on a legal cell. A coral pad marks the entry cell. Gates show by Day and Night in the MVP and release scenes. A new side's banner pulses during the Day.
+- **Route direction** (`UpdateChevrons`): white chevrons drift along each drawn Day route line, from its entry toward the Keep, at 0.9 tiles/s with 1.4-tile spacing. They are hidden at Night, like the route lines.
+- **Label** (`HudView.RefreshEntryMarkers`): the marker sits beside its gate, on the side away from the screen centre, so it never covers the gate or the route's first cells. The edge arrow now means the gate itself is off-screen or behind the top panels; the label being clamped no longer triggers it.
+- Test: `ReleaseSceneTests.GatesStandAtTonightsEntriesAndChevronsFlowTowardTheKeep` checks a turned board (seed 7, Night 1 from North). It asserts one gate per entry, at the entry and off the board; chevrons that point toward the Keep overall, so a reversed direction fails; and gates kept with chevrons gone once Night starts.
+- Captures: [Crossing Day 1](evidence/010/stage3-day1-crossing-gate.png), [four entries, Meadow](evidence/010/stage3-four-entries-meadow.png). In the second, the North and East gates are behind the final-siege announcement, so their labels show the `^` arrow. That's the existing layout, unchanged here.
+
+Same session, separate feature: a Night speed control (II / 1× / 2× / 3× above Start Night, hotkey `F`). It's covered by `NightSpeedRunsMoreFixedStepsAndPauseHoldsBothClocks`, and described in the README controls.
+
+Verification after both: EditMode 105/105 (after the speed change; Stage 3 touches no Core code). PlayMode 20/20, plus the motion probe skipped. Release build succeeded. Offscreen 1080p captures. Not done: a live look at the chevron motion, and the owner's replay.

@@ -16,6 +16,7 @@ One-wave proof for plan `plans/001-navigation-prototype.md` and specification `s
 | WASD / arrows | Pan · mouse wheel zooms · **Reset Camera** button restores the view |
 | **Start Night** (bottom-right) | Starts the wave; becomes **Pause/Resume** during Night |
 | `Space` | Pause / resume during Night |
+| `F`, or **II / 1× / 2× / 3×** above Start Night (MVP and release) | Night speed. The choice lasts for the session (later nights and runs) and is never saved with a run. Picking a speed while paused resumes. The fixed-step simulation plays a night out the same at any speed |
 | **Sell** (selection panel, Day only) | Refunds `floor(price / 2)` once; the Keep cannot be sold |
 | **Restart** (top-right, and on the outcome overlay) | Exact fresh Day |
 | `F9` | Toggle the labeled stress fixture (debug only) |

@@ -196,7 +196,7 @@ namespace TheLastFortress
             hideLabel.fontSize = skipLabel.fontSize = 18;
             guidePanel.SetActive(false);
 
-            gameplayLayer = BuildGameplayLayer(root, "EntryMarkers", "Resources", "Status", "BossBar", "Menu", "BuildCards", "Actions", "Selection", "Hint",
+            gameplayLayer = BuildGameplayLayer(root, "EntryMarkers", "Resources", "Status", "BossBar", "Menu", "BuildCards", "Actions", "Speed", "Selection", "Hint",
                 "Tooltip", "BreachLabel", "StressBanner", "Diagnostic", "Announcement", "GolemBanner", "TerminalOverlay", "RewardOverlay", "Guide");
 
             // Guard dialog (Restart/Quit): blocks the world and every panel underneath until a choice is made.
@@ -336,6 +336,7 @@ namespace TheLastFortress
                 "R  rotate the ghost or the selected building (Walls connect automatically)\n" +
                 "WASD / arrow keys  pan · mouse wheel  zoom · Reset Camera  back to the whole board\n" +
                 "Space or PAUSE  pause and resume the night (inspection still works)\n" +
+                "F or II / 1× / 2× / 3×  night speed (picking a speed also resumes)\n" +
                 "Menu  save and quit by day, settings, credits";
             showGuideButton = MakeButton(hp, "Show guide", new Vector2(0.5f, 0), new Vector2(-160, 30), new Vector2(280, 60), () =>
             {
@@ -650,18 +651,21 @@ namespace TheLastFortress
                     if (s.EntryIndex == i) count++;
                 var isNew = sim.State == RunState.Day && IsNewEntry(sim, cell);
 
-                // Project the entry tile, then keep the marker inside the free play area (below the top panels, above the cards).
+                // Project the entry's gate and set the marker beside it, on the side away from the screen centre: the routes
+                // run toward the Keep in the middle, so neither the gate nor the route's first cells are covered. The marker
+                // stays inside the free play area (below the top panels, above the cards); an arrow means the gate is hidden.
                 var label0 = $"{(isNew ? "NEW " : "")}{WaveText.EntryName(cell).ToUpperInvariant()} {count}";
                 var halfWidth = ((label0.Length + 2) * 12f + 26f) / 2f;
-                var sp = cam.WorldToScreenPoint(Prims.CellCenter(cell, 0.6f));
-                var p = ScreenToCanvas(new Vector2(sp.x, sp.y));
-                if (sp.z < 0) p = size - p;
+                var sp = cam.WorldToScreenPoint(RouteOverlay.GateCenter(cell));
+                var g = ScreenToCanvas(new Vector2(sp.x, sp.y));
+                if (sp.z < 0) g = size - g;
+                var p = new Vector2(g.x + (g.x < size.x * 0.5f ? -1f : 1f) * (halfWidth + 34f), g.y);
                 var minX = halfWidth + 16f;
                 const float minY = 170f;
                 var topReserve = Mathf.Max(260f, topPanelsBottom + 30f); // stay clear of status, boss bar, announcement, banner and guide
                 var clamped = new Vector2(Mathf.Clamp(p.x, minX, size.x - minX), Mathf.Clamp(p.y, minY, size.y - topReserve));
-                var off = (clamped - p).sqrMagnitude > 1f;
-                var arrow = !off ? "" : p.x < minX ? "< " : p.x > size.x - minX ? "> " : p.y > size.y - topReserve ? "^ " : "v ";
+                var hidden = g.x < 0f || g.x > size.x || g.y < minY || g.y > size.y - topReserve + 22f;
+                var arrow = !hidden ? "" : g.x < 0f ? "< " : g.x > size.x ? "> " : g.y >= minY ? "^ " : "v ";
                 var label = arrow + label0;
                 Set(entryMarkerTexts[i], label);
                 var rt = (RectTransform)entryMarkers[i].transform;
@@ -671,7 +675,7 @@ namespace TheLastFortress
             }
         }
 
-        static bool IsNewEntry(RunSimulation sim, GridPos cell)
+        internal static bool IsNewEntry(RunSimulation sim, GridPos cell)
         {
             if (sim.NightNumber < 2) return false;
             foreach (var p in sim.Campaign.Nights[sim.NightNumber - 2].EntryCells)

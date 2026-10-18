@@ -78,6 +78,24 @@ namespace TheLastFortress
         /// <summary>When false, Update does not advance the simulation (tests step it explicitly).</summary>
         public bool AutoAdvance { get; set; } = true;
 
+        public static readonly int[] GameSpeeds = { 1, 2, 3 };
+
+        /// <summary>
+        /// Night time multiplier (1×, 2×, 3×), a player preference for this session: it carries over to later nights and
+        /// runs and is never saved with a run. The simulation still runs whole fixed steps, so a night plays out the same
+        /// at any speed; the combat presentation clock is scaled with it so arrows and impacts stay in step.
+        /// </summary>
+        public int GameSpeed { get; private set; } = 1;
+
+        public void SetGameSpeed(int speed)
+        {
+            if (System.Array.IndexOf(GameSpeeds, speed) < 0) return;
+            GameSpeed = speed;
+            if (Sim.State == RunState.Night) Sim.SetPaused(false); // picking a speed while paused resumes at that speed
+        }
+
+        public void CycleGameSpeed() => SetGameSpeed(GameSpeeds[(System.Array.IndexOf(GameSpeeds, GameSpeed) + 1) % GameSpeeds.Length]);
+
         /// <summary>
         /// When true, Update leaves view syncing to the caller, so frame-exact captures and motion probes own the
         /// presentation clock (otherwise each frame would advance effects twice).
@@ -241,9 +259,12 @@ namespace TheLastFortress
 
             if (!Suspended) Player.Tick(dt);
             else if (cameraRig.IsDragging) cameraRig.CancelDrag(); // a menu or dialog never keeps a drag (or its cursor)
-            if (AutoAdvance && !Suspended) Sim.Advance(dt);
+            if (AutoAdvance) AdvanceSimulation(dt);
             if (!ExternalViewClock) SyncViews(dt);
         }
+
+        /// <summary>One frame of real time for the simulation at the chosen <see cref="GameSpeed"/>; nothing while suspended.</summary>
+        public int AdvanceSimulation(float dt) => Suspended ? 0 : Sim.Advance(dt * GameSpeed);
 
         /// <summary>Pushes current simulation state to views and HUD (also used by tests after manual stepping).</summary>
         public void SyncViews(float dt = 0f)
@@ -297,7 +318,8 @@ namespace TheLastFortress
         /// hold exactly where they are. It keeps running into Reward/Victory/Defeat so the final kill's cues finish.
         /// HUD refresh and camera inspection stay live regardless.
         /// </summary>
-        public float PresentationDelta(float dt) => Suspended || (Sim.State == RunState.Night && Sim.Paused) ? 0f : dt;
+        public float PresentationDelta(float dt) =>
+            Suspended || (Sim.State == RunState.Night && Sim.Paused) ? 0f : Sim.State == RunState.Night ? dt * GameSpeed : dt;
 
         /// <summary>Checkpoint triggers that follow simulation transitions (Reward ledger, terminal record) and Keep-hit shake.</summary>
         void ObserveTransitions()

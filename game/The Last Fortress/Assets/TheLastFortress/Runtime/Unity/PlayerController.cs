@@ -102,6 +102,7 @@ namespace TheLastFortress
                 }
 
                 if (keyboard.spaceKey.wasPressedThisFrame && sim.State == RunState.Night) game.TogglePause();
+                if (keyboard.fKey.wasPressedThisFrame && game.IsMvp && !sim.StressMode) game.CycleGameSpeed(); // 1× → 2× → 3× → 1×
                 if (keyboard.rKey.wasPressedThisFrame && sim.State == RunState.Day && game.IsMvp) RotateClockwise();
             }
 

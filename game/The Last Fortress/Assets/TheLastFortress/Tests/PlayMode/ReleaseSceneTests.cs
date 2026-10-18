@@ -187,5 +187,52 @@ namespace TheLastFortress.Tests
             Assert.IsTrue(game.StartNight(), "Night commits the Day checkpoint first");
             StringAssert.Contains("\"schemaVersion\": 1", File.ReadAllText(game.Persistence.Store.SlotPath(0)), "still saved as a schema-1 six-night run");
         }
+
+        [UnityTest]
+        public IEnumerator NightSpeedRunsMoreFixedStepsAndPauseHoldsBothClocks()
+        {
+            game.NewRun(7, false);
+            game.AutoAdvance = false;
+            yield return null;
+            Assert.IsTrue(game.StartNight());
+            game.Hud.SpeedButton(3).onClick.Invoke();
+            Assert.AreEqual(6, game.AdvanceSimulation(0.1f), "3×: three times the 0.05 s steps for the same real time");
+            Assert.AreEqual(0.3f, game.PresentationDelta(0.1f), 1e-5f, "arrows and impacts keep step with the faster simulation");
+
+            game.Hud.SpeedButton(0).onClick.Invoke();
+            Assert.IsTrue(game.Sim.Paused);
+            Assert.AreEqual(0, game.AdvanceSimulation(0.1f), "paused at any speed: no steps");
+            Assert.AreEqual(0f, game.PresentationDelta(0.1f), "paused: presentation frozen");
+
+            yield return Press(Key.F); // 3× wraps to 1× and resumes
+            Assert.AreEqual((1, false), (game.GameSpeed, game.Sim.Paused));
+            Assert.AreEqual(2, game.AdvanceSimulation(0.1f));
+        }
+
+        [UnityTest]
+        public IEnumerator GatesStandAtTonightsEntriesAndChevronsFlowTowardTheKeep()
+        {
+            game.NewRun(7, false); // a turned board: Night 1 does not come from the West
+            yield return null;
+            var entries = game.Sim.Wave.EntryCells;
+            Assert.AreEqual(entries.Count, game.Overlay.VisibleGateCount);
+            var gate = game.Overlay.GatePosition(0);
+            Assert.Less(Vector3.Distance(gate, Prims.CellCenter(entries[0], gate.y)), 1.2f, "the gate stands at tonight's entry");
+            Assert.IsTrue(gate.x < 0f || gate.x > 20f || gate.z < 0f || gate.z > 20f, "on the beach, never on a legal cell");
+
+            Assert.Greater(game.Overlay.VisibleChevronCount, 3);
+            var keep = Prims.CellCenter(GridState.KeepCell);
+            var toward = 0f;
+            for (var i = 0; i < game.Overlay.VisibleChevronCount; i++)
+            {
+                var c = game.Overlay.Chevron(i);
+                toward += Vector3.Dot(c.forward, (keep - c.position).normalized);
+            }
+
+            Assert.Greater(toward, 0f, "chevrons point from the entries toward the Keep, not back out");
+            Assert.IsTrue(game.StartNight());
+            yield return null;
+            Assert.AreEqual((entries.Count, 0), (game.Overlay.VisibleGateCount, game.Overlay.VisibleChevronCount), "gates stay at Night; route chevrons are a Day preview");
+        }
     }
 }

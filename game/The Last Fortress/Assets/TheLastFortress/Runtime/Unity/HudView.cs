@@ -57,6 +57,12 @@ namespace TheLastFortress
             return null;
         }
         public Button PrimaryButton { get; private set; }
+
+        /// <summary>Speed row above the primary action (MVP/release): index 0 pauses, 1..3 pick 1×, 2×, 3×.</summary>
+        public Button SpeedButton(int i) => speedButtons[i];
+
+        readonly Button[] speedButtons = new Button[4];
+        readonly Text[] speedLabels = new Text[4];
         public Button MenuRestartButton { get; private set; }
         public Button ResetCameraButton { get; private set; }
         public Button SellButton { get; private set; }
@@ -164,6 +170,16 @@ namespace TheLastFortress
             PrimaryButton = MakeButton(actions, "START NIGHT", new Vector2(0, 0), Vector2.zero, new Vector2(300, 100), game.PrimaryAction, out primaryLabel);
             primaryImage = PrimaryButton.GetComponent<Image>();
             primaryLabel.fontSize = 30;
+            if (game.IsMvp)
+            {
+                var speed = Rect(root, "Speed", new Vector2(1, 0), new Vector2(-24, 136), new Vector2(300, 56));
+                for (var i = 0; i < speedButtons.Length; i++)
+                {
+                    var index = i;
+                    speedButtons[i] = MakeButton(speed, i == 0 ? "II" : $"{PrototypeBootstrap.GameSpeeds[i - 1]}×", Vector2.zero, new Vector2(i * 77f, 0), new Vector2(69, 56),
+                        () => { if (index == 0) game.Sim.SetPaused(true); else game.SetGameSpeed(PrototypeBootstrap.GameSpeeds[index - 1]); }, out speedLabels[i]);
+                }
+            }
 
             // Bottom-left: selection
             selectionPanel = Panel(root, "Selection", new Vector2(0, 0), new Vector2(24, 24), new Vector2(380, game.IsMvp ? 248 : 190)).gameObject;
@@ -386,6 +402,24 @@ namespace TheLastFortress
 
         // ---------- refresh ----------
 
+        /// <summary>Shown by Day (to preset the night's speed) and Night; the lit button is the one in effect.</summary>
+        void RefreshSpeed(RunSimulation sim)
+        {
+            if (speedButtons[0] == null) return;
+            var row = speedButtons[0].transform.parent.gameObject;
+            var show = (sim.State == RunState.Day || sim.State == RunState.Night) && !sim.StressMode && !game.TitleScreen;
+            if (row.activeSelf != show) row.SetActive(show);
+            if (!show) return;
+            var paused = sim.State == RunState.Night && sim.Paused;
+            speedButtons[0].interactable = sim.State == RunState.Night;
+            for (var i = 0; i < speedButtons.Length; i++)
+            {
+                var lit = i == 0 ? paused : !paused && game.GameSpeed == PrototypeBootstrap.GameSpeeds[i - 1];
+                speedButtons[i].image.color = lit ? Palette.Amber : Palette.Hex(0x35525C);
+                speedLabels[i].color = lit ? Palette.HudSurface : Palette.HudText;
+            }
+        }
+
         public void Refresh(RunSimulation sim, PlayerController player, RouteOverlay overlay, CameraRig rig)
         {
             var defs = sim.Definitions;
@@ -413,7 +447,7 @@ namespace TheLastFortress
 
                     break;
                 case RunState.Night:
-                    Set(stateText, sim.Paused ? $"NIGHT{nightTag} — PAUSED" : $"NIGHT{nightTag}  {sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture)}s");
+                    Set(stateText, sim.Paused ? $"NIGHT{nightTag} — PAUSED" : $"NIGHT{nightTag}  {sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture)}s{(game.GameSpeed > 1 ? $"  ·  {game.GameSpeed}×" : "")}");
                     Set(infoText, $"Enemies alive {sim.AliveEnemyCount} · still to come {sim.ScheduledRemaining}");
                     break;
                 case RunState.Reward:
@@ -493,6 +527,7 @@ namespace TheLastFortress
             }
 
             if (PrimaryButton.gameObject.activeSelf == sim.IsTerminal) PrimaryButton.gameObject.SetActive(!sim.IsTerminal); // the outcome card has its own actions
+            RefreshSpeed(sim);
 
             // Selection panel
             var sel = player.Selected;

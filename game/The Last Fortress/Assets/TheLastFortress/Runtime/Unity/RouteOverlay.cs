@@ -71,6 +71,140 @@ namespace TheLastFortress
                 if (m != null && m.activeSelf) yield return m.transform.position;
         }
 
+        // ---------- entry gates and route direction (plan 010 stage 3) ----------
+
+        readonly GameObject[] gates = new GameObject[MaxEntries];
+        readonly Transform[] gateBanners = new Transform[MaxEntries];
+        Transform chevronRoot;
+        readonly List<Transform> chevrons = new List<Transform>();
+        Material chevronMat;
+
+        const float ChevronSpacing = 1.4f;
+        const float ChevronSpeed = 0.9f; // tiles per second toward the Keep
+
+        /// <summary>Gates standing at tonight's entries (MVP/release), for tests and captures.</summary>
+        public int VisibleGateCount { get; private set; }
+
+        public Vector3 GatePosition(int i) => gates[i].transform.position;
+
+        /// <summary>Chevrons currently drawn along the route lines, pointing from the entries toward the Keep.</summary>
+        public int VisibleChevronCount { get; private set; }
+
+        public Pose Chevron(int i) => new Pose(chevrons[i].position, chevrons[i].rotation);
+
+        /// <summary>Unit step from a boundary-ring entry cell out of the board.</summary>
+        public static Vector3 Outward(GridPos entry)
+        {
+            var max = GridCoordinates.Size - 1;
+            if (entry.X == 0) return Vector3.left;
+            if (entry.X == max) return Vector3.right;
+            return entry.Z == 0 ? Vector3.back : Vector3.forward;
+        }
+
+        const float GateOut = 0.85f; // from the entry cell centre: past the board edge (0.5), on the beach
+
+        /// <summary>Middle of an entry's gate, where its screen label is set beside it.</summary>
+        public static Vector3 GateCenter(GridPos entry) => Prims.CellCenter(entry, 0.6f) + Outward(entry) * GateOut;
+
+        /// <summary>A gate on the beach just outside the entry: two posts, a beam and a coral banner facing the board.</summary>
+        GameObject BuildGate(int i)
+        {
+            var gate = new GameObject($"EntryGate{i}");
+            gate.transform.SetParent(transform, false);
+            var timber = content.timberShadow;
+            var banner = Prims.Tinted(content.timberShadow, Palette.WarningCoral);
+            foreach (var side in new[] { -0.5f, 0.5f })
+            {
+                Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(side, 0.8f, 0), new Vector3(0.2f, 1.6f, 0.2f), timber, "Post");
+                Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(side, 1.68f, 0), new Vector3(0.28f, 0.16f, 0.28f), banner, "PostCap");
+            }
+
+            Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 1.5f, 0), new Vector3(1.36f, 0.16f, 0.2f), timber, "Beam");
+            var flag = Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 1.08f, 0), new Vector3(0.78f, 0.62f, 0.05f), banner, "Banner");
+            gateBanners[i] = flag.transform;
+            // A coral pad on the entry cell itself, where the enemies step onto the board.
+            var pad = Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 0.27f, GateOut), new Vector3(0.9f, 0.02f, 0.9f), banner, "EntryPad");
+            pad.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            gate.SetActive(false);
+            return gate;
+        }
+
+        GameObject BuildChevron()
+        {
+            var c = new GameObject("Chevron");
+            c.transform.SetParent(chevronRoot, false);
+            foreach (var side in new[] { -1f, 1f })
+                Prims.Create(PrimitiveType.Cube, c.transform, new Vector3(side * 0.13f, 0, -0.13f), new Vector3(0.08f, 0.02f, 0.44f), chevronMat, "Arm",
+                    Quaternion.Euler(0, -side * 40f, 0)).GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return c;
+        }
+
+        /// <summary>Gates at tonight's entries by Day and Night; a new side's banner pulses during the Day.</summary>
+        void UpdateGates(RunSimulation sim)
+        {
+            VisibleGateCount = 0;
+            if (gates[0] == null) return;
+            var show = sim.IsCampaign && !sim.StressMode && (sim.State == RunState.Day || sim.State == RunState.Night);
+            var entries = sim.Wave.EntryCells;
+            for (var i = 0; i < MaxEntries; i++)
+            {
+                var active = show && i < entries.Count;
+                if (gates[i].activeSelf != active) gates[i].SetActive(active);
+                if (!active) continue;
+                VisibleGateCount++;
+                var cell = entries[i];
+                var outward = Outward(cell);
+                // 0.5 to the board edge, then onto the beach: the gate never stands on a legal cell.
+                gates[i].transform.position = Prims.CellCenter(cell, -0.26f) + outward * GateOut;
+                gates[i].transform.rotation = Quaternion.LookRotation(-outward);
+                var pulse = sim.State == RunState.Day && HudView.IsNewEntry(sim, cell) ? 1f + 0.18f * Mathf.Sin(Time.unscaledTime * 5f) : 1f;
+                gateBanners[i].localScale = new Vector3(0.78f * pulse, 0.62f * pulse, 0.05f);
+            }
+        }
+
+        /// <summary>Chevrons drift along each drawn route line from its entry toward the Keep (Day only, like the lines).</summary>
+        void UpdateChevrons(bool day)
+        {
+            var used = 0;
+            if (day && chevronRoot != null)
+            {
+                var phase = Time.unscaledTime * ChevronSpeed % ChevronSpacing;
+                used = PlaceChevrons(primaryLine, phase, used);
+                for (var i = 1; i < MaxEntries; i++) used = PlaceChevrons(extraLines[i], phase, used);
+            }
+
+            for (var i = used; i < chevrons.Count; i++)
+                if (chevrons[i].gameObject.activeSelf) chevrons[i].gameObject.SetActive(false);
+            VisibleChevronCount = used;
+        }
+
+        int PlaceChevrons(LineRenderer line, float phase, int used)
+        {
+            var travelled = 0f;
+            var next = phase;
+            for (var k = 0; k + 1 < line.positionCount; k++)
+            {
+                var a = line.GetPosition(k);
+                var b = line.GetPosition(k + 1);
+                var length = Vector3.Distance(a, b);
+                if (length < 1e-4f) continue;
+                var dir = (b - a) / length;
+                while (next <= travelled + length)
+                {
+                    if (used == chevrons.Count) chevrons.Add(BuildChevron().transform);
+                    var c = chevrons[used++];
+                    if (!c.gameObject.activeSelf) c.gameObject.SetActive(true);
+                    c.position = a + dir * (next - travelled) + new Vector3(0, 0.012f, 0);
+                    c.rotation = Quaternion.LookRotation(dir);
+                    next += ChevronSpacing;
+                }
+
+                travelled += length;
+            }
+
+            return used;
+        }
+
         public void Initialize(PrototypeContent content, IReadOnlyList<BuildingKind> buildable)
         {
             this.content = content;
@@ -97,6 +231,14 @@ namespace TheLastFortress
             {
                 extraLines[i] = Prims.Line(transform, $"RouteLine{i}", lineMat, Palette.RouteCyan.WithAlpha(0.8f), 0.1f);
                 extraBreach[i] = BuildBreachMarker($"BreachMarker{i}");
+            }
+
+            if (content.IsMvp)
+            {
+                for (var i = 0; i < MaxEntries; i++) gates[i] = BuildGate(i);
+                chevronRoot = new GameObject("RouteChevrons").transform;
+                chevronRoot.SetParent(transform, false);
+                chevronMat = Prims.Tinted(lineMat, Palette.HudText);
             }
 
             BuildGhosts(buildable);
@@ -281,6 +423,8 @@ namespace TheLastFortress
                 UpdateLinks(sim);
             }
 
+            UpdateGates(sim);
+            UpdateChevrons(day);
             UpdateRangeAndSelection(sim, player);
         }
 
