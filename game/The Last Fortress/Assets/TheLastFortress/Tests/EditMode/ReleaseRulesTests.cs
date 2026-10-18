@@ -335,7 +335,8 @@ namespace TheLastFortress.Tests
             foreach (var id in MapProfiles.All)
             {
                 var profile = MapProfiles.Get(id);
-                Assert.IsNull(MapProfiles.Validate(profile, MapProfiles.Skeleton(profile, 0)), $"{id}: the fallback skeleton is itself valid");
+                for (var s = 0; s < 8; s++)
+                    Assert.IsNull(MapProfiles.Validate(profile, MapProfiles.Transform(MapProfiles.Skeleton(profile, 0), s)), $"{id}: the fallback skeleton is valid in symmetry {s}");
                 var fallbacks = 0;
                 var symmetries = new HashSet<int>();
                 for (uint seed = 0; seed < 200; seed++)
@@ -344,7 +345,9 @@ namespace TheLastFortress.Tests
                     symmetries.Add(map.Symmetry);
                     Assert.AreEqual(id, map.Profile);
                     if (map.Fallback) fallbacks++;
-                    else Assert.IsNull(MapProfiles.Validate(profile, map), $"{id} seed {seed}");
+                    else Assert.IsNull(MapProfiles.Validate(profile, map), $"{id} seed {seed}: the named rule holds on the board as played");
+                    // The campaign's fronts are the ones the rule was checked for: its West front turns with the map.
+                    Assert.AreEqual(MapProfiles.EntryFor(map.Symmetry, MvpCampaign.West), ReleaseCampaign.Create(seed, id).Nights[0].EntryCells[0], $"{id} seed {seed}");
                     if (seed >= 20) continue;
                     CollectionAssert.AreEqual(map.Cells, MapProfiles.Generate(id, seed).Cells, $"{id} seed {seed} repeatable");
                     var sim = new RunSimulation(new RunConfig

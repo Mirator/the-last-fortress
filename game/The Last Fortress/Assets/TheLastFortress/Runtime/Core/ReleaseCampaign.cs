@@ -47,14 +47,20 @@ namespace TheLastFortress
             new Recipe { Grunts = 40, Runners = 18, Brutes = 10, Bombers = 10, Archers = 12, Boss = EnemyKind.SiegeCommander, Entries = new[] { W, E, N, S }, CadenceSeconds = 0.7 },
         };
 
-        /// <summary>The twelve stored nights for a seed and map profile, with the release perk pool.</summary>
-        public static CampaignConfig Create(uint seed, string mapProfile) => Create(seed, mapProfile, Table());
+        /// <summary>
+        /// The twelve stored nights for a seed and map profile, with the release perk pool, on the board in the seed's own
+        /// symmetry (<see cref="MapProfiles.SymmetryFor"/>, as <see cref="MapProfiles.Generate(string, uint)"/> builds it).
+        /// </summary>
+        public static CampaignConfig Create(uint seed, string mapProfile) => Create(seed, mapProfile, MapProfiles.SymmetryFor(seed));
 
-        public static CampaignConfig Create(uint seed, string mapProfile, IReadOnlyList<Recipe> table)
+        /// <summary>The recipes' entries are written for the profiles' own layout; they turn with the map's symmetry.</summary>
+        public static CampaignConfig Create(uint seed, string mapProfile, int symmetry) => Create(seed, mapProfile, Table(), symmetry);
+
+        public static CampaignConfig Create(uint seed, string mapProfile, IReadOnlyList<Recipe> table, int symmetry = 0)
         {
             var rng = new RunRandom(seed ^ WaveSalt);
             var nights = new List<WavePlan>();
-            for (var i = 0; i < table.Count; i++) nights.Add(BuildNight($"Night {i + 1}", table[i], rng));
+            for (var i = 0; i < table.Count; i++) nights.Add(BuildNight($"Night {i + 1}", table[i], rng, symmetry));
             return new CampaignConfig
             {
                 Label = Label, Nights = nights, OffersRewards = true,
@@ -70,9 +76,11 @@ namespace TheLastFortress
         /// cadence; entries round-robin from a seeded offset. A boss spawns at its time from a seeded entry, after equal-time
         /// ordinary spawns. Consumes one draw per night plus one per boss.
         /// </summary>
-        public static WavePlan BuildNight(string name, Recipe r, RunRandom rng)
+        public static WavePlan BuildNight(string name, Recipe r, RunRandom rng, int symmetry = 0)
         {
-            var count = r.Entries.Length;
+            var entries = new GridPos[r.Entries.Length];
+            for (var i = 0; i < entries.Length; i++) entries[i] = MapProfiles.EntryFor(symmetry, r.Entries[i]);
+            var count = entries.Length;
             var offset = (int)rng.NextBounded((uint)count);
             var cadence = PrototypeDefinitions.ToTicks(r.CadenceSeconds);
             var remaining = new[] { r.Grunts, r.Runners, r.Brutes, r.Bombers, r.Archers };
@@ -87,7 +95,7 @@ namespace TheLastFortress
                     remaining[k]--;
                     left--;
                     var entry = (index + offset) % count;
-                    spawns.Add(new SpawnEntry(index * (long)cadence, r.Entries[entry], entry, CycleOrder[k]));
+                    spawns.Add(new SpawnEntry(index * (long)cadence, entries[entry], entry, CycleOrder[k]));
                     index++;
                 }
             }
@@ -95,10 +103,10 @@ namespace TheLastFortress
             if (r.Boss.HasValue)
             {
                 var entry = (int)rng.NextBounded((uint)count);
-                spawns.Add(new SpawnEntry(PrototypeDefinitions.ToTicks(r.BossSeconds), r.Entries[entry], entry, r.Boss.Value));
+                spawns.Add(new SpawnEntry(PrototypeDefinitions.ToTicks(r.BossSeconds), entries[entry], entry, r.Boss.Value));
             }
 
-            return new WavePlan(name, spawns, r.Entries);
+            return new WavePlan(name, spawns, entries);
         }
 
         /// <summary>Structural problems with stored nights (empty when valid). Route checks need a map: see <see cref="RunSimulation.ValidateMap"/>.</summary>

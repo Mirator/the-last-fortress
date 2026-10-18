@@ -146,17 +146,21 @@ namespace TheLastFortress.Tests
             }
         }
 
-        public static RunSimulation Play(Policy policy, uint seed, StringBuilder log)
+        /// <summary>
+        /// Plays <paramref name="policy"/> on the board turned by <paramref name="symmetry"/>, entries turned to match. The
+        /// scripts' coordinates are written for each profile's own orientation (symmetry 0); for other orientations they are
+        /// turned about the Keep, so the Keep ring stays intact while terrain-side items may land a cell off (or be skipped).
+        /// </summary>
+        public static RunSimulation Play(Policy policy, uint seed, StringBuilder log, int symmetry = 0)
         {
             var sim = new RunSimulation(new RunConfig
             {
-                // The scripts' coordinates are written for each profile's own orientation (symmetry 0).
-                Definitions = ReleaseDefinitions.CreateDefault(), Seed = seed, Terrain = MapProfiles.Generate(policy.Map, seed, 0),
-                Campaign = ReleaseCampaign.Create(seed, policy.Map),
+                Definitions = ReleaseDefinitions.CreateDefault(), Seed = seed, Terrain = MapProfiles.Generate(policy.Map, seed, symmetry),
+                Campaign = ReleaseCampaign.Create(seed, policy.Map, symmetry),
             });
             log.AppendLine($"## {policy.Name} on {sim.Config.Terrain.Describe()}");
-            var defense = new Queue(policy.Defense);
-            var economy = new Queue(policy.Economy);
+            var defense = new Queue(policy.Defense.Select(i => TurnAboutKeep(i, symmetry)).ToArray());
+            var economy = new Queue(policy.Economy.Select(i => TurnAboutKeep(i, symmetry)).ToArray());
             var combat = 0.0;
             for (var day = 1; day <= sim.TotalNights && !sim.IsTerminal; day++)
             {
@@ -199,6 +203,23 @@ namespace TheLastFortress.Tests
             return sim;
         }
 
+        /// <summary>"Kind x z" with its footprint turned about the Keep cell (mirror first, then quarter turns, as the map).</summary>
+        static string TurnAboutKeep(string item, int s)
+        {
+            if (s == 0) return item;
+            var p = item.Split(' ');
+            var kind = (BuildingKind)Enum.Parse(typeof(BuildingKind), p[0]);
+            var k = GridState.KeepCell;
+            var cells = BuildingDefinition.FootprintCells(kind, new GridPos(int.Parse(p[1]), int.Parse(p[2]))).Select(c =>
+            {
+                int dx = c.X - k.X, dz = c.Z - k.Z;
+                if (s >= 4) dx = -dx;
+                for (var i = 0; i < (s & 3); i++) (dx, dz) = (-dz, dx);
+                return new GridPos(k.X + dx, k.Z + dz);
+            }).ToList();
+            return $"{p[0]} {cells.Min(c => c.X)} {cells.Min(c => c.Z)}";
+        }
+
         [Test]
         public void ThreeDistinctApproachesCompleteTwelveNightsOnTheirProfiles()
         {
@@ -214,6 +235,27 @@ namespace TheLastFortress.Tests
                     if (policy.Recorded.Contains(seed) && sim.State != RunState.Victory) failures.Add($"{policy.Name} seed {seed}");
                 }
             }
+
+            // Evidence only: the same seeds on the orientation players actually get (plan 010). Not asserted, because the
+            // scripts were tuned for symmetry 0 and turning them about the Keep is approximate near terrain.
+            var turned = new List<string>();
+            foreach (var policy in new[] { KillZone, Corridor, Economy })
+            {
+                var wins = 0;
+                for (uint seed = 1; seed <= 8; seed++)
+                {
+                    var symmetry = MapProfiles.SymmetryFor(seed);
+                    var sim = Play(policy, seed, log, symmetry);
+                    if (sim.State == RunState.Victory) wins++;
+                    turned.Add($"{policy.Name} seed {seed} (symmetry {symmetry}): {sim.State} after night {sim.NightNumber}, Keep {sim.Keep.Hp}/{sim.Keep.MaxHp}");
+                }
+
+                turned.Add($"{policy.Name}: {wins}/8 on the seeds' own orientations");
+            }
+
+            outcomes.Add("");
+            outcomes.Add("Seeds' own orientations (log only):");
+            outcomes.AddRange(turned);
 
             log.Insert(0, "# Plan 008 release policy runs (real budget, twelve nights)\n" + string.Join("\n", outcomes) + "\n\n");
             Directory.CreateDirectory(Path.Combine("TestResults", "008"));

@@ -18,8 +18,9 @@ namespace TheLastFortress
 
         /// <summary>
         /// Each seed shows its profile in one of the 8 symmetries of the square board (4 rotations, each optionally
-        /// mirrored), so the same profile changes which entries face its corridors, rivers and open land. Drawn from a
-        /// stream separate from waves, rewards and terrain variation.
+        /// mirrored). The campaign's entries turn with it (<see cref="EntryFor"/>), so every orientation keeps the profile's
+        /// promise: the fronts that cross rivers or run down channels do so on every seed. Drawn from a stream separate
+        /// from waves, rewards and terrain variation.
         /// </summary>
         public const uint SymmetrySalt = 0x2545F491;
 
@@ -55,15 +56,29 @@ namespace TheLastFortress
             return map;
         }
 
-        /// <summary>The profile's own (untransformed) layout of a generated map, where its named constraint is defined.</summary>
-        public static TerrainMap Canonical(TerrainMap map)
+        /// <summary>The profile-layout cell that symmetry <paramref name="s"/> moves to <paramref name="c"/> (inverse of <see cref="Apply"/>).</summary>
+        public static GridPos Inverse(int s, GridPos c)
         {
-            if (map.Symmetry == 0) return map;
-            var canonical = new TerrainMap { Seed = map.Seed, Attempt = map.Attempt, Fallback = map.Fallback, Profile = map.Profile };
-            for (var z = 0; z < GridCoordinates.Size; z++)
-            for (var x = 0; x < GridCoordinates.Size; x++)
-                canonical.Cells[z * GridCoordinates.Size + x] = map[Apply(map.Symmetry, new GridPos(x, z))];
-            return canonical;
+            var max = GridCoordinates.Size - 1;
+            for (var i = 0; i < (s & 3); i++) c = new GridPos(c.Z, max - c.X);
+            if (s >= 4) c = new GridPos(max - c.X, c.Z);
+            return c;
+        }
+
+        /// <summary>
+        /// The entry that plays the role of <paramref name="entry"/> (a side midpoint written for the profile's own layout) on
+        /// the board turned by symmetry <paramref name="s"/>: the standard midpoint of the side it lands on. Snapping to the
+        /// midpoint keeps every entry in line with the Keep; the 20-cell board has no centre cell, so the raw image of
+        /// (0, 10) can land one cell off it.
+        /// </summary>
+        public static GridPos EntryFor(int s, GridPos entry)
+        {
+            var c = Apply(s, entry);
+            var max = GridCoordinates.Size - 1;
+            if (c.X == 0) return MvpCampaign.West;
+            if (c.X == max) return MvpCampaign.East;
+            if (c.Z == 0) return MvpCampaign.South;
+            return c.Z == max ? MvpCampaign.North : c;
         }
 
         public sealed class Profile
@@ -77,8 +92,11 @@ namespace TheLastFortress
             public Dictionary<GridPos, TerrainType> Skeleton = new Dictionary<GridPos, TerrainType>();
             public Func<GridPos, bool> Protected = _ => false;
 
-            /// <summary>Profile-specific rule on a candidate without buildings: null when satisfied, otherwise why not.</summary>
-            public Func<TerrainMap, string> Constraint = _ => null;
+            /// <summary>
+            /// Profile-specific rule on a candidate without buildings, checked on the board as played: the map in its symmetry
+            /// with the entries turned to match (<see cref="EntryFor"/>). Null when satisfied, otherwise why not.
+            /// </summary>
+            public Func<TerrainMap, int, string> Constraint = (_, _) => null;
         }
 
         public static bool IsKnown(string id) => Array.IndexOf(All, id) >= 0;
@@ -118,17 +136,20 @@ namespace TheLastFortress
 
             Put(p, TerrainType.Forest, (3, 3), (4, 3), (3, 4), (15, 3), (16, 3), (16, 4), (3, 16), (3, 15), (4, 16), (16, 16), (15, 16), (16, 15));
             p.Protected = c => (c.Z >= 8 && c.Z <= 12) || (c.X >= 9 && c.X <= 11);
-            p.Constraint = map =>
+            p.Constraint = (map, s) =>
             {
                 for (var x = 2; x <= 17; x++)
-                    if ((x < 9 || x > 11) && (map[new GridPos(x, 7)] != TerrainType.Rock || map[new GridPos(x, 13)] != TerrainType.Rock))
+                    if ((x < 9 || x > 11) && (map[Apply(s, new GridPos(x, 7))] != TerrainType.Rock || map[Apply(s, new GridPos(x, 13))] != TerrainType.Rock))
                         return "ridge broken";
-                foreach (var entry in new[] { MvpCampaign.West, MvpCampaign.East })
+                foreach (var front in new[] { MvpCampaign.West, MvpCampaign.East })
                 {
-                    var route = PlanOpen(map, entry);
-                    foreach (var c in route.Cells)
+                    var entry = EntryFor(s, front);
+                    foreach (var shown in PlanOpen(map, entry).Cells)
+                    {
+                        var c = Inverse(s, shown);
                         if (((c.X >= 2 && c.X <= 8) || (c.X >= 12 && c.X <= 17)) && (c.Z < 8 || c.Z > 12))
-                            return $"{WaveText.EntryName(entry)} route leaves its channel at {c}";
+                            return $"{WaveText.EntryName(entry)} route leaves its channel at {shown}";
+                    }
                 }
 
                 return null;
@@ -164,10 +185,10 @@ namespace TheLastFortress
                     if (c.ManhattanDistance(f) <= 1) return true;
                 return false;
             };
-            p.Constraint = map =>
+            p.Constraint = (map, s) =>
             {
-                if (!Crosses(PlanOpen(map, MvpCampaign.West), WestFords)) return "west route does not use a ford";
-                if (!Crosses(PlanOpen(map, MvpCampaign.East), EastFords)) return "east route does not use a ford";
+                if (!Crosses(PlanOpen(map, EntryFor(s, MvpCampaign.West)), WestFords, s)) return "west front does not use a ford";
+                if (!Crosses(PlanOpen(map, EntryFor(s, MvpCampaign.East)), EastFords, s)) return "east front does not use a ford";
                 return null;
             };
             return p;
@@ -209,10 +230,10 @@ namespace TheLastFortress
             return cells;
         }
 
-        static bool Crosses(Route route, GridPos[] fords)
+        static bool Crosses(Route route, GridPos[] fords, int s)
         {
             foreach (var c in route.Cells)
-                if (Array.IndexOf(fords, c) >= 0) return true;
+                if (Array.IndexOf(fords, Inverse(s, c)) >= 0) return true;
             return false;
         }
 
@@ -287,8 +308,8 @@ namespace TheLastFortress
         }
 
         /// <summary>
-        /// Null when the map (as shown) satisfies the common rules and the profile's named constraint holds for its own
-        /// layout; otherwise the first failure.
+        /// Null when the map as played (its symmetry, with the entries turned to match) satisfies the common rules and the
+        /// profile's named constraint; otherwise the first failure.
         /// </summary>
         public static string Validate(Profile profile, TerrainMap map)
         {
@@ -296,7 +317,7 @@ namespace TheLastFortress
             if (common != null) return common;
             var sites = CountDisjointSites(map);
             if (sites < profile.MinDisjointSites) return $"only {sites} disjoint buildable 2x2 sites (needs {profile.MinDisjointSites})";
-            return profile.Constraint(Canonical(map));
+            return profile.Constraint(map, map.Symmetry);
         }
 
         /// <summary>Greedy count of non-overlapping buildable 2x2 sites in (z,x) order (a lower bound on the best packing).</summary>

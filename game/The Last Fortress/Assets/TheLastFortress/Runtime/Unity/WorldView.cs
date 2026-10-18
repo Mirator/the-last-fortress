@@ -401,15 +401,6 @@ namespace TheLastFortress
 
                 ShoreDecorationCount++;
             }
-
-            var patch = Prims.Tinted(content.grass, Color.Lerp(Palette.Grass, Palette.DarkGrass, 0.45f)); // lit like the ground, so it darkens at night
-            var patches = new[] { new Vector4(4.2f, 5.1f, 3.4f, 21f), new Vector4(15.3f, 4.4f, 2.8f, 63f), new Vector4(5.6f, 16.2f, 3.0f, 12f), new Vector4(14.8f, 15.5f, 3.6f, 48f), new Vector4(10.4f, 2.6f, 2.2f, 30f), new Vector4(2.8f, 10.7f, 2.0f, 75f) };
-            foreach (var v in patches)
-            {
-                var g = Prims.Create(PrimitiveType.Quad, board, new Vector3(v.x, 0.003f, v.y), new Vector3(v.z, v.z * 0.7f, 1f), patch, "GroundPatch", Quaternion.Euler(90f, v.w, 0f));
-                g.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                ShoreDecorationCount++;
-            }
         }
 
         static Mesh GridLinesMesh()

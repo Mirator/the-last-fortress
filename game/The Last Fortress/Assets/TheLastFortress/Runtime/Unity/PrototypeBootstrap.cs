@@ -336,7 +336,7 @@ namespace TheLastFortress
             }
 
             var terrain = IsRelease ? MapProfiles.Generate(MapProfiles.Meadow, TitleSeed) : MapGenerator.Generate(TitleSeed);
-            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Campaign = CreateCampaign(TitleSeed, MapProfiles.Meadow), Terrain = terrain });
+            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Campaign = CreateCampaign(TitleSeed, MapProfiles.Meadow, terrain), Terrain = terrain });
             Sim.ApplyLayout(TitleLayout, bypassCost: true);
             Audio?.ResetRun(Sim); // staging is not construction: no build sounds for it
         }
@@ -354,9 +354,12 @@ namespace TheLastFortress
             new Placement(BuildingKind.SpikeTrap, new GridPos(6, 10)),
         });
 
-        /// <summary>All wave plans are stored before Day 1 (release: seeded entry variation for the chosen map profile).</summary>
-        CampaignConfig CreateCampaign(uint seed, string mapProfile) =>
-            IsRelease ? ReleaseCampaign.Create(seed, mapProfile) : MvpCampaign.CreateSixNights();
+        /// <summary>
+        /// All wave plans are stored before Day 1 (release: seeded entry variation for the chosen map profile, with the
+        /// entries turned to the terrain's symmetry so its rivers and channels face the fronts they were made for).
+        /// </summary>
+        CampaignConfig CreateCampaign(uint seed, string mapProfile, TerrainMap terrain) =>
+            IsRelease ? ReleaseCampaign.Create(seed, mapProfile, terrain.Symmetry) : MvpCampaign.CreateSixNights();
 
         /// <summary>Stress fixture: prototype Grunts in the prototype scene; mixed MVP archetypes in the MVP scene.</summary>
         public void EnterStressMode()
@@ -434,7 +437,7 @@ namespace TheLastFortress
             var profile = MapProfileFor(seed);
             var terrain = flat ? TerrainMap.Flat() : IsRelease ? MapProfiles.Generate(profile, seed) : MapGenerator.Generate(seed);
             Debug.Log($"New run: {terrain.Describe()}");
-            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Seed = seed, Terrain = terrain, Campaign = CreateCampaign(seed, profile) });
+            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Seed = seed, Terrain = terrain, Campaign = CreateCampaign(seed, profile, terrain) });
             MenuOpen = false;
             cameraRig.ResetView(); // the Keep and the western approach
             Onboarding?.BeginRun();

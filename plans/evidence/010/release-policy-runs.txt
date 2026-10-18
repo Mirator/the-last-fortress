@@ -1,0 +1,1834 @@
+# Plan 008 release policy runs (real budget, twelve nights)
+kill-zone seed 1: Victory after night 12, Keep 520/650
+kill-zone seed 2: Victory after night 12, Keep 588/650
+kill-zone seed 3: Victory after night 12, Keep 620/650
+kill-zone seed 4: Defeat after night 10, Keep 0/650
+kill-zone seed 5: Victory after night 12, Keep 620/650
+kill-zone seed 6: Victory after night 12, Keep 614/650
+kill-zone seed 7: Victory after night 12, Keep 275/650
+kill-zone seed 8: Defeat after night 11, Keep 0/650
+corridor seed 1: Victory after night 12, Keep 343/650
+corridor seed 2: Victory after night 12, Keep 215/500
+corridor seed 3: Victory after night 12, Keep 118/500
+corridor seed 4: Victory after night 12, Keep 346/650
+corridor seed 5: Victory after night 12, Keep 582/650
+corridor seed 6: Victory after night 12, Keep 285/650
+corridor seed 7: Defeat after night 9, Keep 0/650
+corridor seed 8: Victory after night 12, Keep 304/650
+economy seed 1: Victory after night 12, Keep 600/650
+economy seed 2: Victory after night 12, Keep 610/650
+economy seed 3: Victory after night 12, Keep 492/650
+economy seed 4: Victory after night 12, Keep 394/650
+economy seed 5: Victory after night 12, Keep 468/650
+economy seed 6: Victory after night 12, Keep 500/500
+economy seed 7: Victory after night 12, Keep 164/500
+economy seed 8: Victory after night 12, Keep 628/650
+
+Seeds' own orientations (log only):
+kill-zone seed 1 (symmetry 3): Victory after night 12, Keep 480/500
+kill-zone seed 2 (symmetry 0): Victory after night 12, Keep 588/650
+kill-zone seed 3 (symmetry 1): Victory after night 12, Keep 630/650
+kill-zone seed 4 (symmetry 6): Victory after night 12, Keep 550/650
+kill-zone seed 5 (symmetry 7): Victory after night 12, Keep 460/650
+kill-zone seed 6 (symmetry 4): Victory after night 12, Keep 410/500
+kill-zone seed 7 (symmetry 5): Victory after night 12, Keep 624/650
+kill-zone seed 8 (symmetry 2): Victory after night 12, Keep 610/650
+kill-zone: 8/8 on the seeds' own orientations
+corridor seed 1 (symmetry 3): Victory after night 12, Keep 179/650
+corridor seed 2 (symmetry 0): Victory after night 12, Keep 215/500
+corridor seed 3 (symmetry 1): Victory after night 12, Keep 247/650
+corridor seed 4 (symmetry 6): Victory after night 12, Keep 376/650
+corridor seed 5 (symmetry 7): Victory after night 12, Keep 582/650
+corridor seed 6 (symmetry 4): Victory after night 12, Keep 251/650
+corridor seed 7 (symmetry 5): Defeat after night 9, Keep 0/650
+corridor seed 8 (symmetry 2): Victory after night 12, Keep 530/650
+corridor: 7/8 on the seeds' own orientations
+economy seed 1 (symmetry 3): Victory after night 12, Keep 610/650
+economy seed 2 (symmetry 0): Victory after night 12, Keep 610/650
+economy seed 3 (symmetry 1): Victory after night 12, Keep 550/650
+economy seed 4 (symmetry 6): Victory after night 12, Keep 478/650
+economy seed 5 (symmetry 7): Victory after night 12, Keep 552/650
+economy seed 6 (symmetry 4): Victory after night 12, Keep 434/500
+economy seed 7 (symmetry 5): Defeat after night 6, Keep 0/500
+economy seed 8 (symmetry 2): Victory after night 12, Keep 490/500
+economy: 7/8 on the seeds' own orientations
+
+## kill-zone on crossing seed 1: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward HardenedRoofs,HeavyShot,FortressHeart -> HeavyShot; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 37,6s; Keep -0 (500/500); lost 0; killed 16
+  Reward ThriftyConstruction,Overwatch,KillZone -> Overwatch; dawn income +40
+Day 3: gold left 12; House 13 8
+  Night 3: Reward 38,8s; Keep -0 (500/500); lost 0; killed 20
+  Reward ExpandedVision,FocusedFire,KillZone -> ExpandedVision; dawn income +50
+Day 4: gold left 6; Wall 10 9; Farm 12 13
+  Night 4: Reward 42,8s; Keep -0 (500/500); lost 0; killed 25
+  Reward SignalFires,WarBonds,MarketSquare -> SignalFires; dawn income +67
+Day 5: gold left 10; Wall 10 11; Tower 8 10
+  Night 5: Reward 57,3s; Keep -0 (500/500); lost 3; killed 31
+  Reward BarbedDefenses,Recycling,Gatehouse -> Gatehouse; dawn income +30
+Day 6: gold left 40; 
+  Night 6: Reward 77,8s; Keep -0 (500/500); lost 1; killed 37
+  Reward Sharpshooters,ReinforcedTimber,EfficientFarming -> Sharpshooters; dawn income +20
+Day 7: gold left 11; Tower 12 10
+  Night 7: Reward 52,3s; Keep -0 (500/500); lost 0; killed 42
+  Reward FortressHeart,BlastShields,MarketSquare -> FortressHeart; dawn income +20
+Day 8: gold left 31; 
+  Night 8: Reward 59,1s; Keep -0 (650/650); lost 0; killed 54
+  Reward BlastShields,MarketSquare,Recycling -> BlastShields; dawn income +20
+Day 9: gold left 51; 
+  Night 9: Reward 74,5s; Keep -0 (650/650); lost 0; killed 64
+  Reward WarBonds,FocusedFire,KillZone -> WarBonds; dawn income +50
+Day 10: gold left 24; Cannon 7 7
+  Night 10: Reward 66,7s; Keep -0 (650/650); lost 0; killed 72
+  Reward FlamingArrows,CounterBattery,LastStand -> CounterBattery; dawn income +50
+Day 11: gold left 42; Watchtower 9 8
+  Night 11: Reward 66,9s; Keep -40 (610/650); lost 1; killed 81
+  Reward FocusedFire,FlamingArrows,MarketSquare -> FlamingArrows; dawn income +20
+Day 12: gold left 62; 
+  Night 12: Victory 70,1s; Keep -90 (520/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,2 min; defeated 543; bought 16 (defense 12, economy 4); earned 397; perks [HeavyShot,Overwatch,ExpandedVision,SignalFires,Gatehouse,Sharpshooters,FortressHeart,BlastShields,WarBonds,CounterBattery,FlamingArrows]
+
+## kill-zone on crossing seed 2: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FortressHeart,WarBonds,KillZone -> FortressHeart; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 36,1s; Keep -0 (650/650); lost 0; killed 16
+  Reward HeavyShot,BlastShields,Sharpshooters -> HeavyShot; dawn income +40
+Day 3: gold left 12; House 13 8
+  Night 3: Reward 40,7s; Keep -0 (650/650); lost 0; killed 20
+  Reward SignalFires,MarketSquare,Recycling -> SignalFires; dawn income +50
+Day 4: gold left 6; Wall 10 9; Farm 12 13
+  Night 4: Reward 47,2s; Keep -10 (640/650); lost 0; killed 25
+  Reward ReinforcedTimber,CounterBattery,WarBonds -> CounterBattery; dawn income +67
+Day 5: gold left 10; Wall 10 11; Tower 8 10
+  Night 5: Reward 45,2s; Keep -0 (640/650); lost 1; killed 31
+  Reward SpikedCorridor,HardenedRoofs,LastStand -> HardenedRoofs; dawn income +57
+Day 6: gold left 18; Tower 12 10
+  Night 6: Reward 85,5s; Keep -40 (600/650); lost 3; killed 37
+  Reward Gatehouse,Shrapnel,ReinforcedTimber -> Shrapnel; dawn income +37
+Day 7: gold left 55; 
+  Night 7: Reward 54,3s; Keep -0 (600/650); lost 0; killed 42
+  Reward WarBonds,ThriftyConstruction,BarbedDefenses -> ThriftyConstruction; dawn income +37
+Day 8: gold left 23; Cannon 7 7
+  Night 8: Reward 61,9s; Keep -0 (600/650); lost 0; killed 54
+  Reward Recycling,FocusedFire,KillZone -> FocusedFire; dawn income +37
+Day 9: gold left 32; Watchtower 9 8
+  Night 9: Reward 77,1s; Keep -12 (588/650); lost 0; killed 64
+  Reward EfficientFarming,FlamingArrows,ReinforcedTimber -> FlamingArrows; dawn income +37
+Day 10: gold left 0; Cannon 12 6
+  Night 10: Reward 69,5s; Keep -0 (588/650); lost 1; killed 72
+  Reward Sharpshooters,SpikedCorridor,Gatehouse -> Sharpshooters; dawn income +20
+Day 11: gold left 20; 
+  Night 11: Reward 75,8s; Keep -0 (588/650); lost 0; killed 81
+  Reward Recycling,Overwatch,BarbedDefenses -> Overwatch; dawn income +20
+Day 12: gold left 12; Watchtower 11 8
+  Night 12: Victory 75,3s; Keep -0 (588/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,6 min; defeated 543; bought 18 (defense 14, economy 4); earned 432; perks [FortressHeart,HeavyShot,SignalFires,CounterBattery,HardenedRoofs,Shrapnel,ThriftyConstruction,FocusedFire,FlamingArrows,Sharpshooters,Overwatch]
+
+## kill-zone on crossing seed 3: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FocusedFire,LastStand,ExpandedVision -> ExpandedVision; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 37,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward LastStand,ThriftyConstruction,CounterBattery -> CounterBattery; dawn income +40
+Day 3: gold left 12; House 13 8
+  Night 3: Reward 40,4s; Keep -30 (470/500); lost 0; killed 20
+  Reward Sharpshooters,FlamingArrows,SpikedCorridor -> Sharpshooters; dawn income +50
+Day 4: gold left 6; Wall 10 9; Farm 12 13
+  Night 4: Reward 45,5s; Keep -0 (470/500); lost 0; killed 25
+  Reward WarBonds,EfficientFarming,ReinforcedTimber -> ReinforcedTimber; dawn income +67
+Day 5: gold left 10; Wall 10 11; Tower 8 10
+  Night 5: Reward 42,9s; Keep -0 (470/500); lost 1; killed 31
+  Reward KillZone,WarBonds,Recycling -> WarBonds; dawn income +80
+Day 6: gold left 41; Tower 12 10
+  Night 6: Reward 66,1s; Keep -0 (470/500); lost 0; killed 37
+  Reward KillZone,Overwatch,BlastShields -> Overwatch; dawn income +80
+Day 7: gold left 12; Cannon 7 7; Watchtower 9 8
+  Night 7: Reward 45,6s; Keep -0 (470/500); lost 0; killed 42
+  Reward LastStand,HardenedRoofs,Shrapnel -> Shrapnel; dawn income +80
+Day 8: gold left 15; Cannon 12 6
+  Night 8: Reward 51,9s; Keep -0 (470/500); lost 0; killed 54
+  Reward MarketSquare,FocusedFire,BarbedDefenses -> FocusedFire; dawn income +80
+Day 9: gold left 31; Watchtower 11 8; Cannon 7 12 SKIP Occupied; Watchtower 8 11; Cannon 13 11 SKIP ImpassableTerrain
+  Night 9: Reward 59,4s; Keep -0 (470/500); lost 1; killed 64
+  Reward LastStand,FortressHeart,ThriftyConstruction -> FortressHeart; dawn income +80
+Day 10: gold left 30; Watchtower 12 11; Tower 10 8
+  Night 10: Reward 65,2s; Keep -0 (620/650); lost 0; killed 72
+  Reward BarbedDefenses,MarketSquare,BlastShields -> BlastShields; dawn income +80
+Day 11: gold left 5; Tower 10 12; RepairStation 6 9; Cannon 4 9 SKIP ImpassableTerrain; Cannon 15 9 SKIP ImpassableTerrain
+  Night 11: Reward 70,2s; Keep -0 (620/650); lost 1; killed 81
+  Reward MarketSquare,Gatehouse,ThriftyConstruction -> Gatehouse; dawn income +80
+Day 12: gold left 8; Cannon 9 15
+  Night 12: Victory 75,5s; Keep -0 (620/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 10,5 min; defeated 543; bought 24 (defense 20, economy 4); earned 747; perks [ExpandedVision,CounterBattery,Sharpshooters,ReinforcedTimber,WarBonds,Overwatch,Shrapnel,FocusedFire,FortressHeart,BlastShields,Gatehouse]
+
+## kill-zone on crossing seed 4: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward HardenedRoofs,WarBonds,BlastShields -> BlastShields; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 36,1s; Keep -0 (500/500); lost 0; killed 16
+  Reward FortressHeart,LastStand,WarBonds -> FortressHeart; dawn income +40
+Day 3: gold left 12; House 13 8
+  Night 3: Reward 40,7s; Keep -0 (650/650); lost 0; killed 20
+  Reward ExpandedVision,Gatehouse,EfficientFarming -> Gatehouse; dawn income +50
+Day 4: gold left 6; Wall 10 9; Farm 12 13
+  Night 4: Reward 47,2s; Keep -10 (640/650); lost 0; killed 25
+  Reward Overwatch,Sharpshooters,LastStand -> Sharpshooters; dawn income +67
+Day 5: gold left 10; Wall 10 11; Tower 8 10
+  Night 5: Reward 59,7s; Keep -0 (640/650); lost 4; killed 31
+  Reward BarbedDefenses,KillZone,FocusedFire -> FocusedFire; dawn income +20
+Day 6: gold left 30; 
+  Night 6: Reward 77,8s; Keep -0 (640/650); lost 0; killed 37
+  Reward LastStand,FlamingArrows,BarbedDefenses -> FlamingArrows; dawn income +20
+Day 7: gold left 1; Tower 12 10
+  Night 7: Reward 53,2s; Keep -0 (640/650); lost 0; killed 42
+  Reward HeavyShot,HardenedRoofs,Recycling -> HeavyShot; dawn income +20
+Day 8: gold left 21; 
+  Night 8: Reward 60,1s; Keep -40 (600/650); lost 2; killed 54
+  Reward Shrapnel,LastStand,Recycling -> Shrapnel; dawn income +20
+Day 9: gold left 41; 
+  Night 9: Reward 78,7s; Keep -436 (164/650); lost 0; killed 63
+  Reward KillZone,BarbedDefenses,ThriftyConstruction -> ThriftyConstruction; dawn income +20
+Day 10: gold left 61; 
+  Night 10: Defeat 47,5s; Keep -164 (0/650); lost 1; killed 40
+Result: Defeat; nights 9/12; combat 8,8 min; defeated 338; bought 14 (defense 10, economy 4); earned 287; perks [BlastShields,FortressHeart,Gatehouse,Sharpshooters,FocusedFire,FlamingArrows,HeavyShot,Shrapnel,ThriftyConstruction]
+
+## kill-zone on crossing seed 5: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Gatehouse,LastStand,ExpandedVision -> Gatehouse; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 37,6s; Keep -0 (500/500); lost 0; killed 16
+  Reward ReinforcedTimber,FortressHeart,FlamingArrows -> FortressHeart; dawn income +40
+Day 3: gold left 12; House 13 8
+  Night 3: Reward 41,1s; Keep -30 (620/650); lost 0; killed 20
+  Reward Overwatch,ExpandedVision,HardenedRoofs -> Overwatch; dawn income +50
+Day 4: gold left 6; Wall 10 9; Farm 12 13
+  Night 4: Reward 45,3s; Keep -0 (620/650); lost 0; killed 25
+  Reward ExpandedVision,ThriftyConstruction,BlastShields -> BlastShields; dawn income +67
+Day 5: gold left 10; Wall 10 11; Tower 8 10
+  Night 5: Reward 45,6s; Keep -0 (620/650); lost 3; killed 31
+  Reward Sharpshooters,LastStand,ThriftyConstruction -> Sharpshooters; dawn income +37
+Day 6: gold left 47; 
+  Night 6: Reward 77,3s; Keep -0 (620/650); lost 1; killed 37
+  Reward WarBonds,LastStand,ExpandedVision -> ExpandedVision; dawn income +20
+Day 7: gold left 18; Tower 12 10
+  Night 7: Reward 52,3s; Keep -0 (620/650); lost 0; killed 42
+  Reward LastStand,FlamingArrows,KillZone -> FlamingArrows; dawn income +20
+Day 8: gold left 38; 
+  Night 8: Reward 53,9s; Keep -0 (620/650); lost 0; killed 54
+  Reward FocusedFire,KillZone,Recycling -> FocusedFire; dawn income +20
+Day 9: gold left 58; 
+  Night 9: Reward 74,4s; Keep -0 (620/650); lost 0; killed 64
+  Reward SignalFires,Recycling,LastStand -> SignalFires; dawn income +20
+Day 10: gold left 1; Cannon 7 7
+  Night 10: Reward 63,1s; Keep -0 (620/650); lost 0; killed 72
+  Reward CounterBattery,BarbedDefenses,HeavyShot -> CounterBattery; dawn income +20
+Day 11: gold left 21; 
+  Night 11: Reward 68,5s; Keep -0 (620/650); lost 1; killed 81
+  Reward KillZone,WarBonds,LastStand -> WarBonds; dawn income +50
+Day 12: gold left 7; Watchtower 9 8; Cannon 12 6 SKIP ImpassableTerrain; Watchtower 11 8
+  Night 12: Victory 74,4s; Keep -0 (620/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,0 min; defeated 543; bought 17 (defense 13, economy 4); earned 374; perks [Gatehouse,FortressHeart,Overwatch,BlastShields,Sharpshooters,ExpandedVision,FlamingArrows,FocusedFire,SignalFires,CounterBattery,WarBonds]
+
+## kill-zone on crossing seed 6: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FlamingArrows,EfficientFarming,Overwatch -> Overwatch; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 35,7s; Keep -0 (500/500); lost 0; killed 16
+  Reward KillZone,Recycling,EfficientFarming -> EfficientFarming; dawn income +40
+Day 3: gold left 12; House 13 8
+  Night 3: Reward 39,1s; Keep -0 (500/500); lost 0; killed 20
+  Reward FocusedFire,ThriftyConstruction,WarBonds -> ThriftyConstruction; dawn income +50
+Day 4: gold left 1; Wall 10 9; Farm 12 13; Wall 10 11
+  Night 4: Reward 46,6s; Keep -0 (500/500); lost 1; killed 24
+  Reward FocusedFire,BarbedDefenses,Gatehouse -> Gatehouse; dawn income +72
+Day 5: gold left 29; Tower 8 10
+  Night 5: Reward 45,6s; Keep -0 (500/500); lost 3; killed 31
+  Reward ReinforcedTimber,FortressHeart,Sharpshooters -> Sharpshooters; dawn income +42
+Day 6: gold left 27; Tower 12 10
+  Night 6: Reward 53,9s; Keep -0 (500/500); lost 2; killed 37
+  Reward Recycling,ReinforcedTimber,LastStand -> ReinforcedTimber; dawn income +20
+Day 7: gold left 47; 
+  Night 7: Reward 52,8s; Keep -0 (500/500); lost 0; killed 42
+  Reward CounterBattery,Recycling,BlastShields -> CounterBattery; dawn income +20
+Day 8: gold left 67; 
+  Night 8: Reward 61,5s; Keep -0 (500/500); lost 0; killed 54
+  Reward FortressHeart,FlamingArrows,ExpandedVision -> FortressHeart; dawn income +20
+Day 9: gold left 18; Cannon 7 7
+  Night 9: Reward 68,2s; Keep -0 (650/650); lost 0; killed 64
+  Reward HeavyShot,WarBonds,SignalFires -> HeavyShot; dawn income +20
+Day 10: gold left 10; Watchtower 9 8
+  Night 10: Reward 68,2s; Keep -0 (650/650); lost 0; killed 72
+  Reward BarbedDefenses,WarBonds,KillZone -> WarBonds; dawn income +50
+Day 11: gold left 60; 
+  Night 11: Reward 75,9s; Keep -0 (650/650); lost 0; killed 81
+  Reward KillZone,BlastShields,BarbedDefenses -> BlastShields; dawn income +50
+Day 12: gold left 13; Cannon 12 6; Watchtower 11 8
+  Night 12: Victory 77,0s; Keep -36 (614/650); lost 1; killed 91
+Result: Victory; nights 12/12; combat 10,9 min; defeated 542; bought 18 (defense 14, economy 4); earned 414; perks [Overwatch,EfficientFarming,ThriftyConstruction,Gatehouse,Sharpshooters,ReinforcedTimber,CounterBattery,FortressHeart,HeavyShot,WarBonds,BlastShields]
+
+## kill-zone on crossing seed 7: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FieldEngineers,Overwatch,BarbedDefenses -> Overwatch; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 37,2s; Keep -0 (500/500); lost 0; killed 16
+  Reward ThriftyConstruction,HardenedRoofs,Gatehouse -> Gatehouse; dawn income +40
+Day 3: gold left 12; House 13 8
+  Night 3: Reward 38,8s; Keep -0 (500/500); lost 0; killed 20
+  Reward FlamingArrows,LastStand,SpikedCorridor -> FlamingArrows; dawn income +50
+Day 4: gold left 6; Wall 10 9; Farm 12 13
+  Night 4: Reward 45,3s; Keep -0 (500/500); lost 0; killed 25
+  Reward BarbedDefenses,ExpandedVision,CounterBattery -> CounterBattery; dawn income +67
+Day 5: gold left 10; Wall 10 11; Tower 8 10
+  Night 5: Reward 44,7s; Keep -0 (500/500); lost 3; killed 31
+  Reward FocusedFire,WarBonds,Recycling -> WarBonds; dawn income +67
+Day 6: gold left 28; Tower 12 10
+  Night 6: Reward 78,0s; Keep -0 (500/500); lost 1; killed 37
+  Reward ReinforcedTimber,KillZone,BarbedDefenses -> ReinforcedTimber; dawn income +50
+Day 7: gold left 1; Cannon 7 7
+  Night 7: Reward 52,8s; Keep -0 (500/500); lost 0; killed 42
+  Reward LastStand,FortressHeart,HardenedRoofs -> FortressHeart; dawn income +50
+Day 8: gold left 19; Watchtower 9 8
+  Night 8: Reward 58,8s; Keep -0 (650/650); lost 0; killed 54
+  Reward ExpandedVision,Sharpshooters,Shrapnel -> Shrapnel; dawn income +50
+Day 9: gold left 69; 
+  Night 9: Reward 63,9s; Keep -100 (550/650); lost 1; killed 64
+  Reward BlastShields,LastStand,SignalFires -> SignalFires; dawn income +20
+Day 10: gold left 12; Cannon 12 6
+  Night 10: Reward 68,2s; Keep -0 (550/650); lost 0; killed 72
+  Reward FocusedFire,BarbedDefenses,KillZone -> FocusedFire; dawn income +50
+Day 11: gold left 30; Watchtower 11 8
+  Night 11: Reward 70,0s; Keep -110 (440/650); lost 0; killed 81
+  Reward ExpandedVision,EfficientFarming,Recycling -> ExpandedVision; dawn income +20
+Day 12: gold left 50; 
+  Night 12: Victory 74,2s; Keep -165 (275/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,0 min; defeated 543; bought 18 (defense 14, economy 4); earned 494; perks [Overwatch,Gatehouse,FlamingArrows,CounterBattery,WarBonds,ReinforcedTimber,FortressHeart,Shrapnel,SignalFires,FocusedFire,ExpandedVision]
+
+## kill-zone on crossing seed 8: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FortressHeart,ReinforcedTimber,CounterBattery -> CounterBattery; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 36,1s; Keep -0 (500/500); lost 0; killed 16
+  Reward FieldEngineers,WarBonds,FocusedFire -> WarBonds; dawn income +70
+Day 3: gold left 0; House 13 8; Farm 12 13
+  Night 3: Reward 43,2s; Keep -100 (400/500); lost 0; killed 20
+  Reward KillZone,ReinforcedTimber,LastStand -> ReinforcedTimber; dawn income +67
+Day 4: gold left 11; Wall 10 9; House 7 12; Wall 10 11
+  Night 4: Reward 46,7s; Keep -0 (400/500); lost 0; killed 25
+  Reward KillZone,ThriftyConstruction,FlamingArrows -> FlamingArrows; dawn income +107
+Day 5: gold left 20; Tower 8 10; Tower 12 10
+  Night 5: Reward 59,7s; Keep -0 (400/500); lost 4; killed 31
+  Reward FortressHeart,Recycling,KillZone -> FortressHeart; dawn income +60
+Day 6: gold left 3; Cannon 7 7
+  Night 6: Reward 70,3s; Keep -0 (550/650); lost 2; killed 37
+  Reward Shrapnel,ExpandedVision,Gatehouse -> Shrapnel; dawn income +50
+Day 7: gold left 21; Watchtower 9 8; Cannon 12 6 SKIP ImpassableTerrain
+  Night 7: Reward 55,2s; Keep -0 (550/650); lost 0; killed 42
+  Reward FocusedFire,Gatehouse,LastStand -> Gatehouse; dawn income +50
+Day 8: gold left 39; Watchtower 11 8
+  Night 8: Reward 61,9s; Keep -0 (550/650); lost 0; killed 54
+  Reward HeavyShot,SignalFires,BarbedDefenses -> HeavyShot; dawn income +50
+Day 9: gold left 12; Cannon 7 12
+  Night 9: Reward 75,7s; Keep -0 (550/650); lost 2; killed 64
+  Reward FocusedFire,KillZone,BarbedDefenses -> FocusedFire; dawn income +50
+Day 10: gold left 30; Watchtower 8 11; Cannon 13 11 SKIP ImpassableTerrain
+  Night 10: Reward 68,7s; Keep -180 (370/650); lost 0; killed 72
+  Reward ExpandedVision,BlastShields,KillZone -> BlastShields; dawn income +20
+Day 11: gold left 18; Watchtower 12 11
+  Night 11: Defeat 60,1s; Keep -370 (0/650); lost 0; killed 66
+Result: Defeat; nights 10/12; combat 10,1 min; defeated 437; bought 21 (defense 16, economy 5); earned 554; perks [CounterBattery,WarBonds,ReinforcedTimber,FlamingArrows,FortressHeart,Shrapnel,Gatehouse,HeavyShot,FocusedFire,BlastShields]
+
+## corridor on ravine seed 1: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15 SKIP ImpassableTerrain; House 14 15; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward LastStand,MarketSquare,Sharpshooters -> Sharpshooters; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward Recycling,FlamingArrows,FocusedFire -> FlamingArrows; dawn income +30
+Day 3: gold left 36; 
+  Night 3: Reward 29,7s; Keep -12 (488/500); lost 0; killed 20
+  Reward BlastShields,FortressHeart,Overwatch -> Overwatch; dawn income +30
+Day 4: gold left 17; Tower 6 11
+  Night 4: Reward 35,5s; Keep -0 (488/500); lost 0; killed 25
+  Reward WarBonds,LastStand,ExpandedVision -> ExpandedVision; dawn income +30
+Day 5: gold left 47; 
+  Night 5: Reward 35,1s; Keep -0 (488/500); lost 0; killed 31
+  Reward LastStand,SpikedCorridor,KillZone -> KillZone; dawn income +30
+Day 6: gold left 3; Tower 13 9; SpikeTrap 6 10
+  Night 6: Reward 51,5s; Keep -0 (488/500); lost 0; killed 37
+  Reward SpikedCorridor,SignalFires,HardenedRoofs -> SpikedCorridor; dawn income +30
+Day 7: gold left 8; SpikeTrap 13 10
+  Night 7: Reward 45,1s; Keep -0 (488/500); lost 0; killed 42
+  Reward BlastShields,CounterBattery,FocusedFire -> CounterBattery; dawn income +30
+Day 8: gold left 13; SpikeTrap 5 10
+  Night 8: Reward 52,0s; Keep -0 (488/500); lost 0; killed 54
+  Reward MarketSquare,SignalFires,FocusedFire -> FocusedFire; dawn income +30
+Day 9: gold left 18; SpikeTrap 14 10
+  Night 9: Reward 57,1s; Keep -0 (488/500); lost 0; killed 64
+  Reward MarketSquare,WarBonds,LastStand -> LastStand; dawn income +30
+Day 10: gold left 48; 
+  Night 10: Reward 62,9s; Keep -0 (488/500); lost 0; killed 72
+  Reward FortressHeart,BlastShields,WarBonds -> FortressHeart; dawn income +30
+Day 11: gold left 1; Cannon 6 8
+  Night 11: Reward 63,9s; Keep -100 (538/650); lost 0; killed 81
+  Reward Gatehouse,FieldEngineers,Recycling -> Gatehouse; dawn income +30
+Day 12: gold left 31; 
+  Night 12: Victory 67,0s; Keep -195 (343/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,2 min; defeated 543; bought 14 (defense 13, economy 1); earned 330; perks [Sharpshooters,FlamingArrows,Overwatch,ExpandedVision,KillZone,SpikedCorridor,CounterBattery,FocusedFire,LastStand,FortressHeart,Gatehouse]
+
+## corridor on ravine seed 2: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Overwatch,FortressHeart,FocusedFire -> Overwatch; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward FlamingArrows,WarBonds,KillZone -> KillZone; dawn income +30
+Day 3: gold left 8; House 14 15
+  Night 3: Reward 29,3s; Keep -6 (494/500); lost 0; killed 20
+  Reward MarketSquare,FocusedFire,FlamingArrows -> FlamingArrows; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 35,5s; Keep -0 (494/500); lost 0; killed 25
+  Reward FortressHeart,CounterBattery,ThriftyConstruction -> CounterBattery; dawn income +40
+Day 5: gold left 39; Tower 6 11
+  Night 5: Reward 35,9s; Keep -0 (494/500); lost 1; killed 31
+  Reward MarketSquare,Gatehouse,ReinforcedTimber -> Gatehouse; dawn income +30
+Day 6: gold left 20; Tower 13 9
+  Night 6: Reward 56,8s; Keep -120 (374/500); lost 0; killed 37
+  Reward FieldEngineers,ThriftyConstruction,FocusedFire -> FocusedFire; dawn income +30
+Day 7: gold left 0; SpikeTrap 6 10; SpikeTrap 13 10
+  Night 7: Reward 47,5s; Keep -6 (368/500); lost 0; killed 42
+  Reward SpikedCorridor,Sharpshooters,ThriftyConstruction -> SpikedCorridor; dawn income +30
+Day 8: gold left 5; SpikeTrap 5 10
+  Night 8: Reward 53,3s; Keep -0 (368/500); lost 0; killed 54
+  Reward BarbedDefenses,ExpandedVision,EfficientFarming -> ExpandedVision; dawn income +30
+Day 9: gold left 10; SpikeTrap 14 10
+  Night 9: Reward 57,8s; Keep -50 (318/500); lost 0; killed 64
+  Reward BlastShields,ReinforcedTimber,Sharpshooters -> Sharpshooters; dawn income +30
+Day 10: gold left 40; 
+  Night 10: Reward 61,3s; Keep -0 (318/500); lost 0; killed 72
+  Reward EfficientFarming,Recycling,WarBonds -> WarBonds; dawn income +60
+Day 11: gold left 23; Cannon 6 8
+  Night 11: Reward 64,6s; Keep -0 (318/500); lost 1; killed 81
+  Reward ThriftyConstruction,HardenedRoofs,LastStand -> HardenedRoofs; dawn income +60
+Day 12: gold left 6; Cannon 12 11
+  Night 12: Victory 67,7s; Keep -103 (215/500); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,3 min; defeated 543; bought 16 (defense 14, economy 2); earned 410; perks [Overwatch,KillZone,FlamingArrows,CounterBattery,Gatehouse,FocusedFire,SpikedCorridor,ExpandedVision,Sharpshooters,WarBonds,HardenedRoofs]
+
+## corridor on ravine seed 3: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Shrapnel,Sharpshooters,CounterBattery -> Sharpshooters; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward BarbedDefenses,WarBonds,FocusedFire -> FocusedFire; dawn income +30
+Day 3: gold left 8; House 14 15
+  Night 3: Reward 29,7s; Keep -6 (494/500); lost 0; killed 20
+  Reward Gatehouse,LastStand,WarBonds -> Gatehouse; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 36,0s; Keep -20 (474/500); lost 0; killed 25
+  Reward EfficientFarming,WarBonds,FieldEngineers -> WarBonds; dawn income +40
+Day 5: gold left 39; Tower 6 11
+  Night 5: Reward 36,9s; Keep -6 (468/500); lost 1; killed 31
+  Reward LastStand,FlamingArrows,SpikedCorridor -> SpikedCorridor; dawn income +30
+Day 6: gold left 20; Tower 13 9
+  Night 6: Reward 55,1s; Keep -140 (328/500); lost 0; killed 36
+  Reward CounterBattery,BlastShields,Overwatch -> CounterBattery; dawn income +30
+Day 7: gold left 0; SpikeTrap 6 10; SpikeTrap 13 10
+  Night 7: Reward 47,0s; Keep -24 (304/500); lost 0; killed 42
+  Reward LastStand,ExpandedVision,FortressHeart -> ExpandedVision; dawn income +30
+Day 8: gold left 5; SpikeTrap 5 10
+  Night 8: Reward 54,3s; Keep -0 (304/500); lost 0; killed 54
+  Reward Overwatch,FortressHeart,BlastShields -> Overwatch; dawn income +60
+Day 9: gold left 40; SpikeTrap 14 10
+  Night 9: Reward 59,1s; Keep -120 (184/500); lost 0; killed 64
+  Reward BlastShields,ThriftyConstruction,FieldEngineers -> BlastShields; dawn income +30
+Day 10: gold left 70; 
+  Night 10: Reward 62,1s; Keep -0 (184/500); lost 0; killed 72
+  Reward HeavyShot,ThriftyConstruction,FlamingArrows -> FlamingArrows; dawn income +60
+Day 11: gold left 53; Cannon 6 8
+  Night 11: Reward 65,5s; Keep -96 (88/500); lost 1; killed 81
+  Reward HeavyShot,KillZone,Recycling -> KillZone; dawn income +30
+Day 12: gold left 0; Cannon 12 11; repair Keep +30
+  Night 12: Victory 68,4s; Keep -0 (118/500); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,4 min; defeated 542; bought 16 (defense 14, economy 2); earned 410; perks [Sharpshooters,FocusedFire,Gatehouse,WarBonds,SpikedCorridor,CounterBattery,ExpandedVision,Overwatch,BlastShields,FlamingArrows,KillZone]
+
+## corridor on ravine seed 4: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward KillZone,BlastShields,ThriftyConstruction -> KillZone; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward FortressHeart,Recycling,Overwatch -> Overwatch; dawn income +30
+Day 3: gold left 8; House 14 15
+  Night 3: Reward 29,3s; Keep -6 (494/500); lost 0; killed 20
+  Reward CounterBattery,FlamingArrows,FortressHeart -> FlamingArrows; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 35,5s; Keep -0 (494/500); lost 0; killed 25
+  Reward FortressHeart,ExpandedVision,ThriftyConstruction -> ExpandedVision; dawn income +40
+Day 5: gold left 39; Tower 6 11
+  Night 5: Reward 35,1s; Keep -0 (494/500); lost 1; killed 31
+  Reward BlastShields,LastStand,FortressHeart -> FortressHeart; dawn income +30
+Day 6: gold left 20; Tower 13 9
+  Night 6: Reward 52,8s; Keep -0 (644/650); lost 0; killed 37
+  Reward MarketSquare,FocusedFire,BlastShields -> BlastShields; dawn income +30
+Day 7: gold left 0; SpikeTrap 6 10; SpikeTrap 13 10
+  Night 7: Reward 47,1s; Keep -0 (644/650); lost 0; killed 42
+  Reward HardenedRoofs,EfficientFarming,ThriftyConstruction -> HardenedRoofs; dawn income +30
+Day 8: gold left 5; SpikeTrap 5 10
+  Night 8: Reward 52,8s; Keep -0 (644/650); lost 0; killed 54
+  Reward MarketSquare,BarbedDefenses,Sharpshooters -> Sharpshooters; dawn income +30
+Day 9: gold left 10; SpikeTrap 14 10
+  Night 9: Reward 59,6s; Keep -220 (424/650); lost 0; killed 64
+  Reward HeavyShot,FieldEngineers,ThriftyConstruction -> HeavyShot; dawn income +30
+Day 10: gold left 40; 
+  Night 10: Reward 62,1s; Keep -0 (424/650); lost 0; killed 72
+  Reward Recycling,SpikedCorridor,MarketSquare -> SpikedCorridor; dawn income +30
+Day 11: gold left 70; 
+  Night 11: Reward 64,4s; Keep -0 (424/650); lost 0; killed 81
+  Reward Shrapnel,Recycling,MarketSquare -> Shrapnel; dawn income +30
+Day 12: gold left 23; Cannon 6 8
+  Night 12: Victory 67,7s; Keep -78 (346/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,3 min; defeated 543; bought 15 (defense 13, economy 2); earned 350; perks [KillZone,Overwatch,FlamingArrows,ExpandedVision,FortressHeart,BlastShields,HardenedRoofs,Sharpshooters,HeavyShot,SpikedCorridor,Shrapnel]
+
+## corridor on ravine seed 5: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Overwatch,WarBonds,HardenedRoofs -> Overwatch; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward KillZone,HardenedRoofs,LastStand -> KillZone; dawn income +30
+Day 3: gold left 8; House 14 15
+  Night 3: Reward 29,3s; Keep -12 (488/500); lost 0; killed 20
+  Reward CounterBattery,FieldEngineers,BlastShields -> CounterBattery; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 35,5s; Keep -0 (488/500); lost 0; killed 25
+  Reward MarketSquare,ThriftyConstruction,FlamingArrows -> FlamingArrows; dawn income +40
+Day 5: gold left 39; Tower 6 11
+  Night 5: Reward 34,9s; Keep -0 (488/500); lost 0; killed 31
+  Reward WarBonds,Recycling,BarbedDefenses -> WarBonds; dawn income +70
+Day 6: gold left 10; Tower 13 9; SpikeTrap 6 10; SpikeTrap 13 10
+  Night 6: Reward 53,7s; Keep -0 (488/500); lost 1; killed 37
+  Reward ThriftyConstruction,MarketSquare,FieldEngineers -> ThriftyConstruction; dawn income +60
+Day 7: gold left 26; SpikeTrap 5 10; SpikeTrap 14 10
+  Night 7: Reward 45,5s; Keep -6 (482/500); lost 0; killed 42
+  Reward LastStand,FieldEngineers,Gatehouse -> Gatehouse; dawn income +30
+Day 8: gold left 56; 
+  Night 8: Reward 52,4s; Keep -0 (482/500); lost 0; killed 54
+  Reward MarketSquare,FocusedFire,FortressHeart -> FortressHeart; dawn income +60
+Day 9: gold left 47; Cannon 6 8
+  Night 9: Reward 58,4s; Keep -0 (632/650); lost 0; killed 64
+  Reward FocusedFire,ExpandedVision,SpikedCorridor -> SpikedCorridor; dawn income +60
+Day 10: gold left 10; Cannon 12 11; Watchtower 8 8
+  Night 10: Reward 61,0s; Keep -0 (632/650); lost 0; killed 72
+  Reward Recycling,HeavyShot,BlastShields -> HeavyShot; dawn income +60
+Day 11: gold left 42; Watchtower 14 12
+  Night 11: Reward 64,3s; Keep -50 (582/650); lost 0; killed 81
+  Reward Recycling,SignalFires,Sharpshooters -> Sharpshooters; dawn income +30
+Day 12: gold left 28; Tower 4 9
+  Night 12: Victory 68,1s; Keep -0 (582/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,2 min; defeated 543; bought 19 (defense 17, economy 2); earned 510; perks [Overwatch,KillZone,CounterBattery,FlamingArrows,WarBonds,ThriftyConstruction,Gatehouse,FortressHeart,SpikedCorridor,HeavyShot,Sharpshooters]
+
+## corridor on ravine seed 6: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Recycling,HeavyShot,FlamingArrows -> FlamingArrows; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward WarBonds,BlastShields,Recycling -> BlastShields; dawn income +30
+Day 3: gold left 8; House 14 15
+  Night 3: Reward 29,7s; Keep -50 (450/500); lost 0; killed 20
+  Reward SpikedCorridor,BarbedDefenses,ThriftyConstruction -> SpikedCorridor; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 36,0s; Keep -38 (412/500); lost 0; killed 25
+  Reward Shrapnel,Sharpshooters,ExpandedVision -> Sharpshooters; dawn income +40
+Day 5: gold left 39; Tower 6 11
+  Night 5: Reward 35,4s; Keep -20 (392/500); lost 0; killed 31
+  Reward KillZone,FocusedFire,ReinforcedTimber -> KillZone; dawn income +40
+Day 6: gold left 5; Tower 13 9; SpikeTrap 6 10
+  Night 6: Reward 55,4s; Keep -86 (306/500); lost 1; killed 37
+  Reward LastStand,FocusedFire,BarbedDefenses -> FocusedFire; dawn income +30
+Day 7: gold left 10; SpikeTrap 13 10
+  Night 7: Reward 48,0s; Keep -36 (270/500); lost 0; killed 41
+  Reward ThriftyConstruction,MarketSquare,Overwatch -> Overwatch; dawn income +30
+Day 8: gold left 15; SpikeTrap 5 10
+  Night 8: Reward 53,3s; Keep -0 (270/500); lost 0; killed 54
+  Reward Gatehouse,FortressHeart,FieldEngineers -> FortressHeart; dawn income +30
+Day 9: gold left 20; SpikeTrap 14 10
+  Night 9: Reward 59,2s; Keep -10 (410/650); lost 0; killed 64
+  Reward HeavyShot,ReinforcedTimber,ThriftyConstruction -> HeavyShot; dawn income +30
+Day 10: gold left 50; 
+  Night 10: Reward 63,3s; Keep -0 (410/650); lost 0; killed 72
+  Reward HardenedRoofs,MarketSquare,Recycling -> HardenedRoofs; dawn income +30
+Day 11: gold left 3; Cannon 6 8
+  Night 11: Reward 64,3s; Keep -0 (410/650); lost 0; killed 81
+  Reward Recycling,WarBonds,MarketSquare -> WarBonds; dawn income +60
+Day 12: gold left 63; 
+  Night 12: Victory 67,8s; Keep -125 (285/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,4 min; defeated 542; bought 15 (defense 13, economy 2); earned 390; perks [FlamingArrows,BlastShields,SpikedCorridor,Sharpshooters,KillZone,FocusedFire,Overwatch,FortressHeart,HeavyShot,HardenedRoofs,WarBonds]
+
+## corridor on ravine seed 7: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15; House 14 15 SKIP ImpassableTerrain; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward SpikedCorridor,Recycling,FocusedFire -> SpikedCorridor; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward Overwatch,BarbedDefenses,FlamingArrows -> FlamingArrows; dawn income +30
+Day 3: gold left 36; 
+  Night 3: Reward 29,7s; Keep -30 (470/500); lost 0; killed 20
+  Reward MarketSquare,LastStand,KillZone -> KillZone; dawn income +30
+Day 4: gold left 17; Tower 6 11
+  Night 4: Reward 36,0s; Keep -66 (404/500); lost 0; killed 24
+  Reward FortressHeart,MarketSquare,FieldEngineers -> FortressHeart; dawn income +30
+Day 5: gold left 47; 
+  Night 5: Reward 36,4s; Keep -86 (468/650); lost 1; killed 30
+  Reward BlastShields,Overwatch,FocusedFire -> Overwatch; dawn income +30
+Day 6: gold left 3; Tower 13 9; SpikeTrap 6 10
+  Night 6: Reward 55,9s; Keep -118 (350/650); lost 1; killed 36
+  Reward CounterBattery,Gatehouse,FocusedFire -> CounterBattery; dawn income +20
+Day 7: gold left 23; 
+  Night 7: Reward 47,5s; Keep -28 (322/650); lost 0; killed 42
+  Reward EfficientFarming,MarketSquare,ExpandedVision -> ExpandedVision; dawn income +20
+Day 8: gold left 18; SpikeTrap 13 10
+  Night 8: Reward 53,8s; Keep -0 (322/650); lost 0; killed 54
+  Reward Sharpshooters,Gatehouse,ThriftyConstruction -> Sharpshooters; dawn income +20
+Day 9: gold left 13; SpikeTrap 5 10
+  Night 9: Defeat 57,6s; Keep -322 (0/650); lost 0; killed 54
+Result: Defeat; nights 8/12; combat 6,1 min; defeated 286; bought 12 (defense 11, economy 1); earned 210; perks [SpikedCorridor,FlamingArrows,KillZone,FortressHeart,Overwatch,CounterBattery,ExpandedVision,Sharpshooters]
+
+## corridor on ravine seed 8: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward WarBonds,Recycling,BarbedDefenses -> WarBonds; dawn income +60
+Day 2: gold left 8; SpikeTrap 12 10; House 14 15; Farm 13 16 SKIP ImpassableTerrain
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward Shrapnel,HeavyShot,CounterBattery -> CounterBattery; dawn income +70
+Day 3: gold left 22; House 6 15; House 7 15
+  Night 3: Reward 30,4s; Keep -72 (428/500); lost 0; killed 20
+  Reward SpikedCorridor,Sharpshooters,EfficientFarming -> SpikedCorridor; dawn income +60
+Day 4: gold left 33; Tower 6 11
+  Night 4: Reward 35,1s; Keep -0 (428/500); lost 0; killed 25
+  Reward Sharpshooters,BarbedDefenses,MarketSquare -> Sharpshooters; dawn income +90
+Day 5: gold left 7; Tower 13 9; SpikeTrap 6 10; Farm 6 16
+  Night 5: Reward 41,3s; Keep -0 (428/500); lost 3; killed 31
+  Reward FlamingArrows,Overwatch,KillZone -> KillZone; dawn income +70
+Day 6: gold left 2; SpikeTrap 13 10; SpikeTrap 5 10; SpikeTrap 14 10
+  Night 6: Reward 52,4s; Keep -46 (382/500); lost 0; killed 37
+  Reward LastStand,MarketSquare,Recycling -> LastStand; dawn income +40
+Day 7: gold left 42; 
+  Night 7: Reward 47,0s; Keep -12 (370/500); lost 0; killed 42
+  Reward FlamingArrows,ThriftyConstruction,BlastShields -> FlamingArrows; dawn income +40
+Day 8: gold left 5; Cannon 6 8
+  Night 8: Reward 53,8s; Keep -0 (370/500); lost 0; killed 54
+  Reward FortressHeart,Shrapnel,EfficientFarming -> FortressHeart; dawn income +70
+Day 9: gold left 75; 
+  Night 9: Reward 60,2s; Keep -170 (350/650); lost 0; killed 64
+  Reward FocusedFire,HeavyShot,ExpandedVision -> ExpandedVision; dawn income +40
+Day 10: gold left 6; Cannon 12 11; Watchtower 8 8
+  Night 10: Reward 62,8s; Keep -0 (350/650); lost 0; killed 72
+  Reward FocusedFire,FieldEngineers,SignalFires -> FocusedFire; dawn income +70
+Day 11: gold left 44; Watchtower 14 12
+  Night 11: Reward 65,3s; Keep -40 (310/650); lost 0; killed 81
+  Reward ReinforcedTimber,Overwatch,Shrapnel -> Overwatch; dawn income +40
+Day 12: gold left 35; Tower 4 9
+  Night 12: Victory 66,5s; Keep -6 (304/650); lost 1; killed 91
+Result: Victory; nights 12/12; combat 9,4 min; defeated 543; bought 22 (defense 17, economy 5); earned 650; perks [WarBonds,CounterBattery,SpikedCorridor,Sharpshooters,KillZone,LastStand,FlamingArrows,FortressHeart,ExpandedVision,FocusedFire,Overwatch]
+
+## economy on meadow seed 1: generated (attempt 0)
+Day 1: gold left 19; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12 SKIP ImpassableTerrain; House 12 8
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Shrapnel,LastStand,ReinforcedTimber -> Shrapnel; dawn income +50
+Day 2: gold left 6; Tower 11 9; Wall 9 10
+  Night 2: Reward 31,8s; Keep -0 (500/500); lost 0; killed 16
+  Reward ThriftyConstruction,Overwatch,KillZone -> Overwatch; dawn income +50
+Day 3: gold left 0; House 13 8; Wall 11 10; Wall 10 9
+  Night 3: Reward 30,1s; Keep -0 (500/500); lost 0; killed 20
+  Reward ExpandedVision,FocusedFire,HeavyShot -> ExpandedVision; dawn income +60
+Day 4: gold left 4; Farm 12 6; Wall 10 11
+  Night 4: Reward 36,0s; Keep -0 (500/500); lost 0; killed 25
+  Reward SignalFires,WarBonds,MarketSquare -> MarketSquare; dawn income +98
+Day 5: gold left 4; House 12 12; House 12 13; Farm 13 12
+  Night 5: Reward 40,2s; Keep -0 (500/500); lost 3; killed 31
+  Reward BarbedDefenses,Recycling,FortressHeart -> FortressHeart; dawn income +112
+Day 6: gold left 11; Tower 7 11; House 7 8; House 8 7
+  Night 6: Reward 64,0s; Keep -0 (650/650); lost 1; killed 37
+  Reward Sharpshooters,ThriftyConstruction,CounterBattery -> Sharpshooters; dawn income +110
+Day 7: gold left 16; Tower 13 9; RepairStation 9 14
+  Night 7: Reward 56,9s; Keep -0 (650/650); lost 2; killed 42
+  Reward EfficientFarming,SpikedCorridor,BlastShields -> EfficientFarming; dawn income +96
+Day 8: gold left 3; Watchtower 8 11; Cannon 4 9
+  Night 8: Reward 56,5s; Keep -0 (650/650); lost 1; killed 54
+  Reward ReinforcedTimber,KillZone,WarBonds -> WarBonds; dawn income +126
+Day 9: gold left 3; Cannon 15 10; Tower 7 10
+  Night 9: Reward 61,4s; Keep -0 (650/650); lost 0; killed 64
+  Reward BlastShields,Gatehouse,FieldEngineers -> FieldEngineers; dawn income +126
+Day 10: gold left 3; Tower 13 10; Cannon 9 4
+  Night 10: Reward 67,0s; Keep -0 (650/650); lost 0; killed 72
+  Reward HeavyShot,FlamingArrows,Gatehouse -> FlamingArrows; dawn income +126
+Day 11: gold left 52; Cannon 10 15
+  Night 11: Reward 68,0s; Keep -0 (650/650); lost 2; killed 81
+  Reward LastStand,ReinforcedTimber,KillZone -> ReinforcedTimber; dawn income +126
+Day 12: gold left 41; RepairStation 14 8; Watchtower 12 10; Tower 10 7
+  Night 12: Victory 71,2s; Keep -50 (600/650); lost 1; killed 91
+Result: Victory; nights 12/12; combat 10,1 min; defeated 543; bought 31 (defense 21, economy 10); earned 1080; perks [Shrapnel,Overwatch,ExpandedVision,MarketSquare,FortressHeart,Sharpshooters,EfficientFarming,WarBonds,FieldEngineers,FlamingArrows,ReinforcedTimber]
+
+## economy on meadow seed 2: generated (attempt 0)
+Day 1: gold left 5; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward MarketSquare,FocusedFire,FlamingArrows -> MarketSquare; dawn income +70
+Day 2: gold left 12; Tower 11 9; Wall 9 10
+  Night 2: Reward 30,3s; Keep -0 (500/500); lost 0; killed 16
+  Reward Recycling,BlastShields,Sharpshooters -> Sharpshooters; dawn income +70
+Day 3: gold left 12; House 12 8; House 13 8; Wall 11 10
+  Night 3: Reward 33,1s; Keep -0 (500/500); lost 0; killed 20
+  Reward SignalFires,KillZone,Overwatch -> Overwatch; dawn income +98
+Day 4: gold left 12; Farm 12 6; House 12 12; House 12 13
+  Night 4: Reward 38,9s; Keep -0 (500/500); lost 0; killed 25
+  Reward HardenedRoofs,BarbedDefenses,Recycling -> HardenedRoofs; dawn income +148
+Day 5: gold left 6; Farm 13 12; House 7 8; House 8 7; Farm 6 6; House 7 13 SKIP Occupied; House 13 7 SKIP Occupied; Wall 10 9
+  Night 5: Reward 81,1s; Keep -0 (500/500); lost 5; killed 31
+  Reward Gatehouse,FortressHeart,WarBonds -> WarBonds; dawn income +152
+Day 6: gold left 46; Wall 10 11; Tower 7 11; Tower 13 9
+  Night 6: Reward 54,5s; Keep -40 (460/500); lost 1; killed 37
+  Reward ExpandedVision,FocusedFire,Recycling -> ExpandedVision; dawn income +122
+Day 7: gold left 3; RepairStation 9 14; Watchtower 8 11; Cannon 4 9
+  Night 7: Reward 57,5s; Keep -0 (460/500); lost 1; killed 42
+  Reward CounterBattery,BarbedDefenses,HeavyShot -> CounterBattery; dawn income +142
+Day 8: gold left 19; Cannon 15 10; Tower 7 10
+  Night 8: Reward 62,0s; Keep -0 (460/500); lost 1; killed 54
+  Reward BlastShields,ReinforcedTimber,FocusedFire -> BlastShields; dawn income +142
+Day 9: gold left 35; Tower 13 10; Cannon 9 4
+  Night 9: Reward 62,6s; Keep -0 (460/500); lost 1; killed 64
+  Reward Shrapnel,HeavyShot,FortressHeart -> FortressHeart; dawn income +142
+Day 10: gold left 12; Cannon 10 15; RepairStation 14 8; Watchtower 12 10
+  Night 10: Reward 67,7s; Keep -0 (610/650); lost 0; killed 72
+  Reward FocusedFire,BarbedDefenses,HeavyShot -> HeavyShot; dawn income +142
+Day 11: gold left 56; Tower 10 7; Tower 10 13
+  Night 11: Reward 71,0s; Keep -0 (610/650); lost 1; killed 81
+  Reward LastStand,Shrapnel,FocusedFire -> Shrapnel; dawn income +142
+Day 12: gold left 44; Cannon 4 13; Cannon 15 6
+  Night 12: Victory 74,1s; Keep -0 (610/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 10,9 min; defeated 543; bought 36 (defense 24, economy 12); earned 1370; perks [MarketSquare,Sharpshooters,Overwatch,HardenedRoofs,WarBonds,ExpandedVision,CounterBattery,BlastShields,FortressHeart,HeavyShot,Shrapnel]
+
+## economy on meadow seed 3: generated (attempt 0)
+Day 1: gold left 5; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12
+  Night 1: Reward 23,0s; Keep -0 (500/500); lost 0; killed 10
+  Reward Sharpshooters,MarketSquare,EfficientFarming -> MarketSquare; dawn income +70
+Day 2: gold left 12; Tower 11 9; Wall 9 10
+  Night 2: Reward 31,8s; Keep -0 (500/500); lost 0; killed 16
+  Reward FlamingArrows,FocusedFire,Sharpshooters -> Sharpshooters; dawn income +70
+Day 3: gold left 12; House 12 8; House 13 8; Wall 11 10
+  Night 3: Reward 32,3s; Keep -0 (500/500); lost 0; killed 20
+  Reward Recycling,FortressHeart,Overwatch -> FortressHeart; dawn income +98
+Day 4: gold left 12; Farm 12 6; House 12 12; House 12 13
+  Night 4: Reward 46,4s; Keep -56 (594/650); lost 0; killed 25
+  Reward WarBonds,CounterBattery,ReinforcedTimber -> WarBonds; dawn income +148
+Day 5: gold left 6; Farm 13 12; House 7 8; House 8 7; Farm 6 6; House 7 13 SKIP Occupied; House 13 7 SKIP Occupied; Wall 10 9
+  Night 5: Reward 48,5s; Keep -92 (502/650); lost 5; killed 31
+  Reward ThriftyConstruction,ExpandedVision,KillZone -> ExpandedVision; dawn income +134
+Day 6: gold left 28; Wall 10 11; Tower 7 11; Tower 13 9
+  Night 6: Reward 53,2s; Keep -0 (502/650); lost 1; killed 37
+  Reward Gatehouse,ThriftyConstruction,FocusedFire -> ThriftyConstruction; dawn income +164
+Day 7: gold left 1; RepairStation 9 14; Watchtower 8 11; Cannon 4 9 SKIP ImpassableTerrain; Cannon 15 10; Tower 7 10
+  Night 7: Reward 50,7s; Keep -0 (502/650); lost 2; killed 42
+  Reward FocusedFire,CounterBattery,FieldEngineers -> FieldEngineers; dawn income +124
+Day 8: gold left 12; Tower 13 10; Cannon 9 4; Cannon 10 15 SKIP Occupied
+  Night 8: Reward 58,4s; Keep -0 (502/650); lost 1; killed 54
+  Reward Shrapnel,Recycling,HardenedRoofs -> HardenedRoofs; dawn income +124
+Day 9: gold left 14; RepairStation 14 8; Watchtower 12 10; Tower 10 7
+  Night 9: Reward 57,4s; Keep -10 (492/650); lost 1; killed 64
+  Reward BarbedDefenses,ReinforcedTimber,Recycling -> ReinforcedTimber; dawn income +94
+Day 10: gold left 64; Tower 10 13
+  Night 10: Reward 62,0s; Keep -0 (492/650); lost 0; killed 72
+  Reward LastStand,Gatehouse,BlastShields -> BlastShields; dawn income +124
+Day 11: gold left 6; Cannon 4 13; Cannon 15 6; Tower 8 10
+  Night 11: Reward 63,5s; Keep -0 (492/650); lost 2; killed 81
+  Reward BarbedDefenses,Gatehouse,Overwatch -> Overwatch; dawn income +124
+Day 12: gold left 42; Tower 12 11; Tower 6 10
+  Night 12: Victory 68,3s; Keep -0 (492/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,9 min; defeated 543; bought 37 (defense 25, economy 12); earned 1274; perks [MarketSquare,Sharpshooters,FortressHeart,WarBonds,ExpandedVision,ThriftyConstruction,FieldEngineers,HardenedRoofs,ReinforcedTimber,BlastShields,Overwatch]
+
+## economy on meadow seed 4: generated (attempt 0)
+Day 1: gold left 5; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward HardenedRoofs,BlastShields,ThriftyConstruction -> HardenedRoofs; dawn income +62
+Day 2: gold left 4; Tower 11 9; Wall 9 10
+  Night 2: Reward 30,3s; Keep -0 (500/500); lost 0; killed 16
+  Reward EfficientFarming,LastStand,FortressHeart -> EfficientFarming; dawn income +68
+Day 3: gold left 2; House 12 8; House 13 8; Wall 11 10
+  Night 3: Reward 33,1s; Keep -0 (500/500); lost 0; killed 20
+  Reward BarbedDefenses,Shrapnel,FortressHeart -> FortressHeart; dawn income +88
+Day 4: gold left 6; Farm 12 6; House 12 12; Wall 10 9
+  Night 4: Reward 49,5s; Keep -0 (650/650); lost 0; killed 25
+  Reward Overwatch,Sharpshooters,LastStand -> Sharpshooters; dawn income +126
+Day 5: gold left 6; House 12 13; Farm 13 12; House 7 8; House 8 7
+  Night 5: Reward 57,9s; Keep -0 (650/650); lost 3; killed 31
+  Reward ExpandedVision,Recycling,BarbedDefenses -> ExpandedVision; dawn income +136
+Day 6: gold left 37; Wall 10 11; Tower 7 11; Farm 6 6; House 7 13 SKIP Occupied; House 13 7 SKIP Occupied
+  Night 6: Reward 96,6s; Keep -0 (650/650); lost 1; killed 36
+  Reward SpikedCorridor,WarBonds,Overwatch -> WarBonds; dawn income +194
+Day 7: gold left 17; Tower 13 9; RepairStation 9 14; Watchtower 8 11; Cannon 4 9
+  Night 7: Reward 131,9s; Keep -6 (644/650); lost 7; killed 42
+  Reward ThriftyConstruction,ReinforcedTimber,SpikedCorridor -> ThriftyConstruction; dawn income +68
+Day 8: gold left 16; Cannon 15 10
+  Night 8: Reward 54,5s; Keep -0 (644/650); lost 1; killed 54
+  Reward HeavyShot,ReinforcedTimber,BarbedDefenses -> HeavyShot; dawn income +98
+Day 9: gold left 26; Tower 7 10; Tower 13 10
+  Night 9: Reward 64,6s; Keep -40 (604/650); lost 1; killed 64
+  Reward FocusedFire,KillZone,CounterBattery -> CounterBattery; dawn income +68
+Day 10: gold left 25; Cannon 9 4
+  Night 10: Reward 63,7s; Keep -0 (604/650); lost 0; killed 72
+  Reward Shrapnel,FocusedFire,BlastShields -> BlastShields; dawn income +98
+Day 11: gold left 4; Cannon 10 15; RepairStation 14 8
+  Night 11: Reward 67,9s; Keep -0 (604/650); lost 2; killed 81
+  Reward ReinforcedTimber,Gatehouse,Recycling -> Gatehouse; dawn income +98
+Day 12: gold left 30; Watchtower 12 10; Tower 10 7
+  Night 12: Victory 70,4s; Keep -210 (394/650); lost 3; killed 91
+Result: Victory; nights 12/12; combat 12,4 min; defeated 542; bought 33 (defense 21, economy 12); earned 1104; perks [HardenedRoofs,EfficientFarming,FortressHeart,Sharpshooters,ExpandedVision,WarBonds,ThriftyConstruction,HeavyShot,CounterBattery,BlastShields,Gatehouse]
+
+## economy on meadow seed 5: generated (attempt 0)
+Day 1: gold left 19; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12 SKIP ImpassableTerrain; House 12 8
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Overwatch,Recycling,ExpandedVision -> ExpandedVision; dawn income +50
+Day 2: gold left 6; Tower 11 9; Wall 9 10
+  Night 2: Reward 31,2s; Keep -0 (500/500); lost 0; killed 16
+  Reward ReinforcedTimber,Gatehouse,FocusedFire -> Gatehouse; dawn income +50
+Day 3: gold left 0; House 13 8; Wall 11 10; Wall 10 9
+  Night 3: Reward 29,5s; Keep -6 (494/500); lost 0; killed 20
+  Reward Overwatch,FlamingArrows,HardenedRoofs -> HardenedRoofs; dawn income +60
+Day 4: gold left 4; Farm 12 6; Wall 10 11
+  Night 4: Reward 35,6s; Keep -6 (488/500); lost 1; killed 24
+  Reward FlamingArrows,ThriftyConstruction,BlastShields -> FlamingArrows; dawn income +82
+Day 5: gold left 30; House 12 12; House 12 13
+  Night 5: Reward 40,1s; Keep -122 (366/500); lost 1; killed 30
+  Reward ThriftyConstruction,Sharpshooters,BarbedDefenses -> Sharpshooters; dawn income +92
+Day 6: gold left 3; Tower 7 11; Farm 13 12; House 7 8
+  Night 6: Reward 84,0s; Keep -48 (318/500); lost 2; killed 37
+  Reward BlastShields,Overwatch,LastStand -> BlastShields; dawn income +92
+Day 7: gold left 46; Tower 13 9
+  Night 7: Reward 61,4s; Keep -0 (318/500); lost 1; killed 42
+  Reward MarketSquare,ThriftyConstruction,HeavyShot -> MarketSquare; dawn income +86
+Day 8: gold left 44; RepairStation 9 14; Watchtower 8 11
+  Night 8: Reward 56,6s; Keep -0 (318/500); lost 1; killed 54
+  Reward FocusedFire,KillZone,FortressHeart -> FortressHeart; dawn income +86
+Day 9: gold left 53; Cannon 4 9
+  Night 9: Reward 66,8s; Keep -0 (468/650); lost 2; killed 64
+  Reward ThriftyConstruction,Shrapnel,SignalFires -> Shrapnel; dawn income +76
+Day 10: gold left 3; Cannon 15 10; Tower 7 10
+  Night 10: Reward 64,2s; Keep -0 (468/650); lost 1; killed 72
+  Reward SpikedCorridor,ReinforcedTimber,SignalFires -> SignalFires; dawn income +76
+Day 11: gold left 30; Tower 13 10
+  Night 11: Reward 67,1s; Keep -0 (468/650); lost 0; killed 81
+  Reward FieldEngineers,FocusedFire,ReinforcedTimber -> FieldEngineers; dawn income +76
+Day 12: gold left 29; Cannon 9 4
+  Night 12: Victory 71,0s; Keep -0 (468/650); lost 1; killed 91
+Result: Victory; nights 12/12; combat 10,5 min; defeated 541; bought 26 (defense 17, economy 9); earned 826; perks [ExpandedVision,Gatehouse,HardenedRoofs,FlamingArrows,Sharpshooters,BlastShields,MarketSquare,FortressHeart,Shrapnel,SignalFires,FieldEngineers]
+
+## economy on meadow seed 6: generated (attempt 0)
+Day 1: gold left 5; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Recycling,HardenedRoofs,EfficientFarming -> EfficientFarming; dawn income +68
+Day 2: gold left 10; Tower 11 9; Wall 9 10
+  Night 2: Reward 30,3s; Keep -0 (500/500); lost 0; killed 16
+  Reward LastStand,Shrapnel,Sharpshooters -> Sharpshooters; dawn income +68
+Day 3: gold left 8; House 12 8; House 13 8; Farm 12 6 SKIP ImpassableTerrain; Wall 11 10
+  Night 3: Reward 33,1s; Keep -0 (500/500); lost 0; killed 20
+  Reward FocusedFire,ThriftyConstruction,WarBonds -> WarBonds; dawn income +118
+Day 4: gold left 0; House 12 12; House 12 13; Farm 13 12; House 7 8
+  Night 4: Reward 39,5s; Keep -0 (500/500); lost 0; killed 25
+  Reward FocusedFire,BarbedDefenses,Gatehouse -> Gatehouse; dawn income +176
+Day 5: gold left 1; House 8 7; Farm 6 6; House 7 13 SKIP Occupied; House 13 7; Wall 10 9; Wall 10 11; Tower 7 11
+  Night 5: Reward 37,4s; Keep -0 (500/500); lost 2; killed 31
+  Reward Recycling,ExpandedVision,HardenedRoofs -> HardenedRoofs; dawn income +186
+Day 6: gold left 50; Tower 13 9; RepairStation 9 14; Watchtower 8 11
+  Night 6: Reward 62,4s; Keep -0 (500/500); lost 3; killed 37
+  Reward FortressHeart,LastStand,FlamingArrows -> FlamingArrows; dawn income +176
+Day 7: gold left 23; Cannon 4 9; Cannon 15 10; Tower 7 10
+  Night 7: Reward 60,0s; Keep -0 (500/500); lost 1; killed 42
+  Reward ThriftyConstruction,ReinforcedTimber,BlastShields -> BlastShields; dawn income +166
+Day 8: gold left 63; Tower 13 10; Cannon 9 4
+  Night 8: Reward 57,9s; Keep -0 (500/500); lost 1; killed 54
+  Reward SignalFires,Shrapnel,LastStand -> Shrapnel; dawn income +166
+Day 9: gold left 15; Cannon 10 15; RepairStation 14 8; Watchtower 12 10; Tower 10 7
+  Night 9: Reward 76,4s; Keep -0 (500/500); lost 5; killed 64
+  Reward CounterBattery,Recycling,KillZone -> CounterBattery; dawn income +138
+Day 10: gold left 27; Tower 10 13; Cannon 4 13
+  Night 10: Reward 63,3s; Keep -0 (500/500); lost 1; killed 72
+  Reward ExpandedVision,KillZone,ThriftyConstruction -> ExpandedVision; dawn income +138
+Day 11: gold left 39; Cannon 15 6; Tower 8 10
+  Night 11: Reward 75,1s; Keep -0 (500/500); lost 1; killed 81
+  Reward MarketSquare,LastStand,FocusedFire -> MarketSquare; dawn income +146
+Day 12: gold left 38; Tower 12 11; Tower 6 10; Tower 14 10
+  Night 12: Victory 69,2s; Keep -0 (500/500); lost 1; killed 91
+Result: Victory; nights 12/12; combat 10,4 min; defeated 543; bought 40 (defense 28, economy 12); earned 1546; perks [EfficientFarming,Sharpshooters,WarBonds,Gatehouse,HardenedRoofs,FlamingArrows,BlastShields,Shrapnel,CounterBattery,ExpandedVision,MarketSquare]
+
+## economy on meadow seed 7: generated (attempt 0)
+Day 1: gold left 5; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward SpikedCorridor,EfficientFarming,CounterBattery -> EfficientFarming; dawn income +68
+Day 2: gold left 10; Tower 11 9; Wall 9 10
+  Night 2: Reward 31,8s; Keep -0 (500/500); lost 0; killed 16
+  Reward FocusedFire,HardenedRoofs,MarketSquare -> MarketSquare; dawn income +76
+Day 3: gold left 2; House 12 8; House 13 8; Wall 11 10; Wall 10 9
+  Night 3: Reward 36,7s; Keep -0 (500/500); lost 0; killed 20
+  Reward ThriftyConstruction,WarBonds,KillZone -> WarBonds; dawn income +134
+Day 4: gold left 24; Farm 12 6; House 12 12; House 12 13; Wall 10 11
+  Night 4: Reward 42,1s; Keep -18 (482/500); lost 1; killed 24
+  Reward BarbedDefenses,FieldEngineers,BlastShields -> FieldEngineers; dawn income +160
+Day 5: gold left 44; Farm 13 12; House 7 8; House 8 7; Farm 6 6; House 7 13 SKIP Occupied; House 13 7 SKIP Occupied
+  Night 5: Reward 82,4s; Keep -12 (470/500); lost 7; killed 31
+  Reward KillZone,Overwatch,FlamingArrows -> FlamingArrows; dawn income +108
+Day 6: gold left 54; Tower 7 11; Tower 13 9
+  Night 6: Reward 63,7s; Keep -0 (470/500); lost 2; killed 37
+  Reward ThriftyConstruction,Sharpshooters,Gatehouse -> Sharpshooters; dawn income +110
+Day 7: gold left 76; RepairStation 9 14; Watchtower 8 11
+  Night 7: Reward 50,0s; Keep -6 (464/500); lost 1; killed 42
+  Reward CounterBattery,FortressHeart,ReinforcedTimber -> CounterBattery; dawn income +58
+Day 8: gold left 57; Cannon 4 9
+  Night 8: Reward 56,7s; Keep -0 (464/500); lost 1; killed 54
+  Reward ThriftyConstruction,SignalFires,BarbedDefenses -> ThriftyConstruction; dawn income +88
+Day 9: gold left 32; Cannon 15 10; Tower 7 10
+  Night 9: Reward 61,7s; Keep -0 (464/500); lost 0; killed 64
+  Reward FocusedFire,BarbedDefenses,Shrapnel -> Shrapnel; dawn income +88
+Day 10: gold left 7; Tower 13 10; Cannon 9 4
+  Night 10: Reward 62,5s; Keep -0 (464/500); lost 1; killed 72
+  Reward Gatehouse,FocusedFire,Recycling -> Gatehouse; dawn income +88
+Day 11: gold left 26; Cannon 10 15
+  Night 11: Reward 68,2s; Keep -0 (464/500); lost 2; killed 81
+  Reward ExpandedVision,SignalFires,FortressHeart -> ExpandedVision; dawn income +88
+Day 12: gold left 36; RepairStation 14 8; Watchtower 12 10
+  Night 12: Victory 74,5s; Keep -300 (164/500); lost 2; killed 91
+Result: Victory; nights 12/12; combat 10,9 min; defeated 542; bought 32 (defense 20, economy 12); earned 1066; perks [EfficientFarming,MarketSquare,WarBonds,FieldEngineers,FlamingArrows,Sharpshooters,CounterBattery,ThriftyConstruction,Shrapnel,Gatehouse,ExpandedVision]
+
+## economy on meadow seed 8: generated (attempt 0)
+Day 1: gold left 5; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward WarBonds,Overwatch,BarbedDefenses -> WarBonds; dawn income +92
+Day 2: gold left 6; Tower 11 9; House 12 8; Wall 9 10
+  Night 2: Reward 30,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward FortressHeart,ThriftyConstruction,ExpandedVision -> ExpandedVision; dawn income +102
+Day 3: gold left 10; House 13 8; Farm 12 6; House 12 12
+  Night 3: Reward 33,1s; Keep -10 (490/500); lost 0; killed 20
+  Reward KillZone,ReinforcedTimber,LastStand -> ReinforcedTimber; dawn income +114
+Day 4: gold left 12; Wall 11 10; House 12 13; Farm 13 12; House 7 8
+  Night 4: Reward 40,5s; Keep -12 (478/500); lost 0; killed 25
+  Reward KillZone,ThriftyConstruction,FlamingArrows -> FlamingArrows; dawn income +156
+Day 5: gold left 21; House 8 7; Farm 6 6; House 7 13 SKIP Occupied; House 13 7 SKIP Occupied; Wall 10 9; Wall 10 11; Tower 7 11
+  Night 5: Reward 39,4s; Keep -0 (478/500); lost 2; killed 31
+  Reward FortressHeart,SpikedCorridor,HardenedRoofs -> HardenedRoofs; dawn income +186
+Day 6: gold left 70; Tower 13 9; RepairStation 9 14; Watchtower 8 11
+  Night 6: Reward 62,2s; Keep -0 (478/500); lost 2; killed 37
+  Reward LastStand,Sharpshooters,Overwatch -> Sharpshooters; dawn income +186
+Day 7: gold left 4; Cannon 4 9; Cannon 15 10; Tower 7 10; Tower 13 10
+  Night 7: Reward 136,9s; Keep -0 (478/500); lost 5; killed 42
+  Reward KillZone,LastStand,EfficientFarming -> EfficientFarming; dawn income +118
+Day 8: gold left 45; Cannon 9 4
+  Night 8: Reward 57,5s; Keep -0 (478/500); lost 1; killed 54
+  Reward ThriftyConstruction,HeavyShot,FortressHeart -> FortressHeart; dawn income +118
+Day 9: gold left 5; Cannon 10 15; RepairStation 14 8 SKIP ImpassableTerrain; Watchtower 12 10; Tower 10 7
+  Night 9: Reward 58,4s; Keep -0 (628/650); lost 0; killed 64
+  Reward Gatehouse,Shrapnel,SignalFires -> Shrapnel; dawn income +118
+Day 10: gold left 74; Tower 10 13
+  Night 10: Reward 61,5s; Keep -0 (628/650); lost 0; killed 72
+  Reward MarketSquare,Recycling,HeavyShot -> MarketSquare; dawn income +126
+Day 11: gold left 46; Cannon 4 13; Cannon 15 6
+  Night 11: Reward 65,7s; Keep -0 (628/650); lost 3; killed 81
+  Reward Recycling,Gatehouse,LastStand -> Gatehouse; dawn income +126
+Day 12: gold left 25; Tower 8 10; Tower 12 11; Tower 6 10
+  Night 12: Victory 67,5s; Keep -0 (628/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,2 min; defeated 543; bought 38 (defense 26, economy 12); earned 1442; perks [WarBonds,ExpandedVision,ReinforcedTimber,FlamingArrows,HardenedRoofs,Sharpshooters,EfficientFarming,FortressHeart,Shrapnel,MarketSquare,Gatehouse]
+
+## kill-zone on crossing seed 1: generated (attempt 0)
+Day 1: gold left 12; Tower 9 11; Tower 11 9; Tower 11 11; Tower 9 9; House 8 8; Wall 10 11
+  Night 1: Reward 30,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward HardenedRoofs,HeavyShot,FortressHeart -> HeavyShot; dawn income +30
+Day 2: gold left 0; House 12 12; Wall 10 9
+  Night 2: Reward 37,3s; Keep -0 (500/500); lost 0; killed 16
+  Reward ThriftyConstruction,Overwatch,KillZone -> Overwatch; dawn income +40
+Day 3: gold left 12; House 8 7
+  Night 3: Reward 38,7s; Keep -20 (480/500); lost 0; killed 20
+  Reward ExpandedVision,FocusedFire,KillZone -> ExpandedVision; dawn income +50
+Day 4: gold left 6; Wall 9 10; Farm 13 7
+  Night 4: Reward 42,1s; Keep -0 (480/500); lost 0; killed 25
+  Reward SignalFires,WarBonds,MarketSquare -> SignalFires; dawn income +67
+Day 5: gold left 10; Wall 11 10; Tower 10 12
+  Night 5: Reward 42,1s; Keep -0 (480/500); lost 1; killed 31
+  Reward BarbedDefenses,Recycling,Gatehouse -> Gatehouse; dawn income +50
+Day 6: gold left 11; Tower 10 8
+  Night 6: Reward 72,9s; Keep -0 (480/500); lost 0; killed 37
+  Reward Sharpshooters,ThriftyConstruction,CounterBattery -> CounterBattery; dawn income +50
+Day 7: gold left 61; 
+  Night 7: Reward 52,2s; Keep -0 (480/500); lost 0; killed 42
+  Reward Recycling,WarBonds,FocusedFire -> WarBonds; dawn income +80
+Day 8: gold left 32; Cannon 7 12; Watchtower 8 11
+  Night 8: Reward 58,9s; Keep -0 (480/500); lost 0; killed 54
+  Reward SpikedCorridor,LastStand,ThriftyConstruction -> ThriftyConstruction; dawn income +80
+Day 9: gold left 15; Cannon 6 7; Watchtower 8 9; Cannon 12 12 SKIP Occupied
+  Night 9: Reward 66,9s; Keep -0 (480/500); lost 0; killed 64
+  Reward FlamingArrows,HardenedRoofs,ReinforcedTimber -> FlamingArrows; dawn income +80
+Day 10: gold left 67; Watchtower 11 12
+  Night 10: Reward 65,5s; Keep -0 (480/500); lost 0; killed 72
+  Reward ReinforcedTimber,KillZone,BlastShields -> BlastShields; dawn income +80
+Day 11: gold left 6; Cannon 11 6; Watchtower 11 8; Tower 8 10
+  Night 11: Reward 68,4s; Keep -0 (480/500); lost 0; killed 81
+  Reward LastStand,Shrapnel,KillZone -> Shrapnel; dawn income +80
+Day 12: gold left 42; Tower 12 10; RepairStation 9 13 SKIP ImpassableTerrain
+  Night 12: Victory 71,5s; Keep -0 (480/500); lost 1; killed 91
+Result: Victory; nights 12/12; combat 10,8 min; defeated 543; bought 23 (defense 19, economy 4); earned 687; perks [HeavyShot,Overwatch,ExpandedVision,SignalFires,Gatehouse,CounterBattery,WarBonds,ThriftyConstruction,FlamingArrows,BlastShields,Shrapnel]
+
+## kill-zone on crossing seed 2: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FortressHeart,WarBonds,KillZone -> FortressHeart; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 11 10
+  Night 2: Reward 36,1s; Keep -0 (650/650); lost 0; killed 16
+  Reward HeavyShot,BlastShields,Sharpshooters -> HeavyShot; dawn income +40
+Day 3: gold left 12; House 13 8
+  Night 3: Reward 40,7s; Keep -0 (650/650); lost 0; killed 20
+  Reward SignalFires,MarketSquare,Recycling -> SignalFires; dawn income +50
+Day 4: gold left 6; Wall 10 9; Farm 12 13
+  Night 4: Reward 47,2s; Keep -10 (640/650); lost 0; killed 25
+  Reward ReinforcedTimber,CounterBattery,WarBonds -> CounterBattery; dawn income +67
+Day 5: gold left 10; Wall 10 11; Tower 8 10
+  Night 5: Reward 45,2s; Keep -0 (640/650); lost 1; killed 31
+  Reward SpikedCorridor,HardenedRoofs,LastStand -> HardenedRoofs; dawn income +57
+Day 6: gold left 18; Tower 12 10
+  Night 6: Reward 85,5s; Keep -40 (600/650); lost 3; killed 37
+  Reward Gatehouse,Shrapnel,ReinforcedTimber -> Shrapnel; dawn income +37
+Day 7: gold left 55; 
+  Night 7: Reward 54,3s; Keep -0 (600/650); lost 0; killed 42
+  Reward WarBonds,ThriftyConstruction,BarbedDefenses -> ThriftyConstruction; dawn income +37
+Day 8: gold left 23; Cannon 7 7
+  Night 8: Reward 61,9s; Keep -0 (600/650); lost 0; killed 54
+  Reward Recycling,FocusedFire,KillZone -> FocusedFire; dawn income +37
+Day 9: gold left 32; Watchtower 9 8
+  Night 9: Reward 77,1s; Keep -12 (588/650); lost 0; killed 64
+  Reward EfficientFarming,FlamingArrows,ReinforcedTimber -> FlamingArrows; dawn income +37
+Day 10: gold left 0; Cannon 12 6
+  Night 10: Reward 69,5s; Keep -0 (588/650); lost 1; killed 72
+  Reward Sharpshooters,SpikedCorridor,Gatehouse -> Sharpshooters; dawn income +20
+Day 11: gold left 20; 
+  Night 11: Reward 75,8s; Keep -0 (588/650); lost 0; killed 81
+  Reward Recycling,Overwatch,BarbedDefenses -> Overwatch; dawn income +20
+Day 12: gold left 12; Watchtower 11 8
+  Night 12: Victory 75,3s; Keep -0 (588/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,6 min; defeated 543; bought 18 (defense 14, economy 4); earned 432; perks [FortressHeart,HeavyShot,SignalFires,CounterBattery,HardenedRoofs,Shrapnel,ThriftyConstruction,FocusedFire,FlamingArrows,Sharpshooters,Overwatch]
+
+## kill-zone on crossing seed 3: generated (attempt 0)
+Day 1: gold left 12; Tower 11 9; Tower 9 11; Tower 9 9; Tower 11 11; House 12 12; Wall 10 9
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FocusedFire,LastStand,ExpandedVision -> ExpandedVision; dawn income +30
+Day 2: gold left 0; House 8 8; Wall 10 11
+  Night 2: Reward 37,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward LastStand,ThriftyConstruction,CounterBattery -> CounterBattery; dawn income +40
+Day 3: gold left 12; House 12 13
+  Night 3: Reward 40,4s; Keep -10 (490/500); lost 0; killed 20
+  Reward Sharpshooters,FlamingArrows,SpikedCorridor -> Sharpshooters; dawn income +50
+Day 4: gold left 6; Wall 11 10; Farm 6 12
+  Night 4: Reward 46,7s; Keep -0 (490/500); lost 0; killed 25
+  Reward WarBonds,EfficientFarming,ReinforcedTimber -> ReinforcedTimber; dawn income +67
+Day 5: gold left 10; Wall 9 10; Tower 10 8
+  Night 5: Reward 41,6s; Keep -0 (490/500); lost 1; killed 31
+  Reward KillZone,WarBonds,Recycling -> WarBonds; dawn income +80
+Day 6: gold left 41; Tower 10 12
+  Night 6: Reward 68,2s; Keep -0 (490/500); lost 1; killed 37
+  Reward KillZone,Overwatch,BlastShields -> Overwatch; dawn income +70
+Day 7: gold left 2; Cannon 12 7; Watchtower 12 9
+  Night 7: Reward 52,2s; Keep -0 (490/500); lost 0; killed 42
+  Reward LastStand,HardenedRoofs,Shrapnel -> Shrapnel; dawn income +70
+Day 8: gold left 72; 
+  Night 8: Reward 56,2s; Keep -0 (490/500); lost 0; killed 54
+  Reward MarketSquare,FocusedFire,BarbedDefenses -> FocusedFire; dawn income +70
+Day 9: gold left 1; Cannon 13 12; Watchtower 12 11; Cannon 7 7 SKIP Occupied; Watchtower 9 8; Cannon 8 13 SKIP ImpassableTerrain
+  Night 9: Reward 62,2s; Keep -0 (490/500); lost 1; killed 64
+  Reward LastStand,FortressHeart,ThriftyConstruction -> FortressHeart; dawn income +70
+Day 10: gold left 39; Watchtower 9 12
+  Night 10: Reward 71,0s; Keep -0 (640/650); lost 0; killed 72
+  Reward BarbedDefenses,MarketSquare,BlastShields -> BlastShields; dawn income +70
+Day 11: gold left 11; Tower 12 10; Tower 8 10
+  Night 11: Reward 71,9s; Keep -0 (640/650); lost 1; killed 81
+  Reward HardenedRoofs,FlamingArrows,KillZone -> FlamingArrows; dawn income +70
+Day 12: gold left 25; RepairStation 10 6; Cannon 10 4 SKIP ImpassableTerrain; Cannon 10 15 SKIP ImpassableTerrain
+  Night 12: Victory 80,4s; Keep -10 (630/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 10,9 min; defeated 543; bought 23 (defense 19, economy 4); earned 687; perks [ExpandedVision,CounterBattery,Sharpshooters,ReinforcedTimber,WarBonds,Overwatch,Shrapnel,FocusedFire,FortressHeart,BlastShields,FlamingArrows]
+
+## kill-zone on crossing seed 4: generated (attempt 0)
+Day 1: gold left 12; Tower 9 11; Tower 11 9; Tower 9 9; Tower 11 11; House 12 12; Wall 9 10
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward HardenedRoofs,WarBonds,BlastShields -> BlastShields; dawn income +30
+Day 2: gold left 0; House 8 8; Wall 11 10
+  Night 2: Reward 36,1s; Keep -0 (500/500); lost 0; killed 16
+  Reward FortressHeart,LastStand,WarBonds -> FortressHeart; dawn income +40
+Day 3: gold left 12; House 13 12
+  Night 3: Reward 40,0s; Keep -0 (650/650); lost 0; killed 20
+  Reward ExpandedVision,Gatehouse,EfficientFarming -> Gatehouse; dawn income +50
+Day 4: gold left 6; Wall 10 11; Farm 12 6
+  Night 4: Reward 50,1s; Keep -80 (570/650); lost 0; killed 25
+  Reward Overwatch,Sharpshooters,LastStand -> Sharpshooters; dawn income +67
+Day 5: gold left 10; Wall 10 9; Tower 8 10
+  Night 5: Reward 44,9s; Keep -0 (570/650); lost 2; killed 31
+  Reward Recycling,BarbedDefenses,Shrapnel -> Shrapnel; dawn income +40
+Day 6: gold left 1; Tower 12 10
+  Night 6: Reward 76,8s; Keep -0 (570/650); lost 0; killed 37
+  Reward SpikedCorridor,WarBonds,Overwatch -> Overwatch; dawn income +40
+Day 7: gold left 41; 
+  Night 7: Reward 52,8s; Keep -0 (570/650); lost 0; killed 42
+  Reward BarbedDefenses,ReinforcedTimber,LastStand -> ReinforcedTimber; dawn income +40
+Day 8: gold left 4; Cannon 7 12
+  Night 8: Reward 59,7s; Keep -0 (570/650); lost 1; killed 54
+  Reward LastStand,SignalFires,HardenedRoofs -> SignalFires; dawn income +40
+Day 9: gold left 12; Watchtower 9 12
+  Night 9: Reward 65,4s; Keep -20 (550/650); lost 1; killed 64
+  Reward FieldEngineers,FocusedFire,ThriftyConstruction -> ThriftyConstruction; dawn income +40
+Day 10: gold left 52; 
+  Night 10: Reward 65,1s; Keep -0 (550/650); lost 0; killed 72
+  Reward HardenedRoofs,HeavyShot,KillZone -> HeavyShot; dawn income +40
+Day 11: gold left 23; Cannon 12 13
+  Night 11: Reward 75,6s; Keep -0 (550/650); lost 1; killed 81
+  Reward LastStand,HardenedRoofs,CounterBattery -> CounterBattery; dawn income +30
+Day 12: gold left 25; Watchtower 11 12
+  Night 12: Victory 72,6s; Keep -0 (550/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,1 min; defeated 543; bought 18 (defense 14, economy 4); earned 457; perks [BlastShields,FortressHeart,Gatehouse,Sharpshooters,Shrapnel,Overwatch,ReinforcedTimber,SignalFires,ThriftyConstruction,HeavyShot,CounterBattery]
+
+## kill-zone on crossing seed 5: generated (attempt 0)
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 11 9; Tower 9 11; House 8 12; Wall 10 9
+  Night 1: Reward 29,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Gatehouse,LastStand,ExpandedVision -> Gatehouse; dawn income +30
+Day 2: gold left 0; House 12 8; Wall 10 11
+  Night 2: Reward 37,6s; Keep -0 (500/500); lost 0; killed 16
+  Reward ReinforcedTimber,FortressHeart,FlamingArrows -> FortressHeart; dawn income +40
+Day 3: gold left 12; House 8 13
+  Night 3: Reward 42,7s; Keep -150 (500/650); lost 0; killed 20
+  Reward Overwatch,ExpandedVision,HardenedRoofs -> Overwatch; dawn income +50
+Day 4: gold left 6; Wall 9 10; Farm 13 12
+  Night 4: Reward 45,6s; Keep -0 (500/650); lost 0; killed 25
+  Reward ExpandedVision,ThriftyConstruction,BlastShields -> BlastShields; dawn income +67
+Day 5: gold left 10; Wall 11 10; Tower 10 8
+  Night 5: Reward 43,8s; Keep -0 (500/650); lost 3; killed 31
+  Reward Sharpshooters,LastStand,ThriftyConstruction -> Sharpshooters; dawn income +37
+Day 6: gold left 47; 
+  Night 6: Reward 77,3s; Keep -0 (500/650); lost 1; killed 37
+  Reward WarBonds,LastStand,ExpandedVision -> ExpandedVision; dawn income +20
+Day 7: gold left 18; Tower 10 12
+  Night 7: Reward 53,2s; Keep -0 (500/650); lost 0; killed 42
+  Reward LastStand,FlamingArrows,KillZone -> FlamingArrows; dawn income +20
+Day 8: gold left 38; 
+  Night 8: Reward 60,0s; Keep -0 (500/650); lost 0; killed 54
+  Reward FocusedFire,KillZone,Recycling -> FocusedFire; dawn income +20
+Day 9: gold left 58; 
+  Night 9: Reward 74,9s; Keep -0 (500/650); lost 0; killed 64
+  Reward SignalFires,Recycling,LastStand -> SignalFires; dawn income +20
+Day 10: gold left 1; Cannon 7 7
+  Night 10: Reward 69,2s; Keep -0 (500/650); lost 0; killed 72
+  Reward CounterBattery,BarbedDefenses,HeavyShot -> CounterBattery; dawn income +20
+Day 11: gold left 21; 
+  Night 11: Reward 72,4s; Keep -40 (460/650); lost 1; killed 81
+  Reward KillZone,WarBonds,LastStand -> WarBonds; dawn income +20
+Day 12: gold left 9; Watchtower 8 9; Cannon 6 12 SKIP ImpassableTerrain
+  Night 12: Victory 76,9s; Keep -0 (460/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,4 min; defeated 543; bought 16 (defense 12, economy 4); earned 344; perks [Gatehouse,FortressHeart,Overwatch,BlastShields,Sharpshooters,ExpandedVision,FlamingArrows,FocusedFire,SignalFires,CounterBattery,WarBonds]
+
+## kill-zone on crossing seed 6: generated (attempt 0)
+Day 1: gold left 12; Tower 11 9; Tower 9 11; Tower 11 11; Tower 9 9; House 8 8; Wall 11 10
+  Night 1: Reward 28,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FlamingArrows,EfficientFarming,Overwatch -> Overwatch; dawn income +30
+Day 2: gold left 0; House 12 12; Wall 9 10
+  Night 2: Reward 35,2s; Keep -0 (500/500); lost 0; killed 16
+  Reward KillZone,Recycling,EfficientFarming -> EfficientFarming; dawn income +40
+Day 3: gold left 12; House 7 8
+  Night 3: Reward 38,7s; Keep -0 (500/500); lost 0; killed 20
+  Reward FocusedFire,ThriftyConstruction,WarBonds -> ThriftyConstruction; dawn income +50
+Day 4: gold left 1; Wall 10 9; Farm 7 13; Wall 10 11
+  Night 4: Reward 43,8s; Keep -0 (500/500); lost 0; killed 25
+  Reward FocusedFire,BarbedDefenses,Gatehouse -> Gatehouse; dawn income +72
+Day 5: gold left 29; Tower 12 10
+  Night 5: Reward 46,4s; Keep -0 (500/500); lost 2; killed 31
+  Reward ReinforcedTimber,ExpandedVision,HardenedRoofs -> ExpandedVision; dawn income +50
+Day 6: gold left 35; Tower 8 10
+  Night 6: Reward 57,8s; Keep -90 (410/500); lost 1; killed 37
+  Reward MarketSquare,FortressHeart,HeavyShot -> HeavyShot; dawn income +50
+Day 7: gold left 16; Cannon 12 7
+  Night 7: Reward 66,3s; Keep -0 (410/500); lost 2; killed 42
+  Reward KillZone,WarBonds,FocusedFire -> WarBonds; dawn income +60
+Day 8: gold left 48; Watchtower 11 8
+  Night 8: Reward 56,5s; Keep -0 (410/500); lost 0; killed 54
+  Reward Shrapnel,Sharpshooters,KillZone -> Shrapnel; dawn income +60
+Day 9: gold left 11; Cannon 7 6; Watchtower 9 8; Cannon 12 12 SKIP Occupied
+  Night 9: Reward 74,3s; Keep -0 (410/500); lost 0; killed 64
+  Reward BlastShields,Recycling,HardenedRoofs -> BlastShields; dawn income +60
+Day 10: gold left 43; Watchtower 12 11
+  Night 10: Reward 66,1s; Keep -0 (410/500); lost 0; killed 72
+  Reward CounterBattery,HardenedRoofs,SignalFires -> CounterBattery; dawn income +60
+Day 11: gold left 6; Cannon 6 11; Watchtower 8 11
+  Night 11: Reward 70,9s; Keep -0 (410/500); lost 0; killed 81
+  Reward LastStand,KillZone,FlamingArrows -> FlamingArrows; dawn income +60
+Day 12: gold left 22; Tower 10 8
+  Night 12: Victory 93,7s; Keep -0 (410/500); lost 1; killed 91
+Result: Victory; nights 12/12; combat 11,3 min; defeated 543; bought 22 (defense 18, economy 4); earned 592; perks [Overwatch,EfficientFarming,ThriftyConstruction,Gatehouse,ExpandedVision,HeavyShot,WarBonds,Shrapnel,BlastShields,CounterBattery,FlamingArrows]
+
+## kill-zone on crossing seed 7: generated (attempt 0)
+Day 1: gold left 12; Tower 11 11; Tower 9 9; Tower 9 11; Tower 11 9; House 12 8; Wall 10 11
+  Night 1: Reward 30,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FieldEngineers,Overwatch,BarbedDefenses -> Overwatch; dawn income +30
+Day 2: gold left 0; House 8 12; Wall 10 9
+  Night 2: Reward 38,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward ThriftyConstruction,HardenedRoofs,Gatehouse -> Gatehouse; dawn income +40
+Day 3: gold left 12; House 12 7
+  Night 3: Reward 39,1s; Keep -20 (480/500); lost 0; killed 20
+  Reward FlamingArrows,LastStand,SpikedCorridor -> FlamingArrows; dawn income +50
+Day 4: gold left 6; Wall 11 10; Farm 6 7
+  Night 4: Reward 47,4s; Keep -0 (480/500); lost 0; killed 25
+  Reward BarbedDefenses,ExpandedVision,CounterBattery -> CounterBattery; dawn income +67
+Day 5: gold left 10; Wall 9 10; Tower 10 12
+  Night 5: Reward 45,5s; Keep -0 (480/500); lost 2; killed 31
+  Reward ReinforcedTimber,BlastShields,KillZone -> BlastShields; dawn income +47
+Day 6: gold left 8; Tower 10 8
+  Night 6: Reward 79,2s; Keep -0 (480/500); lost 2; killed 37
+  Reward Recycling,BarbedDefenses,Shrapnel -> Shrapnel; dawn income +30
+Day 7: gold left 38; 
+  Night 7: Reward 53,6s; Keep -0 (480/500); lost 0; killed 42
+  Reward ReinforcedTimber,FocusedFire,Sharpshooters -> Sharpshooters; dawn income +30
+Day 8: gold left 68; 
+  Night 8: Reward 59,6s; Keep -6 (474/500); lost 0; killed 54
+  Reward FieldEngineers,FocusedFire,MarketSquare -> FocusedFire; dawn income +30
+Day 9: gold left 21; Cannon 12 12
+  Night 9: Reward 72,8s; Keep -0 (474/500); lost 0; killed 64
+  Reward WarBonds,FieldEngineers,FortressHeart -> FortressHeart; dawn income +30
+Day 10: gold left 19; Watchtower 12 11
+  Night 10: Reward 67,8s; Keep -0 (624/650); lost 0; killed 72
+  Reward HeavyShot,LastStand,SpikedCorridor -> HeavyShot; dawn income +30
+Day 11: gold left 49; 
+  Night 11: Reward 75,6s; Keep -0 (624/650); lost 1; killed 81
+  Reward ThriftyConstruction,LastStand,EfficientFarming -> ThriftyConstruction; dawn income +30
+Day 12: gold left 10; Cannon 13 7
+  Night 12: Victory 75,6s; Keep -0 (624/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,4 min; defeated 543; bought 17 (defense 13, economy 4); earned 414; perks [Overwatch,Gatehouse,FlamingArrows,CounterBattery,BlastShields,Shrapnel,Sharpshooters,FocusedFire,FortressHeart,HeavyShot,ThriftyConstruction]
+
+## kill-zone on crossing seed 8: generated (attempt 0)
+Day 1: gold left 12; Tower 11 11; Tower 9 9; Tower 11 9; Tower 9 11; House 8 12; Wall 11 10
+  Night 1: Reward 28,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward FortressHeart,ReinforcedTimber,CounterBattery -> CounterBattery; dawn income +30
+Day 2: gold left 0; House 12 8; Wall 9 10
+  Night 2: Reward 35,6s; Keep -0 (500/500); lost 0; killed 16
+  Reward FieldEngineers,WarBonds,FocusedFire -> WarBonds; dawn income +70
+Day 3: gold left 0; House 7 12; Farm 7 6
+  Night 3: Reward 41,0s; Keep -40 (460/500); lost 0; killed 20
+  Reward KillZone,ReinforcedTimber,LastStand -> ReinforcedTimber; dawn income +67
+Day 4: gold left 11; Wall 10 11; House 13 8; Farm 13 6 SKIP ImpassableTerrain; Wall 10 9
+  Night 4: Reward 45,6s; Keep -0 (460/500); lost 1; killed 25
+  Reward KillZone,ThriftyConstruction,FlamingArrows -> FlamingArrows; dawn income +107
+Day 5: gold left 20; Tower 12 10; Tower 8 10
+  Night 5: Reward 55,7s; Keep -0 (460/500); lost 3; killed 31
+  Reward FortressHeart,Recycling,KillZone -> FortressHeart; dawn income +70
+Day 6: gold left 13; Cannon 12 12
+  Night 6: Reward 72,6s; Keep -0 (610/650); lost 0; killed 37
+  Reward LastStand,Sharpshooters,Overwatch -> Sharpshooters; dawn income +70
+Day 7: gold left 51; Watchtower 11 12
+  Night 7: Reward 51,2s; Keep -0 (610/650); lost 0; killed 42
+  Reward Recycling,ExpandedVision,BlastShields -> BlastShields; dawn income +70
+Day 8: gold left 12; Cannon 7 13; Watchtower 9 12; Cannon 12 7 SKIP Occupied
+  Night 8: Reward 62,0s; Keep -0 (610/650); lost 0; killed 54
+  Reward KillZone,HeavyShot,FocusedFire -> HeavyShot; dawn income +70
+Day 9: gold left 50; Watchtower 12 9
+  Night 9: Reward 80,8s; Keep -0 (610/650); lost 2; killed 64
+  Reward Overwatch,KillZone,BarbedDefenses -> Overwatch; dawn income +60
+Day 10: gold left 1; Cannon 6 8; Watchtower 8 9
+  Night 10: Reward 68,7s; Keep -0 (610/650); lost 1; killed 72
+  Reward FocusedFire,ExpandedVision,Gatehouse -> Gatehouse; dawn income +50
+Day 11: gold left 2; Tower 10 12
+  Night 11: Reward 73,7s; Keep -0 (610/650); lost 1; killed 81
+  Reward Shrapnel,ThriftyConstruction,FieldEngineers -> Shrapnel; dawn income +50
+Day 12: gold left 3; Tower 10 8; RepairStation 13 10 SKIP ImpassableTerrain
+  Night 12: Victory 74,1s; Keep -0 (610/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,5 min; defeated 543; bought 24 (defense 19, economy 5); earned 714; perks [CounterBattery,WarBonds,ReinforcedTimber,FlamingArrows,FortressHeart,Sharpshooters,BlastShields,HeavyShot,Overwatch,Gatehouse,Shrapnel]
+
+## corridor on ravine seed 1: generated (attempt 0)
+Day 1: gold left 12; Tower 9 12; Tower 11 9; Tower 11 12; Tower 9 9; House 15 7 SKIP ImpassableTerrain; House 15 6 SKIP ImpassableTerrain; Farm 16 6
+  Night 1: Reward 20,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward ReinforcedTimber,SpikedCorridor,Recycling -> SpikedCorridor; dawn income +37
+Day 2: gold left 24; SpikeTrap 10 13
+  Night 2: Reward 28,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward LastStand,HardenedRoofs,FieldEngineers -> HardenedRoofs; dawn income +37
+Day 3: gold left 8; SpikeTrap 10 8; House 15 14
+  Night 3: Reward 31,4s; Keep -10 (490/500); lost 0; killed 20
+  Reward Overwatch,MarketSquare,WarBonds -> Overwatch; dawn income +47
+Day 4: gold left 6; Tower 11 14
+  Night 4: Reward 36,5s; Keep -6 (484/500); lost 0; killed 25
+  Reward EfficientFarming,LastStand,BlastShields -> BlastShields; dawn income +47
+Day 5: gold left 4; Tower 9 7
+  Night 5: Reward 36,0s; Keep -0 (484/500); lost 1; killed 31
+  Reward LastStand,Sharpshooters,KillZone -> KillZone; dawn income +30
+Day 6: gold left 9; SpikeTrap 10 14
+  Night 6: Reward 51,3s; Keep -0 (484/500); lost 0; killed 37
+  Reward Sharpshooters,SignalFires,Gatehouse -> Sharpshooters; dawn income +30
+Day 7: gold left 14; SpikeTrap 10 7
+  Night 7: Reward 46,4s; Keep -0 (484/500); lost 0; killed 42
+  Reward CounterBattery,ExpandedVision,FlamingArrows -> FlamingArrows; dawn income +30
+Day 8: gold left 19; SpikeTrap 10 15
+  Night 8: Reward 53,1s; Keep -0 (484/500); lost 0; killed 54
+  Reward MarketSquare,SignalFires,ExpandedVision -> ExpandedVision; dawn income +30
+Day 9: gold left 24; SpikeTrap 10 6
+  Night 9: Reward 57,7s; Keep -0 (484/500); lost 0; killed 64
+  Reward MarketSquare,WarBonds,LastStand -> LastStand; dawn income +30
+Day 10: gold left 54; 
+  Night 10: Reward 62,9s; Keep -0 (484/500); lost 0; killed 72
+  Reward FocusedFire,CounterBattery,WarBonds -> CounterBattery; dawn income +30
+Day 11: gold left 7; Cannon 8 13
+  Night 11: Reward 64,3s; Keep -110 (374/500); lost 0; killed 81
+  Reward FortressHeart,MarketSquare,FocusedFire -> FortressHeart; dawn income +30
+Day 12: gold left 37; 
+  Night 12: Victory 66,5s; Keep -345 (179/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,2 min; defeated 543; bought 15 (defense 13, economy 2); earned 378; perks [SpikedCorridor,HardenedRoofs,Overwatch,BlastShields,KillZone,Sharpshooters,FlamingArrows,ExpandedVision,LastStand,CounterBattery,FortressHeart]
+
+## corridor on ravine seed 2: generated (attempt 0)
+Day 1: gold left 1; Tower 8 9; Tower 11 11; Tower 8 11; Tower 11 9; House 13 15; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Overwatch,FortressHeart,FocusedFire -> Overwatch; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward FlamingArrows,WarBonds,KillZone -> KillZone; dawn income +30
+Day 3: gold left 8; House 14 15
+  Night 3: Reward 29,3s; Keep -6 (494/500); lost 0; killed 20
+  Reward MarketSquare,FocusedFire,FlamingArrows -> FlamingArrows; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 35,5s; Keep -0 (494/500); lost 0; killed 25
+  Reward FortressHeart,CounterBattery,ThriftyConstruction -> CounterBattery; dawn income +40
+Day 5: gold left 39; Tower 6 11
+  Night 5: Reward 35,9s; Keep -0 (494/500); lost 1; killed 31
+  Reward MarketSquare,Gatehouse,ReinforcedTimber -> Gatehouse; dawn income +30
+Day 6: gold left 20; Tower 13 9
+  Night 6: Reward 56,8s; Keep -120 (374/500); lost 0; killed 37
+  Reward FieldEngineers,ThriftyConstruction,FocusedFire -> FocusedFire; dawn income +30
+Day 7: gold left 0; SpikeTrap 6 10; SpikeTrap 13 10
+  Night 7: Reward 47,5s; Keep -6 (368/500); lost 0; killed 42
+  Reward SpikedCorridor,Sharpshooters,ThriftyConstruction -> SpikedCorridor; dawn income +30
+Day 8: gold left 5; SpikeTrap 5 10
+  Night 8: Reward 53,3s; Keep -0 (368/500); lost 0; killed 54
+  Reward BarbedDefenses,ExpandedVision,EfficientFarming -> ExpandedVision; dawn income +30
+Day 9: gold left 10; SpikeTrap 14 10
+  Night 9: Reward 57,8s; Keep -50 (318/500); lost 0; killed 64
+  Reward BlastShields,ReinforcedTimber,Sharpshooters -> Sharpshooters; dawn income +30
+Day 10: gold left 40; 
+  Night 10: Reward 61,3s; Keep -0 (318/500); lost 0; killed 72
+  Reward EfficientFarming,Recycling,WarBonds -> WarBonds; dawn income +60
+Day 11: gold left 23; Cannon 6 8
+  Night 11: Reward 64,6s; Keep -0 (318/500); lost 1; killed 81
+  Reward ThriftyConstruction,HardenedRoofs,LastStand -> HardenedRoofs; dawn income +60
+Day 12: gold left 6; Cannon 12 11
+  Night 12: Victory 67,7s; Keep -103 (215/500); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,3 min; defeated 543; bought 16 (defense 14, economy 2); earned 410; perks [Overwatch,KillZone,FlamingArrows,CounterBattery,Gatehouse,FocusedFire,SpikedCorridor,ExpandedVision,Sharpshooters,WarBonds,HardenedRoofs]
+
+## corridor on ravine seed 3: generated (attempt 0)
+Day 1: gold left 1; Tower 11 8; Tower 9 11; Tower 9 8; Tower 11 11; House 5 13; SpikeTrap 10 7
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Shrapnel,Sharpshooters,CounterBattery -> Sharpshooters; dawn income +30
+Day 2: gold left 6; SpikeTrap 10 12
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward BarbedDefenses,WarBonds,FocusedFire -> FocusedFire; dawn income +30
+Day 3: gold left 8; House 5 14
+  Night 3: Reward 29,7s; Keep -6 (494/500); lost 0; killed 20
+  Reward Gatehouse,LastStand,WarBonds -> Gatehouse; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 36,0s; Keep -20 (474/500); lost 0; killed 25
+  Reward EfficientFarming,WarBonds,FieldEngineers -> WarBonds; dawn income +40
+Day 5: gold left 39; Tower 9 6
+  Night 5: Reward 37,4s; Keep -6 (468/500); lost 1; killed 31
+  Reward LastStand,FlamingArrows,SpikedCorridor -> SpikedCorridor; dawn income +30
+Day 6: gold left 20; Tower 11 13
+  Night 6: Reward 55,1s; Keep -146 (322/500); lost 0; killed 36
+  Reward CounterBattery,BlastShields,Overwatch -> CounterBattery; dawn income +30
+Day 7: gold left 0; SpikeTrap 10 6; SpikeTrap 10 13
+  Night 7: Reward 46,0s; Keep -0 (322/500); lost 0; killed 42
+  Reward LastStand,ExpandedVision,FortressHeart -> ExpandedVision; dawn income +60
+Day 8: gold left 10; SpikeTrap 10 5; SpikeTrap 10 14; Cannon 11 6 SKIP ImpassableTerrain
+  Night 8: Reward 53,4s; Keep -0 (322/500); lost 0; killed 54
+  Reward Overwatch,FortressHeart,BlastShields -> Overwatch; dawn income +60
+Day 9: gold left 70; 
+  Night 9: Reward 59,9s; Keep -200 (122/500); lost 0; killed 64
+  Reward BlastShields,ThriftyConstruction,FieldEngineers -> BlastShields; dawn income +30
+Day 10: gold left 0; Cannon 8 12; Watchtower 12 8 SKIP ImpassableTerrain; repair Keep +115
+  Night 10: Reward 61,3s; Keep -0 (237/500); lost 0; killed 72
+  Reward EfficientFarming,FortressHeart,ThriftyConstruction -> FortressHeart; dawn income +60
+Day 11: gold left 28; Watchtower 8 14
+  Night 11: Reward 64,5s; Keep -80 (307/650); lost 1; killed 81
+  Reward Recycling,LastStand,FlamingArrows -> FlamingArrows; dawn income +30
+Day 12: gold left 9; Tower 11 4
+  Night 12: Victory 67,4s; Keep -60 (247/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,3 min; defeated 542; bought 17 (defense 15, economy 2); earned 440; perks [Sharpshooters,FocusedFire,Gatehouse,WarBonds,SpikedCorridor,CounterBattery,ExpandedVision,Overwatch,BlastShields,FortressHeart,FlamingArrows]
+
+## corridor on ravine seed 4: generated (attempt 0)
+Day 1: gold left 1; Tower 8 11; Tower 11 9; Tower 8 9; Tower 11 11; House 13 5; SpikeTrap 7 10
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward KillZone,BlastShields,ThriftyConstruction -> KillZone; dawn income +30
+Day 2: gold left 6; SpikeTrap 12 10
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward FortressHeart,Recycling,Overwatch -> Overwatch; dawn income +30
+Day 3: gold left 8; House 14 5
+  Night 3: Reward 29,3s; Keep -6 (494/500); lost 0; killed 20
+  Reward CounterBattery,FlamingArrows,FortressHeart -> FlamingArrows; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 35,5s; Keep -0 (494/500); lost 0; killed 25
+  Reward FortressHeart,ExpandedVision,ThriftyConstruction -> ExpandedVision; dawn income +40
+Day 5: gold left 39; Tower 6 9
+  Night 5: Reward 35,1s; Keep -0 (494/500); lost 1; killed 31
+  Reward BlastShields,LastStand,FortressHeart -> FortressHeart; dawn income +30
+Day 6: gold left 20; Tower 13 11
+  Night 6: Reward 52,7s; Keep -0 (644/650); lost 0; killed 37
+  Reward MarketSquare,FocusedFire,BlastShields -> BlastShields; dawn income +30
+Day 7: gold left 0; SpikeTrap 6 10; SpikeTrap 13 10
+  Night 7: Reward 46,1s; Keep -0 (644/650); lost 0; killed 42
+  Reward HardenedRoofs,EfficientFarming,ThriftyConstruction -> HardenedRoofs; dawn income +30
+Day 8: gold left 5; SpikeTrap 5 10
+  Night 8: Reward 53,8s; Keep -0 (644/650); lost 0; killed 54
+  Reward MarketSquare,BarbedDefenses,Sharpshooters -> Sharpshooters; dawn income +30
+Day 9: gold left 10; SpikeTrap 14 10; Cannon 6 11 SKIP ImpassableTerrain
+  Night 9: Reward 58,2s; Keep -250 (394/650); lost 0; killed 64
+  Reward HeavyShot,FieldEngineers,ThriftyConstruction -> HeavyShot; dawn income +30
+Day 10: gold left 40; 
+  Night 10: Reward 61,3s; Keep -0 (394/650); lost 0; killed 72
+  Reward Recycling,SpikedCorridor,MarketSquare -> SpikedCorridor; dawn income +30
+Day 11: gold left 70; 
+  Night 11: Reward 65,4s; Keep -18 (376/650); lost 0; killed 81
+  Reward Shrapnel,Recycling,MarketSquare -> Shrapnel; dawn income +30
+Day 12: gold left 23; Cannon 12 8; Watchtower 8 12 SKIP ImpassableTerrain
+  Night 12: Victory 67,0s; Keep -0 (376/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,2 min; defeated 543; bought 15 (defense 13, economy 2); earned 350; perks [KillZone,Overwatch,FlamingArrows,ExpandedVision,FortressHeart,BlastShields,HardenedRoofs,Sharpshooters,HeavyShot,SpikedCorridor,Shrapnel]
+
+## corridor on ravine seed 5: generated (attempt 0)
+Day 1: gold left 1; Tower 9 8; Tower 11 11; Tower 11 8; Tower 9 11; House 15 13; SpikeTrap 10 7
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Overwatch,WarBonds,HardenedRoofs -> Overwatch; dawn income +30
+Day 2: gold left 6; SpikeTrap 10 12
+  Night 2: Reward 28,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward KillZone,HardenedRoofs,LastStand -> KillZone; dawn income +30
+Day 3: gold left 8; House 15 14
+  Night 3: Reward 29,3s; Keep -12 (488/500); lost 0; killed 20
+  Reward CounterBattery,FieldEngineers,BlastShields -> CounterBattery; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 35,5s; Keep -0 (488/500); lost 0; killed 25
+  Reward MarketSquare,ThriftyConstruction,FlamingArrows -> FlamingArrows; dawn income +40
+Day 5: gold left 39; Tower 11 6
+  Night 5: Reward 34,9s; Keep -0 (488/500); lost 0; killed 31
+  Reward WarBonds,Recycling,BarbedDefenses -> WarBonds; dawn income +70
+Day 6: gold left 10; Tower 9 13; SpikeTrap 10 6; SpikeTrap 10 13
+  Night 6: Reward 53,7s; Keep -0 (488/500); lost 1; killed 37
+  Reward ThriftyConstruction,MarketSquare,FieldEngineers -> ThriftyConstruction; dawn income +60
+Day 7: gold left 26; SpikeTrap 10 5; SpikeTrap 10 14
+  Night 7: Reward 45,5s; Keep -6 (482/500); lost 0; killed 42
+  Reward LastStand,FieldEngineers,Gatehouse -> Gatehouse; dawn income +30
+Day 8: gold left 56; 
+  Night 8: Reward 52,4s; Keep -0 (482/500); lost 0; killed 54
+  Reward MarketSquare,FocusedFire,FortressHeart -> FortressHeart; dawn income +60
+Day 9: gold left 47; Cannon 8 6
+  Night 9: Reward 58,4s; Keep -0 (632/650); lost 0; killed 64
+  Reward FocusedFire,ExpandedVision,SpikedCorridor -> SpikedCorridor; dawn income +60
+Day 10: gold left 10; Cannon 11 12; Watchtower 8 8
+  Night 10: Reward 61,0s; Keep -0 (632/650); lost 0; killed 72
+  Reward Recycling,HeavyShot,BlastShields -> HeavyShot; dawn income +60
+Day 11: gold left 42; Watchtower 12 14
+  Night 11: Reward 64,3s; Keep -50 (582/650); lost 0; killed 81
+  Reward Recycling,SignalFires,Sharpshooters -> Sharpshooters; dawn income +30
+Day 12: gold left 28; Tower 9 4
+  Night 12: Victory 68,1s; Keep -0 (582/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,2 min; defeated 543; bought 19 (defense 17, economy 2); earned 510; perks [Overwatch,KillZone,CounterBattery,FlamingArrows,WarBonds,ThriftyConstruction,Gatehouse,FortressHeart,SpikedCorridor,HeavyShot,Sharpshooters]
+
+## corridor on ravine seed 6: generated (attempt 0)
+Day 1: gold left 1; Tower 12 9; Tower 9 11; Tower 12 11; Tower 9 9; House 7 15; SpikeTrap 13 10
+  Night 1: Reward 20,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Recycling,HeavyShot,FlamingArrows -> FlamingArrows; dawn income +30
+Day 2: gold left 6; SpikeTrap 8 10
+  Night 2: Reward 29,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward WarBonds,BlastShields,Recycling -> BlastShields; dawn income +30
+Day 3: gold left 8; House 6 15
+  Night 3: Reward 30,2s; Keep -58 (442/500); lost 0; killed 20
+  Reward SpikedCorridor,BarbedDefenses,ThriftyConstruction -> SpikedCorridor; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 35,7s; Keep -48 (394/500); lost 0; killed 24
+  Reward Shrapnel,Sharpshooters,ExpandedVision -> Sharpshooters; dawn income +40
+Day 5: gold left 39; Tower 14 11
+  Night 5: Reward 36,0s; Keep -6 (388/500); lost 0; killed 31
+  Reward KillZone,FocusedFire,ReinforcedTimber -> KillZone; dawn income +40
+Day 6: gold left 5; Tower 7 9; SpikeTrap 14 10
+  Night 6: Reward 55,6s; Keep -86 (302/500); lost 1; killed 37
+  Reward LastStand,FocusedFire,BarbedDefenses -> FocusedFire; dawn income +30
+Day 7: gold left 10; SpikeTrap 7 10
+  Night 7: Reward 48,0s; Keep -36 (266/500); lost 0; killed 41
+  Reward ThriftyConstruction,MarketSquare,Overwatch -> Overwatch; dawn income +30
+Day 8: gold left 15; SpikeTrap 15 10
+  Night 8: Reward 53,3s; Keep -0 (266/500); lost 0; killed 54
+  Reward Gatehouse,FortressHeart,FieldEngineers -> FortressHeart; dawn income +30
+Day 9: gold left 20; SpikeTrap 6 10
+  Night 9: Reward 59,2s; Keep -0 (416/650); lost 0; killed 64
+  Reward HeavyShot,ReinforcedTimber,ThriftyConstruction -> HeavyShot; dawn income +30
+Day 10: gold left 50; 
+  Night 10: Reward 63,3s; Keep -0 (416/650); lost 0; killed 72
+  Reward HardenedRoofs,MarketSquare,Recycling -> HardenedRoofs; dawn income +30
+Day 11: gold left 3; Cannon 13 8
+  Night 11: Reward 64,7s; Keep -0 (416/650); lost 0; killed 81
+  Reward Recycling,WarBonds,MarketSquare -> WarBonds; dawn income +60
+Day 12: gold left 63; 
+  Night 12: Victory 67,8s; Keep -165 (251/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,4 min; defeated 541; bought 15 (defense 13, economy 2); earned 390; perks [FlamingArrows,BlastShields,SpikedCorridor,Sharpshooters,KillZone,FocusedFire,Overwatch,FortressHeart,HeavyShot,HardenedRoofs,WarBonds]
+
+## corridor on ravine seed 7: generated (attempt 0)
+Day 1: gold left 1; Tower 11 12; Tower 9 9; Tower 9 12; Tower 11 9; House 5 7; SpikeTrap 10 13
+  Night 1: Reward 20,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward SpikedCorridor,Recycling,FocusedFire -> SpikedCorridor; dawn income +30
+Day 2: gold left 6; SpikeTrap 10 8
+  Night 2: Reward 28,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward Overwatch,BarbedDefenses,FlamingArrows -> FlamingArrows; dawn income +30
+Day 3: gold left 8; House 5 6
+  Night 3: Reward 30,7s; Keep -0 (500/500); lost 0; killed 20
+  Reward MarketSquare,LastStand,KillZone -> KillZone; dawn income +40
+Day 4: gold left 48; 
+  Night 4: Reward 37,0s; Keep -84 (416/500); lost 0; killed 24
+  Reward FortressHeart,MarketSquare,FieldEngineers -> FortressHeart; dawn income +40
+Day 5: gold left 39; Tower 9 14
+  Night 5: Reward 37,3s; Keep -114 (452/650); lost 1; killed 30
+  Reward BlastShields,Overwatch,FocusedFire -> Overwatch; dawn income +40
+Day 6: gold left 5; Tower 11 7; SpikeTrap 10 14
+  Night 6: Reward 53,0s; Keep -118 (334/650); lost 1; killed 36
+  Reward Sharpshooters,LastStand,BlastShields -> Sharpshooters; dawn income +30
+Day 7: gold left 10; SpikeTrap 10 7
+  Night 7: Reward 46,8s; Keep -0 (334/650); lost 0; killed 42
+  Reward HardenedRoofs,WarBonds,CounterBattery -> CounterBattery; dawn income +30
+Day 8: gold left 15; SpikeTrap 10 15
+  Night 8: Reward 54,4s; Keep -60 (274/650); lost 0; killed 54
+  Reward EfficientFarming,FieldEngineers,WarBonds -> WarBonds; dawn income +30
+Day 9: gold left 20; SpikeTrap 10 6; Cannon 11 13 SKIP ImpassableTerrain
+  Night 9: Defeat 59,5s; Keep -274 (0/650); lost 0; killed 58
+Result: Defeat; nights 8/12; combat 6,1 min; defeated 290; bought 14 (defense 12, economy 2); earned 270; perks [SpikedCorridor,FlamingArrows,KillZone,FortressHeart,Overwatch,Sharpshooters,CounterBattery,WarBonds]
+
+## corridor on ravine seed 8: generated (attempt 0)
+Day 1: gold left 1; Tower 12 11; Tower 9 9; Tower 12 9; Tower 9 11; House 7 5; SpikeTrap 13 10
+  Night 1: Reward 20,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward WarBonds,Recycling,BarbedDefenses -> WarBonds; dawn income +60
+Day 2: gold left 8; SpikeTrap 8 10; House 6 5
+  Night 2: Reward 29,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward Shrapnel,HeavyShot,CounterBattery -> CounterBattery; dawn income +70
+Day 3: gold left 8; Farm 6 3; House 14 5; House 13 5 SKIP ImpassableTerrain
+  Night 3: Reward 31,4s; Keep -10 (490/500); lost 0; killed 20
+  Reward ThriftyConstruction,KillZone,SignalFires -> KillZone; dawn income +72
+Day 4: gold left 31; Tower 14 9
+  Night 4: Reward 35,7s; Keep -0 (490/500); lost 0; killed 25
+  Reward Overwatch,BarbedDefenses,Shrapnel -> Overwatch; dawn income +102
+Day 5: gold left 17; Tower 7 11; SpikeTrap 14 10; Farm 13 3
+  Night 5: Reward 43,1s; Keep -0 (490/500); lost 3; killed 31
+  Reward FlamingArrows,Sharpshooters,LastStand -> Sharpshooters; dawn income +70
+Day 6: gold left 9; SpikeTrap 7 10; SpikeTrap 15 10; House 5 16
+  Night 6: Reward 54,5s; Keep -0 (490/500); lost 0; killed 37
+  Reward LastStand,MarketSquare,Shrapnel -> Shrapnel; dawn income +80
+Day 7: gold left 64; SpikeTrap 6 10; Cannon 13 11 SKIP ImpassableTerrain
+  Night 7: Reward 45,8s; Keep -0 (490/500); lost 0; killed 42
+  Reward MarketSquare,Recycling,BlastShields -> BlastShields; dawn income +80
+Day 8: gold left 35; Cannon 7 8; Watchtower 12 12 SKIP ImpassableTerrain; Watchtower 6 8
+  Night 8: Reward 52,3s; Keep -0 (490/500); lost 0; killed 54
+  Reward HardenedRoofs,SignalFires,BarbedDefenses -> HardenedRoofs; dawn income +80
+Day 9: gold left 17; Tower 16 11; Tower 5 9
+  Night 9: Reward 57,4s; Keep -100 (390/500); lost 0; killed 64
+  Reward FortressHeart,Gatehouse,LastStand -> FortressHeart; dawn income +50
+Day 10: gold left 17; SpikeTrap 16 10; SpikeTrap 5 10
+  Night 10: Reward 62,3s; Keep -0 (540/650); lost 0; killed 72
+  Reward FlamingArrows,FieldEngineers,SpikedCorridor -> SpikedCorridor; dawn income +80
+Day 11: gold left 48; Tower 11 8
+  Night 11: Reward 64,8s; Keep -10 (530/650); lost 0; killed 81
+  Reward Recycling,ThriftyConstruction,FlamingArrows -> FlamingArrows; dawn income +50
+Day 12: gold left 24; Tower 9 12; SpikeTrap 10 8
+  Night 12: Victory 65,7s; Keep -0 (530/650); lost 2; killed 91
+Result: Victory; nights 12/12; combat 9,4 min; defeated 543; bought 27 (defense 21, economy 6); earned 794; perks [WarBonds,CounterBattery,KillZone,Overwatch,Sharpshooters,Shrapnel,BlastShields,HardenedRoofs,FortressHeart,SpikedCorridor,FlamingArrows]
+
+## economy on meadow seed 1: generated (attempt 0)
+Day 1: gold left 19; Tower 9 11; Tower 11 9; Tower 11 11; House 12 12; House 13 12; Farm 12 13 SKIP ImpassableTerrain; House 8 8
+  Night 1: Reward 20,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Shrapnel,LastStand,ReinforcedTimber -> Shrapnel; dawn income +50
+Day 2: gold left 6; Tower 9 9; Wall 10 11
+  Night 2: Reward 30,0s; Keep -0 (500/500); lost 0; killed 16
+  Reward ThriftyConstruction,Overwatch,KillZone -> Overwatch; dawn income +50
+Day 3: gold left 0; House 8 7; Wall 10 9; Wall 9 10
+  Night 3: Reward 32,6s; Keep -0 (500/500); lost 0; killed 20
+  Reward ExpandedVision,FocusedFire,HeavyShot -> ExpandedVision; dawn income +60
+Day 4: gold left 4; Farm 6 7; Wall 11 10
+  Night 4: Reward 38,1s; Keep -0 (500/500); lost 0; killed 25
+  Reward SignalFires,WarBonds,MarketSquare -> MarketSquare; dawn income +98
+Day 5: gold left 4; House 12 8; House 13 8; Farm 12 6
+  Night 5: Reward 39,5s; Keep -0 (500/500); lost 1; killed 31
+  Reward BarbedDefenses,Recycling,FortressHeart -> FortressHeart; dawn income +126
+Day 6: gold left 25; Tower 11 13; House 8 13; House 7 12
+  Night 6: Reward 55,4s; Keep -40 (610/650); lost 1; killed 37
+  Reward Sharpshooters,ThriftyConstruction,CounterBattery -> Sharpshooters; dawn income +146
+Day 7: gold left 24; Tower 9 7; RepairStation 14 10; Farm 6 13
+  Night 7: Reward 49,4s; Keep -0 (610/650); lost 1; killed 42
+  Reward EfficientFarming,SpikedCorridor,BlastShields -> EfficientFarming; dawn income +152
+Day 8: gold left 67; Watchtower 11 12; Cannon 9 15
+  Night 8: Reward 56,1s; Keep -0 (610/650); lost 1; killed 54
+  Reward ReinforcedTimber,KillZone,WarBonds -> WarBonds; dawn income +182
+Day 9: gold left 74; Cannon 10 4; Tower 10 13; Tower 10 7
+  Night 9: Reward 59,3s; Keep -0 (610/650); lost 0; killed 64
+  Reward BlastShields,Gatehouse,FieldEngineers -> FieldEngineers; dawn income +182
+Day 10: gold left 14; Cannon 4 10; Cannon 15 9; RepairStation 8 5; Watchtower 10 8
+  Night 10: Reward 62,9s; Keep -0 (610/650); lost 0; killed 72
+  Reward HeavyShot,FlamingArrows,Gatehouse -> FlamingArrows; dawn income +182
+Day 11: gold left 21; Tower 7 10; Tower 13 10; Cannon 13 15
+  Night 11: Reward 65,5s; Keep -0 (610/650); lost 2; killed 81
+  Reward LastStand,ReinforcedTimber,KillZone -> ReinforcedTimber; dawn income +182
+Day 12: gold left 28; Cannon 6 4; Tower 10 12; Tower 11 8
+  Night 12: Victory 70,5s; Keep -0 (610/650); lost 1; killed 91
+Result: Victory; nights 12/12; combat 9,7 min; defeated 543; bought 37 (defense 26, economy 11); earned 1410; perks [Shrapnel,Overwatch,ExpandedVision,MarketSquare,FortressHeart,Sharpshooters,EfficientFarming,WarBonds,FieldEngineers,FlamingArrows,ReinforcedTimber]
+
+## economy on meadow seed 2: generated (attempt 0)
+Day 1: gold left 5; Tower 9 9; Tower 11 11; Tower 9 11; House 8 12; House 8 13; Farm 6 12
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward MarketSquare,FocusedFire,FlamingArrows -> MarketSquare; dawn income +70
+Day 2: gold left 12; Tower 11 9; Wall 9 10
+  Night 2: Reward 30,3s; Keep -0 (500/500); lost 0; killed 16
+  Reward Recycling,BlastShields,Sharpshooters -> Sharpshooters; dawn income +70
+Day 3: gold left 12; House 12 8; House 13 8; Wall 11 10
+  Night 3: Reward 33,1s; Keep -0 (500/500); lost 0; killed 20
+  Reward SignalFires,KillZone,Overwatch -> Overwatch; dawn income +98
+Day 4: gold left 12; Farm 12 6; House 12 12; House 12 13
+  Night 4: Reward 38,9s; Keep -0 (500/500); lost 0; killed 25
+  Reward HardenedRoofs,BarbedDefenses,Recycling -> HardenedRoofs; dawn income +148
+Day 5: gold left 6; Farm 13 12; House 7 8; House 8 7; Farm 6 6; House 7 13 SKIP Occupied; House 13 7 SKIP Occupied; Wall 10 9
+  Night 5: Reward 81,1s; Keep -0 (500/500); lost 5; killed 31
+  Reward Gatehouse,FortressHeart,WarBonds -> WarBonds; dawn income +152
+Day 6: gold left 46; Wall 10 11; Tower 7 11; Tower 13 9
+  Night 6: Reward 54,5s; Keep -40 (460/500); lost 1; killed 37
+  Reward ExpandedVision,FocusedFire,Recycling -> ExpandedVision; dawn income +122
+Day 7: gold left 3; RepairStation 9 14; Watchtower 8 11; Cannon 4 9
+  Night 7: Reward 57,5s; Keep -0 (460/500); lost 1; killed 42
+  Reward CounterBattery,BarbedDefenses,HeavyShot -> CounterBattery; dawn income +142
+Day 8: gold left 19; Cannon 15 10; Tower 7 10
+  Night 8: Reward 62,0s; Keep -0 (460/500); lost 1; killed 54
+  Reward BlastShields,ReinforcedTimber,FocusedFire -> BlastShields; dawn income +142
+Day 9: gold left 35; Tower 13 10; Cannon 9 4
+  Night 9: Reward 62,6s; Keep -0 (460/500); lost 1; killed 64
+  Reward Shrapnel,HeavyShot,FortressHeart -> FortressHeart; dawn income +142
+Day 10: gold left 12; Cannon 10 15; RepairStation 14 8; Watchtower 12 10
+  Night 10: Reward 67,7s; Keep -0 (610/650); lost 0; killed 72
+  Reward FocusedFire,BarbedDefenses,HeavyShot -> HeavyShot; dawn income +142
+Day 11: gold left 56; Tower 10 7; Tower 10 13
+  Night 11: Reward 71,0s; Keep -0 (610/650); lost 1; killed 81
+  Reward LastStand,Shrapnel,FocusedFire -> Shrapnel; dawn income +142
+Day 12: gold left 44; Cannon 4 13; Cannon 15 6
+  Night 12: Victory 74,1s; Keep -0 (610/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 10,9 min; defeated 543; bought 36 (defense 24, economy 12); earned 1370; perks [MarketSquare,Sharpshooters,Overwatch,HardenedRoofs,WarBonds,ExpandedVision,CounterBattery,BlastShields,FortressHeart,HeavyShot,Shrapnel]
+
+## economy on meadow seed 3: generated (attempt 0)
+Day 1: gold left 5; Tower 11 9; Tower 9 11; Tower 9 9; House 8 8; House 7 8; Farm 7 6
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Sharpshooters,MarketSquare,EfficientFarming -> MarketSquare; dawn income +70
+Day 2: gold left 12; Tower 11 11; Wall 10 9
+  Night 2: Reward 31,8s; Keep -0 (500/500); lost 0; killed 16
+  Reward FlamingArrows,FocusedFire,Sharpshooters -> Sharpshooters; dawn income +70
+Day 3: gold left 12; House 12 12; House 12 13; Wall 10 11
+  Night 3: Reward 32,3s; Keep -0 (500/500); lost 0; killed 20
+  Reward Recycling,FortressHeart,Overwatch -> FortressHeart; dawn income +98
+Day 4: gold left 12; Farm 13 12; House 8 12; House 7 12
+  Night 4: Reward 38,1s; Keep -0 (650/650); lost 0; killed 25
+  Reward WarBonds,CounterBattery,ReinforcedTimber -> WarBonds; dawn income +178
+Day 5: gold left 22; Farm 7 13; House 12 7; House 13 8; Farm 13 6; House 7 7 SKIP Occupied; House 13 13 SKIP Occupied; Wall 11 10; Wall 9 10
+  Night 5: Reward 53,0s; Keep -12 (638/650); lost 6; killed 30
+  Reward ThriftyConstruction,ExpandedVision,KillZone -> ExpandedVision; dawn income +144
+Day 6: gold left 12; Tower 9 7; Tower 11 13; RepairStation 5 9
+  Night 6: Reward 70,9s; Keep -78 (560/650); lost 1; killed 36
+  Reward Gatehouse,ThriftyConstruction,FocusedFire -> ThriftyConstruction; dawn income +144
+Day 7: gold left 59; Watchtower 9 8; Cannon 10 4
+  Night 7: Reward 56,5s; Keep -0 (560/650); lost 4; killed 42
+  Reward HardenedRoofs,KillZone,FlamingArrows -> HardenedRoofs; dawn income +132
+Day 8: gold left 34; Cannon 9 15; Tower 10 7; Tower 10 13
+  Night 8: Reward 57,5s; Keep -0 (560/650); lost 0; killed 54
+  Reward LastStand,SpikedCorridor,HeavyShot -> HeavyShot; dawn income +132
+Day 9: gold left 28; Cannon 15 9; Cannon 4 10
+  Night 9: Reward 61,2s; Keep -10 (550/650); lost 1; killed 64
+  Reward ReinforcedTimber,FocusedFire,Recycling -> ReinforcedTimber; dawn income +102
+Day 10: gold left 8; RepairStation 11 14; Watchtower 10 12; Tower 13 10
+  Night 10: Reward 64,4s; Keep -0 (550/650); lost 0; killed 72
+  Reward LastStand,FocusedFire,BlastShields -> BlastShields; dawn income +132
+Day 11: gold left 27; Tower 7 10; Cannon 6 4
+  Night 11: Reward 67,4s; Keep -0 (550/650); lost 3; killed 81
+  Reward BarbedDefenses,FocusedFire,Overwatch -> Overwatch; dawn income +132
+Day 12: gold left 2; Cannon 13 15; Tower 10 8; Tower 9 12
+  Night 12: Victory 71,5s; Keep -0 (550/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 10,4 min; defeated 541; bought 38 (defense 26, economy 12); earned 1334; perks [MarketSquare,Sharpshooters,FortressHeart,WarBonds,ExpandedVision,ThriftyConstruction,HardenedRoofs,HeavyShot,ReinforcedTimber,BlastShields,Overwatch]
+
+## economy on meadow seed 4: generated (attempt 0)
+Day 1: gold left 5; Tower 9 11; Tower 11 9; Tower 9 9; House 8 8; House 8 7; Farm 6 7
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward HardenedRoofs,BlastShields,ThriftyConstruction -> HardenedRoofs; dawn income +62
+Day 2: gold left 4; Tower 11 11; Wall 9 10
+  Night 2: Reward 29,3s; Keep -0 (500/500); lost 0; killed 16
+  Reward EfficientFarming,LastStand,FortressHeart -> EfficientFarming; dawn income +68
+Day 3: gold left 2; House 12 12; House 13 12; Wall 11 10
+  Night 3: Reward 31,9s; Keep -40 (460/500); lost 0; killed 20
+  Reward BarbedDefenses,Shrapnel,FortressHeart -> FortressHeart; dawn income +88
+Day 4: gold left 6; Farm 12 13; House 12 8; Wall 10 11
+  Night 4: Reward 45,4s; Keep -0 (610/650); lost 0; killed 25
+  Reward Overwatch,Sharpshooters,LastStand -> Sharpshooters; dawn income +126
+Day 5: gold left 6; House 12 7; Farm 13 7; House 7 12; House 8 13
+  Night 5: Reward 95,8s; Keep -132 (478/650); lost 4; killed 31
+  Reward ExpandedVision,Recycling,BarbedDefenses -> ExpandedVision; dawn income +126
+Day 6: gold left 27; Wall 10 9; Tower 7 9; Farm 6 13; House 7 7 SKIP Occupied; House 13 13 SKIP Occupied
+  Night 6: Reward 55,8s; Keep -0 (478/650); lost 2; killed 36
+  Reward SpikedCorridor,WarBonds,Overwatch -> WarBonds; dawn income +168
+Day 7: gold left 58; Tower 13 11; RepairStation 9 5; Watchtower 8 9
+  Night 7: Reward 60,5s; Keep -0 (478/650); lost 1; killed 42
+  Reward Gatehouse,LastStand,Overwatch -> Overwatch; dawn income +140
+Day 8: gold left 23; Cannon 4 10; Cannon 15 9 SKIP ImpassableTerrain; Tower 7 10; Tower 13 10
+  Night 8: Reward 55,0s; Keep -0 (478/650); lost 1; killed 54
+  Reward HeavyShot,Shrapnel,BarbedDefenses -> Shrapnel; dawn income +140
+Day 9: gold left 9; Cannon 9 15; Cannon 10 4
+  Night 9: Reward 61,8s; Keep -0 (478/650); lost 0; killed 64
+  Reward FocusedFire,HeavyShot,CounterBattery -> CounterBattery; dawn income +140
+Day 10: gold left 12; RepairStation 14 11; Watchtower 12 10; Tower 10 13
+  Night 10: Reward 60,5s; Keep -0 (478/650); lost 0; killed 72
+  Reward HeavyShot,SignalFires,FlamingArrows -> FlamingArrows; dawn income +140
+Day 11: gold left 26; Tower 10 7; Cannon 4 6 SKIP ImpassableTerrain; Cannon 15 13
+  Night 11: Reward 63,5s; Keep -0 (478/650); lost 0; killed 81
+  Reward SpikedCorridor,MarketSquare,HeavyShot -> MarketSquare; dawn income +148
+Day 12: gold left 27; Tower 8 10; Tower 12 9; Tower 6 10
+  Night 12: Victory 66,2s; Keep -0 (478/650); lost 2; killed 91
+Result: Victory; nights 12/12; combat 10,8 min; defeated 542; bought 37 (defense 25, economy 12); earned 1346; perks [HardenedRoofs,EfficientFarming,FortressHeart,Sharpshooters,ExpandedVision,WarBonds,Overwatch,Shrapnel,CounterBattery,FlamingArrows,MarketSquare]
+
+## economy on meadow seed 5: generated (attempt 0)
+Day 1: gold left 19; Tower 9 9; Tower 11 11; Tower 11 9; House 12 8; House 13 8; Farm 12 6 SKIP ImpassableTerrain; House 8 12
+  Night 1: Reward 21,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Overwatch,Recycling,ExpandedVision -> ExpandedVision; dawn income +50
+Day 2: gold left 6; Tower 9 11; Wall 10 9
+  Night 2: Reward 31,2s; Keep -0 (500/500); lost 0; killed 16
+  Reward ReinforcedTimber,Gatehouse,FocusedFire -> Gatehouse; dawn income +50
+Day 3: gold left 0; House 8 13; Wall 10 11; Wall 9 10
+  Night 3: Reward 36,2s; Keep -0 (500/500); lost 0; killed 20
+  Reward Overwatch,FlamingArrows,HardenedRoofs -> HardenedRoofs; dawn income +60
+Day 4: gold left 4; Farm 6 12; Wall 11 10
+  Night 4: Reward 41,5s; Keep -6 (494/500); lost 1; killed 24
+  Reward FlamingArrows,ThriftyConstruction,BlastShields -> FlamingArrows; dawn income +82
+Day 5: gold left 30; House 12 12; House 13 12
+  Night 5: Reward 56,6s; Keep -44 (450/500); lost 2; killed 31
+  Reward ThriftyConstruction,Sharpshooters,BarbedDefenses -> Sharpshooters; dawn income +82
+Day 6: gold left 21; Tower 11 7; Farm 12 13
+  Night 6: Reward 84,0s; Keep -48 (402/500); lost 1; killed 37
+  Reward BlastShields,Overwatch,LastStand -> BlastShields; dawn income +82
+Day 7: gold left 54; Tower 9 13
+  Night 7: Reward 58,5s; Keep -0 (402/500); lost 1; killed 42
+  Reward MarketSquare,ThriftyConstruction,HeavyShot -> MarketSquare; dawn income +68
+Day 8: gold left 34; RepairStation 14 9; Watchtower 11 8
+  Night 8: Reward 56,3s; Keep -0 (402/500); lost 1; killed 54
+  Reward FocusedFire,KillZone,FortressHeart -> FortressHeart; dawn income +68
+Day 9: gold left 25; Cannon 9 4
+  Night 9: Reward 76,7s; Keep -0 (552/650); lost 0; killed 64
+  Reward ThriftyConstruction,Shrapnel,SignalFires -> Shrapnel; dawn income +68
+Day 10: gold left 16; Cannon 10 15
+  Night 10: Reward 62,2s; Keep -0 (552/650); lost 1; killed 72
+  Reward SpikedCorridor,ReinforcedTimber,SignalFires -> SignalFires; dawn income +58
+Day 11: gold left 25; Tower 10 7
+  Night 11: Reward 65,5s; Keep -0 (552/650); lost 1; killed 81
+  Reward FieldEngineers,FocusedFire,ReinforcedTimber -> FieldEngineers; dawn income +58
+Day 12: gold left 34; Tower 10 13
+  Night 12: Victory 69,3s; Keep -0 (552/650); lost 0; killed 91
+Result: Victory; nights 12/12; combat 11,0 min; defeated 542; bought 24 (defense 16, economy 8); earned 726; perks [ExpandedVision,Gatehouse,HardenedRoofs,FlamingArrows,Sharpshooters,BlastShields,MarketSquare,FortressHeart,Shrapnel,SignalFires,FieldEngineers]
+
+## economy on meadow seed 6: generated (attempt 0)
+Day 1: gold left 5; Tower 11 9; Tower 9 11; Tower 11 11; House 12 12; House 12 13; Farm 13 12
+  Night 1: Reward 20,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward Recycling,HardenedRoofs,EfficientFarming -> EfficientFarming; dawn income +68
+Day 2: gold left 10; Tower 9 9; Wall 11 10
+  Night 2: Reward 29,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward LastStand,Shrapnel,Sharpshooters -> Sharpshooters; dawn income +68
+Day 3: gold left 8; House 8 8; House 7 8; Farm 7 6 SKIP ImpassableTerrain; Wall 9 10
+  Night 3: Reward 32,1s; Keep -0 (500/500); lost 0; killed 20
+  Reward FocusedFire,ThriftyConstruction,WarBonds -> WarBonds; dawn income +118
+Day 4: gold left 0; House 8 12; House 8 13; Farm 6 12; House 13 8
+  Night 4: Reward 40,2s; Keep -6 (494/500); lost 0; killed 25
+  Reward FocusedFire,BarbedDefenses,Gatehouse -> Gatehouse; dawn income +146
+Day 5: gold left 20; House 12 7; Farm 13 6; House 13 13 SKIP Occupied; House 7 7; Wall 10 9; Wall 10 11
+  Night 5: Reward 74,1s; Keep -0 (494/500); lost 7; killed 30
+  Reward Recycling,ExpandedVision,HardenedRoofs -> HardenedRoofs; dawn income +110
+Day 6: gold left 32; Tower 13 11; Tower 7 9
+  Night 6: Reward 60,2s; Keep -40 (454/500); lost 2; killed 37
+  Reward MarketSquare,FocusedFire,HeavyShot -> MarketSquare; dawn income +68
+Day 7: gold left 12; RepairStation 10 14; Watchtower 12 11
+  Night 7: Reward 56,9s; Keep -0 (454/500); lost 1; killed 42
+  Reward FortressHeart,ThriftyConstruction,FieldEngineers -> FieldEngineers; dawn income +88
+Day 8: gold left 23; Cannon 15 9
+  Night 8: Reward 55,8s; Keep -0 (454/500); lost 1; killed 54
+  Reward FortressHeart,ExpandedVision,CounterBattery -> CounterBattery; dawn income +88
+Day 9: gold left 34; Cannon 4 10
+  Night 9: Reward 64,2s; Keep -20 (434/500); lost 0; killed 64
+  Reward Overwatch,LastStand,ExpandedVision -> ExpandedVision; dawn income +58
+Day 10: gold left 43; Tower 13 10
+  Night 10: Reward 65,4s; Keep -0 (434/500); lost 2; killed 72
+  Reward KillZone,Overwatch,SpikedCorridor -> Overwatch; dawn income +88
+Day 11: gold left 5; Tower 7 10; Cannon 10 4
+  Night 11: Reward 65,0s; Keep -0 (434/500); lost 0; killed 81
+  Reward FlamingArrows,BlastShields,ThriftyConstruction -> FlamingArrows; dawn income +88
+Day 12: gold left 16; Cannon 9 15
+  Night 12: Victory 67,4s; Keep -0 (434/500); lost 0; killed 91
+Result: Victory; nights 12/12; combat 10,5 min; defeated 542; bought 30 (defense 18, economy 12); earned 988; perks [EfficientFarming,Sharpshooters,WarBonds,Gatehouse,HardenedRoofs,MarketSquare,FieldEngineers,CounterBattery,ExpandedVision,Overwatch,FlamingArrows]
+
+## economy on meadow seed 7: generated (attempt 0)
+Day 1: gold left 5; Tower 11 11; Tower 9 9; Tower 9 11; House 8 12; House 7 12; Farm 7 13
+  Night 1: Reward 20,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward SpikedCorridor,EfficientFarming,CounterBattery -> EfficientFarming; dawn income +68
+Day 2: gold left 10; Tower 11 9; Wall 10 11
+  Night 2: Reward 28,5s; Keep -0 (500/500); lost 0; killed 16
+  Reward FocusedFire,HardenedRoofs,MarketSquare -> MarketSquare; dawn income +76
+Day 3: gold left 2; House 12 8; House 12 7; Wall 10 9; Wall 11 10
+  Night 3: Reward 37,6s; Keep -20 (480/500); lost 0; killed 20
+  Reward ThriftyConstruction,WarBonds,KillZone -> WarBonds; dawn income +104
+Day 4: gold left 8; Farm 13 7; House 8 8; House 7 8
+  Night 4: Reward 44,9s; Keep -30 (450/500); lost 0; killed 25
+  Reward BarbedDefenses,FieldEngineers,BlastShields -> FieldEngineers; dawn income +160
+Day 5: gold left 14; Farm 7 6; House 12 13; House 13 12; Farm 13 13; House 7 13 SKIP Occupied; House 13 7 SKIP Occupied; Wall 9 10
+  Night 5: Reward 74,1s; Keep -0 (450/500); lost 9; killed 29
+  Reward KillZone,Overwatch,FlamingArrows -> FlamingArrows; dawn income +144
+Day 6: gold left 4; Tower 9 13; Tower 11 7; RepairStation 5 10
+  Night 6: Defeat 63,7s; Keep -450 (0/500); lost 5; killed 32
+Result: Defeat; nights 5/12; combat 4,5 min; defeated 132; bought 23 (defense 11, economy 12); earned 552; perks [EfficientFarming,MarketSquare,WarBonds,FieldEngineers,FlamingArrows]
+
+## economy on meadow seed 8: generated (attempt 0)
+Day 1: gold left 5; Tower 11 11; Tower 9 9; Tower 11 9; House 12 8; House 12 7; Farm 13 7
+  Night 1: Reward 20,6s; Keep -0 (500/500); lost 0; killed 10
+  Reward WarBonds,Overwatch,BarbedDefenses -> WarBonds; dawn income +92
+Day 2: gold left 6; Tower 9 11; House 8 12; Wall 11 10
+  Night 2: Reward 30,3s; Keep -0 (500/500); lost 0; killed 16
+  Reward FortressHeart,ThriftyConstruction,ExpandedVision -> ExpandedVision; dawn income +102
+Day 3: gold left 10; House 7 12; Farm 7 13; House 8 8
+  Night 3: Reward 31,6s; Keep -0 (500/500); lost 0; killed 20
+  Reward KillZone,ReinforcedTimber,LastStand -> ReinforcedTimber; dawn income +144
+Day 4: gold left 0; Wall 9 10; House 8 7; Farm 6 7; House 13 12; House 12 13; Wall 10 11
+  Night 4: Reward 45,3s; Keep -10 (490/500); lost 0; killed 25
+  Reward KillZone,ThriftyConstruction,FlamingArrows -> FlamingArrows; dawn income +166
+Day 5: gold left 12; Farm 13 13; House 13 7 SKIP Occupied; House 7 13 SKIP Occupied; Wall 10 9; Tower 13 9; Tower 7 11
+  Night 5: Reward 38,4s; Keep -0 (490/500); lost 1; killed 31
+  Reward FortressHeart,SpikedCorridor,HardenedRoofs -> HardenedRoofs; dawn income +196
+Day 6: gold left 43; RepairStation 10 5; Watchtower 12 9; Cannon 15 10
+  Night 6: Reward 65,5s; Keep -0 (490/500); lost 1; killed 37
+  Reward SignalFires,BlastShields,FocusedFire -> BlastShields; dawn income +196
+Day 7: gold left 64; Cannon 4 9; Tower 13 10; Tower 7 10
+  Night 7: Reward 45,8s; Keep -0 (490/500); lost 1; killed 42
+  Reward LastStand,MarketSquare,FieldEngineers -> MarketSquare; dawn income +198
+Day 8: gold left 20; Cannon 10 15; Cannon 9 4; RepairStation 5 11; Watchtower 8 10
+  Night 8: Reward 52,3s; Keep -0 (490/500); lost 0; killed 54
+  Reward SignalFires,FieldEngineers,Gatehouse -> FieldEngineers; dawn income +198
+Day 9: gold left 43; Tower 10 13; Tower 10 7; Cannon 15 6
+  Night 9: Reward 55,7s; Keep -0 (490/500); lost 0; killed 64
+  Reward Gatehouse,Recycling,HeavyShot -> HeavyShot; dawn income +198
+Day 10: gold left 17; Cannon 4 13; Tower 12 10; Tower 8 9; Tower 14 10
+  Night 10: Reward 63,8s; Keep -0 (490/500); lost 2; killed 72
+  Reward KillZone,Sharpshooters,FortressHeart -> Sharpshooters; dawn income +198
+Day 11: gold left 68; Tower 6 10; Tower 14 12; Tower 6 8
+  Night 11: Reward 66,0s; Keep -0 (490/500); lost 1; killed 81
+  Reward Shrapnel,EfficientFarming,SignalFires -> EfficientFarming; dawn income +210
+Day 12: gold left 278; 
+  Night 12: Victory 70,5s; Keep -0 (490/500); lost 0; killed 91
+Result: Victory; nights 12/12; combat 9,8 min; defeated 543; bought 42 (defense 30, economy 12); earned 1898; perks [WarBonds,ExpandedVision,ReinforcedTimber,FlamingArrows,HardenedRoofs,BlastShields,MarketSquare,FieldEngineers,HeavyShot,Sharpshooters,EfficientFarming]
+
