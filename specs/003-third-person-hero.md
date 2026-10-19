@@ -40,13 +40,14 @@ The hero is a Core simulation entity like enemies and buildings, not a Unity obj
 | Max HP | 200 [P] |
 | Move speed | 3.0 tiles/s [P] = 180 units/step; must be a whole number of 1/1200-tile units per step [I] |
 | Body radius | 0.3 tile [P] |
-| Spawn / respawn point | Keep-adjacent spawn cell: the first walkable non-solid cell edge-adjacent to the Keep in N, E, S, W order [I] |
+| Spawn / respawn point | The walkable cell with no solid building nearest the Keep: smallest Manhattan distance to `(10,10)`, ties by N, E, S, W direction from the Keep, then `(z, x)` ascending [I]. Usually a Keep neighbour; outside the walls when all four neighbours are built on. Recomputed from the current grid each time it is used |
 | Position | Continuous (same numeric representation as enemy `X`, `Z`), not cell-bound [I] |
 
 - **Per-step command** [I]: one `HeroCommand` per simulation step: move heading quantized to 16 directions or none, attack pressed (bool), facing quantized to 64 directions. The view samples input into this record; the simulation reads nothing else from input. The same initial state plus the same command stream yields the same outcome.
 - **Collision** [I]: the hero's body cannot overlap a cell occupied by a solid building or a non-walkable terrain cell (forest, rock, water; fords are walkable). It cannot leave the 20×20 board. Movement resolves axis-separated against those cells (slide along walls), never pushes anything, and never breaches.
 - **No grid side effects** [I]: the hero never occupies cells, never blocks enemy routes, never changes `GridState.Revision`, and does not trigger Spike Traps. Enemies and the hero pass through each other (the game has no unit collision avoidance).
-- **Day**: the hero exists and can walk during Day [P], but nothing in Day is timed or fought. A building cannot be placed on a cell the hero's body currently overlaps; placement is rejected with a distinct reason [I].
+- **Day**: the hero can walk during Day, but nothing in Day is fought. Day movement uses the same collision rules and per-step command, advanced by a hero-only Day clock at the fixed step; nothing else in the simulation advances [I].
+- **Building on the hero** [I]: placing a building whose footprint overlaps the hero's body succeeds, and the hero is moved to the spawn-rule cell nearest its own position (same tie-break, measured from the hero's cell instead of the Keep). Selling or destruction never moves the hero.
 
 ### 2.2 Hero attack
 
@@ -88,9 +89,9 @@ The invariant to preserve: enemies decide only at cell-centre decision points on
 - At 0 HP the hero is down: no commands, no attacks, not a target. It respawns at the spawn point with full HP after **10 s** [P] of simulation time [I: measured in steps, so pause and Night speed apply].
 - Hero death **never** causes Defeat. Defeat remains Keep HP 0 only [I].
 - On every Day entry the hero is restored to full HP at the spawn point, alive, with its swing cooldown reset [I].
-- Consequence [I]: the hero has **no state in the Day checkpoint**. A `release-rules-2` save differs from a rules-1 save only by its `rulesVersion`. Quitting during Night still returns to the start of that Night, as now.
+- **Night start position** [I]: the hero starts the Night where it stood at the end of Day. That position is stored in the checkpoint written at Start Night, so Continue replays the Night from the same position. HP and cooldown need no storage (always full and reset at Day entry). Quitting during Night still returns to the start of that Night, as now.
 
-**Acceptance (section 2):** an enemy engages only at a cell-centre decision point, never mid-segment; an enemy hitting a Wall ignores the hero standing next to it; a Raider Archer shooting a House switches to the hero at its next decision after the hero hits it, and returns to normal priority once the hero leaves range; hero death on the step the Keep falls still ends in Defeat, and hero death alone never does; the hero cannot enter a solid-building or non-walkable cell, including diagonally at corners; the same seed, placements, perk choices and command stream reproduce the same night outcome; a rules-1 save loads and plays with no hero.
+**Acceptance (section 2):** an enemy engages only at a cell-centre decision point, never mid-segment; an enemy hitting a Wall ignores the hero standing next to it; a Raider Archer shooting a House switches to the hero at its next decision after the hero hits it, and returns to normal priority once the hero leaves range; hero death on the step the Keep falls still ends in Defeat, and hero death alone never does; the hero cannot enter a solid-building or non-walkable cell, including diagonally at corners; with all four Keep neighbours walled, the hero spawns on the nearest free cell outside; placing a Wall on the hero moves the hero aside and the placement succeeds; a Night continued from its checkpoint starts with the hero where it stood at Start Night; the same seed, placements, perk choices and command stream reproduce the same night outcome; a rules-1 save loads and plays with no hero.
 
 ## 3. Views
 
@@ -141,7 +142,7 @@ Proposed bindings [P]. Keyboard and mouse only in this milestone; gamepad deferr
 | Space | — | Pause / resume | — | Pause / resume |
 | F | — | Cycle speed 1/2/3× | — | Disabled (shows "1× in Hero view") |
 | H | Centre camera on hero | Centre camera on hero | — | — |
-| Esc | Cancel tool, else menu | Menu (pauses as now) | Menu (unlocks cursor) | Menu (pauses, unlocks cursor) |
+| Esc | Cancel tool, else clear selection (unchanged) | Cancel tool, else clear selection (unchanged) | Unlock cursor and open the menu | Unlock cursor and open the menu (pauses as the menu does now) |
 
 The menu, reward screen, dialogs and focus loss always unlock the cursor. UI clicks never pass into the world in either view (existing `PlayerController` rule).
 
@@ -177,9 +178,9 @@ These scripts establish mechanical limits only. Whether the hero is fun and whet
 
 ## 7. Saves
 
-- Run checkpoint schema 2 with `rulesVersion: release-rules-2`; no new fields (2.5). Builds without rules-2 reject such a save with the existing `IncompatibleRules` message and never overwrite it [I].
+- Run checkpoint schema 2 with `rulesVersion: release-rules-2`. New optional fields, absent in rules-1 saves: the hero's position at Start Night (2.5) and the run's hero-kill count in the statistics. Builds without rules-2 reject such a save with the existing `IncompatibleRules` message and never overwrite it [I].
 - Settings file gains the camera settings from 3.2 with a version bump and migration from the current version.
-- The current view, camera angle and hero position are not saved [I].
+- The current view and camera angle are not saved. The hero's Day position is saved only through the Start Night checkpoint; a Save and Quit during Day returns the hero to the spawn point on Continue [I].
 
 ## 8. Tests
 
@@ -214,3 +215,7 @@ Stage 1 can be judged by scripts before any camera work starts. If the balance g
 6. **Hero always on:** every new release run has the hero; there is no on/off choice (section 1).
 7. **Starting numbers:** 200 HP, 15 damage per 0.6 s swing, 10 s respawn, as tabled.
 8. **Art:** generated placeholder art for the hero model, sky and island edge, like the current release art.
+9. **Night start position:** the hero starts the Night where it stood in Day, saved in the Start Night checkpoint (2.5, 7).
+10. **Building on the hero:** the placement succeeds and the hero steps aside (2.1).
+11. **Spawn cell:** nearest free cell to the Keep, possibly outside the walls (2.1).
+12. **Esc:** opens the menu in Hero view only; Strategic view keeps today's behaviour (3.4).
