@@ -1,5 +1,11 @@
 # Agent guidelines
 
+## Review specs before planning
+
+- Before writing an implementation plan, read `specs/README.md`, the spec the plan implements, and `plans/008-rules.md` (current release rules). Check that they agree with each other and with the code the plan will touch.
+- If a spec is stale, contradicts another spec or the code, or leaves a decision open that the plan depends on, report it to the owner and get it resolved first. Do not quietly resolve it inside the plan.
+- Every plan names the spec (and version) it implements. When a spec is implemented or superseded, update its status line and `specs/README.md` in the same change.
+
 ## Keep tests useful and lean
 
 - Add or change a test only to protect a concrete gameplay rule, reproduce a real bug, or cover a meaningful risk introduced by the current change. Be able to name the failure it would catch.

@@ -12,6 +12,12 @@ This document describes the full game vision. It does not authorize implementing
 2. **Six-night MVP:** six buildings including the Keep, four enemy types including the final boss, ten perks, and one biome. Its scope and system rules are in [003-six-night-mvp.md](003-six-night-mvp.md). Begin only after the navigation prototype passes its checks and playtesting supports further investment.
 3. **Full release:** twelve nights and the expanded content targets in section 15. These remain direction, not immediate implementation work.
 
+### Current status (2026-10-19)
+
+Milestones 1 and 2 are implemented (plans 001, 003–007). The release profile `release-rules-1` (twelve nights, nine buildings, seven enemies including two bosses, 24 perks, three map profiles) is implemented by plan 008; its frozen rules contract is [plans/008-rules.md](../plans/008-rules.md), which takes precedence over this document's examples. Plans 010–011 changed board readability and visuals, not rules.
+
+The next feature is a player-controlled hero with a switchable third-person view, specified in [005-third-person-hero.md](005-third-person-hero.md). For the release profile it supersedes this document's fixed isometric camera and its exclusion of heroes; the six-night MVP and the prototype keep both. [README.md](README.md) lists every specification with its status.
+
 The milestone-specific specification takes precedence for its milestone. For example, the prototype has no reward phase or passive income; the MVP has no soldiers or activated abilities. Owner-confirmed decisions: open routes take priority over breaching, the later economy has guaranteed Keep income, and controllable soldiers are deferred beyond the MVP. Numerical values are initial tuning defaults, not validated balance.
 
 *Visual reference search terms: minimalist isometric low poly medieval fortress on small grassy island surrounded by tiny enemies twilight indie strategy game aesthetic Thronefall; stylized minimalist medieval village palisade towers warm torchlight isometric game environment; top down isometric minimalist fantasy forest fortress tiny army battle stylized low poly indie game.*
@@ -30,7 +36,7 @@ Target platform
 
 Camera
 
-**Fixed isometric**
+**Fixed isometric strategy view; release profile adds a switchable third-person hero view (spec 005)**
 
 Business model
 
@@ -82,7 +88,7 @@ The sequence repeats until the player wins or the Keep is destroyed.
 
 ## 3. Map and building system
 
-The battlefield is a compact, procedurally generated island represented by a square grid. The camera stays fixed in a three-quarter isometric view.
+The battlefield is a compact, procedurally generated island represented by a square grid. The strategy camera stays fixed in a three-quarter isometric view; the release profile adds a third-person hero view the player can switch to (spec 005).
 
 ### Starting map
 
@@ -293,11 +299,11 @@ The game is designed primarily for mouse and keyboard.
 | Mouse wheel | Zoom |
 | Space | Pause / Resume during combat |
 | 1–2 prototype; 1–5 MVP | Select a purchasable building from toolbar |
-| Tab | Future detailed combat overlay; not required for prototype/MVP |
+| Tab | Release profile with hero: switch between strategy and hero view (spec 005, which defines the full hero-view input map) |
 
 ### HUD
 
-The default HUD displays gold, income per day where applicable, Keep HP, current night, upcoming enemy threats, and building shortcuts. Fixed isometric means fixed orientation: camera pan and zoom are allowed, rotation is not.
+The default HUD displays gold, income per day where applicable, Keep HP, current night, upcoming enemy threats, and building shortcuts. In the strategy view, fixed isometric means fixed orientation: camera pan and zoom are allowed, rotation is not. The hero view has its own HUD and controls (spec 005).
 
 The interface should minimize clutter by exposing building-specific statistics on selection or hover.
 
@@ -346,7 +352,7 @@ The game should remain playable with music disabled.
 
 **Project decision:** Develop The Last Fortress in **Unity 6.3 LTS (6000.3.16f1)** using C#. The Unity project is in `game/The Last Fortress/`.
 
-Use the Universal Render Pipeline (URP) for the fixed isometric 3D presentation. Keep building placement and enemy routing on a logical grid so fortress layouts can change paths predictably.
+Use the Universal Render Pipeline (URP) for the 3D presentation (fixed isometric strategy view; perspective hero view from spec 005). Keep building placement and enemy routing on a logical grid so fortress layouts can change paths predictably.
 
 ### Main systems
 
@@ -441,6 +447,8 @@ Potential post-release content includes daily seeded challenges, additional map 
 
 Co-op and competitive multiplayer are not planned for version 1.0.
 
+Implemented so far in `release-rules-1` (plan 008): one biome with three map profiles, 9 buildings, 7 enemy types including 2 bosses, 24 perks, 12 nights, one difficulty. One player hero (spec 005) is planned on top of it; heroes were not in the original version 1.0 targets above.
+
 ## 16. Balancing model
 
 Difficulty should not depend solely on increasing enemy HP and damage.
@@ -508,4 +516,4 @@ The most distinctive mechanic is not the day/night cycle or the economy. It is t
 
 That mechanic should be fun even without procedural generation, upgrades, or progression. If it is, the remaining systems can reinforce it.
 
-The technical prototype specification is [002-navigation-prototype.md](002-navigation-prototype.md). Execute [plan 001](../plans/001-navigation-prototype.md) before implementing the MVP rules in [003-six-night-mvp.md](003-six-night-mvp.md). Treat the stated production schedule and content totals as planning targets, not implementation acceptance criteria.
+Historical: this section described the first milestone, now implemented (spec 002, plan 001). The MVP (spec 003) and release profile (plan 008) followed. The current next milestone is [005-third-person-hero.md](005-third-person-hero.md). Treat the stated production schedule and content totals as planning targets, not implementation acceptance criteria.

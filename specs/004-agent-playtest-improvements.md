@@ -1,6 +1,6 @@
 # Improvements from agent playtests and focused reviews
 
-2026-10-15. Status: proposed follow-up specification; no gameplay changes implemented by this task.
+2026-10-15. Status (2026-10-19): implemented by plan 006 ([results](../plans/006-results.md)); human playtest checks remain pending as recorded there.
 
 ## Purpose and evidence
 
