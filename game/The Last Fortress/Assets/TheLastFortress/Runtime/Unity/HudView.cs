@@ -84,6 +84,8 @@ namespace TheLastFortress
         {
             this.game = game;
             font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (panelSprite == null) panelSprite = SlicedSprite("HudPanel", 0.86f, 0.72f, 0.95f);
+            if (buttonSprite == null) buttonSprite = SlicedSprite("HudButton", 1f, 0.8f, 1f);
 
             var canvasGo = new GameObject("HUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasGo.transform.SetParent(transform, false);
@@ -774,8 +776,55 @@ namespace TheLastFortress
         {
             var rt = Rect(parent, name, anchor, position, size);
             var img = rt.gameObject.AddComponent<Image>();
-            img.color = Palette.HudSurface.WithAlpha(0.92f);
+            img.color = Palette.HudSurface.WithAlpha(0.94f);
+            Sliced(img, panelSprite);
+            // Restrained accent: a thin amber rule inset along the top edge, the one ornament every panel shares.
+            var accent = new GameObject("Accent", typeof(RectTransform)).GetComponent<RectTransform>();
+            accent.SetParent(rt, false);
+            accent.anchorMin = new Vector2(0f, 1f);
+            accent.anchorMax = new Vector2(1f, 1f);
+            accent.pivot = new Vector2(0.5f, 1f);
+            accent.offsetMin = new Vector2(14f, -5f);
+            accent.offsetMax = new Vector2(-14f, -3f);
+            var line = accent.gameObject.AddComponent<Image>();
+            line.color = Palette.Amber.WithAlpha(0.45f);
+            line.raycastTarget = false;
             return rt;
+        }
+
+        /// <summary>HUD surface sprites, generated once (no texture assets): rounded corners, a lit 1 px rim and a soft top-to-bottom shade.</summary>
+        static Sprite panelSprite, buttonSprite;
+
+        static void Sliced(Image img, Sprite sprite)
+        {
+            if (sprite == null) return;
+            img.sprite = sprite;
+            img.type = Image.Type.Sliced;
+            img.pixelsPerUnitMultiplier = 1f;
+        }
+
+        static Sprite SlicedSprite(string name, float top, float bottom, float rim)
+        {
+            const int size = 48, radius = 9;
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = name, wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+            var pixels = new Color32[size * size];
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                // Signed distance to the rounded rectangle (negative inside).
+                var qx = Mathf.Max(Mathf.Abs(x + 0.5f - size / 2f) - (size / 2f - radius), 0f);
+                var qy = Mathf.Max(Mathf.Abs(y + 0.5f - size / 2f) - (size / 2f - radius), 0f);
+                var d = Mathf.Sqrt(qx * qx + qy * qy) - radius;
+                var alpha = Mathf.Clamp01(0.5f - d);
+                var shade = Mathf.Lerp(bottom, top, y / (size - 1f));
+                var edge = Mathf.Clamp01(1.5f + d); // 1 on the outer 1.5 px
+                var v = Mathf.Lerp(shade, rim, edge * (y > size / 2 ? 1f : 0.55f)); // the rim is brighter on top, like light from above
+                pixels[y * size + x] = new Color(v, v, v, alpha);
+            }
+
+            tex.SetPixels32(pixels);
+            tex.Apply(false, true);
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(radius + 3, radius + 3, radius + 3, radius + 3));
         }
 
         Text Label(Transform parent, string name, int size, TextAnchor align, Vector2 position, Vector2 box, Color color, bool centered = false)
@@ -789,6 +838,14 @@ namespace TheLastFortress
             t.raycastTarget = false;
             t.horizontalOverflow = HorizontalWrapMode.Wrap;
             t.verticalOverflow = VerticalWrapMode.Overflow;
+            if (color.grayscale > 0.5f)
+            {
+                // Light text gets a soft drop shadow so it stays legible over the board and bright panels.
+                var shadow = rt.gameObject.AddComponent<Shadow>();
+                shadow.effectColor = new Color(0f, 0f, 0f, 0.45f);
+                shadow.effectDistance = new Vector2(1.5f, -1.5f);
+            }
+
             return t;
         }
 
@@ -806,7 +863,8 @@ namespace TheLastFortress
         {
             var rt = Rect(parent, label.Replace(" ", "") + "Button", anchor, position, size);
             var img = rt.gameObject.AddComponent<Image>();
-            img.color = Palette.Hex(0x35525C);
+            img.color = Palette.Hex(0x3A5963);
+            Sliced(img, buttonSprite);
             var button = rt.gameObject.AddComponent<Button>();
             button.targetGraphic = img;
             ApplyStates(button);
@@ -825,7 +883,7 @@ namespace TheLastFortress
             colors.highlightedColor = new Color(1.22f, 1.22f, 1.22f, 1f);
             colors.selectedColor = new Color(1.12f, 1.12f, 1.12f, 1f);
             colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            colors.disabledColor = new Color(0.62f, 0.62f, 0.62f, 1f); // dimmed but opaque: the board never shows through a card
             colors.colorMultiplier = 1f;
             colors.fadeDuration = 0.06f;
             selectable.colors = colors;
@@ -872,6 +930,7 @@ namespace TheLastFortress
             var rt = Rect(parent, title.Replace(" ", "") + "Card", new Vector2(0, 0), position, new Vector2(width, 120));
             image = rt.gameObject.AddComponent<Image>();
             image.color = CardIdle;
+            Sliced(image, buttonSprite);
             var button = rt.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             ApplyStates(button);
@@ -892,6 +951,7 @@ namespace TheLastFortress
             var keyBack = Rect(rt, "HotkeyBack", new Vector2(0, 1), new Vector2(keyX, keyY), new Vector2(46, 40));
             var kb = keyBack.gameObject.AddComponent<Image>();
             kb.color = Palette.HudText;
+            Sliced(kb, buttonSprite);
             kb.raycastTarget = false;
             keyBack.SetSiblingIndex(key.transform.GetSiblingIndex());
             return button;

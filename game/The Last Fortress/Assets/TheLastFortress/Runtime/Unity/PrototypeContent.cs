@@ -45,6 +45,9 @@ namespace TheLastFortress
         [Tooltip("Uniform scale for enemy views (MVP readability at default zoom). 0 or 1 = prefab scale.")]
         public float enemyScale = 1f;
 
+        /// <summary>Authored board look, lighting and post-processing (plan 011); null keeps the generated blockout look.</summary>
+        public ArtDirection art;
+
         [Header("Materials")]
         public Material grass;
         public Material water;

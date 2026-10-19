@@ -95,6 +95,13 @@ namespace TheLastFortress
                 yield break;
             }
 
+            if (game.IsRelease && captureSet == "011")
+            {
+                yield return RunPlan011();
+                Application.Quit();
+                yield break;
+            }
+
             if (game.IsRelease)
             {
                 yield return RunPlan008();
@@ -575,6 +582,92 @@ namespace TheLastFortress
             game.Hud.HelpPanel.SetActive(false);
 
             File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-008-capture-log.txt"), log.ToString());
+        }
+
+        /// <summary>The same small fortress on every map: an L of Walls west and north of the Keep, two Archer Towers, a House, a Farm, a trap.</summary>
+        static readonly (BuildingKind kind, int x, int z)[] Plan011Layout =
+        {
+            (BuildingKind.Wall, 8, 8), (BuildingKind.Wall, 8, 9), (BuildingKind.Wall, 8, 11), (BuildingKind.Wall, 8, 12), (BuildingKind.Wall, 9, 12),
+            (BuildingKind.Wall, 11, 12), (BuildingKind.Wall, 12, 12), (BuildingKind.Tower, 9, 11), (BuildingKind.Tower, 11, 9),
+            (BuildingKind.House, 12, 8), (BuildingKind.Farm, 13, 14), (BuildingKind.SpikeTrap, 6, 10),
+        };
+
+        /// <summary>
+        /// -capture-set 011 (release build): matched before/after views for the visual upgrade. Per map profile at seed 7 and
+        /// default zoom: Day with the same fortress, an Archer Tower placement ghost, and Night 1 in combat. Then a close view
+        /// of the Keep/Wall/Tower slice by Day and Night, and a dense mixed fight. Simulation-driven and deterministic, so the
+        /// same build inputs give the same game states; only presentation differs between builds.
+        /// </summary>
+        IEnumerator RunPlan011()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            foreach (var id in MapProfiles.All)
+            {
+                game.SetMapProfile(id);
+                game.NewRun(7, false);
+                var placed = new StringBuilder();
+                foreach (var (kind, x, z) in Plan011Layout)
+                    placed.Append($"{kind}({x},{z})={game.Sim.TryPlace(kind, new GridPos(x, z), out _)} ");
+                log.AppendLine($"{id}: {game.Sim.Config.Terrain.Describe()} {placed}");
+                game.CameraRig.ResetView();
+                yield return Shot($"011-{id}-1-day");
+                game.Player.SetTool(BuildingKind.Tower);
+                game.Player.HoverOverride = FirstLegal(BuildingKind.Tower, 6, 6, 9, 9);
+                yield return Shot($"011-{id}-2-placement");
+                game.Player.HoverOverride = null;
+                game.Player.CancelTool();
+                game.StartNight();
+                for (var i = 0; i < 60; i++) yield return null; // night light at real frames; the simulation is not advancing
+                log.AppendLine($"{id} night: {StepUntil(() => game.Sim.AliveEnemyCount >= 3 && game.World.ActiveArrowCount > 0, 1600)} alive={game.Sim.AliveEnemyCount}");
+                yield return Shot($"011-{id}-3-night");
+                if (id == MapProfiles.Crossing)
+                {
+                    game.CameraRig.SetView(new Vector3(10f, 0f, 10.5f), 4.5f);
+                    yield return Shot("011-slice-night-close");
+                    game.CameraRig.ResetView();
+                }
+
+                game.Sim.SetPaused(false);
+            }
+
+            // The slice by Day, close: Keep, connected Walls and Archer Towers on Crossing.
+            game.SetMapProfile(MapProfiles.Crossing);
+            game.NewRun(7, false);
+            foreach (var (kind, x, z) in Plan011Layout) game.Sim.TryPlace(kind, new GridPos(x, z), out _);
+            game.CameraRig.SetView(new Vector3(10f, 0f, 10.5f), 4.5f);
+            yield return Shot("011-slice-day-close");
+            game.CameraRig.ResetView();
+
+            // Dense fight: 40 mixed attackers from two sides against the same fortress plus a Cannon.
+            var spawns = new System.Collections.Generic.List<SpawnEntry>();
+            var mix = new[] { EnemyKind.Grunt, EnemyKind.Grunt, EnemyKind.Runner, EnemyKind.Grunt, EnemyKind.Archer, EnemyKind.Brute, EnemyKind.Bomber, EnemyKind.Grunt };
+            for (var i = 0; i < 40; i++) spawns.Add(new SpawnEntry(i * 3, i % 2 == 0 ? MvpCampaign.West : MvpCampaign.East, i % 2, mix[i % mix.Length]));
+            var dense = new WavePlan("dense", spawns, new[] { MvpCampaign.West, MvpCampaign.East });
+            var calm = new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West });
+            var setup = new RunSimulation(new RunConfig
+            {
+                Definitions = game.NewRunDefinitions, Seed = 7, Terrain = MapProfiles.Generate(MapProfiles.Meadow, 7),
+                Campaign = new CampaignConfig
+                {
+                    Label = ReleaseCampaign.Label, Nights = new[] { dense, calm }, OffersRewards = true, RulesVersion = ReleaseCampaign.RulesVersion,
+                    CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
+                },
+            });
+            foreach (var (kind, x, z) in Plan011Layout) setup.TryPlace(kind, new GridPos(x, z), out _);
+            setup.TryPlace(BuildingKind.Cannon, new GridPos(13, 10), out _);
+            ContinueSaved(setup, log);
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null;
+            log.AppendLine($"dense: {StepUntil(() => game.Sim.AliveEnemyCount >= 24, 2400)} alive={game.Sim.AliveEnemyCount}");
+            yield return Shot("011-dense-combat");
+            game.CameraRig.SetView(new Vector3(8f, 0f, 10f), 5f);
+            yield return Shot("011-dense-combat-close");
+            game.CameraRig.ResetView();
+            game.Sim.SetPaused(false);
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-011-capture-log.txt"), log.ToString());
         }
 
         /// <summary>

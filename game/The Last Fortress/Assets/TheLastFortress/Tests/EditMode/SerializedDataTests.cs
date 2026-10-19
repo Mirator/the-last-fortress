@@ -82,6 +82,29 @@ namespace TheLastFortress.Tests
             CollectionAssert.AreEquivalent(spec.Placements.Select(p => p.ToString()), json.Placements.Select(p => p.ToString()));
         }
 
+        /// <summary>
+        /// Plan 011: the shipped release content points at authored art, and rerunning the blockout setups keeps it — the
+        /// generator is never even invoked for a reference outside its own Prefabs/&lt;name&gt;.prefab.
+        /// </summary>
+        [Test]
+        public void AuthoredArtSurvivesBlockoutRegeneration()
+        {
+            var c = AssetDatabase.LoadAssetAtPath<PrototypeContent>(Data + "ReleaseContent.asset");
+            var assigned = new (Object prefab, string generated)[]
+            {
+                (c.keepPrefab, "Keep"), (c.towerPrefab, "ArcherTower"), (c.gruntPrefab, "Grunt"), (c.wallPrefab, "Wall"), (c.housePrefab, "House"),
+                (c.runnerPrefab, "Runner"), (c.cannonPrefab, "ReleaseCannon"), (c.bomberPrefab, "ReleaseBomber"),
+            }.Concat(c.wallShapePrefabs.Select((p, s) => ((Object)p, "MvpWall" + (WallShape)s)));
+            foreach (var (prefab, generated) in assigned)
+            {
+                StringAssert.StartsWith("Assets/TheLastFortress/Art/", AssetDatabase.GetAssetPath(prefab), generated);
+                var kept = TheLastFortress.Editor.PrototypeSetup.Generated((GameObject)prefab, () => throw new AssertionException($"{generated}: blockout regenerated over authored art"), generated);
+                Assert.AreSame(prefab, kept, generated);
+            }
+
+            Assert.IsNotNull(c.art, "release content keeps its art direction");
+        }
+
         [Test]
         public void LayoutJsonRoundTrips()
         {

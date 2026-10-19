@@ -88,6 +88,15 @@ namespace TheLastFortress
             public Transform[] Torches;
 
             public float TorchAccum, FireAccum;
+
+            /// <summary>Authored Archer Tower: the bow (child of the archer, which is the Turret) and its draw/release state.</summary>
+            public Transform Bow;
+
+            public Vector3 BowRest;
+            public float Draw, Release;
+
+            /// <summary>Amber light at the tower torch, lit at night (authored art only).</summary>
+            public Light TorchLight;
         }
 
         sealed class EnemyView
@@ -130,6 +139,11 @@ namespace TheLastFortress
 
             /// <summary>0..1 forward strike building up over the last moment before a hit is due.</summary>
             public float StrikeRise;
+
+            /// <summary>Authored part rig (null for blockouts), the light kinds' short wind-up, and the hit flinch.</summary>
+            public CharacterRig Rig;
+
+            public float LightWind, Hit, HitDelay;
         }
 
         sealed class ArrowFx
@@ -222,6 +236,8 @@ namespace TheLastFortress
 
             /// <summary>Parts hidden when the fall starts (HP bar, burn, fuse, aura): the bar stays up until the hit lands.</summary>
             public GameObject[] Hide;
+
+            public CharacterRig Rig;
         }
 
         readonly List<Dying> dying = new List<Dying>();
@@ -316,6 +332,8 @@ namespace TheLastFortress
                 flashes.Add(new FlashLight { Light = l });
             }
 
+            art = content.art;
+            if (art != null) InitializeArt();
             BuildBoard();
             var keepLightGo = new GameObject("KeepTorchLight");
             keepLightGo.transform.SetParent(transform, false);
@@ -329,15 +347,94 @@ namespace TheLastFortress
             ApplyLighting(0f);
         }
 
+        // ------------------------------------------------------------------ authored look (plan 011)
+
+        ArtDirection art;
+
+        /// <summary>Runtime copies of authored materials the view animates (never the assets themselves, so play mode leaves them untouched).</summary>
+        Material windowSource, windowMat, riverMat, fordMat, seaMat;
+
+        UnityEngine.Rendering.Volume dayVolume, nightVolume;
+
+        public bool HasArt => art != null;
+
+        void InitializeArt()
+        {
+            riverMat = art.river != null ? new Material(art.river) : null;
+            fordMat = art.ford != null ? new Material(art.ford) : null;
+            seaMat = art.sea != null ? new Material(art.sea) : null;
+            if (seaMat != null) seaMat.SetTextureScale("_BaseMap", Vector2.one * 24f);
+            // The window material glows with the night; find it on the Keep so the prefabs need no extra reference.
+            if (content.keepPrefab != null)
+                foreach (var r in content.keepPrefab.GetComponentsInChildren<Renderer>(true))
+                foreach (var m in r.sharedMaterials)
+                    if (m != null && m.name == "ArtWindow") windowSource = m;
+            if (windowSource != null) windowMat = new Material(windowSource);
+            dayVolume = CreateVolume("DayVolume", art.dayProfile, 1f);
+            nightVolume = CreateVolume("NightVolume", art.nightProfile, 0f);
+            var cam = Camera.main;
+            if (cam != null && cam.TryGetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>(out var data)) data.renderPostProcessing = true;
+            else if (cam != null) cam.gameObject.AddComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>().renderPostProcessing = true;
+        }
+
+        UnityEngine.Rendering.Volume CreateVolume(string name, UnityEngine.Rendering.VolumeProfile profile, float weight)
+        {
+            if (profile == null) return null;
+            var go = new GameObject(name);
+            go.transform.SetParent(transform, false);
+            var v = go.AddComponent<UnityEngine.Rendering.Volume>();
+            v.isGlobal = true;
+            v.sharedProfile = profile;
+            v.weight = weight;
+            return v;
+        }
+
+        /// <summary>Swaps the shared window material for the view's night-reactive copy on one instantiated model.</summary>
+        void UseRuntimeMaterials(GameObject root)
+        {
+            if (windowMat == null) return;
+            foreach (var r in root.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                var mats = r.sharedMaterials;
+                var changed = false;
+                for (var i = 0; i < mats.Length; i++)
+                {
+                    if (mats[i] != windowSource) continue;
+                    mats[i] = windowMat;
+                    changed = true;
+                }
+
+                if (changed) r.sharedMaterials = mats;
+            }
+        }
+
+        static void Tile(GameObject go, float tiling)
+        {
+            var block = new MaterialPropertyBlock();
+            block.SetVector("_BaseMap_ST", new Vector4(tiling, tiling, 0f, 0f));
+            go.GetComponent<MeshRenderer>().SetPropertyBlock(block);
+        }
+
         void BuildBoard()
         {
             var board = new GameObject("Board").transform;
             board.SetParent(transform, false);
-            Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.1f, 10f), new Vector3(20f, 0.2f, 20f), content.grass, "Ground");
-            Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.45f, 10f), new Vector3(20.4f, 0.5f, 20.4f), content.timberShadow, "IslandEdge");
-            var water = Prims.Create(PrimitiveType.Plane, board, new Vector3(10f, -0.3f, 10f), new Vector3(8f, 1f, 8f), content.water, "DecorativeWater");
+            var ground = Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.1f, 10f), new Vector3(20f, 0.2f, 20f), art?.ground != null ? art.ground : content.grass, "Ground");
+            ground.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            if (art?.ground != null) Tile(ground, art.groundTiling);
+            var edge = Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.45f, 10f), new Vector3(20.4f, 0.5f, 20.4f), art?.cliff != null ? art.cliff : content.timberShadow, "IslandEdge");
+            if (art?.cliff != null) Tile(edge, 8f);
+            var water = Prims.Create(PrimitiveType.Plane, board, new Vector3(10f, -0.3f, 10f), new Vector3(8f, 1f, 8f), seaMat != null ? seaMat : content.water, "DecorativeWater");
             water.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
             if (content.IsMvp) BuildShoreAndGround(board);
+            if (art?.farIslands != null && art.farIslands.Length > 0)
+            {
+                // Beyond the sea at the four frame corners of the default view: the board sits in a wider world.
+                var spots = new[] { new Vector3(7f, -0.7f, 32f), new Vector3(32f, -0.7f, 7f), new Vector3(-11f, -0.7f, 14f), new Vector3(14f, -0.7f, -11f) };
+                for (var i = 0; i < spots.Length; i++)
+                    Prop(art.farIslands[i % art.farIslands.Length], board, spots[i], i * 83f, 1.1f + 0.1f * i);
+            }
 
             buildGrid = new GameObject("BuildGrid");
             buildGrid.transform.SetParent(board, false);
@@ -362,10 +459,11 @@ namespace TheLastFortress
         /// </summary>
         void BuildShoreAndGround(Transform board)
         {
-            var sand = Prims.Tinted(content.rock, Palette.Hex(0xC9B98F));
+            var sand = art?.beach != null ? art.beach : Prims.Tinted(content.rock, Palette.Hex(0xC9B98F));
             var reeds = Prims.Tinted(content.foliage, Palette.Hex(0x7E8C4E));
             var beach = Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.36f, 10f), new Vector3(21.3f, 0.2f, 21.3f), sand, "Beach");
             beach.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            if (art?.beach != null) Tile(beach, 10f);
             var shore = new GameObject("Shore").transform;
             shore.SetParent(board, false);
             for (var i = 0; i < 64; i++)
@@ -386,7 +484,9 @@ namespace TheLastFortress
                 }
 
                 p.y = -0.26f;
-                if (i % 3 == 0)
+                if (art?.rockSmall != null && i % 3 != 2)
+                    Prop(i % 3 == 0 ? art.rockSmall : art.reeds, shore, p, 40f * h + i * 17f, 1.2f + 0.6f * h);
+                else if (i % 3 == 0)
                 {
                     Prims.Create(PrimitiveType.Cube, shore, p + new Vector3(0, 0.06f, 0), new Vector3(0.22f, 0.14f, 0.18f) * (0.8f + 0.5f * h), content.rock, "ShoreStone",
                         Quaternion.Euler(6f * h, 40f * h + i * 17f, 0f));
@@ -461,12 +561,14 @@ namespace TheLastFortress
         public void SetTerrain(TerrainMap map)
         {
             if (terrainRoot != null) Destroy(terrainRoot);
+            groundDetail.Clear(); // its tufts die with terrainRoot, also when no new terrain follows
+            groundDetailRevision = -1;
             foreach (var m in terrainMeshes) Destroy(m);
             terrainMeshes.Clear();
             terrainRoot = null;
             TerrainDecorationCount = 0;
             if (map == null || content.foliage == null) return;
-            if (poolWater == null) poolWater = Prims.Tinted(content.water, Palette.Hex(0x3B6E8C));
+            if (poolWater == null) poolWater = riverMat != null ? riverMat : Prims.Tinted(content.water, Palette.Hex(0x3B6E8C));
             terrainRoot = new GameObject("Terrain");
             terrainRoot.transform.SetParent(transform, false);
             for (var i = 0; i < map.Cells.Length; i++)
@@ -478,6 +580,13 @@ namespace TheLastFortress
                 root.SetParent(terrainRoot.transform, false);
                 root.position = Prims.CellCenter(cell);
                 var h = (cell.X * 73 + cell.Z * 151) % 7 / 7f; // stable per-cell variation, not gameplay randomness
+                if (art != null && art.pine != null && type != TerrainType.Water)
+                {
+                    PlaceArtCell(root, type, cell, h);
+                    TerrainDecorationCount++;
+                    continue;
+                }
+
                 switch (type)
                 {
                     case TerrainType.Forest:
@@ -503,6 +612,100 @@ namespace TheLastFortress
             }
 
             BuildWater(map);
+            if (art != null && art.tuft != null) BuildGroundDetail(map);
+        }
+
+        /// <summary>Two trees (pine or broadleaf by cell) and a bush per forest cell; one boulder group per rock cell. Inside the cell.</summary>
+        void PlaceArtCell(Transform root, TerrainType type, GridPos cell, float h)
+        {
+            if (type == TerrainType.Forest)
+            {
+                for (var t = 0; t < 2; t++)
+                {
+                    var p = new Vector3(t == 0 ? -0.18f : 0.2f, 0, t == 0 ? 0.15f : -0.17f);
+                    var pick = ((cell.X * 31 + cell.Z * 17 + t * 7) % 5) < 3 ? art.pine : art.broadleaf;
+                    Prop(pick, root, p, (h * 360f + t * 137f) % 360f, 0.95f + 0.3f * ((h + t * 0.37f) % 1f));
+                }
+
+                if (art.bush != null) Prop(art.bush, root, new Vector3(0.22f, 0f, 0.22f) * (h > 0.5f ? 1f : -1f), h * 200f, 1f);
+            }
+            else if (type == TerrainType.Rock) Prop(art.rockLarge, root, Vector3.zero, 30f + h * 300f, 0.95f + 0.15f * h);
+        }
+
+        GameObject Prop(GameObject prefab, Transform parent, Vector3 local, float yaw, float scale)
+        {
+            if (prefab == null) return null;
+            var go = Instantiate(prefab, parent);
+            go.transform.localPosition = local;
+            go.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
+            go.transform.localScale = Vector3.one * scale;
+            return go;
+        }
+
+        /// <summary>Ground tufts on open land, by cell (index -> object), hidden while a building stands on the cell.</summary>
+        readonly Dictionary<GridPos, GameObject> groundDetail = new Dictionary<GridPos, GameObject>();
+
+        int groundDetailRevision = -1;
+
+        public int GroundDetailCount => groundDetail.Count;
+
+        /// <summary>
+        /// Plan 010 stage 2.1 for the art pass: low tufts (under 0.08, no shadow) on Land cells only, outside a readability
+        /// mask (the reserved ring where entries and gates are, the Keep and its neighbours, water banks, fords and the cells
+        /// either side of each ford). Reeds and pebbles go in water cells along the banks, which are impassable anyway.
+        /// Derived from the played map each run; deterministic; never touches the simulation.
+        /// </summary>
+        void BuildGroundDetail(TerrainMap map)
+        {
+            groundDetail.Clear();
+            groundDetailRevision = -1;
+            var mask = new HashSet<GridPos>();
+            var crossings = new HashSet<GridPos>(MapProfiles.RiverCrossings(map));
+            for (var i = 0; i < map.Cells.Length; i++)
+            {
+                var cell = new GridPos(i % GridCoordinates.Size, i / GridCoordinates.Size);
+                if (map.Cells[i] != TerrainType.Land || crossings.Contains(cell)) Around(mask, cell, map.Cells[i] == TerrainType.Water || crossings.Contains(cell) ? 1 : 0);
+            }
+
+            Around(mask, GridState.KeepCell, 1);
+            var detail = new GameObject("GroundDetail").transform;
+            detail.SetParent(terrainRoot.transform, false);
+            for (var i = 0; i < map.Cells.Length; i++)
+            {
+                var cell = new GridPos(i % GridCoordinates.Size, i / GridCoordinates.Size);
+                var hash = (cell.X * 92821 + cell.Z * 68917) % 100;
+                if (map.Cells[i] == TerrainType.Water && !crossings.Contains(cell))
+                {
+                    // Reeds and a pebble on the bank side of some water cells (water is never walkable or buildable).
+                    if (hash % 3 != 0 || art.reeds == null) continue;
+                    var side = new Vector3(((hash / 3) % 3 - 1) * 0.3f, 0f, ((hash / 9) % 3 - 1) * 0.3f);
+                    Prop(art.reeds, detail, Prims.CellCenter(cell) + side + Vector3.up * WaterY, hash * 7f, 0.9f + hash % 4 * 0.1f);
+                    continue;
+                }
+
+                if (map.Cells[i] != TerrainType.Land || GridCoordinates.IsReservedRing(cell) || mask.Contains(cell) || hash >= 22) continue;
+                var offset = new Vector3((hash % 7 - 3) * 0.1f, 0f, (hash % 5 - 2) * 0.12f);
+                groundDetail[cell] = Prop(art.tuft, detail, Prims.CellCenter(cell) + offset, hash * 13f, 1f + (hash % 3) * 0.25f);
+            }
+        }
+
+        static void Around(HashSet<GridPos> set, GridPos c, int r)
+        {
+            for (var dx = -r; dx <= r; dx++)
+            for (var dz = -r; dz <= r; dz++)
+                set.Add(new GridPos(c.X + dx, c.Z + dz));
+        }
+
+        /// <summary>Hides ground detail under buildings; rechecked only when occupancy changes.</summary>
+        void SyncGroundDetail(RunSimulation sim)
+        {
+            if (groundDetail.Count == 0 || sim.Grid.Revision == groundDetailRevision) return;
+            groundDetailRevision = sim.Grid.Revision;
+            foreach (var pair in groundDetail)
+            {
+                var free = sim.Grid.GetOccupant(pair.Key) == null;
+                if (pair.Value.activeSelf != free) pair.Value.SetActive(free);
+            }
         }
 
         const float BankWidth = 0.12f;
@@ -517,9 +720,9 @@ namespace TheLastFortress
         /// </summary>
         void BuildWater(TerrainMap map)
         {
-            if (shallowWater == null) shallowWater = Prims.Tinted(content.water, Palette.Hex(0x6A9DB2));
-            if (bankSand == null) bankSand = Prims.Tinted(content.rock, Palette.Hex(0xC9B98F));
-            if (bridgeTimber == null) bridgeTimber = Prims.Tinted(content.timberShadow, Palette.Hex(0x8A6A48));
+            if (shallowWater == null) shallowWater = fordMat != null ? fordMat : Prims.Tinted(content.water, Palette.Hex(0x6A9DB2));
+            if (bankSand == null) bankSand = art?.bank != null ? art.bank : Prims.Tinted(content.rock, Palette.Hex(0xC9B98F));
+            if (bridgeTimber == null) bridgeTimber = art?.bridge != null ? art.bridge : Prims.Tinted(content.timberShadow, Palette.Hex(0x8A6A48));
             var crossings = new HashSet<GridPos>(MapProfiles.RiverCrossings(map));
             bool IsRiver(GridPos c) => GridCoordinates.IsInBounds(c) && (map[c] == TerrainType.Water || crossings.Contains(c));
 
@@ -570,8 +773,10 @@ namespace TheLastFortress
                     for (var k = -1; k <= 1; k++)
                     {
                         var jitter = (alongZ ? Vector3.forward : Vector3.right) * (((h + k * 0.31f) % 1f) - 0.5f) * 0.2f;
-                        Prims.Create(PrimitiveType.Cube, props, center + across * (k * 0.3f) + jitter + new Vector3(0, 0.035f, 0),
-                            new Vector3(0.17f, 0.04f, 0.15f), content.rock, "SteppingStone", Quaternion.Euler(0, 20 + h * 50 + k * 25, 0));
+                        if (art?.fordStone != null) Prop(art.fordStone, props, center + across * (k * 0.3f) + jitter + new Vector3(0, 0.02f, 0), 20 + h * 50 + k * 25, 1f + 0.15f * k * k);
+                        else
+                            Prims.Create(PrimitiveType.Cube, props, center + across * (k * 0.3f) + jitter + new Vector3(0, 0.035f, 0),
+                                new Vector3(0.17f, 0.04f, 0.15f), content.rock, "SteppingStone", Quaternion.Euler(0, 20 + h * 50 + k * 25, 0));
                     }
                 }
             }
@@ -631,7 +836,11 @@ namespace TheLastFortress
             terrainMeshes.Add(mesh);
             mesh.SetVertices(data.Item1);
             mesh.SetTriangles(data.Item2, 0);
+            var uv = new List<Vector2>(data.Item1.Count);
+            foreach (var v in data.Item1) uv.Add(new Vector2(v.x, v.z) * 0.5f); // world-aligned, so water and banks tile seamlessly across cells
+            mesh.SetUVs(0, uv);
             mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
             var go = new GameObject(name);
             go.transform.SetParent(terrainRoot.transform, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
@@ -660,6 +869,7 @@ namespace TheLastFortress
 
             foreach (var d in dying) Destroy(d.Root);
             dying.Clear();
+            lastStrikeBurst.Clear();
             buildingViews.Clear();
             enemyViews.Clear();
             arrows.Clear();
@@ -709,6 +919,14 @@ namespace TheLastFortress
                         if (e.HasPositions) SpawnCue(CueKind.Fire, muzzle ?? Pos(e.FromX, e.FromZ, 2.05f), 0f);
                         if (muzzle.HasValue) EmitMuzzleBlast(muzzle.Value, shooter.AimDirection);
                         if (shooter != null) shooter.Recoil = 0.14f;
+                        if (shooter?.Bow != null && e.HasPositions)
+                        {
+                            // The archer looses at the shot's point and holds it while the arrow flies, then draws again.
+                            shooter.AimDirection = new Vector3((float)(e.ToX - e.FromX), 0f, (float)(e.ToZ - e.FromZ));
+                            shooter.AimHold = 0.35f;
+                            shooter.Release = 1f;
+                            shooter.Draw = 0f;
+                        }
                         break;
                     case SimEventType.SplashHit:
                         shotTargets.Add(e.TargetId); // a splash kill shows when the shell lands, like the primary's
@@ -744,7 +962,16 @@ namespace TheLastFortress
                         if (buildingViews.TryGetValue(e.TargetId, out var bv)) bv.Flash = 0.18f;
                         break;
                     case SimEventType.EnemyAttacked:
-                        if (enemyViews.TryGetValue(e.SourceId, out var attacker)) attacker.Lunge = 0.25f;
+                        if (enemyViews.TryGetValue(e.SourceId, out var attacker))
+                        {
+                            attacker.Lunge = 0.25f;
+                            if (sim.GetBuilding(e.TargetId) is Building struck) EmitStrikeImpact(attacker.Root.transform.position, struck);
+                        }
+
+                        break;
+                    case SimEventType.TrapTriggered:
+                    case SimEventType.BurnTick:
+                        if (enemyViews.TryGetValue(e.TargetId, out var hurt)) hurt.Hit = Mathf.Max(hurt.Hit, e.Type == SimEventType.BurnTick ? 0.45f : 1f);
                         break;
                     case SimEventType.BuildingDestroyed:
                         destroyedThisFrame.Add(e.SourceId);
@@ -754,6 +981,10 @@ namespace TheLastFortress
                 }
             }
 
+            if (riverMat != null) riverMat.SetTextureOffset("_BaseMap", new Vector2(fxTime * 0.02f, fxTime * 0.045f));
+            if (fordMat != null) fordMat.SetTextureOffset("_BaseMap", new Vector2(fxTime * 0.03f, fxTime * 0.06f));
+            if (seaMat != null) seaMat.SetTextureOffset("_BaseMap", new Vector2(fxTime * 0.01f, fxTime * 0.016f));
+            SyncGroundDetail(sim);
             SyncBuildings(sim, deltaTime);
             SyncEnemies(sim, deltaTime);
             UpdateCues(deltaTime); // before arrows: cues spawned by landing arrows this frame start at age zero
@@ -807,6 +1038,7 @@ namespace TheLastFortress
                 }
 
                 if (view.Turret != null) AimCannon(sim, b, view, dt);
+                if (view.Bow != null) AnimateArcher(sim, b, view, dt);
 
                 var fraction = b.MaxHp > 0 ? (float)b.Hp / b.MaxHp : 1f;
                 var height = BarHeight(b.Kind);
@@ -898,7 +1130,18 @@ namespace TheLastFortress
 
                 t.position = pos + view.Offset;
                 // The bar drops when the projectile lands, not when it is fired, then drains over ~0.15 s.
-                if (shotFlight.TryGetValue(e.Id, out var landsIn)) view.BarHold = Mathf.Max(view.BarHold, landsIn);
+                if (shotFlight.TryGetValue(e.Id, out var landsIn))
+                {
+                    view.BarHold = Mathf.Max(view.BarHold, landsIn);
+                    view.HitDelay = Mathf.Max(view.HitDelay, Mathf.Max(landsIn, 1e-4f)); // flinch when the projectile lands
+                }
+
+                if (view.HitDelay > 0f)
+                {
+                    view.HitDelay -= dt;
+                    if (view.HitDelay <= 0f) view.Hit = 1f;
+                }
+                else view.Hit = Mathf.Max(0f, view.Hit - dt / HitFlinchSeconds);
                 var fraction = (float)e.Hp / e.Definition.MaxHp;
                 if (view.BarHold > 0f) view.BarHold -= dt;
                 else view.ShownFraction = Mathf.MoveTowards(view.ShownFraction, fraction, dt / BarDrainSeconds);
@@ -931,6 +1174,9 @@ namespace TheLastFortress
                 var windUp = due >= 0 && due < WindUpSeconds ? 1f - (float)(due / WindUpSeconds) : 0f;
                 // Lean back as the strike nears; when it lands, come forward over ~0.1 s instead of in one frame.
                 view.WindUp = windUp >= view.WindUp ? windUp : Mathf.Max(windUp, view.WindUp - dt / WindUpReleaseSeconds);
+                // Light kinds with a rig raise the weapon over the last 0.3 s instead (same timing source, no delay to the hit).
+                var light = !heavy && dueAny >= 0 && dueAny < LightWindSeconds ? 1f - (float)(dueAny / LightWindSeconds) : 0f;
+                view.LightWind = light >= view.LightWind ? light : Mathf.Max(light, view.LightWind - dt / WindUpReleaseSeconds);
                 AnimateModel(view, pos, dt);
             }
 
@@ -943,7 +1189,11 @@ namespace TheLastFortress
                 var v = enemyViews[id];
                 enemyViews.Remove(id);
                 if (detonatedThisFrame.Contains(id) || !killDelay.TryGetValue(id, out var delay)) Destroy(v.Root);
-                else StartDying(v.Root, v.Model, false, delay, v.HpBar, v.Burn, v.Fuse, v.Aura);
+                else
+                {
+                    StartDying(v.Root, v.Model, false, delay, v.HpBar, v.Burn, v.Fuse, v.Aura);
+                    dying[dying.Count - 1].Rig = v.Rig;
+                }
             }
         }
 
@@ -968,7 +1218,7 @@ namespace TheLastFortress
             var height = BarHeight(b.Kind);
             var bar = CreateBar(root.transform, height, 0.8f, hpFill, out var fill);
             GameObject glow = null;
-            if (b.Kind == BuildingKind.House)
+            if (b.Kind == BuildingKind.House && windowMat == null) // an authored House glows through its window material
             {
                 // Warm window at night: an unlit pane over the modeled window (no extra light per building).
                 glow = Prims.Create(PrimitiveType.Cube, root.transform, new Vector3(0.2f, 0.4f, -0.33f), new Vector3(0.11f, 0.11f, 0.01f), glowMat, "WindowGlow");
@@ -981,10 +1231,34 @@ namespace TheLastFortress
             var torches = new List<Transform>();
             foreach (Transform child in root.transform)
                 if (child.name == "Torch") torches.Add(child);
+            // Authored Archer Tower: the archer turns to aim like the Cannon's gun, and the bow draws between shots.
+            Transform bow = null;
+            if (b.Kind == BuildingKind.Tower && root.transform.Find("Archer") is Transform archer)
+            {
+                turret = archer;
+                bow = archer.Find("Bow");
+            }
+
+            Light torchLight = null;
+            if (art != null && b.Kind == BuildingKind.Tower && torches.Count > 0)
+            {
+                var lightGo = new GameObject("TorchLight");
+                lightGo.transform.SetParent(torches[0], false);
+                torchLight = lightGo.AddComponent<Light>();
+                torchLight.type = LightType.Point;
+                torchLight.shadows = LightShadows.None;
+                torchLight.color = art.torchColor;
+                torchLight.range = art.towerLightRange;
+                torchLight.intensity = art.towerLightIntensity * NightBlend;
+                lightGo.SetActive(NightBlend > 0.01f);
+            }
+
+            UseRuntimeMaterials(root);
             return new BuildingView
             {
                 Building = b, Root = root, HpBar = bar, HpFill = fill, Glow = glow, Turret = turret, Muzzle = muzzle, WallMask = mask,
-                Orientation = b.Kind == BuildingKind.Wall ? 0 : b.Orientation, Torches = torches.ToArray(),
+                Orientation = b.Kind == BuildingKind.Wall ? 0 : b.Orientation, Torches = torches.ToArray(), Bow = bow,
+                BowRest = bow != null ? bow.localPosition : Vector3.zero, TorchLight = torchLight,
             };
         }
 
@@ -1027,6 +1301,19 @@ namespace TheLastFortress
             }
 
             view.Turret.localRotation = Quaternion.RotateTowards(view.Turret.localRotation, want, CannonTurnDegreesPerSecond * dt);
+        }
+
+        /// <summary>
+        /// The tower archer draws over ~0.5 s while it has a target at Night (relaxed half-draw otherwise), snaps forward on
+        /// each shot (the TowerShot event) and draws again. Presentation only; the shot already happened.
+        /// </summary>
+        void AnimateArcher(RunSimulation sim, Building b, BuildingView view, float dt)
+        {
+            var engaged = sim.State == RunState.Night && b.TargetEnemyId >= 0;
+            view.Draw = Mathf.MoveTowards(view.Draw, engaged ? 1f : 0.25f, dt / 0.5f);
+            view.Release = Mathf.Max(0f, view.Release - dt / 0.15f);
+            view.Bow.localPosition = view.BowRest + new Vector3(0f, 0f, -0.035f * view.Draw + 0.02f * view.Release);
+            view.Bow.localRotation = Quaternion.Euler(-8f * view.Draw + 6f * view.Release, 0f, 0f);
         }
 
         static float BarHeight(BuildingKind kind)
@@ -1078,8 +1365,16 @@ namespace TheLastFortress
 
             var step = Mathf.Sin(view.GaitPhase);
             // The strike is at its furthest the moment the hit lands (the event), then recovers.
-            var lunge = Mathf.Max(view.StrikeRise, view.Lunge > 0f ? Mathf.Pow(view.Lunge / 0.25f, 2f) : 0f) * 0.12f;
+            var strike = Mathf.Max(view.StrikeRise, view.Lunge > 0f ? Mathf.Pow(view.Lunge / 0.25f, 2f) : 0f);
+            var lunge = strike * 0.12f;
             var windUp = view.WindUp * view.WindUp;
+            if (view.Rig != null)
+            {
+                // Limbs carry the stride, the strike and the flinch; the whole-body sway stays as a small accent.
+                view.Rig.Pose(view.GaitPhase, view.GaitAmount, strike, Mathf.Max(view.WindUp, view.LightWind), view.Hit, 0f);
+                sway *= 0.35f;
+                lunge -= view.Hit * 0.05f;
+            }
             view.Model.localPosition = new Vector3(0f, Mathf.Abs(step) * bob * view.GaitAmount, lunge - windUp * 0.08f);
             view.Model.localRotation = Quaternion.Euler((kind == EnemyKind.Runner ? 6f * view.GaitAmount : 0f) - windUp * 12f, 0f, step * sway * view.GaitAmount);
         }
@@ -1127,6 +1422,7 @@ namespace TheLastFortress
             {
                 Enemy = e, Root = root, Model = model, HpBar = bar, HpFill = fill, Burn = burn, Fuse = fuse, Aura = aura, Offset = offset,
                 LastPosition = new Vector3((float)sx, 0f, (float)sz) + offset, Height = height, Wick = model.Find("WickTip"), Torch = model.Find("TorchFlame"),
+                Rig = model.GetComponent<CharacterRig>(),
             };
         }
 
@@ -1179,6 +1475,7 @@ namespace TheLastFortress
                 }
                 else
                 {
+                    if (d.Rig != null) d.Rig.Pose(0f, 0f, 0f, 0f, 1f - t, t); // limbs go slack as the body tips
                     if (d.Model != null)
                     {
                         d.Model.localRotation = Quaternion.Euler(-80f * Mathf.Sin(t * Mathf.PI * 0.5f), 0f, 0f);
@@ -1251,6 +1548,11 @@ namespace TheLastFortress
 
         const float BarDrainSeconds = 0.15f;
 
+        /// <summary>Flinch length after a hit lands, and how long before a light kind's hit its rig raises the weapon.</summary>
+        const float HitFlinchSeconds = 0.22f;
+
+        const double LightWindSeconds = 0.3;
+
         /// <summary>The forward strike rises over this long before the hit is due, so it peaks exactly on contact.</summary>
         const float StrikeRiseSeconds = 0.1f;
 
@@ -1292,7 +1594,7 @@ namespace TheLastFortress
             if (splash > 0f)
                 go = shellPool.Count > 0 ? shellPool.Pop() : Prims.Create(PrimitiveType.Sphere, fxRoot, Vector3.zero, Vector3.one * 0.22f, glowMat, "Shell");
             else
-                go = arrowPool.Count > 0 ? arrowPool.Pop() : Prims.Create(PrimitiveType.Cube, fxRoot, Vector3.zero, new Vector3(0.05f, 0.05f, 0.4f), content.arrow, "Arrow");
+                go = arrowPool.Count > 0 ? arrowPool.Pop() : CreateArrow();
             if (splash <= 0f) go.GetComponent<MeshRenderer>().sharedMaterial = enemy ? enemyArrowMat : content.arrow;
             go.SetActive(true);
             var from = origin ?? (enemy ? Pos(e.FromX, e.FromZ, 0.6f) : Pos(e.FromX, e.FromZ, splash > 0f ? 1.1f : 1.75f));
@@ -1616,6 +1918,91 @@ namespace TheLastFortress
                     0.18f, 0.45f, Dust, Dust.WithAlpha(0f), -0.1f, 1.5f);
         }
 
+        static readonly Color ArrowTrail = new Color(1f, 0.95f, 0.82f, 0.45f);
+        static readonly Color Splinter = new Color(0.62f, 0.45f, 0.28f, 1f);
+
+        Mesh arrowMesh;
+        Material trailMat;
+
+        /// <summary>Presentation time of each building's last strike burst: at most one burst per building per <see cref="StrikeBurstSeconds"/>.</summary>
+        readonly Dictionary<int, float> lastStrikeBurst = new Dictionary<int, float>();
+
+        const float StrikeBurstSeconds = 0.2f;
+
+        /// <summary>Arrow (0.42 long, +Z forward): square shaft, iron head, three fletching vanes. Built once, shared by the pool.</summary>
+        GameObject CreateArrow()
+        {
+            if (arrowMesh == null)
+            {
+                var v = new List<Vector3>();
+                var t = new List<int>();
+                void Box(Vector3 c, Vector3 size)
+                {
+                    var h = size * 0.5f;
+                    var i = v.Count;
+                    for (var k = 0; k < 8; k++) v.Add(c + new Vector3((k & 1) == 0 ? -h.x : h.x, (k & 2) == 0 ? -h.y : h.y, (k & 4) == 0 ? -h.z : h.z));
+                    int[] q = { 0, 2, 3, 1, 4, 5, 7, 6, 0, 1, 5, 4, 2, 6, 7, 3, 0, 4, 6, 2, 1, 3, 7, 5 };
+                    for (var f = 0; f < 6; f++)
+                    {
+                        t.Add(i + q[f * 4]); t.Add(i + q[f * 4 + 1]); t.Add(i + q[f * 4 + 2]);
+                        t.Add(i + q[f * 4]); t.Add(i + q[f * 4 + 2]); t.Add(i + q[f * 4 + 3]);
+                    }
+                }
+
+                Box(Vector3.zero, new Vector3(0.022f, 0.022f, 0.36f));
+                Box(new Vector3(0f, 0f, 0.19f), new Vector3(0.045f, 0.018f, 0.06f));
+                Box(new Vector3(0f, 0.018f, -0.15f), new Vector3(0.006f, 0.04f, 0.08f));
+                Box(new Vector3(0.016f, -0.01f, -0.15f), new Vector3(0.04f, 0.006f, 0.08f));
+                Box(new Vector3(-0.016f, -0.01f, -0.15f), new Vector3(0.04f, 0.006f, 0.08f));
+                arrowMesh = new Mesh { name = "Arrow" };
+                arrowMesh.SetVertices(v);
+                arrowMesh.SetTriangles(t, 0);
+                arrowMesh.RecalculateNormals();
+            }
+
+            var go = new GameObject("Arrow");
+            go.transform.SetParent(fxRoot, false);
+            go.AddComponent<MeshFilter>().sharedMesh = arrowMesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = content.arrow;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            if (art != null)
+            {
+                // A short pale streak behind the head so fast arrows read in a crowded fight; part of the pooled arrow,
+                // so it costs nothing per frame (a per-frame particle trail scaled with frame rate).
+                trailMat ??= Prims.Tinted(content.overlay, ArrowTrail);
+                Prims.Create(PrimitiveType.Cube, go.transform, new Vector3(0f, 0f, -0.42f), new Vector3(0.012f, 0.012f, 0.5f), trailMat, "Trail")
+                    .GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+
+            return go;
+        }
+
+        /// <summary>
+        /// An enemy's blow landing on a building (the EnemyAttacked event): stone throws sparks and grit, timber throws
+        /// splinters, both a small dust puff at the contact point. Bounded: a handful of particles per hit.
+        /// </summary>
+        void EmitStrikeImpact(Vector3 attacker, Building target)
+        {
+            var centre = new Vector3((float)target.CenterX, 0f, (float)target.CenterZ);
+            var toward = centre - attacker;
+            toward.y = 0f;
+            var dir = toward.sqrMagnitude > 1e-4f ? toward.normalized : Vector3.forward;
+            var at = attacker + dir * 0.32f + Vector3.up * 0.32f;
+            var stone = target.Kind == BuildingKind.Keep;
+            // Bounded: a crowd hammering one Wall shows a steady trickle, not a particle per attacker per hit.
+            if (lastStrikeBurst.TryGetValue(target.Id, out var last) && fxTime - last < StrikeBurstSeconds) return;
+            lastStrikeBurst[target.Id] = fxTime;
+            for (var i = 0; i < 2; i++)
+            {
+                var v = -dir * particles.Range(0.8f, 1.6f) + Vector3.up * particles.Range(0.8f, 1.8f) + particles.InSphere(0.6f);
+                if (stone) particles.Emit(at, v, particles.Range(0.18f, 0.3f), 0.035f, 0.01f, Spark, SparkEnd, 6f, 0.5f);
+                else particles.Emit(at, v, particles.Range(0.35f, 0.55f), 0.05f, 0.03f, Splinter, Splinter.WithAlpha(0f), 9.8f, 0.3f, ground: true);
+            }
+
+            particles.Emit(at - Vector3.up * 0.2f, particles.InSphere(0.3f) + Vector3.up * 0.3f, particles.Range(0.5f, 0.8f), 0.1f, 0.24f, Dust.WithAlpha(0.45f), Dust.WithAlpha(0f), -0.1f, 1.5f);
+        }
+
         /// <summary>A collapsing building throws up a dust cloud and a few splinters.</summary>
         void EmitCollapseDust(Vector3 at, float radius)
         {
@@ -1667,6 +2054,12 @@ namespace TheLastFortress
         /// <summary>Lerps day (0) to night (1): cooler ambient, weaker sun, the Keep torch lit.</summary>
         void ApplyLighting(float t)
         {
+            if (art != null)
+            {
+                ApplyArtLighting(t);
+                return;
+            }
+
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
             RenderSettings.ambientLight = Color.Lerp(new Color(0.62f, 0.62f, 0.58f), Palette.NightAmbient * 1.25f, t);
             if (sun != null)
@@ -1676,6 +2069,48 @@ namespace TheLastFortress
             }
 
             keepLight.intensity = 2.2f * t;
+        }
+
+        /// <summary>
+        /// Authored day/night: trilight ambient (sky, horizon, ground) instead of one flat colour so forms keep their depth,
+        /// warm sun to cool moonlight, softer night shadows, amber settlement light (Keep, tower torches, windows), the sea
+        /// and background darkening, and the day/night post profiles cross-faded. Values live in the ArtDirection asset.
+        /// </summary>
+        void ApplyArtLighting(float t)
+        {
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = Color.Lerp(art.daySky, art.nightSky, t);
+            RenderSettings.ambientEquatorColor = Color.Lerp(art.dayEquator, art.nightEquator, t);
+            RenderSettings.ambientGroundColor = Color.Lerp(art.dayGround, art.nightGround, t);
+            RenderSettings.reflectionIntensity = Mathf.Lerp(1f, 0.2f, t); // the sky reflection must not make water glow at night
+            if (sun != null)
+            {
+                sun.color = Color.Lerp(art.sunColor, art.moonColor, t);
+                sun.intensity = Mathf.Lerp(art.sunIntensity, art.moonIntensity, t);
+                sun.shadowStrength = Mathf.Lerp(art.dayShadowStrength, art.nightShadowStrength, t);
+            }
+
+            if (keepLight != null)
+            {
+                keepLight.color = art.torchColor;
+                keepLight.intensity = art.keepLightIntensity * t;
+            }
+
+            if (windowMat != null) windowMat.SetColor("_EmissionColor", art.torchColor * Mathf.Lerp(art.windowDay, art.windowNight, t));
+            // Water loses its daylight colour at night instead of staying saturated blue under the moon.
+            if (riverMat != null) riverMat.SetColor("_BaseColor", art.river.GetColor("_BaseColor") * Mathf.Lerp(1f, 0.4f, t));
+            if (fordMat != null) fordMat.SetColor("_BaseColor", art.ford.GetColor("_BaseColor") * Mathf.Lerp(1f, 0.45f, t));
+            var sea = Color.Lerp(art.seaColorDay, art.seaColorNight, t);
+            if (seaMat != null) seaMat.SetColor("_BaseColor", sea);
+            if (Camera.main != null) Camera.main.backgroundColor = sea * 0.9f;
+            if (dayVolume != null) dayVolume.weight = 1f - t;
+            if (nightVolume != null) nightVolume.weight = t;
+            foreach (var v in buildingViews.Values)
+            {
+                if (v.TorchLight == null) continue;
+                v.TorchLight.intensity = art.towerLightIntensity * t;
+                if (v.TorchLight.gameObject.activeSelf != t > 0.01f) v.TorchLight.gameObject.SetActive(t > 0.01f);
+            }
         }
     }
 }

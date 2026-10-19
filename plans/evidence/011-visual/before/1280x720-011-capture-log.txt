@@ -1,0 +1,7 @@
+ravine: ravine seed 7: generated (attempt 0) Wall(8,8)=None Wall(8,9)=None Wall(8,11)=None Wall(8,12)=None Wall(9,12)=None Wall(11,12)=None Wall(12,12)=ImpassableTerrain Tower(9,11)=None Tower(11,9)=None House(12,8)=None Farm(13,14)=ImpassableTerrain SpikeTrap(6,10)=None 
+ravine night: True alive=4
+crossing: crossing seed 7: generated (attempt 0) Wall(8,8)=None Wall(8,9)=None Wall(8,11)=None Wall(8,12)=None Wall(9,12)=None Wall(11,12)=None Wall(12,12)=None Tower(9,11)=None Tower(11,9)=None House(12,8)=None Farm(13,14)=ImpassableTerrain SpikeTrap(6,10)=None 
+crossing night: True alive=10
+meadow: meadow seed 7: generated (attempt 0) Wall(8,8)=None Wall(8,9)=None Wall(8,11)=None Wall(8,12)=None Wall(9,12)=None Wall(11,12)=None Wall(12,12)=None Tower(9,11)=None Tower(11,9)=None House(12,8)=None Farm(13,14)=InsufficientGold SpikeTrap(6,10)=None 
+meadow night: True alive=4
+dense: True alive=24

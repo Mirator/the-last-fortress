@@ -154,6 +154,8 @@ namespace TheLastFortress
                 var img = m.GetComponent<Image>();
                 img.color = Palette.WarningCoral.WithAlpha(0.92f);
                 img.raycastTarget = false;
+                img.sprite = null; // a flat, full-strength coral tag: the panel shading and amber rule are for dark panels
+                Destroy(m.Find("Accent").gameObject);
                 entryMarkerTexts[i] = Label(m, "Text", 20, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(150, 44), Palette.HudSurface, true);
                 entryMarkerTexts[i].rectTransform.anchorMin = entryMarkerTexts[i].rectTransform.anchorMax = entryMarkerTexts[i].rectTransform.pivot = new Vector2(0.5f, 0.5f);
                 entryMarkerTexts[i].fontStyle = FontStyle.Bold;

@@ -75,6 +75,7 @@ namespace TheLastFortress
 
         readonly GameObject[] gates = new GameObject[MaxEntries];
         readonly Transform[] gateBanners = new Transform[MaxEntries];
+        readonly Vector3[] gateBannerRest = new Vector3[MaxEntries];
         Transform chevronRoot;
         readonly List<Transform> chevrons = new List<Transform>();
         Material chevronMat;
@@ -113,6 +114,19 @@ namespace TheLastFortress
             gate.transform.SetParent(transform, false);
             var timber = content.timberShadow;
             var banner = Prims.Tinted(content.timberShadow, Palette.WarningCoral);
+            if (content.art != null && content.art.gate != null)
+            {
+                // Authored gate: same footprint on the beach; its Banner part pulses like the blockout's flag.
+                var model = Instantiate(content.art.gate, gate.transform);
+                model.transform.localPosition = Vector3.zero;
+                gateBanners[i] = model.transform.Find("Banner");
+                if (gateBanners[i] != null) gateBannerRest[i] = gateBanners[i].localScale;
+                var artPad = Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 0.27f, GateOut), new Vector3(0.9f, 0.02f, 0.9f), banner, "EntryPad");
+                artPad.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                gate.SetActive(false);
+                return gate;
+            }
+
             foreach (var side in new[] { -0.5f, 0.5f })
             {
                 Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(side, 0.8f, 0), new Vector3(0.2f, 1.6f, 0.2f), timber, "Post");
@@ -122,6 +136,7 @@ namespace TheLastFortress
             Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 1.5f, 0), new Vector3(1.36f, 0.16f, 0.2f), timber, "Beam");
             var flag = Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 1.08f, 0), new Vector3(0.78f, 0.62f, 0.05f), banner, "Banner");
             gateBanners[i] = flag.transform;
+            gateBannerRest[i] = flag.transform.localScale;
             // A coral pad on the entry cell itself, where the enemies step onto the board.
             var pad = Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 0.27f, GateOut), new Vector3(0.9f, 0.02f, 0.9f), banner, "EntryPad");
             pad.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -158,7 +173,7 @@ namespace TheLastFortress
                 gates[i].transform.position = Prims.CellCenter(cell, -0.26f) + outward * GateOut;
                 gates[i].transform.rotation = Quaternion.LookRotation(-outward);
                 var pulse = sim.State == RunState.Day && HudView.IsNewEntry(sim, cell) ? 1f + 0.18f * Mathf.Sin(Time.unscaledTime * 5f) : 1f;
-                gateBanners[i].localScale = new Vector3(0.78f * pulse, 0.62f * pulse, 0.05f);
+                if (gateBanners[i] != null) gateBanners[i].localScale = Vector3.Scale(gateBannerRest[i], new Vector3(pulse, pulse, 1f));
             }
         }
 

@@ -15,30 +15,31 @@ MonoBehaviour:
   definitions: {fileID: 11400000, guid: c229310b3909f23458a7a699b261486e, type: 2}
   mvpDefinitions: {fileID: 11400000, guid: d42a6bc0627f66f4e8bc000e9478e112, type: 2}
   releaseDefinitions: {fileID: 11400000, guid: c729aa97ddd81f943b55d94ecc5c951d, type: 2}
-  keepPrefab: {fileID: 6440497214723432423, guid: 70ece24faa35d97489b2376f0ff687fe, type: 3}
-  wallPrefab: {fileID: 1998575460765660594, guid: 09b8bd1eeb48bbe4e82af639633f9c0b, type: 3}
-  towerPrefab: {fileID: 1112093812300093508, guid: 89778087862789f4482debc682862177, type: 3}
-  gruntPrefab: {fileID: 9036051224892743207, guid: 24da9229eb426d24cb5f5c34a780202c, type: 3}
-  housePrefab: {fileID: 5277260028096390677, guid: 0e64fc6695a506341b1c35f4115b3d0d, type: 3}
-  farmPrefab: {fileID: 1039874398559794542, guid: 7ab3817aa7dcc7646bb91a9eb903ed45, type: 3}
-  trapPrefab: {fileID: 1147258301517022158, guid: 4bd86a39955b3b449bd1b50e7c334624, type: 3}
-  runnerPrefab: {fileID: 843949496038645126, guid: a043d064dff13874d85076c924016886, type: 3}
-  brutePrefab: {fileID: 5264471698511741351, guid: e5a7654585e01324190af26901ceab2e, type: 3}
-  golemPrefab: {fileID: 2420143663933871889, guid: f67be200d8a4b4244a6d510062c496ca, type: 3}
-  cannonPrefab: {fileID: 858188365145743168, guid: 812a95175b75ce84ab80d92e338b8ad8, type: 3}
-  watchtowerPrefab: {fileID: 859269386686627785, guid: 313bf7990840766418b5f8084a009bc4, type: 3}
-  repairStationPrefab: {fileID: 8630593210737663012, guid: 065e73dbb3a5f754f889d4c1871e48a9, type: 3}
-  raiderArcherPrefab: {fileID: 2623349833653696810, guid: 20d98b21fe0930f46a4169a0a2e1b189, type: 3}
-  bomberPrefab: {fileID: 123269060131196537, guid: 2b6e614425aeead45914169108e8c7d8, type: 3}
-  commanderPrefab: {fileID: 1707553708335497060, guid: db31fab7fad8eb34da28cadfbd25f959, type: 3}
+  keepPrefab: {fileID: 3113410671069058101, guid: 4632f10c0af8afb4f84283e88557299a, type: 3}
+  wallPrefab: {fileID: 5394435929723511753, guid: af44f5569b4a0564a989b728368be5c9, type: 3}
+  towerPrefab: {fileID: 9112202150111827439, guid: b0866cf8739d37249bc57918b6f87339, type: 3}
+  gruntPrefab: {fileID: 3472920882174607594, guid: 379f51d2ab73e2b47ac6156a016dc5c5, type: 3}
+  housePrefab: {fileID: 7640542900344921036, guid: 1a9fc516aaff2bc4d9bb443450bfc41a, type: 3}
+  farmPrefab: {fileID: 5040771501538919426, guid: 159cc42070818af458cbf4c56be509f7, type: 3}
+  trapPrefab: {fileID: 4562011737865292685, guid: e9680c6b5c7dc9a41b4f9e9fbf6350cb, type: 3}
+  runnerPrefab: {fileID: 7429601524345773123, guid: debe899184eef684ab45d1304edd7e94, type: 3}
+  brutePrefab: {fileID: 1684382618824314045, guid: 41202a6afa1c6ae4d83a7c636c130daf, type: 3}
+  golemPrefab: {fileID: 1780362451824461143, guid: 28cba6509e6b5164388286b36e635588, type: 3}
+  cannonPrefab: {fileID: 2198366529454211407, guid: 7015a01102cf6c6478f4cbba2da5f9ff, type: 3}
+  watchtowerPrefab: {fileID: 1325927115242731038, guid: 8400e329883a39e49b1e2314fba44c8d, type: 3}
+  repairStationPrefab: {fileID: 8360726647778069353, guid: 115a817572fccea47bdf7da2f663d333, type: 3}
+  raiderArcherPrefab: {fileID: 7120807620281102858, guid: 9f9fa7a5fe606f6439b0cd5c0fbed5e2, type: 3}
+  bomberPrefab: {fileID: 2359386809958955175, guid: 6a50c7ea44548aa46a9def3fd9e3d5e5, type: 3}
+  commanderPrefab: {fileID: 5108529738428571984, guid: 988740485a79f2a4898a9c3e59c4f09f, type: 3}
   wallShapePrefabs:
-  - {fileID: 2437841978709261811, guid: c38bae8e4e791a542a45842d4ebda39a, type: 3}
-  - {fileID: 8882741028239806279, guid: 2000df4d539a5674fa8cdd0d5249db65, type: 3}
-  - {fileID: 9221202855275405175, guid: 1322b8da49770c241890444f920c29db, type: 3}
-  - {fileID: 6026799193222652213, guid: f34b8daf9461fe34a811078468588a0c, type: 3}
-  - {fileID: 6424769892367090624, guid: bd019e30aca86a448b58ded4a574a7bd, type: 3}
-  - {fileID: 1373029656162853461, guid: 3fa17192ce51a8540a724c25783f8e0f, type: 3}
+  - {fileID: 1818984170239210886, guid: fe749c50637e0b246969e2ba5654df01, type: 3}
+  - {fileID: 5246436114326698459, guid: 471a064dd18e92f4d9335a1aa8a0864c, type: 3}
+  - {fileID: 5394435929723511753, guid: af44f5569b4a0564a989b728368be5c9, type: 3}
+  - {fileID: 144205066670791881, guid: 5b27d422fb7573d458600067f99ed570, type: 3}
+  - {fileID: 8842792902288470866, guid: d8ce5b5fd11d3f6469801ae3b79f44a6, type: 3}
+  - {fileID: 2169749351110565012, guid: 52b45377d7974eb4891c83f865f7207e, type: 3}
   enemyScale: 1.35
+  art: {fileID: 11400000, guid: ef98c199b64ef314eb3fe4d995944d17, type: 2}
   grass: {fileID: 2100000, guid: 2ba6a866d2d7e934eab073c3516fcc38, type: 2}
   water: {fileID: 2100000, guid: f9e2934e21fbb5d44b392f40f49c6d69, type: 2}
   timberShadow: {fileID: 2100000, guid: ddadbc511bf2155428d1ab0ec762ebeb, type: 2}

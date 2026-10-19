@@ -1,0 +1,2 @@
+Editor Play mode, Release scene, stress fixture (100 alive), Game view 1284x722, UnityStats (indicative, Editor only)
+batches=160 drawCalls=167 setPass=47 tris=318380 verts=280842 shadowCasters=42 meshRenderers=1535

@@ -3,6 +3,7 @@
     "rootNamespace": "TheLastFortress.Tests",
     "references": [
         "TheLastFortress.Runtime",
+        "TheLastFortress.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

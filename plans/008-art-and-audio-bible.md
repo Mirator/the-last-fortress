@@ -1,5 +1,7 @@
 # Plan 008 art and audio bible
 
+> Plan 011 (2026-10-19) added an authored art layer and changed the ownership, material and LOD rules below; see [011-visual-upgrade.md](011-visual-upgrade.md). Where they conflict, 011 wins.
+
 The standard every 008/009 asset is held to. It describes the current generated family (blockouts and synthesized clips) and the rules a final asset must keep so it drops into the same code paths. **Nothing here is approved final art or audio**: there has been no listening pass, live review or art-director sign-off (G4 PENDING). Reference captures below are candidates for that review, not approvals.
 
 ## 1. Camera, scale and readability
@@ -43,7 +45,8 @@ Caps (pooled, oldest recycled): hit 40, kill 30, collapse 12, fire 24, blast 12,
 
 - Prefabs: `Prefabs/<Kind>.prefab` for MVP kinds, `Prefabs/Release<Kind>.prefab` for 008 kinds. Icons: `UI/Icons/icon_<kind>.png`, 128 px white line art on transparent, 3.5/64 stroke. Clips: `Audio/Clips/<name>.wav` (mono, PCM for one-shots, Vorbis streaming for loops).
 - **Ownership:** everything currently shipped is *generated*: blockouts by `EntityPrefabBuilder`, icons by `UI/Source~/icons.py`, clips by `Audio/Source~/synth.py`. `ReleaseSetup` regenerates a `Release*` prefab only while the content asset still points at the generated file; assigning an authored prefab in `ReleaseContent.asset` stops regeneration for that kind. `PresentationSetup` rewrites import settings and references only, never the source files. Before final art lands, extend this rule to icons and clips (an authored file must not be overwritten by a generator).
-- LOD: not needed for the blockouts; a final asset over ~2k triangles must ship LOD1 at ≤50%.
+- LOD: not needed for the blockouts; a final asset over ~2k triangles must ship LOD1 at ≤50%. **Superseded by plan 011:** LOD is deferred under the fixed orthographic camera (see [011](011-visual-upgrade.md#updated-presentation-guidance-supersedes-the-blockout-budgets-where-they-conflict)).
+- **Plan 011 authored layer:** the release content now uses agent-generated models in `Art/` (sources in `Art/Source~/`, provenance in `Art/credits.md`), assigned by `ArtSetup`. Every blockout setup now regenerates a prefab only while the content still points at its own generated file (`PrototypeSetup.Generated`), so the authored assignments survive reruns. Textured materials (procedural 512 px maps) replace the flat-colour rule of §2 for authored assets; the colour semantics and value structure still apply. The `Art/` set is generated, not approved art.
 
 ## 6. Reference captures (candidates, not approved)
 

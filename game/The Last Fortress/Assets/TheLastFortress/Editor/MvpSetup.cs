@@ -83,16 +83,22 @@ namespace TheLastFortress.Editor
             content.wallPrefab = prototype.wallPrefab;
             content.towerPrefab = prototype.towerPrefab;
             content.gruntPrefab = prototype.gruntPrefab;
-            content.housePrefab = PrototypeSetup.SavePrefab(EntityPrefabBuilder.House(mats), "House");
-            content.farmPrefab = PrototypeSetup.SavePrefab(EntityPrefabBuilder.Farm(mats), "Farm");
-            content.trapPrefab = PrototypeSetup.SavePrefab(EntityPrefabBuilder.SpikeTrap(mats), "SpikeTrap");
-            content.runnerPrefab = PrototypeSetup.SavePrefab(EntityPrefabBuilder.Runner(mats), "Runner");
-            content.brutePrefab = PrototypeSetup.SavePrefab(EntityPrefabBuilder.Brute(mats), "Brute");
-            content.golemPrefab = PrototypeSetup.SavePrefab(EntityPrefabBuilder.SiegeGolem(mats), "SiegeGolem");
-            content.wallShapePrefabs = new GameObject[6];
+            content.housePrefab = PrototypeSetup.Generated(content.housePrefab, () => EntityPrefabBuilder.House(mats), "House");
+            content.farmPrefab = PrototypeSetup.Generated(content.farmPrefab, () => EntityPrefabBuilder.Farm(mats), "Farm");
+            content.trapPrefab = PrototypeSetup.Generated(content.trapPrefab, () => EntityPrefabBuilder.SpikeTrap(mats), "SpikeTrap");
+            content.runnerPrefab = PrototypeSetup.Generated(content.runnerPrefab, () => EntityPrefabBuilder.Runner(mats), "Runner");
+            content.brutePrefab = PrototypeSetup.Generated(content.brutePrefab, () => EntityPrefabBuilder.Brute(mats), "Brute");
+            content.golemPrefab = PrototypeSetup.Generated(content.golemPrefab, () => EntityPrefabBuilder.SiegeGolem(mats), "SiegeGolem");
+            var shapes = content.wallShapePrefabs != null && content.wallShapePrefabs.Length == 6 ? content.wallShapePrefabs : new GameObject[6];
             for (var s = 0; s < 6; s++)
-                content.wallShapePrefabs[s] = PrototypeSetup.SavePrefab(EntityPrefabBuilder.WallPiece(mats, (WallShape)s), "MvpWall" + (WallShape)s);
+            {
+                var shape = (WallShape)s;
+                shapes[s] = PrototypeSetup.Generated(shapes[s], () => EntityPrefabBuilder.WallPiece(mats, shape), "MvpWall" + shape);
+            }
+
+            content.wallShapePrefabs = shapes;
             content.enemyScale = 1.35f;
+            if (content.art == null) content.art = prototype.art;
             content.foliage = all["Foliage"];
             content.rock = all["Rock"];
             content.overlayOnTop = OverlayOnTopMaterial();

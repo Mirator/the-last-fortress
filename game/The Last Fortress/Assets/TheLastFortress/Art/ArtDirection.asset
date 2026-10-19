@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e593dff4c7b74114b95a15599916178e, type: 3}
+  m_Name: ArtDirection
+  m_EditorClassIdentifier: TheLastFortress.Runtime::TheLastFortress.ArtDirection
+  ground: {fileID: 2100000, guid: 22f55fe8879f496408603a313b2910ed, type: 2}
+  bank: {fileID: 2100000, guid: 0937a4e6633e9734e80a563795ee79cb, type: 2}
+  river: {fileID: 2100000, guid: d4c5f33cb35ce724c9e89a8b449cf244, type: 2}
+  ford: {fileID: 2100000, guid: 14636770b28eba549a002b3050f6bd37, type: 2}
+  beach: {fileID: 2100000, guid: 10d6cdf27a6c2f14e879f7d8110a7230, type: 2}
+  cliff: {fileID: 2100000, guid: 616012550655d0641add73f8880e85b5, type: 2}
+  sea: {fileID: 2100000, guid: 2db8b71cc4c55ad4fb1b7127ff2a28ea, type: 2}
+  bridge: {fileID: 2100000, guid: eed2996131b21014bbc0adc64507dfbf, type: 2}
+  groundTiling: 3
+  pine: {fileID: 7167093046577466117, guid: c5316874f5451794dbc680e241a5e963, type: 3}
+  broadleaf: {fileID: 7167934353542765151, guid: 6ff456ffdb4d5944b9880924e2aa89f7, type: 3}
+  bush: {fileID: 903490027959621123, guid: 041deed573f9350428c26d131adc43f5, type: 3}
+  rockLarge: {fileID: 6283880078991437941, guid: dfd513ae5eab25d438ccf3c2c0beaddf, type: 3}
+  rockSmall: {fileID: 6110465881946166505, guid: 7e3cc8b33ca35764dab4501279b36af5, type: 3}
+  reeds: {fileID: 2746466063064950158, guid: 0d1ab17b45c140846a56e4a111413c4a, type: 3}
+  tuft: {fileID: 7721788834377632855, guid: 6a4c13d48a795b342ab6e4cce9a7542a, type: 3}
+  fordStone: {fileID: 3345350996921448844, guid: 20c57c7a1790d254c9d233e35427a275, type: 3}
+  gate: {fileID: 3733504292685820564, guid: dd354e22b820b764a86596c95bb101a9, type: 3}
+  farIslands:
+  - {fileID: 2248128622391164826, guid: 228545d7e77f19d4b84bd9b29ca5d4c2, type: 3}
+  - {fileID: 3244873464253194556, guid: 8418661ab89beff4591b3e537eba886c, type: 3}
+  dayProfile: {fileID: 11400000, guid: f47a476b8bbafad4b9978796ebae6ea0, type: 2}
+  nightProfile: {fileID: 11400000, guid: 214c66ff8afca99439421d553647939e, type: 2}
+  daySky: {r: 0.66, g: 0.72, b: 0.8, a: 1}
+  dayEquator: {r: 0.62, g: 0.6, b: 0.52, a: 1}
+  dayGround: {r: 0.36, g: 0.34, b: 0.28, a: 1}
+  sunColor: {r: 1, g: 0.93, b: 0.8, a: 1}
+  sunIntensity: 1.5
+  dayShadowStrength: 0.82
+  nightSky: {r: 0.3, g: 0.37, b: 0.56, a: 1}
+  nightEquator: {r: 0.18, g: 0.22, b: 0.34, a: 1}
+  nightGround: {r: 0.07, g: 0.08, b: 0.12, a: 1}
+  moonColor: {r: 0.62, g: 0.72, b: 1, a: 1}
+  moonIntensity: 0.85
+  nightShadowStrength: 0.6
+  torchColor: {r: 1, g: 0.66, b: 0.32, a: 1}
+  keepLightIntensity: 3.2
+  towerLightIntensity: 1.6
+  towerLightRange: 2.6
+  windowDay: 0.15
+  windowNight: 2.4
+  seaColorDay: {r: 0.25, g: 0.4, b: 0.47, a: 1}
+  seaColorNight: {r: 0.06, g: 0.09, b: 0.16, a: 1}

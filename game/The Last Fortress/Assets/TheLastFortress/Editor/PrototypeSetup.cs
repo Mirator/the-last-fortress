@@ -58,10 +58,10 @@ namespace TheLastFortress.Editor
             }
 
             content.definitions = definitions;
-            content.keepPrefab = SavePrefab(EntityPrefabBuilder.Keep(mats), "Keep");
-            content.wallPrefab = SavePrefab(EntityPrefabBuilder.Wall(mats), "Wall");
-            content.towerPrefab = SavePrefab(EntityPrefabBuilder.Tower(mats), "ArcherTower");
-            content.gruntPrefab = SavePrefab(EntityPrefabBuilder.Grunt(mats), "Grunt");
+            content.keepPrefab = Generated(content.keepPrefab, () => EntityPrefabBuilder.Keep(mats), "Keep");
+            content.wallPrefab = Generated(content.wallPrefab, () => EntityPrefabBuilder.Wall(mats), "Wall");
+            content.towerPrefab = Generated(content.towerPrefab, () => EntityPrefabBuilder.Tower(mats), "ArcherTower");
+            content.gruntPrefab = Generated(content.gruntPrefab, () => EntityPrefabBuilder.Grunt(mats), "Grunt");
             content.grass = all["Grass"];
             content.water = all["Water"];
             content.timberShadow = all["TimberShadow"];
@@ -153,6 +153,20 @@ namespace TheLastFortress.Editor
             LitMaterial("Rock", Palette.Hex(0x9A958B), all);
             return mats;
         }
+
+        /// <summary>
+        /// Regenerates a blockout prefab only while the reference is empty or still points at its own generated file; an
+        /// authored replacement assigned in a content asset (for example by <see cref="ArtSetup"/>) is never overwritten.
+        /// </summary>
+        public static GameObject Generated(GameObject current, System.Func<GameObject> build, string name)
+        {
+            if (IsAuthored(current, name)) return current;
+            return SavePrefab(build(), name);
+        }
+
+        /// <summary>True when the reference is set and is not the generated Prefabs/&lt;name&gt;.prefab.</summary>
+        internal static bool IsAuthored(Object current, string generatedName) =>
+            current != null && AssetDatabase.GetAssetPath(current) != $"{Root}/Prefabs/{generatedName}.prefab";
 
         internal static GameObject SavePrefab(GameObject temp, string name)
         {

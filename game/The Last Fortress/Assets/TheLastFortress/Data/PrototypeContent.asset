@@ -13,15 +13,39 @@ MonoBehaviour:
   m_Name: PrototypeContent
   m_EditorClassIdentifier: TheLastFortress.Runtime::TheLastFortress.PrototypeContent
   definitions: {fileID: 11400000, guid: c229310b3909f23458a7a699b261486e, type: 2}
-  keepPrefab: {fileID: 6440497214723432423, guid: 70ece24faa35d97489b2376f0ff687fe, type: 3}
-  wallPrefab: {fileID: 1998575460765660594, guid: 09b8bd1eeb48bbe4e82af639633f9c0b, type: 3}
-  towerPrefab: {fileID: 1112093812300093508, guid: 89778087862789f4482debc682862177, type: 3}
-  gruntPrefab: {fileID: 9036051224892743207, guid: 24da9229eb426d24cb5f5c34a780202c, type: 3}
+  mvpDefinitions: {fileID: 0}
+  releaseDefinitions: {fileID: 0}
+  keepPrefab: {fileID: 3113410671069058101, guid: 4632f10c0af8afb4f84283e88557299a, type: 3}
+  wallPrefab: {fileID: 5394435929723511753, guid: af44f5569b4a0564a989b728368be5c9, type: 3}
+  towerPrefab: {fileID: 9112202150111827439, guid: b0866cf8739d37249bc57918b6f87339, type: 3}
+  gruntPrefab: {fileID: 3472920882174607594, guid: 379f51d2ab73e2b47ac6156a016dc5c5, type: 3}
+  housePrefab: {fileID: 7640542900344921036, guid: 1a9fc516aaff2bc4d9bb443450bfc41a, type: 3}
+  farmPrefab: {fileID: 5040771501538919426, guid: 159cc42070818af458cbf4c56be509f7, type: 3}
+  trapPrefab: {fileID: 4562011737865292685, guid: e9680c6b5c7dc9a41b4f9e9fbf6350cb, type: 3}
+  runnerPrefab: {fileID: 7429601524345773123, guid: debe899184eef684ab45d1304edd7e94, type: 3}
+  brutePrefab: {fileID: 1684382618824314045, guid: 41202a6afa1c6ae4d83a7c636c130daf, type: 3}
+  golemPrefab: {fileID: 1780362451824461143, guid: 28cba6509e6b5164388286b36e635588, type: 3}
+  cannonPrefab: {fileID: 2198366529454211407, guid: 7015a01102cf6c6478f4cbba2da5f9ff, type: 3}
+  watchtowerPrefab: {fileID: 1325927115242731038, guid: 8400e329883a39e49b1e2314fba44c8d, type: 3}
+  repairStationPrefab: {fileID: 8360726647778069353, guid: 115a817572fccea47bdf7da2f663d333, type: 3}
+  raiderArcherPrefab: {fileID: 7120807620281102858, guid: 9f9fa7a5fe606f6439b0cd5c0fbed5e2, type: 3}
+  bomberPrefab: {fileID: 2359386809958955175, guid: 6a50c7ea44548aa46a9def3fd9e3d5e5, type: 3}
+  commanderPrefab: {fileID: 5108529738428571984, guid: 988740485a79f2a4898a9c3e59c4f09f, type: 3}
+  wallShapePrefabs: []
+  enemyScale: 1
+  art: {fileID: 11400000, guid: ef98c199b64ef314eb3fe4d995944d17, type: 2}
   grass: {fileID: 2100000, guid: 2ba6a866d2d7e934eab073c3516fcc38, type: 2}
   water: {fileID: 2100000, guid: f9e2934e21fbb5d44b392f40f49c6d69, type: 2}
   timberShadow: {fileID: 2100000, guid: ddadbc511bf2155428d1ab0ec762ebeb, type: 2}
   overlay: {fileID: 2100000, guid: 96d63c55ca1a0fd498917d60f1d828e0, type: 2}
   arrow: {fileID: 2100000, guid: a126e42a60d3c744b907fe9b0f133832, type: 2}
+  foliage: {fileID: 0}
+  rock: {fileID: 0}
+  overlayOnTop: {fileID: 0}
+  audio: {fileID: 0}
+  buildingIcons: []
+  goldIcon: {fileID: 0}
+  panCursor: {fileID: 0}
   winningLayout: {fileID: 4900000, guid: bfb63b8742eaa864a970ef1c62ce91c9, type: 3}
   losingLayout: {fileID: 4900000, guid: c2100436c31f16e4eb464ec3b6a6596c, type: 3}
   stressLayout: {fileID: 4900000, guid: 79d3c75cab386a04bb542e5555532700, type: 3}

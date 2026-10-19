@@ -97,6 +97,7 @@ namespace TheLastFortress.Editor
             content.golemPrefab = mvp.golemPrefab;
             content.wallShapePrefabs = mvp.wallShapePrefabs;
             content.enemyScale = mvp.enemyScale;
+            if (content.art == null) content.art = mvp.art;
             content.cannonPrefab = Generated(content.cannonPrefab, () => EntityPrefabBuilder.Cannon(mats, release), "ReleaseCannon");
             content.watchtowerPrefab = Generated(content.watchtowerPrefab, () => EntityPrefabBuilder.Watchtower(mats), "ReleaseWatchtower");
             content.repairStationPrefab = Generated(content.repairStationPrefab, () => EntityPrefabBuilder.RepairStation(mats), "ReleaseRepairStation");
@@ -131,8 +132,7 @@ namespace TheLastFortress.Editor
         /// </summary>
         static GameObject Generated(GameObject current, System.Func<GameObject> build, string name)
         {
-            if (current != null && !AssetDatabase.GetAssetPath(current).EndsWith($"/Prefabs/{name}.prefab")) return current;
-            return PrototypeSetup.SavePrefab(build(), name);
+            return PrototypeSetup.Generated(current, build, name);
         }
     }
 }
