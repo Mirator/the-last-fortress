@@ -1,6 +1,6 @@
 # Third-person hero and switchable views
 
-Version 0.1, 2026-10-19. Status: **current specification**; direction owner-approved, proposed defaults await the owner decisions at the end; nothing implemented. An implementing agent must first prepare a separate implementation plan (next free number: `plans/012`).
+Version 0.1, 2026-10-19. Status: **current specification**; direction owner-approved, proposed defaults await the owner decisions at the end; nothing implemented. An implementing agent must first prepare a separate implementation plan.
 
 ## Purpose and decisions so far
 
@@ -8,11 +8,11 @@ Add one player-controlled hero who fights during Night alongside the fortress, p
 
 Owner-confirmed (2026-10-19): option B from the feasibility analysis, a true third-person perspective camera, not a hero steered on the fixed isometric camera. Both views stay in the game with a switch between them.
 
-Everything else in this document is a proposed default for review. Numbers are tagged as in `plans/008-rules.md`: **[I]** invariant rule (changing it is a rules-version change), **[P]** provisional tuning (may change with recorded evidence inside the bounded-tuning policy).
+Everything else in this document is a proposed default for review. Numbers are tagged as in [005-release-rules.md](005-release-rules.md): **[I]** invariant rule (changing it is a rules-version change), **[P]** provisional tuning (may change with recorded evidence inside the bounded-tuning policy).
 
 ## Baseline and what this supersedes
 
-- The rules contract this extends is `plans/008-rules.md` (`release-rules-1`, campaign `twelve-nights`, map profiles `ravine`/`crossing`/`meadow`), together with the presentation from plans 010 and 011. `specs/001-003` describe earlier milestones; the release rules live in the plan 008 rules file, not in a spec.
+- The rules contract this extends is [005-release-rules.md](005-release-rules.md) (`release-rules-1`, campaign `twelve-nights`, map profiles `ravine`/`crossing`/`meadow`), together with the current release presentation (entry gates, route chevrons, authored art, day/night lighting). Specs 001-004 describe earlier milestones.
 - For the **release profile only**, this supersedes two lines of `specs/001-game-design.md`: "Camera: Fixed isometric" and the exclusion of heroes. Soldiers, Barracks and activated abilities remain deferred.
 - The six-night MVP profile (`mvp-rules-1`) and the one-wave prototype are unchanged in rules, presentation, controls and saves. They get no hero and no hero view.
 
@@ -57,7 +57,7 @@ The hero is a Core simulation entity like enemies and buildings, not a Unity obj
 
 ### 2.3 Step order
 
-`plans/008-rules.md` §0 becomes, for `release-rules-2` only [I]:
+[005-release-rules.md](005-release-rules.md) §0 becomes, for `release-rules-2` only [I]:
 
 1. Due spawns.
 2. Enemy movement and Spike Trap entry. **2b. Hero movement** from this step's command.
@@ -152,7 +152,7 @@ The menu, reward screen, dialogs and focus loss always unlock the cursor. UI cli
 The world was authored for a fixed 45°/40° orthographic view. The hero view exposes things that view never shows. Required in this milestone:
 
 1. **Horizon.** Today the background is a flat clear colour (`WorldView` sets `Camera.main.backgroundColor` to the sea colour). Hero view needs a sky (gradient or skybox with day/night blend), distant sea and a visible island edge beyond the 20×20 board, plus distance fog tuned for both lighting states.
-2. **Billboards and overlays.** World-space HP bars are rotated to the constant `CameraRig.Yaw`. They must face the active camera. Screen-space anchors in `HudView` and `HudView.Mvp` use the strategic camera's `WorldToScreenPoint`. They must use the active camera and hide anchors behind the camera. Route chevrons and entry gates (plan 010) must stay readable or be toned down at low angles.
+2. **Billboards and overlays.** World-space HP bars are rotated to the constant `CameraRig.Yaw`. They must face the active camera. Screen-space anchors in `HudView` and `HudView.Mvp` use the strategic camera's `WorldToScreenPoint`. They must use the active camera and hide anchors behind the camera. Route chevrons and entry gates must stay readable or be toned down at low angles.
 3. **Art audit.** Check every release building, enemy and terrain piece from hero eye height for missing back faces, unfinished undersides, z-fighting and scale problems. Hero height ≈ Grunt height [P]. Fix or record each finding.
 4. **Hero model.** One authored hero on the existing `CharacterRig` part rig (walk, swing, hit, fall, respawn), with a silhouette distinct from every enemy at both camera distances. The hero must be findable in Strategic view (marker or outline).
 5. **Night readability in Hero view.** HUD shows hero HP, Keep HP, enemies remaining, the respawn timer when down, and a directional indicator when the Keep or a building outside the view is hit. New-side entry warnings stay visible. A hero torch or rim light may be added; it must not change what is readable as dangerous.
@@ -162,14 +162,14 @@ The world was authored for a fixed 45°/40° orthographic view. The hero view ex
 
 ## 5. Performance
 
-The perspective camera sees more geometry and shadow casters than the orthographic one. Repeat the plan 011 100-enemy visible-window measurement in Hero view at both resolutions, looking across the board toward the busiest entry. Budget: the Hero view frame time must stay within 1.5× of the Strategic view measured in the same session, and both must hold 60 fps on the reference machine [P]. Record shadow distance and any LOD or culling change made to meet it.
+The perspective camera sees more geometry and shadow casters than the orthographic one. Repeat the existing 100-enemy visible-window performance measurement in Hero view at both resolutions, looking across the board toward the busiest entry. Budget: the Hero view frame time must stay within 1.5× of the Strategic view measured in the same session, and both must hold 60 fps on the reference machine [P]. Record shadow distance and any LOD or culling change made to meet it.
 
 ## 6. Balance guard
 
-The design pillars are "every building is a tactical decision" and readable battles. A hero strong enough to replace placement breaks the game. Required evidence before any rules-2 tuning is called done (scripted policy runs, as in plan 008, seeds 1–8 per approach, real budget):
+The design pillars are "every building is a tactical decision" and readable battles. A hero strong enough to replace placement breaks the game. Required evidence before any rules-2 tuning is called done (scripted policy runs, seeds 1–8 per approach, real budget, as recorded in the spec 005 tuning log):
 
 1. **Hero alone loses.** No construction beyond the Keep, hero controlled by a scripted "fight nearest" policy: the run must be lost by Night 3 on every seed [P: night].
-2. **Idle hero changes little.** Existing plan 008 policies with the hero in guard behaviour at the spawn point: outcomes (win/loss, final night) match `release-rules-1` on at least 7 of 8 seeds per approach.
+2. **Idle hero changes little.** The existing release policies (kill-zone, corridor, economy) with the hero in guard behaviour at the spawn point: outcomes (win/loss, final night) match `release-rules-1` on at least 7 of 8 seeds per approach.
 3. **Active hero helps, does not dominate.** With a scripted active hero, hero kills stay at or below 25% of all kills per night on Nights 6–12 [P].
 4. Any wave, HP or damage change for rules-2 follows the bounded-tuning policy, is recorded with before/after logs, and never changes `release-rules-1`.
 
@@ -212,4 +212,4 @@ Stage 1 can be judged by scripts before any camera work starts. If the balance g
 5. **Speed in Hero view.** Lock to 1× (proposed), or allow 2× with the hero moving faster too?
 6. **Hero on/off at New Run.** Keep the toggle (proposed), or make the hero mandatory in the release profile and keep rules-1 only for old saves?
 7. **Respawn delay and hero numbers.** 10 s respawn, 200 HP, 15 damage per 0.6 s as starting values.
-8. **Art.** Hero model and the sky/island-edge art are new content. Generated placeholder art, as in plan 011, or commissioned?
+8. **Art.** Hero model and the sky/island-edge art are new content. Generated placeholder art, like the current release art, or commissioned?

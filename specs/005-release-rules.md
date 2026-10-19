@@ -1,6 +1,6 @@
-# Plan 008 rules — release profile `release-rules-1`
+# Release profile rules — `release-rules-1`
 
-Frozen 2026-10-16 for plan 008 G0. This is the contract the code implements; the code may not improvise beyond it. Every number is tagged **[I]** invariant (a rule; changing it is a rules-version change) or **[P]** provisional tuning (may change after observed play, inside the stated bounds, with the change recorded in `008-results.md`). Names match `Definitions.cs`, `PerkRules.cs`, `MvpCampaign.cs` and the new `ReleaseCampaign.cs` / `MapProfiles.cs`.
+Frozen 2026-10-16. Status (2026-10-19): implemented; the twelve-night release profile. This is the contract the code implements; the code may not improvise beyond it. Every number is tagged **[I]** invariant (a rule; changing it is a rules-version change) or **[P]** provisional tuning (may change after observed play, inside the stated bounds, with the change recorded in the tuning log, section 8). Names match `Definitions.cs`, `PerkRules.cs`, `MvpCampaign.cs` and the new `ReleaseCampaign.cs` / `MapProfiles.cs`.
 
 Nothing here changes the six-night MVP profile (`mvp-rules-1`). It keeps its definitions, its 10-perk pool, its night table, its generator and its save schema 1.
 
@@ -184,7 +184,7 @@ The MVP random generator (`MapGenerator`, 30 scattered obstacles) is unchanged a
 ## 6. Economy and difficulty
 
 - Starting gold 250 [P], Keep 20/day [P], existing building incomes unchanged [P]. Manual repair 5 HP per gold [I]. Sale refunds 50% (floor) [I]. Recycling 25% [I].
-- One difficulty, `standard` [I for 008]. Persisted for future profiles.
+- One difficulty, `standard` [I for `release-rules-1`]. Persisted for future profiles.
 - Cost/income assumptions to verify with policies: a balanced build reaches ~150–200 gold/day by Night 8; Night 12 needs roughly 1,600–2,200 gold of defenses. These are hypotheses, not acceptance criteria.
 
 ## 7. Saves and profiles
@@ -193,11 +193,11 @@ The MVP random generator (`MapGenerator`, 30 scattered obstacles) is unchanged a
 - Schema **2** = profile-tagged: `rulesVersion` (`release-rules-1`), `campaignId` (`twelve-nights`), `contentVersion` (2; 1 before the cheaper-buildings retune in §8), `mapProfile`, `difficulty`, plus all schema-1 fields. Stored nights hold up to 7 enemy kinds; stored buildings up to 9 kinds. New buildings carry no extra per-building state across Days (cooldowns reset at Day, dawn repair is stateless).
 - Reading [I]: schema 1 → legacy profile only; schema 2 → the catalog must know its `rulesVersion` + `campaignId`, else `IncompatibleRules` with an actionable message; any other schema → `UnknownSchema`, file untouched ("made by a newer version; update to continue it"). A six-night save is never converted into twelve nights; it continues as six nights under MVP rules in any build that ships the legacy profile (the release build does).
 - Release and MVP builds share the save folder; a build that does not know a save's profile never overwrites it (a New Run takes the next slot).
-- Settings (v2) and onboarding profile (v1) are separate files with separate migrations; unchanged by 008.
+- Settings (v2) and onboarding profile (v1) are separate files with separate migrations; unchanged by these rules.
 
 ## 8. Tuning log (provisional values changed with evidence)
 
-Each change below was made inside the [P] bounds after a recorded scripted run (`evidence/008/release-policy-runs.txt`, real budget, seeds 1–8 per approach). Scripts are not players: these are mechanical-viability adjustments, not balance claims.
+Each change below was made inside the [P] bounds after a recorded scripted policy run (real budget, seeds 1–8 per approach). Scripts are not players: these are mechanical-viability adjustments, not balance claims.
 
 | Value | From → to | Evidence |
 |---|---|---|

@@ -1,7 +1,7 @@
 namespace TheLastFortress
 {
     /// <summary>
-    /// Initial plan 008 release tuning (008-rules.md sections 1-2): the MVP definitions plus Cannon, Watchtower, Repair
+    /// Initial plan 008 release tuning (spec 005-release-rules.md sections 1-2): the MVP definitions plus Cannon, Watchtower, Repair
     /// Station, Raider Archer, Bomber and Siege Commander. The MVP defaults are untouched; values marked provisional there
     /// are tuned in the release definitions asset, never by editing the MVP.
     /// </summary>

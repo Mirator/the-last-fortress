@@ -43,7 +43,7 @@ public const int CurrentSchema = 1;
 public const string RulesVersion = "mvp-rules-1";
 ```
 
-At entry run `git status --short` and `git diff --stat dc8b55a..HEAD -- "game/The Last Fortress/Assets/TheLastFortress"`; inspect uncommitted and untracked work as well. Read `plans/008-results.md`, `008-rules.md`, `008-content-matrix.md` and `008-art-and-audio-bible.md`. If they are missing or gates are unmet, perform production planning only and mark dependent content work PENDING. Do not fabricate the release systems or rewrite another task's working files.
+At entry run `git status --short` and `git diff --stat dc8b55a..HEAD -- "game/The Last Fortress/Assets/TheLastFortress"`; inspect uncommitted and untracked work as well. Read `plans/008-results.md`, `specs/005-release-rules.md`, `008-content-matrix.md` and `008-art-and-audio-bible.md`. If they are missing or gates are unmet, perform production planning only and mark dependent content work PENDING. Do not fabricate the release systems or rewrite another task's working files.
 
 ## 1. Freeze the production edition before scaling it
 

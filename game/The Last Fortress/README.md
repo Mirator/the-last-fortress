@@ -119,7 +119,7 @@ PlayMode tests set `SaveStore.DirectoryOverride` to a temp folder; storage tests
 
 ## Twelve-night release profile (plan 008)
 
-A third scene, `Assets/TheLastFortress/Scenes/Release.unity`, plays the plan 008 rules (`plans/008-rules.md`): twelve stored nights, nine building kinds (adds **Cannon**, **Watchtower**, **Repair Station**), seven enemy kinds (adds **Raider Archer**, **Bomber**, **Siege Commander**), a 24-perk reward pool and three map profiles. The six-night MVP scene, its tuning and its saves are unchanged and remain the regression build.
+A third scene, `Assets/TheLastFortress/Scenes/Release.unity`, plays the plan 008 rules (`specs/005-release-rules.md`): twelve stored nights, nine building kinds (adds **Cannon**, **Watchtower**, **Repair Station**), seven enemy kinds (adds **Raider Archer**, **Bomber**, **Siege Commander**), a 24-perk reward pool and three map profiles. The six-night MVP scene, its tuning and its saves are unchanged and remain the regression build.
 
 | Input | Action |
 |---|---|

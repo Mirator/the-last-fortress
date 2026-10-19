@@ -29,7 +29,7 @@ Prepared on 2026-10-15 using the improve skill. These plans are implementation h
 
 ## Latest handoff — 008 implemented, 009 planned (2026-10-16)
 
-Plan 008's technical milestone is implemented; see [008 results](008-results.md), the frozen [rules](008-rules.md), [content matrix](008-content-matrix.md) and [art/audio bible](008-art-and-audio-bible.md). Fresh run after the last change: EditMode 105/105, PlayMode 18/18, release content validation 0 errors, release and MVP builds succeeded, offscreen captures at 720p/1080p, MVP regression capture. Deliverable: the whole `game/The Last Fortress/Builds/Release/` folder; old six-night saves continue in it.
+Plan 008's technical milestone is implemented; see [008 results](008-results.md), the frozen [rules](../specs/005-release-rules.md), [content matrix](008-content-matrix.md) and [art/audio bible](008-art-and-audio-bible.md). Fresh run after the last change: EditMode 105/105, PlayMode 18/18, release content validation 0 errors, release and MVP builds succeeded, offscreen captures at 720p/1080p, MVP regression capture. Deliverable: the whole `game/The Last Fortress/Builds/Release/` folder; old six-night saves continue in it.
 
 Plan 009 is **planning only** by its own entry rule: [production contract](009-production-contract.md) and [content contracts](009-content-contracts.md) are drafts with owner decisions left open; [009 results](009-results.md) lists what was deliberately not started.
 

@@ -1,6 +1,6 @@
 # Improvements from agent playtests and focused reviews
 
-2026-10-15. Status (2026-10-19): implemented by plan 006 ([results](../plans/006-results.md)).
+2026-10-15. Status (2026-10-19): implemented.
 
 ## Purpose and evidence
 
@@ -8,18 +8,18 @@ Make the existing six-night MVP's decisions easier to evaluate, then investigate
 
 Two GPT-6 Luna subagents performed separate background simulation passes after the owner requested no desktop interaction. The drivers compile the actual `Runtime/Core/*.cs` from commit `cea7c4f` with .NET SDK 10.0.300. Default tuning was checked against `Data/MvpDefinitions.asset`; these are source-level gameplay simulations, not runs of the rendered standalone build.
 
-- [Playtester A: mistakes, recovery, perks and checkpoint continuation](../plans/evidence/006-playtest-a/report.md), [seed-1 transcript](../plans/evidence/006-playtest-a/scenario-run.txt), [seed-2 transcript](../plans/evidence/006-playtest-a/scenario-run-seed2.txt), [driver](../plans/evidence/006-playtest-a/scenario/Program.cs).
-- [Playtester B: strategy comparison](../plans/evidence/006-playtest-b/report.md), [eight fresh policy runs](../plans/evidence/006-playtest-b/policy-runs.txt), [driver](../plans/evidence/006-playtest-b/harness/Program.cs).
+- Playtester A: mistakes, recovery, perks and checkpoint continuation, seed-1 transcript, seed-2 transcript, driver.
+- Playtester B: strategy comparison, eight fresh policy runs, driver.
 
 The earlier standalone capture attempt failed before gameplay input; its tooling timeout is not a game defect. After the owner's change of direction, neither agent used the desktop. Background console processes ran locally. No production code, tests, tuning, or user saves were changed.
 
-No screenshots, visual inspection, mouse/keyboard usability findings, wall-clock session times, or human fun/balance validation resulted from these simulations. Existing saved test/performance reports are historical evidence and were not rerun here. This work does not satisfy the five-fresh-player acceptance gate in plan 005.
+No screenshots, visual inspection, mouse/keyboard usability findings, wall-clock session times, or human fun/balance validation resulted from these simulations. Existing saved test/performance reports are historical evidence and were not rerun here. This work does not satisfy the five-fresh-player acceptance gate in spec 003.
 
-Three additional GPT-6 Luna subagents subsequently reviewed gameplay immersion, graphics/motion and UI without launching the game or controlling the desktop. These were source and saved-evidence reviews, not three further hands-on playtests. Graphics/UI reviews inspected historical plan-005 screenshots; the later `feedback-*` Day captures show the owner-feedback fixes, while older menu/combat/reward captures may predate them. Motion, current runtime layout and player comprehension remain unverified.
+Three additional GPT-6 Luna subagents subsequently reviewed gameplay immersion, graphics/motion and UI without launching the game or controlling the desktop. These were source and saved-evidence reviews, not three further hands-on playtests. Graphics/UI reviews inspected historical MVP screenshots; the later `feedback-*` Day captures show the owner-feedback fixes, while older menu/combat/reward captures may predate them. Motion, current runtime layout and player comprehension remain unverified.
 
-- [Immersion review](../plans/evidence/007-immersion/report.md): damage/loss feedback and the connection between nights and subsequent decisions.
-- [Graphics and motion review](../plans/evidence/007-graphics-motion/report.md): shot-event lifecycle, movement, hit feedback, pause clocks and lighting transitions.
-- [UI review](../plans/evidence/007-ui/report.md): restart/quit semantics, tooltip bounds, control discovery and selection layout.
+- Immersion review: damage/loss feedback and the connection between nights and subsequent decisions.
+- Graphics and motion review: shot-event lifecycle, movement, hit feedback, pause clocks and lighting transitions.
+- UI review: restart/quit semantics, tooltip bounds, control discovery and selection layout.
 
 The requirements below consolidate overlapping recommendations. Historical income-breakdown wrapping, missing building descriptions, missing new-side markers and coplanar water were addressed by the owner's earlier feedback fixes; they are not new unresolved findings here. The compact current income forecast/receipt should be retained.
 
@@ -72,7 +72,7 @@ The policy drivers use fixed purchase coordinates and perk preferences, skip rej
 1. Compare at least one alternative defense-led opening that adapts its purchases to income and blocked terrain on the same seeds 1–3. Use normal offered rewards and ordinary placement/repair APIs. Record purchased/skipped buildings, repair spending, surviving defenses, Keep HP and outcome by night.
 2. Distinguish terrain effects from reward luck using a clearly labeled diagnostic comparison if necessary; do not secretly grant favorable rewards in a claimed normal run.
 3. State whether the desired second approach is pure defense with guaranteed Keep income or defense-led with delayed economic investment. Do not silently turn the goal into identical outcomes for all openings.
-4. If adaptive defensive play still lacks a reasonable recovery path, propose the smallest supported tuning change with before/after logs. Follow the existing bounded-tuning policy in plans 004/005; broader changes require an explicit new decision. No automatic starting-gold increase, kill bounty, mid-night construction, free repair, or guaranteed optimal rewards.
+4. If adaptive defensive play still lacks a reasonable recovery path, propose the smallest supported tuning change with before/after logs. Follow the existing bounded-tuning policy; broader changes require an explicit new decision. No automatic starting-gold increase, kill bounty, mid-night construction, free repair, or guaranteed optimal rewards.
 5. Retain a passing economy approach and document the tradeoff introduced. Simulation wins support mechanical viability only; fresh players must still demonstrate understandable, genuinely different approaches.
 
 This requirement authorizes investigation in a future implementation task, not a balance patch based solely on the eight runs here.
@@ -93,7 +93,7 @@ This requirement authorizes investigation in a future implementation task, not a
 
 ## P2 — Make attacks and fortress losses readable
 
-**Source-backed concern:** the current building reaction is a small 0.18-second scale pulse; building destruction removes the view. Enemy attacks and Tower fire have little distinct contact feedback beyond those cues and HP bars (`WorldView.cs:257–275`, `:314–330`, `:445–479`). Historical Night 4/6 captures show a dense Tower/Keep cluster; plan 005 records partial Keep occlusion. Static captures cannot establish whether the existing reactions are sufficient in motion.
+**Source-backed concern:** the current building reaction is a small 0.18-second scale pulse; building destruction removes the view. Enemy attacks and Tower fire have little distinct contact feedback beyond those cues and HP bars (`WorldView.cs:257–275`, `:314–330`, `:445–479`). Historical Night 4/6 captures show a dense Tower/Keep cluster; earlier MVP captures recorded partial Keep occlusion. Static captures cannot establish whether the existing reactions are sufficient in motion.
 
 **Desired behavior:** provide short, distinct cues for a successful hit, a Keep hit and a destroyed structure. A persistent HUD Keep-health indicator should briefly signal a new hit even if the Keep is outside the camera view; on-board cues stay attached to their targets. Prefer restrained flashes, impact shapes or a short collapse/fade over constant damage-number clutter. Reuse the lethal-shot work rather than adding a second effect system. Effects must not suggest changed footprints, obstacles, range or damage timing.
 

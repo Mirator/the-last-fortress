@@ -830,7 +830,7 @@ namespace TheLastFortress
         }
 
         /// <summary>
-        /// Repair Stations at dawn (008-rules 1.3), in ascending station ID: each spends its budget on eligible buildings
+        /// Repair Stations at dawn (spec 005-release-rules 1.3), in ascending station ID: each spends its budget on eligible buildings
         /// within reach, lowest HP fraction first (ties lowest ID). Runs once per Day entry, never on Day 1 or a reload.
         /// </summary>
         void DawnRepair()
@@ -1079,7 +1079,7 @@ namespace TheLastFortress
         }
 
         /// <summary>
-        /// Raider Archer at a cell centre of its own route (008-rules 2.1): keeps a living target in range; otherwise picks
+        /// Raider Archer at a cell centre of its own route (spec 005-release-rules 2.1): keeps a living target in range; otherwise picks
         /// one by class (economy, support, towers, Walls, Keep), then nearest footprint cell, then lowest ID. With a target
         /// it stays on this cell. A new target is taken on a fresh step with a full interval (cooldown reset on retarget).
         /// </summary>
@@ -1276,7 +1276,7 @@ namespace TheLastFortress
         }
 
         /// <summary>
-        /// Cannon shot (008-rules 1.1): the primary target and every other living enemy within the splash radius of the
+        /// Cannon shot (spec 005-release-rules 1.1): the primary target and every other living enemy within the splash radius of the
         /// primary's position take the shot's damage once, in ascending enemy ID.
         /// </summary>
         void CannonSplash(Building cannon, Enemy primary)
@@ -1366,7 +1366,7 @@ namespace TheLastFortress
         }
 
         /// <summary>
-        /// Bomber detonation (008-rules 2.2): primary blast on its target if still alive, then splash on every other living
+        /// Bomber detonation (spec 005-release-rules 2.2): primary blast on its target if still alive, then splash on every other living
         /// building with HP within Chebyshev 1 of its cell, ascending ID. The Bomber dies without counting as defeated.
         /// </summary>
         void Detonate(Enemy e)

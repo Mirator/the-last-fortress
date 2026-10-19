@@ -8,15 +8,15 @@ Source: https://chatgpt.com/share/6ad07d7a-e294-83eb-b843-7f391179455c
 
 This document describes the full game vision. It does not authorize implementing every feature at once.
 
-1. **Navigation prototype:** one authored map, one wave, Keep, Wall, Archer Tower, Grunt. Implement [002-navigation-prototype.md](002-navigation-prototype.md) first, following [the implementation plan](../plans/001-navigation-prototype.md).
+1. **Navigation prototype:** one authored map, one wave, Keep, Wall, Archer Tower, Grunt. Specified in [002-navigation-prototype.md](002-navigation-prototype.md).
 2. **Six-night MVP:** six buildings including the Keep, four enemy types including the final boss, ten perks, and one biome. Its scope and system rules are in [003-six-night-mvp.md](003-six-night-mvp.md). Begin only after the navigation prototype passes its checks and playtesting supports further investment.
 3. **Full release:** twelve nights and the expanded content targets in section 15. These remain direction, not immediate implementation work.
 
 ### Current status (2026-10-19)
 
-Milestones 1 and 2 are implemented (plans 001, 003–007). The release profile `release-rules-1` (twelve nights, nine buildings, seven enemies including two bosses, 24 perks, three map profiles) is implemented by plan 008; its frozen rules contract is [plans/008-rules.md](../plans/008-rules.md), which takes precedence over this document's examples. Plans 010–011 changed board readability and visuals, not rules.
+Milestones 1 and 2 are implemented. The release profile `release-rules-1` (twelve nights, nine buildings, seven enemies including two bosses, 24 perks, three map profiles) is implemented; its frozen rules contract is [005-release-rules.md](005-release-rules.md), which takes precedence over this document's examples.
 
-The next feature is a player-controlled hero with a switchable third-person view, specified in [005-third-person-hero.md](005-third-person-hero.md). For the release profile it supersedes this document's fixed isometric camera and its exclusion of heroes; the six-night MVP and the prototype keep both. [README.md](README.md) lists every specification with its status.
+The next feature is a player-controlled hero with a switchable third-person view, specified in [006-third-person-hero.md](006-third-person-hero.md). For the release profile it supersedes this document's fixed isometric camera and its exclusion of heroes; the six-night MVP and the prototype keep both. [README.md](README.md) lists every specification with its status.
 
 The milestone-specific specification takes precedence for its milestone. For example, the prototype has no reward phase or passive income; the MVP has no soldiers or activated abilities. Owner-confirmed decisions: open routes take priority over breaching, the later economy has guaranteed Keep income, and controllable soldiers are deferred beyond the MVP. Numerical values are initial tuning defaults, not validated balance.
 
@@ -36,7 +36,7 @@ Target platform
 
 Camera
 
-**Fixed isometric strategy view; release profile adds a switchable third-person hero view (spec 005)**
+**Fixed isometric strategy view; release profile adds a switchable third-person hero view (spec 006)**
 
 Business model
 
@@ -88,7 +88,7 @@ The sequence repeats until the player wins or the Keep is destroyed.
 
 ## 3. Map and building system
 
-The battlefield is a compact, procedurally generated island represented by a square grid. The strategy camera stays fixed in a three-quarter isometric view; the release profile adds a third-person hero view the player can switch to (spec 005).
+The battlefield is a compact, procedurally generated island represented by a square grid. The strategy camera stays fixed in a three-quarter isometric view; the release profile adds a third-person hero view the player can switch to (spec 006).
 
 ### Starting map
 
@@ -303,7 +303,7 @@ The game is designed primarily for mouse and keyboard.
 
 ### HUD
 
-The default HUD displays gold, income per day where applicable, Keep HP, current night, upcoming enemy threats, and building shortcuts. In the strategy view, fixed isometric means fixed orientation: camera pan and zoom are allowed, rotation is not. The hero view has its own HUD and controls (spec 005).
+The default HUD displays gold, income per day where applicable, Keep HP, current night, upcoming enemy threats, and building shortcuts. In the strategy view, fixed isometric means fixed orientation: camera pan and zoom are allowed, rotation is not. The hero view has its own HUD and controls (spec 006).
 
 The interface should minimize clutter by exposing building-specific statistics on selection or hover.
 
@@ -447,7 +447,7 @@ Potential post-release content includes daily seeded challenges, additional map 
 
 Co-op and competitive multiplayer are not planned for version 1.0.
 
-Implemented so far in `release-rules-1` (plan 008): one biome with three map profiles, 9 buildings, 7 enemy types including 2 bosses, 24 perks, 12 nights, one difficulty. One player hero (spec 005) is planned on top of it; heroes were not in the original version 1.0 targets above.
+Implemented so far in `release-rules-1` ([spec 005](005-release-rules.md)): one biome with three map profiles, 9 buildings, 7 enemy types including 2 bosses, 24 perks, 12 nights, one difficulty. One player hero (spec 006) is planned on top of it; heroes were not in the original version 1.0 targets above.
 
 ## 16. Balancing model
 
@@ -516,4 +516,4 @@ The most distinctive mechanic is not the day/night cycle or the economy. It is t
 
 That mechanic should be fun even without procedural generation, upgrades, or progression. If it is, the remaining systems can reinforce it.
 
-Historical: this section described the first milestone, now implemented (spec 002, plan 001). The MVP (spec 003) and release profile (plan 008) followed. The current next milestone is [005-third-person-hero.md](005-third-person-hero.md). Treat the stated production schedule and content totals as planning targets, not implementation acceptance criteria.
+Historical: this section described the first milestone, now implemented (spec 002). The MVP (spec 003) and release profile (spec 006) followed. The current next milestone is [006-third-person-hero.md](006-third-person-hero.md). Treat the stated production schedule and content totals as planning targets, not implementation acceptance criteria.
