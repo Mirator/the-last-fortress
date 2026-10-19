@@ -1,6 +1,6 @@
 # The Last Fortress — navigation prototype, six-night MVP and twelve-night release profile
 
-One-wave proof for plan `plans/001-navigation-prototype.md` and specification `specs/002-navigation-prototype.md`: buy Walls and Archer Towers, preview the route, start one Grunt wave, watch automatic combat, win or lose, restart. The six-night MVP (`specs/003`, plans 003–005) is a separate scene; see **Six-night MVP** below.
+One-wave proof for plan `plans/001-navigation-prototype.md` and specification `specs/archive/002-navigation-prototype.md`: buy Walls and Archer Towers, preview the route, start one Grunt wave, watch automatic combat, win or lose, restart. The six-night MVP (`specs/003`, plans 003–005) is a separate scene; see **Six-night MVP** below.
 
 - Editor: Unity `6000.3.16f1` (URP 17.3, Input System 1.19, Test Framework 1.6). No packages were added or upgraded.
 - Scene: `Assets/TheLastFortress/Scenes/NavigationPrototype.unity` (enabled in Build Settings; `SampleScene` left untouched).
@@ -119,7 +119,7 @@ PlayMode tests set `SaveStore.DirectoryOverride` to a temp folder; storage tests
 
 ## Twelve-night release profile (plan 008)
 
-A third scene, `Assets/TheLastFortress/Scenes/Release.unity`, plays the plan 008 rules (`specs/005-release-rules.md`): twelve stored nights, nine building kinds (adds **Cannon**, **Watchtower**, **Repair Station**), seven enemy kinds (adds **Raider Archer**, **Bomber**, **Siege Commander**), a 24-perk reward pool and three map profiles. The six-night MVP scene, its tuning and its saves are unchanged and remain the regression build.
+A third scene, `Assets/TheLastFortress/Scenes/Release.unity`, plays the release rules (`specs/002-game-rules.md`): twelve stored nights, nine building kinds (adds **Cannon**, **Watchtower**, **Repair Station**), seven enemy kinds (adds **Raider Archer**, **Bomber**, **Siege Commander**), a 24-perk reward pool and three map profiles. The six-night MVP scene, its tuning and its saves are unchanged and remain the regression build.
 
 | Input | Action |
 |---|---|

@@ -2,7 +2,7 @@
 
 ## Execution contract
 
-Status: TODO. Priority: P1. Effort: L. Planned 2026-10-15 at `4855f69`, with expected input from completed plan 003. Execute after `plans/003-mvp-economy-foundation.md`; continue to 005 only after this plan's mechanical gates pass. Follow root `AGENTS.md` and `specs/003-six-night-mvp.md`.
+Status: TODO. Priority: P1. Effort: L. Planned 2026-10-15 at `4855f69`, with expected input from completed plan 003. Execute after `plans/003-mvp-economy-foundation.md`; continue to 005 only after this plan's mechanical gates pass. Follow root `AGENTS.md` and `specs/archive/003-six-night-mvp.md`.
 
 The owner authorized one agent to implement 003 → 004 → 005 in order, bounded MVP tuning with before/after evidence, and minimal existing-test corrections only for demonstrated harness defects. No routine approval is needed between passing stages. Human playtest signoff is pending and cannot be claimed from automated evidence.
 

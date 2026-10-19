@@ -1,6 +1,6 @@
 # Plan 001 execution results: navigation prototype
 
-Executed 2026-10-15 against `plans/001-navigation-prototype.md` and `specs/002-navigation-prototype.md`. The six-night MVP (`specs/003`) is out of scope and was not started.
+Executed 2026-10-15 against `plans/001-navigation-prototype.md` and `specs/archive/002-navigation-prototype.md`. The six-night MVP (`specs/003`) is out of scope and was not started.
 
 ## Baseline
 

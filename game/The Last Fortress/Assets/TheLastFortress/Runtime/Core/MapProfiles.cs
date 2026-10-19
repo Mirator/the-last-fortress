@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace TheLastFortress
 {
     /// <summary>
-    /// Plan 008 tactical map profiles (spec 005-release-rules.md section 5): an authored skeleton plus bounded seeded variation, validated
+    /// Plan 008 tactical map profiles (specs/002-game-rules.md section 11): an authored skeleton plus bounded seeded variation, validated
     /// with the real route planner. Up to 20 attempts, then the skeleton alone (flagged as a fallback). The six-night
     /// MVP keeps <see cref="MapGenerator"/> unchanged.
     /// </summary>

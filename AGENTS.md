@@ -2,7 +2,7 @@
 
 ## Review specs before planning
 
-- Before writing an implementation plan, read `specs/README.md`, the spec the plan implements, and `specs/005-release-rules.md` (current release rules). Check that they agree with each other and with the code the plan will touch.
+- Before writing an implementation plan, read `specs/README.md`, the spec the plan implements, and `specs/002-game-rules.md` (current rules). Check that they agree with each other and with the code the plan will touch.
 - If a spec is stale, contradicts another spec or the code, or leaves a decision open that the plan depends on, report it to the owner and get it resolved first. Do not quietly resolve it inside the plan.
 - Every plan names the spec (and version) it implements. When a spec is implemented or superseded, update its status line and `specs/README.md` in the same change.
 

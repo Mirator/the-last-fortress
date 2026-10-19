@@ -36,7 +36,7 @@ namespace TheLastFortress
         public const string BarbedDefenses = "BarbedDefenses";
         public const string ThriftyConstruction = "ThriftyConstruction";
 
-        // Plan 008 release perks (spec 005-release-rules.md section 4).
+        // Plan 008 release perks (specs/002-game-rules.md section 10).
         public const string KillZone = "KillZone";
         public const string FocusedFire = "FocusedFire";
         public const string CounterBattery = "CounterBattery";

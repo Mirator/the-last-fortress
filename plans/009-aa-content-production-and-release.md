@@ -19,7 +19,7 @@ This plan completes content around validated systems. It does not authorize repl
 
 Current repository facts, independently useful to a future executor:
 
-- `specs/001-game-design.md`, sections 15–18, proposes four biomes, 15 buildings including Keep, ten enemies including four bosses, 50 perks, twelve nights, four difficulties and 20+ challenges. These were direction targets, explicitly not implementation acceptance fixtures.
+- `specs/archive/001-game-design.md`, sections 15–18, proposes four biomes, 15 buildings including Keep, ten enemies including four bosses, 50 perks, twelve nights, four difficulties and 20+ challenges. These were direction targets, explicitly not implementation acceptance fixtures.
 - `Runtime/Core/Definitions.cs` currently has six stable building IDs; `MvpCampaign.cs` is the six-night table with 100 live enemies. `MapGenerator.cs` and checkpoint terrain depend on a fixed 20×20 board. Paths in this document beginning `Runtime/`, `Editor/`, `Tests/` or `Data/` are under `game/The Last Fortress/Assets/TheLastFortress/`.
 - `Runtime/Core/RunCheckpoint.cs` uses schema 1 and `CheckpointCodec.RulesVersion="mvp-rules-1"`; stores actual terrain and waves and rejects incompatible rules. `Runtime/Unity/SaveStore.cs` now uses GameSettings v2 and a separate onboarding profile. Profile progression is not a run checkpoint.
 - Plan 007 introduced bounded audio, shared event distribution, contextual help and presentation. `Audio/Source~/synth.py` supplies synthesized clips; `Editor/PresentationSetup.cs` links generated content. Final custom art/audio ownership must not be overwritten by setup regeneration.
@@ -43,7 +43,7 @@ public const int CurrentSchema = 1;
 public const string RulesVersion = "mvp-rules-1";
 ```
 
-At entry run `git status --short` and `git diff --stat dc8b55a..HEAD -- "game/The Last Fortress/Assets/TheLastFortress"`; inspect uncommitted and untracked work as well. Read `plans/008-results.md`, `specs/005-release-rules.md`, `008-content-matrix.md` and `008-art-and-audio-bible.md`. If they are missing or gates are unmet, perform production planning only and mark dependent content work PENDING. Do not fabricate the release systems or rewrite another task's working files.
+At entry run `git status --short` and `git diff --stat dc8b55a..HEAD -- "game/The Last Fortress/Assets/TheLastFortress"`; inspect uncommitted and untracked work as well. Read `plans/008-results.md`, `specs/archive/005-release-rules.md`, `008-content-matrix.md` and `008-art-and-audio-bible.md`. If they are missing or gates are unmet, perform production planning only and mark dependent content work PENDING. Do not fabricate the release systems or rewrite another task's working files.
 
 ## 1. Freeze the production edition before scaling it
 

@@ -2,7 +2,7 @@
 
 ## Execution contract
 
-Status: TODO. Priority: P1. Effort: L. Planned 2026-10-15 at `4855f69`, with expected input from completed 003 and 004. Execute after `plans/004-six-night-combat-and-perks.md`. Follow root `AGENTS.md`, the rules in `specs/003-six-night-mvp.md`, and the appearance direction in `design/README.md`. This plan completes the MVP implementation, not full-release content or human playtest approval.
+Status: TODO. Priority: P1. Effort: L. Planned 2026-10-15 at `4855f69`, with expected input from completed 003 and 004. Execute after `plans/004-six-night-combat-and-perks.md`. Follow root `AGENTS.md`, the rules in `specs/archive/003-six-night-mvp.md`, and the appearance direction in `design/README.md`. This plan completes the MVP implementation, not full-release content or human playtest approval.
 
 The owner authorized this sequence for one agent while away, bounded evidence-based tuning, minimal demonstrated test-harness fixes, a simple low-poly/HUD pass, and automatic Wall rotation/connections. Rotation here is cosmetic: it never changes grid footprints, passability, attack direction, targeting, or building identity. This deliberately adds MVP visual rotation beyond the original prototype's no-rotation scope; preserve the original prototype's controls/content.
 

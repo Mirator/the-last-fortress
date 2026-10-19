@@ -8,7 +8,7 @@
 - Priority: P1 correctness and progress protection, followed by P2 presentation/investigation; conditional P3 polish last.
 - Effort: L across several focused stages. Risk: medium, concentrated in event timing, save-and-exit and recap accounting.
 - Planned at commit `cea7c4f`, 2026-10-15. Depends on implemented plans 003–005.
-- Specification: [004-agent-playtest-improvements.md](../specs/004-agent-playtest-improvements.md). This plan covers every required section and explicitly defers its conditional items.
+- Specification: [004-agent-playtest-improvements.md](../specs/archive/004-agent-playtest-improvements.md). This plan covers every required section and explicitly defers its conditional items.
 - Root: `C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress`; Unity project: `game/The Last Fortress`.
 - Stack: Unity 6000.3.16f1, URP 17.3, Input System 1.19, uGUI with legacy `UnityEngine.UI.Text`, plain C# simulation at a 0.05-second step. Preserve these conventions.
 - Existing Windows build: `game/The Last Fortress/Builds/Mvp/TheLastFortress.exe`. Normal launch opens the menu.
@@ -17,7 +17,7 @@ First run these read-only checks from the repository root:
 
 ```powershell
 git status --short
-git diff --stat cea7c4f..HEAD -- 'game/The Last Fortress/Assets/TheLastFortress' 'specs/004-agent-playtest-improvements.md' plans
+git diff --stat cea7c4f..HEAD -- 'game/The Last Fortress/Assets/TheLastFortress' 'specs/archive/004-agent-playtest-improvements.md' plans
 git diff --stat -- 'game/The Last Fortress/Assets/TheLastFortress'
 ```
 

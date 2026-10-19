@@ -6,7 +6,7 @@ Status: TODO. Priority: P0. Effort: L. Planned 2026-10-15 at commit `4855f69`. R
 
 Read root `AGENTS.md`. The owner authorized the complete 003 → 004 → 005 sequence for one implementing agent, bounded tuning with before/after evidence, minimal existing-test fixes only when a harness defect is demonstrated, and a later art pass with connected/rotating Walls. Implement this plan, verify it, record results, then continue to 004 without routine approval. Do not implement 005 early.
 
-Repository: `C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress`. Unity project: `game/The Last Fortress/`, editor `6000.3.16f1`. Gameplay sources are under `Assets/TheLastFortress/`. This plan adds a separately selectable MVP foundation; the existing one-wave prototype and stress fixture remain available as reference/debug modes. Follow `specs/003-six-night-mvp.md` for economy rules, with the explicit temporary wave profile below. Original prototype behavior remains governed by specification 002.
+Repository: `C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress`. Unity project: `game/The Last Fortress/`, editor `6000.3.16f1`. Gameplay sources are under `Assets/TheLastFortress/`. This plan adds a separately selectable MVP foundation; the existing one-wave prototype and stress fixture remain available as reference/debug modes. Follow `specs/archive/003-six-night-mvp.md` for economy rules, with the explicit temporary wave profile below. Original prototype behavior remains governed by specification 002.
 
 ## Current state and preflight
 

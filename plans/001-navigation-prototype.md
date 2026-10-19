@@ -10,7 +10,7 @@
 
 Implement only the first playable proof: buy Walls and Archer Towers, preview the route, start one Grunt wave, observe automatic combat, then win/lose and restart. The key gameplay contract is that enemies follow any open route before breaching; fully enclosing the Keep is legal and causes an attack on a blocking structure. Do not silently replace that policy with travel-time optimization.
 
-Read the full plan and `specs/002-navigation-prototype.md` before editing. That specification is the behavioral contract; the summaries below let the executor understand the task without this conversation. `specs/003-six-night-mvp.md` is context for future expansion, not implementation scope.
+Read the full plan and `specs/archive/002-navigation-prototype.md` before editing. That specification is the behavioral contract; the summaries below let the executor understand the task without this conversation. `specs/archive/003-six-night-mvp.md` is context for future expansion, not implementation scope.
 
 ## Baseline and drift check
 

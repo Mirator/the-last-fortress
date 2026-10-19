@@ -7,7 +7,7 @@ using static TheLastFortress.Tests.SimTestUtil;
 namespace TheLastFortress.Tests
 {
     /// <summary>
-    /// Plan 008 G2: the exact failure modes named by the gate for the release additions (spec 005-release-rules.md sections 1-2). Each
+    /// Plan 008 G2: the exact failure modes named by the gate for the release additions (specs/002-game-rules.md sections 7-8). Each
     /// test pins one ordering or invariant that a plausible implementation could get wrong; balance values are not frozen.
     /// </summary>
     public class ReleaseMechanicsTests

@@ -46,7 +46,7 @@ Recommendation for the owner, with reasons: **do not choose the candidate yet.**
 
 | Risk | Likelihood / impact | Mitigation |
 |---|---|---|
-| Converged Keep ring stays dominant ([008 tuning log](../specs/005-release-rules.md#8-tuning-log-provisional-values-changed-with-evidence)) | medium / high: variety collapses to one build | Decide with 008 G3 evidence; new content must counter it by decision (e.g. split-front boss, minimum-range weapon), not by raw numbers |
+| Converged Keep ring stays dominant ([008 tuning log](../specs/archive/005-release-rules.md#8-tuning-log-provisional-values-changed-with-evidence)) | medium / high: variety collapses to one build | Decide with 008 G3 evidence; new content must counter it by decision (e.g. split-front boss, minimum-range weapon), not by raw numbers |
 | Content multiplication before throughput is known | high / high | Gate in §3; cut optional breadth first |
 | Status effects (slow), facing (shield), breach-cost changes are new rule systems | high / medium | Each is a separate contract with EditMode failure-mode tests, like 008's |
 | Save compatibility across three profiles | medium / high | Keep schema 1 (MVP) and 2 (release) readers; one new rules version per frozen content change; fixtures per supported schema |

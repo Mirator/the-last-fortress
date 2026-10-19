@@ -1,6 +1,6 @@
 # Third-person hero and switchable views
 
-Version 0.1, 2026-10-19. Status: **current specification**; direction owner-approved, proposed defaults await the owner decisions at the end; nothing implemented. An implementing agent must first prepare a separate implementation plan.
+Version 0.1, 2026-10-19. Status: **current specification**; owner decisions recorded at the end; ready for an implementation plan; nothing implemented. An implementing agent must first prepare a separate implementation plan.
 
 ## Purpose and decisions so far
 
@@ -8,12 +8,12 @@ Add one player-controlled hero who fights during Night alongside the fortress, p
 
 Owner-confirmed (2026-10-19): option B from the feasibility analysis, a true third-person perspective camera, not a hero steered on the fixed isometric camera. Both views stay in the game with a switch between them.
 
-Everything else in this document is a proposed default for review. Numbers are tagged as in [005-release-rules.md](005-release-rules.md): **[I]** invariant rule (changing it is a rules-version change), **[P]** provisional tuning (may change with recorded evidence inside the bounded-tuning policy).
+Owner decisions on the open questions are recorded at the end of this document. Everything else is a proposed default. Numbers are tagged as in [002-game-rules.md](002-game-rules.md): **[I]** invariant rule (changing it is a rules-version change), **[P]** provisional tuning (may change with recorded evidence inside the bounded-tuning policy).
 
 ## Baseline and what this supersedes
 
-- The rules contract this extends is [005-release-rules.md](005-release-rules.md) (`release-rules-1`, campaign `twelve-nights`, map profiles `ravine`/`crossing`/`meadow`), together with the current release presentation (entry gates, route chevrons, authored art, day/night lighting). Specs 001-004 describe earlier milestones.
-- For the **release profile only**, this supersedes two lines of `specs/001-game-design.md`: "Camera: Fixed isometric" and the exclusion of heroes. Soldiers, Barracks and activated abilities remain deferred.
+- The rules this extends are [002-game-rules.md](002-game-rules.md) (`release-rules-1`, campaign `twelve-nights`, map profiles `ravine`/`crossing`/`meadow`), together with the current release presentation (entry gates, route chevrons, authored art, day/night lighting).
+- For the **release profile only**, this changes the fixed isometric camera (game rules §13) and adds a hero, which [001-vision.md](001-vision.md) lists as a direction. Soldiers, Barracks and activated abilities remain deferred.
 - The six-night MVP profile (`mvp-rules-1`) and the one-wave prototype are unchanged in rules, presentation, controls and saves. They get no hero and no hero view.
 
 ## Scope
@@ -25,8 +25,8 @@ Out of scope (each needs its own specification): hero progression (levels, gear,
 ## 1. Rules version and profiles
 
 1. Hero runs use a new rules version **`release-rules-2`** [I] on the same `twelve-nights` campaign and map profiles. All `release-rules-1` rules apply unless this document changes them.
-2. `release-rules-1` stays in the catalog. Existing schema-2 saves tagged `release-rules-1` load and continue exactly as before, without a hero [I]. A rules-1 run is never converted to rules-2.
-3. New Run in the release build offers **Hero: On (default) / Off**. Off starts a `release-rules-1` run; On starts `release-rules-2` [P: default value]. The off setting is also the control group for balance comparisons.
+2. `release-rules-1` stays in the catalog only so existing saves continue: schema-2 saves tagged `release-rules-1` load and play exactly as before, without a hero [I]. A rules-1 run is never converted to rules-2.
+3. The hero is always on: every New Run in the release build starts `release-rules-2`. There is no player-facing on/off option [I]. Balance comparisons use scripted `release-rules-1` runs as the control group (section 6).
 4. The release perk pool (24), its weights and the reward RNG stream are unchanged [I]. No perk refers to the hero in this milestone, so offer integrity and saved offers keep their meaning.
 
 ## 2. The hero in the simulation
@@ -57,7 +57,7 @@ The hero is a Core simulation entity like enemies and buildings, not a Unity obj
 
 ### 2.3 Step order
 
-[005-release-rules.md](005-release-rules.md) §0 becomes, for `release-rules-2` only [I]:
+[002-game-rules.md](002-game-rules.md) §4 step order becomes, for `release-rules-2` only [I]:
 
 1. Due spawns.
 2. Enemy movement and Spike Trap entry. **2b. Hero movement** from this step's command.
@@ -76,11 +76,11 @@ The invariant to preserve: enemies decide only at cell-centre decision points on
 | Enemy | Behaviour toward the hero |
 |---|---|
 | Grunt, Runner, Brute | At a decision point, if the hero is alive and within **1.0 tile** [P] (Euclidean, enemy position to hero centre), stop and target the hero. First hit due one full interval later. Sticky while the hero is alive and within **1.5 tiles** [P]; otherwise drop the target and resume at the next decision point. |
-| Raider Archer | Hero is a ranged-target candidate within its 3.5 range at **priority class 1** (with House and Farm), nearest first [P: class, owner decision]. Normal stickiness and cooldown-reset-on-retarget rules apply. |
+| Raider Archer | Hero is a ranged-target candidate within its 3.5 range at **priority class 1** (with House and Farm), nearest first [P: class]. Normal stickiness and cooldown-reset-on-retarget rules apply. **Provoked:** a Raider Archer that the hero has hit targets the hero above every class, overriding stickiness, at its next fresh decision while the hero is alive and within 3.5 tiles; retargeting gives a fresh full interval. Provocation ends when the hero dies, respawns, or leaves range [I]. |
 | Bomber | Ignores the hero. A lit fuse still splashes buildings only; the blast does not damage the hero [P]. |
 | Siege Golem, Siege Commander | Ignore the hero as a target. The hero can hit them. |
 
-- An enemy already attacking a building never switches to the hero [I]. Hero engagement only happens where the enemy would otherwise move on.
+- An enemy already attacking a building never switches to the hero, except a provoked Raider Archer [I]. Hero engagement only happens where the enemy would otherwise move on.
 - Hits on the hero use the enemy's normal damage, no Wall multiplier, no reflection, no Barbed Defenses. The Siege Commander aura applies [I].
 
 ### 2.5 Hero death, respawn and dawn
@@ -90,7 +90,7 @@ The invariant to preserve: enemies decide only at cell-centre decision points on
 - On every Day entry the hero is restored to full HP at the spawn point, alive, with its swing cooldown reset [I].
 - Consequence [I]: the hero has **no state in the Day checkpoint**. A `release-rules-2` save differs from a rules-1 save only by its `rulesVersion`. Quitting during Night still returns to the start of that Night, as now.
 
-**Acceptance (section 2):** an enemy engages only at a cell-centre decision point, never mid-segment; an enemy hitting a Wall ignores the hero standing next to it; hero death on the step the Keep falls still ends in Defeat, and hero death alone never does; the hero cannot enter a solid-building or non-walkable cell, including diagonally at corners; the same seed, placements, perk choices and command stream reproduce the same night outcome; a rules-1 save loads and plays with no hero.
+**Acceptance (section 2):** an enemy engages only at a cell-centre decision point, never mid-segment; an enemy hitting a Wall ignores the hero standing next to it; a Raider Archer shooting a House switches to the hero at its next decision after the hero hits it, and returns to normal priority once the hero leaves range; hero death on the step the Keep falls still ends in Defeat, and hero death alone never does; the hero cannot enter a solid-building or non-walkable cell, including diagonally at corners; the same seed, placements, perk choices and command stream reproduce the same night outcome; a rules-1 save loads and plays with no hero.
 
 ## 3. Views
 
@@ -100,12 +100,12 @@ The invariant to preserve: enemies decide only at cell-centre decision points on
 |---|---|---|
 | Camera | Existing orthographic isometric rig, unchanged | New perspective third-person orbit camera behind the hero |
 | Available | Day, Night, Reward | Day and Night (Reward screen overlays either) |
-| Construction, sale, repair, rotation | Yes (Day) | No. Pressing a build hotkey or opening a build card switches to Strategic view with that tool armed [P: owner decision] |
+| Construction, sale, repair, rotation | Yes (Day) | No. Pressing a build hotkey or opening a build card switches to Strategic view with that tool armed |
 | Hero control | No; hero follows guard behaviour (2.2) | Yes |
 | Night speed 1×/2×/3× | Yes | Locked to 1×. Entering Hero view sets 1×; returning to Strategic keeps 1× until changed [P] |
 
 - **Switching is presentation only** [I]: it never changes simulation state, RNG, gold, pause state or the hero's command beyond "no command" while not controlled. Toggling views any number of times, on any frame, leaves the simulation snapshot identical to not toggling.
-- Default view: Strategic at Day 1 and after loading; on Start Night the view does not change unless a setting "Enter Hero view at Night" is on [P: default off, owner decision].
+- Default view: Strategic at Day 1 and after loading; on Start Night the view does not change unless a setting "Enter Hero view at Night" is on [P: default off].
 - The Strategic camera keeps its own focus and zoom across switches. Switching to Strategic does not jump to the hero; a key centres the strategic camera on the hero.
 - Switching shows a short camera transition (≤ 0.4 s [P], skippable, unscaled time). It must work while Night is paused.
 
@@ -166,7 +166,7 @@ The perspective camera sees more geometry and shadow casters than the orthograph
 
 ## 6. Balance guard
 
-The design pillars are "every building is a tactical decision" and readable battles. A hero strong enough to replace placement breaks the game. Required evidence before any rules-2 tuning is called done (scripted policy runs, seeds 1–8 per approach, real budget, as recorded in the spec 005 tuning log):
+The design pillars are "every building is a tactical decision" and readable battles. A hero strong enough to replace placement breaks the game. Required evidence before any rules-2 tuning is called done (scripted policy runs, seeds 1–8 per approach, real budget, as in the game rules tuning history, §16):
 
 1. **Hero alone loses.** No construction beyond the Keep, hero controlled by a scripted "fight nearest" policy: the run must be lost by Night 3 on every seed [P: night].
 2. **Idle hero changes little.** The existing release policies (kill-zone, corridor, economy) with the hero in guard behaviour at the spawn point: outcomes (win/loss, final night) match `release-rules-1` on at least 7 of 8 seeds per approach.
@@ -187,6 +187,7 @@ Follow root `AGENTS.md`. Each test names the failure it catches; no generic fram
 
 EditMode (Core):
 - Engagement only at cell-centre decision points, and building attackers ignore the hero: catches enemies re-routing or switching targets mid-segment.
+- A provoked Raider Archer retargets the hero over a higher-class building, and provocation ends when the hero leaves range: catches the priority override sticking or never firing.
 - Hero death is not Defeat, and Keep death with a same-step hero death is still Defeat: catches terminal-state priority regressions.
 - Hero collision against a solid cell, a non-walkable cell and a diagonal corner: catches walking through walls.
 - Same command stream reproduces the same night: catches non-determinism from input handling.
@@ -203,13 +204,13 @@ PlayMode (one scenario): toggle views and drive the hero during a Night; the sim
 
 Stage 1 can be judged by scripts before any camera work starts. If the balance guard shows the hero cannot be made useful without dominating, stop and revisit the design before stages 2-3.
 
-## Owner decisions needed
+## Owner decisions (2026-10-19)
 
-1. **Hero name.** "Commander" collides with the Siege Commander enemy. Working name: "Warden".
-2. **Archers vs hero.** Should Raider Archers shoot the hero (class 1, proposed) or ignore it?
-3. **Construction in Hero view.** Switch to Strategic with the tool armed (proposed), or allow placing at an aimed cell from Hero view (more work)?
-4. **Default view at Night.** Stay in the current view (proposed), or enter Hero view automatically?
-5. **Speed in Hero view.** Lock to 1× (proposed), or allow 2× with the hero moving faster too?
-6. **Hero on/off at New Run.** Keep the toggle (proposed), or make the hero mandatory in the release profile and keep rules-1 only for old saves?
-7. **Respawn delay and hero numbers.** 10 s respawn, 200 HP, 15 damage per 0.6 s as starting values.
-8. **Art.** Hero model and the sky/island-edge art are new content. Generated placeholder art, like the current release art, or commissioned?
+1. **Name:** the unit is called simply "Hero" in the game.
+2. **Archers vs hero:** Raider Archers target the hero at class 1, and a Raider Archer the hero hits switches to the hero at top priority (2.4).
+3. **Construction in Hero view:** a build hotkey or card switches to Strategic view with the tool armed. Placing from Hero view may be revisited later.
+4. **View at Night start:** the view does not change; the optional "Enter Hero view at Night" setting stays off by default.
+5. **Speed in Hero view:** locked to 1×.
+6. **Hero always on:** every new release run has the hero; there is no on/off choice (section 1).
+7. **Starting numbers:** 200 HP, 15 damage per 0.6 s swing, 10 s respawn, as tabled.
+8. **Art:** generated placeholder art for the hero model, sky and island edge, like the current release art.

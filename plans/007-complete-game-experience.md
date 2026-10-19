@@ -140,7 +140,7 @@ If strategic shallowness is demonstrated:
 
 ### 3.6 Full-release scope
 
-The original `specs/001-game-design.md` describes twelve nights and a larger roster. This plan preserves that vision while preventing implementation of its entire content list before validating the core game.
+The original `specs/archive/001-game-design.md` describes twelve nights and a larger roster. This plan preserves that vision while preventing implementation of its entire content list before validating the core game.
 
 After the complete six-night version, decide from playtests:
 
@@ -170,7 +170,7 @@ Total: approximately 3–7 working weeks without a major content expansion, not 
 
 ### A — Establish the baseline
 
-1. Read root `AGENTS.md`, this document, `plans/006-results.md`, `specs/003-six-night-mvp.md` and relevant current code. Run `git status --short` and `git diff --stat dc8b55a..HEAD -- "game/The Last Fortress/Assets/TheLastFortress"`. Include uncommitted changes: at planning time, `ProjectSettings/EditorBuildSettings.asset` and `EditorSettings.asset` were already modified and three 007 report folders were untracked. Do not overwrite them.
+1. Read root `AGENTS.md`, this document, `plans/006-results.md`, `specs/archive/003-six-night-mvp.md` and relevant current code. Run `git status --short` and `git diff --stat dc8b55a..HEAD -- "game/The Last Fortress/Assets/TheLastFortress"`. Include uncommitted changes: at planning time, `ProjectSettings/EditorBuildSettings.asset` and `EditorSettings.asset` were already modified and three 007 report folders were untracked. Do not overwrite them.
 2. Record differences from the excerpts and adapt steps to the current implementation. Do not recreate resolved problems. If rules differ from spec 003, stop dependent implementation and describe the conflict.
 3. Before changes, capture an ordinary generated map, menu, Day 1, Night 4, finale and outcome. Night 4/6 recordings must run at 1×. Create `plans/evidence/007-experience/baseline.md` with specific planned changes, audio/asset sources and budget. Identify captured files by date, build and seed.
 

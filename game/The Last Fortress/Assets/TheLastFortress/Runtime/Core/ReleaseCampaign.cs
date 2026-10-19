@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace TheLastFortress
 {
     /// <summary>
-    /// Plan 008 twelve-night campaign (spec 005-release-rules.md section 3). Authored recipes with bounded seeded variation: per night
+    /// Plan 008 twelve-night campaign (specs/002-game-rules.md section 9). Authored recipes with bounded seeded variation: per night
     /// one draw for the entry rotation and, on a boss night, one for the boss entry, from a wave stream separate from the
     /// map and reward streams. All twelve plans are built before Day 1 and stored; no director reacts to the fortress.
     /// </summary>

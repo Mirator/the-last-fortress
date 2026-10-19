@@ -1,6 +1,6 @@
 # Plan 008 content matrix
 
-Every 008 addition, the decision it creates, its counter, where it is taught, its cue and how it is verified. Rules are in [spec 005](../specs/005-release-rules.md). "Author" is who owns the current asset: **generated** = produced by setup scripts (`EntityPrefabBuilder`, `icons.py`, `synth.py`) and replaceable; no hand-authored final art or audio exists yet (G4 PENDING). Verification names the actual EditMode/PlayMode check or the PENDING human check.
+Every 008 addition, the decision it creates, its counter, where it is taught, its cue and how it is verified. Rules are in [spec 005](../specs/archive/005-release-rules.md). "Author" is who owns the current asset: **generated** = produced by setup scripts (`EntityPrefabBuilder`, `icons.py`, `synth.py`) and replaceable; no hand-authored final art or audio exists yet (G4 PENDING). Verification names the actual EditMode/PlayMode check or the PENDING human check.
 
 ## Buildings
 
