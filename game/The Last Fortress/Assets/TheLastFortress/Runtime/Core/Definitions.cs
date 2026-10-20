@@ -123,6 +123,8 @@ namespace TheLastFortress
 
         /// <summary>Movement units consumed per 0.05 s step: speed * 60 (Grunt 60, Runner 105, Brute 36, Golem 24).</summary>
         public int MoveUnitsPerStep => (int)Math.Round(SpeedTilesPerSecond * UnitsPerTile * PrototypeDefinitions.StepSeconds);
+
+        public EnemyDefinition Copy() => (EnemyDefinition)MemberwiseClone();
     }
 
     /// <summary>
@@ -169,6 +171,21 @@ namespace TheLastFortress
                 DisplayName = "Grunt", MaxHp = 30, SpeedTilesPerSecond = 1, AttackDamage = 10, AttackIntervalSeconds = 1,
             },
         };
+
+        /// <summary>A copy of this tuning set whose enemy definitions are replaced by <paramref name="map"/> (buildings shared).</summary>
+        public PrototypeDefinitions WithEnemies(Func<EnemyDefinition, EnemyDefinition> map)
+        {
+            var d = (PrototypeDefinitions)MemberwiseClone();
+            EnemyDefinition M(EnemyDefinition e) => e == null ? null : map(e.Copy());
+            d.Grunt = M(Grunt);
+            d.Runner = M(Runner);
+            d.Brute = M(Brute);
+            d.SiegeGolem = M(SiegeGolem);
+            d.RaiderArcher = M(RaiderArcher);
+            d.Bomber = M(Bomber);
+            d.SiegeCommander = M(SiegeCommander);
+            return d;
+        }
 
         /// <summary>Definition for a kind, or null for an optional kind absent from this tuning set.</summary>
         public BuildingDefinition For(BuildingKind kind)

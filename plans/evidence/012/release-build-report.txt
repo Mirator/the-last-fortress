@@ -1,0 +1,10 @@
+started=2026-10-19T17:07:11.7247408+02:00
+result=Succeeded
+platform=StandaloneWindows64 options=None
+output=C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Builds/Release/TheLastFortress.exe
+total_size_bytes=143140271
+duration=00:00:19.0329603
+errors=0 warnings=488
+scenes=Assets/TheLastFortress/Scenes/Release.unity
+rules=release-rules-2 campaign=twelve-nights content=2 legacy=mvp-rules-1
+unity=6000.3.16f1 version=0.1.0

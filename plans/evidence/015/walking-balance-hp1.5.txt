@@ -1,0 +1,8 @@
+release-rules-2 kill-zone: 8/8 wins [V12 V12 V12 V12 V12 V12 V12 V12]
+release-rules-2 corridor: 8/8 wins [V12 V12 V12 V12 V12 V12 V12 V12]
+release-rules-2 economy: 8/8 wins [V12 V12 V12 V12 V12 V12 V12 V12]
+release-rules-3 kill-zone: 8/8 wins [V12 V12 V12 V12 V12 V12 V12 V12]
+release-rules-3 corridor: 4/8 wins [V12 D11 V12 D10 V12 D8 D10 V12]
+release-rules-3 economy: 7/8 wins [V12 V12 V12 V12 D11 V12 V12 V12]
+release-rules-2 hero alone: [D3 D2 D2 D2 D2 D2 D2 D2]
+release-rules-3 hero alone: [D2 D2 D1 D2 D2 D2 D2 D2]

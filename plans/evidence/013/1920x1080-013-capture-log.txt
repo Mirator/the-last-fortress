@@ -1,0 +1,13 @@
+ravine: ravine seed 7: generated (attempt 0) hero at 10,30,12,40
+ravine night: True alive=4
+crossing: crossing seed 7: generated (attempt 0) hero at 10,30,12,40
+crossing night: True alive=10
+meadow: meadow seed 7: generated (attempt 0) hero at 10,30,12,40
+meadow night: True alive=4
+slice: hero at 10,30,12,40, obstruction yaw 42
+slice night: hero at 7,50,10,38 engage True
+slice swing: True hero hp=200
+slice cues: Kill@7,45,0,30,10,50 Hit@7,45,0,35,10,50 particles=8 grass=3136
+dense: True alive=24
+row: Wall(4,12)=None Wall(5,12)=None Tower(7,12)=None House(9,12)=None Farm(11,12)=None SpikeTrap(14,12)=None Cannon(15,12)=None Watchtower(6,14)=None RepairStation(9,15)=None 
+lineup: True SiegeCommander@3,1,9,5 SiegeGolem@2,6,9,5 Brute@3,5,9,5 Archer@4,5,9,5 Grunt@4,0,9,5 Bomber@2,9,9,5 Runner@3,5,9,5

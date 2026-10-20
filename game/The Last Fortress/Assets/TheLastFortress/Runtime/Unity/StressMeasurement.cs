@@ -42,6 +42,13 @@ namespace TheLastFortress
             target = west.IsBreach ? game.Sim.Grid.GetOccupant(west.Blocker) : null;
             targetCell = west.IsBreach ? west.Blocker : default;
             if (target == null || target.Kind != BuildingKind.Wall) Debug.LogError("Stress measurement: west route has no Wall blocker.");
+            // Plan 012 (-hero-camera): the same fight seen through the perspective hero camera from a ground vantage west of
+            // the Keep, looking across the board toward the busiest entries (the stress fixture itself has no hero).
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-hero-camera") >= 0)
+                game.ViewFromHeroCamera(new Vector3(4.5f, 0f, 10.5f), 90f);
+            // Plan 016 (-hero-camera-out): from the west edge looking out into the edge mist, which then covers most of the frame.
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-hero-camera-out") >= 0)
+                game.ViewFromHeroCamera(new Vector3(2.5f, 0f, 12.5f), 270f);
             startTime = Time.realtimeSinceStartup;
         }
 

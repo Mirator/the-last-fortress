@@ -105,6 +105,42 @@ namespace TheLastFortress.Tests
             Assert.IsNotNull(c.art, "release content keeps its art direction");
         }
 
+        /// <summary>
+        /// Plan 013 terrain (mainland since plan 016): buildings, enemies and the hero stand at y = 0, so every walkable,
+        /// buildable board cell must stay exactly flat while water cells sink below the river surface (blocked terrain looks
+        /// blocked), and each entry's road leaves the board at board level. Fails if the surround or river carving ever bends the
+        /// played board or leaves an entry without its road.
+        /// </summary>
+        [Test]
+        public void TerrainKeepsTheBoardFlatAndSinksOnlyWater()
+        {
+            foreach (var profile in MapProfiles.All)
+            for (var seed = 1u; seed <= 3; seed++)
+            {
+                var map = MapProfiles.Generate(profile, seed);
+                var shape = new WorldView.TerrainShape(map);
+                var crossings = new System.Collections.Generic.HashSet<GridPos>(MapProfiles.RiverCrossings(map));
+                for (var z = 0; z < GridCoordinates.Size; z++)
+                for (var x = 0; x < GridCoordinates.Size; x++)
+                {
+                    var cell = new GridPos(x, z);
+                    if (map[cell] == TerrainType.Water)
+                        Assert.Less(shape.Height(x + 0.5f, z + 0.5f), -0.06f, $"{profile}/{seed} water {cell} sits below the river surface");
+                    else if (!crossings.Contains(cell))
+                        for (var k = 0; k <= 4; k++)
+                        for (var j = 0; j <= 4; j++)
+                            Assert.AreEqual(0f, shape.Height(x + k * 0.25f, z + j * 0.25f), $"{profile}/{seed} land {cell} stays flat");
+                }
+
+                foreach (var entry in new[] { new GridPos(0, 10), new GridPos(19, 10), new GridPos(10, 0), new GridPos(10, 19) })
+                {
+                    var mouth = RouteOverlay.RoadMouth(entry);
+                    Assert.AreEqual(0f, shape.Height(mouth.x, mouth.z), 0.03f, $"{profile}/{seed} road mouth at {entry} is at board level");
+                    Assert.Less(WorldView.TerrainShape.RoadDistance(mouth.x, mouth.z), WorldView.TerrainShape.RoadHalfWidth, $"{profile}/{seed} entry {entry} has its road");
+                }
+            }
+        }
+
         [Test]
         public void LayoutJsonRoundTrips()
         {

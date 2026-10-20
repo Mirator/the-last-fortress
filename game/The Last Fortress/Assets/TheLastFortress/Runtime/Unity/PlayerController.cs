@@ -32,6 +32,15 @@ namespace TheLastFortress
         /// <summary>Scripted hover (screenshots); overrides the pointer while set.</summary>
         public GridPos? HoverOverride;
 
+        /// <summary>
+        /// This frame's hero command (specs/003 3.4): sampled from WASD, mouse look and the left button in the hero view;
+        /// <see cref="HeroCommand.None"/> in the strategic view, where the hero guards on its own.
+        /// </summary>
+        public HeroCommand HeroInput { get; private set; }
+
+        /// <summary>Scripted hero input (tests, captures): replaces sampled input in the hero view while set.</summary>
+        public HeroCommand? HeroInputOverride;
+
         public Mouse Mouse => MouseOverride != null && MouseOverride.added ? MouseOverride : Mouse.current;
         public Keyboard Keyboard => KeyboardOverride != null && KeyboardOverride.added ? KeyboardOverride : Keyboard.current;
 
@@ -42,6 +51,7 @@ namespace TheLastFortress
 
         public void Reset()
         {
+            HeroInput = HeroCommand.None;
             Tool = null;
             Selected = null;
             HoverCell = null;
@@ -86,6 +96,18 @@ namespace TheLastFortress
 
             PointerPosition = mouse != null ? mouse.position.ReadValue() : Vector2.zero;
             PointerOverUi = mouse != null && IsOverUi(PointerPosition);
+            if (game.HeroViewActive)
+            {
+                TickHeroView(keyboard, mouse);
+                return;
+            }
+
+            HeroInput = HeroCommand.None;
+            if (keyboard != null && keyboard.tabKey.wasPressedThisFrame && game.SetHeroView(true)) return;
+            if (keyboard != null && EnterPressed(keyboard) && sim.State == RunState.Day && game.IsMvp) game.StartNight();
+            if (keyboard != null && keyboard.pKey.wasPressedThisFrame && sim.State == RunState.Night) game.TogglePause();
+            if (keyboard != null && keyboard.hKey.wasPressedThisFrame) game.CenterCameraOnHero();
+            if (keyboard != null && keyboard.zKey.wasPressedThisFrame) game.CameraRig.ShowWholeBoard();
             if (HoverOverride.HasValue) HoverCell = HoverOverride;
             else if (mouse != null && !PointerOverUi && game.CameraRig.TryScreenToCell(PointerPosition, out var cell)) HoverCell = cell;
             else HoverCell = null;
@@ -114,6 +136,87 @@ namespace TheLastFortress
                 if (mouse.leftButton.wasPressedThisFrame && !PointerOverUi) Click();
             }
         }
+
+        /// <summary>
+        /// Hero view input (specs/003 3.4): Tab back to Strategic, 1-8 to Strategic with that card armed, Esc to the menu,
+        /// Space pauses; WASD moves relative to the camera, the mouse looks, the left button swings. Nothing is placed here.
+        /// </summary>
+        void TickHeroView(Keyboard keyboard, Mouse mouse)
+        {
+            HoverCell = null;
+            Tool = null;
+            Selected = null; // selection belongs to the strategic view
+            var sim = game.Sim;
+            if (keyboard != null)
+            {
+                if (keyboard.tabKey.wasPressedThisFrame)
+                {
+                    game.SetHeroView(false);
+                    HeroInput = HeroCommand.None;
+                    return;
+                }
+
+                for (var i = 0; i < game.PurchasableKinds.Count && i < DigitKeys.Length; i++)
+                    if (keyboard[DigitKeys[i]].wasPressedThisFrame || keyboard[NumpadKeys[i]].wasPressedThisFrame)
+                    {
+                        var kind = game.PurchasableKinds[i];
+                        game.SetHeroView(false);
+                        HeroInput = HeroCommand.None;
+                        SetTool(kind); // armed only where building is allowed (Day); never places by itself
+                        return;
+                    }
+
+                if (keyboard.escapeKey.wasPressedThisFrame)
+                {
+                    game.OpenMenu(); // unlocks the cursor; the run is suspended as for the menu button
+                    HeroInput = HeroCommand.None;
+                    return;
+                }
+
+                // Space jumps here (presentation only); P pauses; Enter starts the night from Day without leaving the view.
+                if (keyboard.spaceKey.wasPressedThisFrame) game.HeroView.Jump();
+                if (keyboard.pKey.wasPressedThisFrame && sim.State == RunState.Night) game.TogglePause();
+                if (EnterPressed(keyboard) && sim.State == RunState.Day) game.StartNight();
+            }
+
+            var rig = game.HeroRig;
+            rig.Look(mouse, game.CursorLocked);
+            if (HeroInputOverride.HasValue)
+            {
+                HeroInput = HeroInputOverride.Value;
+                return;
+            }
+
+            var move = Vector2.zero;
+            if (keyboard != null)
+            {
+                if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) move.y += 1;
+                if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) move.y -= 1;
+                if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) move.x += 1;
+                if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) move.x -= 1;
+            }
+
+            var yaw = rig.Yaw * Mathf.Deg2Rad;
+            var forward = new Vector2(Mathf.Sin(yaw), Mathf.Cos(yaw)); // (x, z)
+            var right = new Vector2(forward.y, -forward.x);
+            var facing = HeroRules.FacingToward(forward.x, forward.y);
+            var heading = -1;
+            if (move != Vector2.zero)
+            {
+                var dir = right * move.x + forward * move.y;
+                heading = (HeroRules.FacingToward(dir.x, dir.y) + 2) / 4 % 16;
+            }
+
+            // A click is remembered for a moment, so a quick tap between fixed steps or late in the cooldown still swings.
+            if (mouse != null && mouse.leftButton.wasPressedThisFrame && game.CursorLocked) attackLatchUntil = Time.unscaledTime + AttackLatchSeconds;
+            var attack = mouse != null && game.CursorLocked && (mouse.leftButton.isPressed || Time.unscaledTime < attackLatchUntil);
+            HeroInput = new HeroCommand(heading, attack, facing);
+        }
+
+        const float AttackLatchSeconds = 0.25f;
+        float attackLatchUntil;
+
+        static bool EnterPressed(Keyboard k) => k.enterKey.wasPressedThisFrame || k.numpadEnterKey.wasPressedThisFrame;
 
         void Click()
         {

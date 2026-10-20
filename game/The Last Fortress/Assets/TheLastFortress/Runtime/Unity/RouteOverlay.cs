@@ -71,11 +71,15 @@ namespace TheLastFortress
                 if (m != null && m.activeSelf) yield return m.transform.position;
         }
 
-        // ---------- entry gates and route direction (plan 010 stage 3) ----------
+        // ---------- entry markers and route direction (plan 010 stage 3; no gate structures since plan 016) ----------
 
-        readonly GameObject[] gates = new GameObject[MaxEntries];
-        readonly Transform[] gateBanners = new Transform[MaxEntries];
-        readonly Vector3[] gateBannerRest = new Vector3[MaxEntries];
+        readonly GameObject[] entryMarkers = new GameObject[MaxEntries];
+        readonly Transform[] entryPads = new Transform[MaxEntries];
+        readonly Vector3[] entryPadRest = new Vector3[MaxEntries];
+        readonly Light[] roadTorches = new Light[MaxEntries];
+
+        /// <summary>0 by day, 1 at night: the road torches light up so the four ways out of the mist stay readable (plan 016).</summary>
+        public float NightGlow;
         Transform chevronRoot;
         readonly List<Transform> chevrons = new List<Transform>();
         Material chevronMat;
@@ -83,10 +87,10 @@ namespace TheLastFortress
         const float ChevronSpacing = 1.4f;
         const float ChevronSpeed = 0.9f; // tiles per second toward the Keep
 
-        /// <summary>Gates standing at tonight's entries (MVP/release), for tests and captures.</summary>
-        public int VisibleGateCount { get; private set; }
+        /// <summary>Entry markers shown at tonight's entries (MVP/release), for tests and captures.</summary>
+        public int VisibleEntryCount { get; private set; }
 
-        public Vector3 GatePosition(int i) => gates[i].transform.position;
+        public Vector3 EntryMarkerPosition(int i) => entryMarkers[i].transform.position;
 
         /// <summary>Chevrons currently drawn along the route lines, pointing from the entries toward the Keep.</summary>
         public int VisibleChevronCount { get; private set; }
@@ -102,46 +106,35 @@ namespace TheLastFortress
             return entry.Z == 0 ? Vector3.back : Vector3.forward;
         }
 
-        const float GateOut = 0.85f; // from the entry cell centre: past the board edge (0.5), on the beach
+        const float RoadMouthOut = 0.85f; // from the entry cell centre: past the board edge (0.5), on its road
 
-        /// <summary>Middle of an entry's gate, where its screen label is set beside it.</summary>
-        public static Vector3 GateCenter(GridPos entry) => Prims.CellCenter(entry, 0.6f) + Outward(entry) * GateOut;
+        /// <summary>Where an entry's road meets the board, where its screen label is set beside it.</summary>
+        public static Vector3 RoadMouth(GridPos entry) => Prims.CellCenter(entry, 0.6f) + Outward(entry) * RoadMouthOut;
 
-        /// <summary>A gate on the beach just outside the entry: two posts, a beam and a coral banner facing the board.</summary>
-        GameObject BuildGate(int i)
+        /// <summary>
+        /// The marker of an entry (plan 016: no gate structure, enemies simply come down the road out of the mist): a coral
+        /// pad on the entry cell, where they step onto the board, and a torch light on the road mouth that glows at Night.
+        /// </summary>
+        GameObject BuildEntryMarker(int i)
         {
-            var gate = new GameObject($"EntryGate{i}");
-            gate.transform.SetParent(transform, false);
-            var timber = content.timberShadow;
-            var banner = Prims.Tinted(content.timberShadow, Palette.WarningCoral);
-            if (content.art != null && content.art.gate != null)
-            {
-                // Authored gate: same footprint on the beach; its Banner part pulses like the blockout's flag.
-                var model = Instantiate(content.art.gate, gate.transform);
-                model.transform.localPosition = Vector3.zero;
-                gateBanners[i] = model.transform.Find("Banner");
-                if (gateBanners[i] != null) gateBannerRest[i] = gateBanners[i].localScale;
-                var artPad = Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 0.27f, GateOut), new Vector3(0.9f, 0.02f, 0.9f), banner, "EntryPad");
-                artPad.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                gate.SetActive(false);
-                return gate;
-            }
-
-            foreach (var side in new[] { -0.5f, 0.5f })
-            {
-                Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(side, 0.8f, 0), new Vector3(0.2f, 1.6f, 0.2f), timber, "Post");
-                Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(side, 1.68f, 0), new Vector3(0.28f, 0.16f, 0.28f), banner, "PostCap");
-            }
-
-            Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 1.5f, 0), new Vector3(1.36f, 0.16f, 0.2f), timber, "Beam");
-            var flag = Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 1.08f, 0), new Vector3(0.78f, 0.62f, 0.05f), banner, "Banner");
-            gateBanners[i] = flag.transform;
-            gateBannerRest[i] = flag.transform.localScale;
-            // A coral pad on the entry cell itself, where the enemies step onto the board.
-            var pad = Prims.Create(PrimitiveType.Cube, gate.transform, new Vector3(0, 0.27f, GateOut), new Vector3(0.9f, 0.02f, 0.9f), banner, "EntryPad");
+            var marker = new GameObject($"EntryMarker{i}");
+            marker.transform.SetParent(transform, false);
+            var torch = new GameObject("RoadTorch");
+            torch.transform.SetParent(marker.transform, false);
+            torch.transform.localPosition = new Vector3(0f, 0.55f, -0.15f); // just outside, lighting the road out of the mist
+            roadTorches[i] = torch.AddComponent<Light>();
+            roadTorches[i].type = LightType.Point;
+            roadTorches[i].color = content.art != null ? content.art.torchColor : Palette.Amber;
+            roadTorches[i].range = 1.8f;
+            roadTorches[i].intensity = 0f;
+            roadTorches[i].shadows = LightShadows.None;
+            var coral = Prims.Tinted(content.timberShadow, Palette.WarningCoral);
+            var pad = Prims.Create(PrimitiveType.Cube, marker.transform, new Vector3(0, 0.012f, RoadMouthOut), new Vector3(0.9f, 0.02f, 0.9f), coral, "EntryPad");
             pad.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            gate.SetActive(false);
-            return gate;
+            entryPads[i] = pad.transform; // a new side's pad pulses
+            entryPadRest[i] = pad.transform.localScale;
+            marker.SetActive(false);
+            return marker;
         }
 
         GameObject BuildChevron()
@@ -154,26 +147,27 @@ namespace TheLastFortress
             return c;
         }
 
-        /// <summary>Gates at tonight's entries by Day and Night; a new side's banner pulses during the Day.</summary>
-        void UpdateGates(RunSimulation sim)
+        /// <summary>Markers at tonight's entries by Day and Night; a new side's pad pulses during the Day.</summary>
+        void UpdateEntryMarkers(RunSimulation sim)
         {
-            VisibleGateCount = 0;
-            if (gates[0] == null) return;
+            VisibleEntryCount = 0;
+            if (entryMarkers[0] == null) return;
             var show = sim.IsCampaign && !sim.StressMode && (sim.State == RunState.Day || sim.State == RunState.Night);
             var entries = sim.Wave.EntryCells;
             for (var i = 0; i < MaxEntries; i++)
             {
                 var active = show && i < entries.Count;
-                if (gates[i].activeSelf != active) gates[i].SetActive(active);
+                if (entryMarkers[i].activeSelf != active) entryMarkers[i].SetActive(active);
                 if (!active) continue;
-                VisibleGateCount++;
+                VisibleEntryCount++;
                 var cell = entries[i];
                 var outward = Outward(cell);
-                // 0.5 to the board edge, then onto the beach: the gate never stands on a legal cell.
-                gates[i].transform.position = Prims.CellCenter(cell, -0.26f) + outward * GateOut;
-                gates[i].transform.rotation = Quaternion.LookRotation(-outward);
+                // 0.5 to the board edge, then onto its road: the torch never stands on a legal cell (the pad is on the entry).
+                entryMarkers[i].transform.position = Prims.CellCenter(cell) + outward * RoadMouthOut;
+                entryMarkers[i].transform.rotation = Quaternion.LookRotation(-outward);
+                if (roadTorches[i] != null) roadTorches[i].intensity = 1.6f * NightGlow;
                 var pulse = sim.State == RunState.Day && HudView.IsNewEntry(sim, cell) ? 1f + 0.18f * Mathf.Sin(Time.unscaledTime * 5f) : 1f;
-                if (gateBanners[i] != null) gateBanners[i].localScale = Vector3.Scale(gateBannerRest[i], new Vector3(pulse, pulse, 1f));
+                if (entryPads[i] != null) entryPads[i].localScale = Vector3.Scale(entryPadRest[i], new Vector3(pulse, 1f, pulse));
             }
         }
 
@@ -250,7 +244,7 @@ namespace TheLastFortress
 
             if (content.IsMvp)
             {
-                for (var i = 0; i < MaxEntries; i++) gates[i] = BuildGate(i);
+                for (var i = 0; i < MaxEntries; i++) entryMarkers[i] = BuildEntryMarker(i);
                 chevronRoot = new GameObject("RouteChevrons").transform;
                 chevronRoot.SetParent(transform, false);
                 chevronMat = Prims.Tinted(lineMat, Palette.HudText);
@@ -438,7 +432,7 @@ namespace TheLastFortress
                 UpdateLinks(sim);
             }
 
-            UpdateGates(sim);
+            UpdateEntryMarkers(sim);
             UpdateChevrons(day);
             UpdateRangeAndSelection(sim, player);
         }

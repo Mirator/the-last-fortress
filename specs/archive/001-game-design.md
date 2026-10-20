@@ -16,7 +16,7 @@ This document describes the full game vision. It does not authorize implementing
 
 Milestones 1 and 2 are implemented. The release profile `release-rules-1` (twelve nights, nine buildings, seven enemies including two bosses, 24 perks, three map profiles) is implemented; its frozen rules contract is [005-release-rules.md](005-release-rules.md), which takes precedence over this document's examples.
 
-The next feature is a player-controlled hero with a switchable third-person view, specified in [006-third-person-hero.md](../003-third-person-hero.md). For the release profile it supersedes this document's fixed isometric camera and its exclusion of heroes; the six-night MVP and the prototype keep both. [README.md](../README.md) lists every specification with its status.
+The next feature is a player-controlled hero with a switchable third-person view, specified in [006-third-person-hero.md](006-third-person-hero.md). For the release profile it supersedes this document's fixed isometric camera and its exclusion of heroes; the six-night MVP and the prototype keep both. [README.md](../README.md) lists every specification with its status.
 
 The milestone-specific specification takes precedence for its milestone. For example, the prototype has no reward phase or passive income; the MVP has no soldiers or activated abilities. Owner-confirmed decisions: open routes take priority over breaching, the later economy has guaranteed Keep income, and controllable soldiers are deferred beyond the MVP. Numerical values are initial tuning defaults, not validated balance.
 
@@ -516,4 +516,4 @@ The most distinctive mechanic is not the day/night cycle or the economy. It is t
 
 That mechanic should be fun even without procedural generation, upgrades, or progression. If it is, the remaining systems can reinforce it.
 
-Historical: this section described the first milestone, now implemented (spec 002). The MVP (spec 003) and release profile (spec 006) followed. The current next milestone is [006-third-person-hero.md](../003-third-person-hero.md). Treat the stated production schedule and content totals as planning targets, not implementation acceptance criteria.
+Historical: this section described the first milestone, now implemented (spec 002). The MVP (spec 003) and release profile (spec 006) followed. The current next milestone is [006-third-person-hero.md](006-third-person-hero.md). Treat the stated production schedule and content totals as planning targets, not implementation acceptance criteria.

@@ -39,6 +39,9 @@ namespace TheLastFortress
         public GameObject bomberPrefab;
         public GameObject commanderPrefab;
 
+        [Tooltip("Plan 012 player hero (CharacterRig). Null shows a tinted Grunt rig as a placeholder.")]
+        public GameObject heroPrefab;
+
         [Tooltip("MVP connected Walls, indexed by WallShape (Isolated, End, Straight, Corner, T, Cross), canonical facing north. Empty keeps the prototype Wall.")]
         public GameObject[] wallShapePrefabs;
 

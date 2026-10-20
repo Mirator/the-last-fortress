@@ -2,11 +2,10 @@
 
 What the game is and should become. Specs never refer to implementation plans; plans refer to the spec they implement. Read the relevant specs before writing or executing any plan (see root `AGENTS.md`).
 
-| Spec | Role | Status (2026-10-19) |
+| Spec | Role | Status (2026-10-20) |
 |---|---|---|
 | [001-vision.md](001-vision.md) | Vision, pillars, core loop, direction, risks, success criteria. No rules. | Living |
-| [002-game-rules.md](002-game-rules.md) | The complete current rules of the game (release profile, plus how the legacy six-night profile differs) | Implemented; the single source of current rules |
-| [003-third-person-hero.md](003-third-person-hero.md) | Feature spec: player hero, third-person view, switchable views, `release-rules-2` | **Current**; owner decisions recorded; ready for an implementation plan |
+| [002-game-rules.md](002-game-rules.md) | The complete current rules of the game (release profile with the hero, plus how the legacy profiles differ) | Implemented; the single source of current rules |
 | [archive/](archive/README.md) | Earlier milestone specs, kept as history | Not current; do not plan from them |
 
 How specs change:

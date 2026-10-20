@@ -24,6 +24,35 @@ namespace TheLastFortress
         public PrototypeDefinitions Definitions { get; private set; }
         public PlayerController Player { get; private set; }
         public CameraRig CameraRig => cameraRig;
+
+        /// <summary>Third-person camera of the hero view (release scene only; null elsewhere).</summary>
+        public HeroCameraRig HeroRig { get; private set; }
+
+        /// <summary>Presents the hero (release scene only).</summary>
+        public HeroPresenter HeroView { get; private set; }
+
+        /// <summary>Sky dome and fog of the hero view (release scene only).</summary>
+        public HeroSky Sky { get; private set; }
+
+        /// <summary>
+        /// The hero view is showing (specs/003 3.1). Switching changes only presentation and input routing: never the
+        /// simulation, its RNG, gold or pause state.
+        /// </summary>
+        public bool HeroViewActive { get; private set; }
+
+        /// <summary>
+        /// Figures (hero and enemies) are drawn at true scale against the buildings in both views (owner decision,
+        /// 2026-10-19): a person about 0.22 tile tall, so the Keep stands about seven times their height and the palisade
+        /// about three. Relative to the plan 011 model size; presentation only.
+        /// </summary>
+        public const float FigureScale = 0.27f;
+
+        /// <summary>The camera currently rendering the board (screen-space anchors project with it).</summary>
+        public Camera ActiveCamera => HeroViewActive ? HeroRig.Camera : cameraRig.Camera;
+
+        /// <summary>The hero view captures the mouse while play is live (not in menus, dialogs or the Reward screen).</summary>
+        public bool CursorLocked => HeroViewActive && !Suspended && Sim != null && (Sim.State == RunState.Day || Sim.State == RunState.Night);
+
         public WorldView World { get; private set; }
         public RouteOverlay Overlay { get; private set; }
         public HudView Hud { get; private set; }
@@ -89,6 +118,7 @@ namespace TheLastFortress
 
         public void SetGameSpeed(int speed)
         {
+            if (HeroViewActive) return; // locked to 1x in the hero view (specs/003 3.1)
             if (System.Array.IndexOf(GameSpeeds, speed) < 0) return;
             GameSpeed = speed;
             if (Sim.State == RunState.Night) Sim.SetPaused(false); // picking a speed while paused resumes at that speed
@@ -156,9 +186,12 @@ namespace TheLastFortress
             if (content == null || cameraRig == null) throw new InvalidOperationException("PrototypeBootstrap is missing scene references; run The Last Fortress > Setup Prototype Scene.");
             if (IsRelease)
             {
-                var release = RulesProfile.TwelveNights(content.releaseDefinitions.ToDefinitions());
+                var baseDefinitions = content.releaseDefinitions.ToDefinitions();
+                var release = RulesProfile.TwelveNightsWalking(baseDefinitions); // release-rules-3: people walk at true scale
+                var heroRun = RulesProfile.TwelveNightsHero(baseDefinitions); // release-rules-2 saves keep their speeds
+                var beforeHero = RulesProfile.TwelveNights(baseDefinitions); // release-rules-1 saves continue without a hero
                 var legacy = RulesProfile.SixNights(content.mvpDefinitions != null ? content.mvpDefinitions.ToDefinitions() : MvpDefinitions.CreateDefault());
-                Catalog = new RulesCatalog(release, legacy);
+                Catalog = new RulesCatalog(release, heroRun, beforeHero, legacy);
                 Definitions = release.Definitions;
                 PurchasableKinds = RulesProfile.ReleaseKinds;
             }
@@ -196,6 +229,7 @@ namespace TheLastFortress
             World.transform.SetParent(transform, false);
             World.Initialize(content, sun);
             cameraRig.PanCursor = content.panCursor;
+            if (IsRelease) CreateHeroView();
             if (IsMvp)
             {
                 Audio = new GameObject("Audio").AddComponent<AudioDirector>();
@@ -236,6 +270,29 @@ namespace TheLastFortress
             if (measureOut != null && IsStressMode) gameObject.AddComponent<StressMeasurement>().Begin(this, measureOut);
             var captureDir = ArgValue(args, "-capture");
             if (captureDir != null) gameObject.AddComponent<CaptureSequence>().Begin(this, captureDir);
+            // Not during scene load and never without a GPU (batch tests): on the first frame instead.
+            warmUpPending = HeroRig != null && SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null;
+        }
+
+        bool warmUpPending;
+
+        /// <summary>
+        /// Renders the hero camera once, with fog on, into a tiny texture while the scene loads, so the first Tab does not
+        /// stall compiling the fogged shader variants (the first hero-view frame measured a 50 ms spike before this).
+        /// </summary>
+        void WarmUpHeroView()
+        {
+            var rt = RenderTexture.GetTemporary(64, 64, 24);
+            var fog = RenderSettings.fog;
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.Linear;
+            var cam = HeroRig.Camera;
+            cam.transform.SetPositionAndRotation(new Vector3(10.5f, 1f, 5f), Quaternion.Euler(10f, 0f, 0f));
+            cam.targetTexture = rt;
+            cam.Render();
+            cam.targetTexture = null;
+            RenderSettings.fog = fog;
+            RenderTexture.ReleaseTemporary(rt);
         }
 
         static bool HasArg(string[] args, string name) => Array.IndexOf(args, name) >= 0;
@@ -248,6 +305,12 @@ namespace TheLastFortress
 
         void Update()
         {
+            if (warmUpPending)
+            {
+                warmUpPending = false;
+                WarmUpHeroView();
+            }
+
             var dt = Mathf.Min(Time.unscaledDeltaTime, MaxFrameDelta);
             var kb = Player.Keyboard;
             if (kb != null && kb.f9Key.wasPressedThisFrame && !MenuOpen)
@@ -261,10 +324,109 @@ namespace TheLastFortress
             else if (cameraRig.IsDragging) cameraRig.CancelDrag(); // a menu or dialog never keeps a drag (or its cursor)
             if (AutoAdvance) AdvanceSimulation(dt);
             if (!ExternalViewClock) SyncViews(dt);
+            var locked = CursorLocked;
+            if (locked != (Cursor.lockState == CursorLockMode.Locked))
+            {
+                Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+                Cursor.visible = !locked;
+            }
         }
 
-        /// <summary>One frame of real time for the simulation at the chosen <see cref="GameSpeed"/>; nothing while suspended.</summary>
-        public int AdvanceSimulation(float dt) => Suspended ? 0 : Sim.Advance(dt * GameSpeed);
+        /// <summary>
+        /// One frame of real time for the simulation at the chosen <see cref="GameSpeed"/>; nothing while suspended. The hero
+        /// view's command drives the hero (Day: on its own clock; Night: every step of this frame); the strategic view sends
+        /// none, so the hero guards. Returns the fixed steps run (Day: hero-only steps).
+        /// </summary>
+        public int AdvanceSimulation(float dt)
+        {
+            if (Suspended) return 0;
+            var command = HeroViewActive ? Player.HeroInput : HeroCommand.None;
+            if (Sim.State == RunState.Day) return Sim.AdvanceDay(dt, command);
+
+            return Sim.Advance(dt * GameSpeed, command);
+        }
+
+        void CreateHeroView()
+        {
+            var strategic = cameraRig.Camera;
+            var go = new GameObject("HeroCamera") { tag = "MainCamera" };
+            go.transform.SetParent(transform, false);
+            var cam = go.AddComponent<Camera>();
+            cam.clearFlags = strategic.clearFlags;
+            cam.backgroundColor = strategic.backgroundColor;
+            cam.cullingMask = strategic.cullingMask;
+            cam.orthographic = false;
+            cam.fieldOfView = GameSettings.DefaultFieldOfView;
+            cam.nearClipPlane = 0.03f;
+            cam.farClipPlane = 250f;
+            cam.enabled = false;
+            var data = go.AddComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+            data.renderPostProcessing = true;
+            if (strategic.TryGetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>(out var from))
+                data.antialiasing = from.antialiasing;
+            go.AddComponent<AudioListener>().enabled = false;
+            HeroRig = go.AddComponent<HeroCameraRig>();
+            HeroView = new GameObject("Hero").AddComponent<HeroPresenter>();
+            HeroView.transform.SetParent(transform, false);
+            HeroView.Initialize(content);
+            Sky = new GameObject("HeroSky").AddComponent<HeroSky>();
+            Sky.transform.SetParent(transform, false);
+            Sky.Sun = sun;
+            Sky.Initialize(content.overlay);
+        }
+
+        /// <summary>
+        /// Tab: switches between the strategic and the hero view (specs/003 3.1). Only for a run with a hero, in Day or
+        /// Night, outside menus. Entering sets Night speed to 1x without touching pause. Returns whether the view changed.
+        /// </summary>
+        public bool SetHeroView(bool on)
+        {
+            if (on == HeroViewActive) return false;
+            if (on && (HeroRig == null || Sim?.Hero == null || Suspended || TitleScreen || !(Sim.State == RunState.Day || Sim.State == RunState.Night)))
+                return false;
+            HeroViewActive = on;
+            if (on)
+            {
+                speedBeforeHeroView = GameSpeed;
+                GameSpeed = 1; // the lock never resumes a paused night (SetGameSpeed would)
+                Player.CancelTool();
+                cameraRig.CancelDrag();
+                HeroRig.BeginFrom(cameraRig.transform, CameraRig.Yaw, cameraRig.Size, cameraRig.Focus);
+            }
+
+            else GameSpeed = speedBeforeHeroView; // the strategic speed returns (never resumes a pause either)
+
+            cameraRig.Camera.enabled = !on;
+            HeroRig.Camera.enabled = on;
+            if (cameraRig.TryGetComponent<AudioListener>(out var strategicEars)) strategicEars.enabled = !on;
+            HeroRig.GetComponent<AudioListener>().enabled = on;
+            return true;
+        }
+
+        Vector3? fixedHeroCamera;
+        int speedBeforeHeroView = 1;
+
+        /// <summary>
+        /// Measurement only (stress fixture, -hero-camera): renders through the hero camera from a fixed ground point, as if a
+        /// hero stood there. Gameplay, input routing and the simulation are untouched.
+        /// </summary>
+        public void ViewFromHeroCamera(Vector3 at, float yaw)
+        {
+            if (HeroRig == null) return;
+            fixedHeroCamera = at;
+            HeroRig.SetOrbit(yaw, 14f);
+            HeroRig.SkipTransition();
+            cameraRig.Camera.enabled = false;
+            HeroRig.Camera.enabled = true;
+        }
+
+        /// <summary>H in the strategic view: centres the camera on the hero, keeping the zoom.</summary>
+        public void CenterCameraOnHero()
+        {
+            var hero = Sim?.Hero;
+            if (hero == null || HeroViewActive) return;
+            cameraRig.SetView(new Vector3((float)hero.X, 0f, (float)hero.Z), cameraRig.Size);
+        }
 
         /// <summary>Pushes current simulation state to views and HUD (also used by tests after manual stepping).</summary>
         public void SyncViews(float dt = 0f)
@@ -274,10 +436,25 @@ namespace TheLastFortress
             frameEvents.Clear();
             Sim.DrainEvents(frameEvents); // the only drain: both consumers see each batch exactly once
             World.SetBuildGridVisible(Player.Tool.HasValue && Sim.State == RunState.Day);
-            if (Overlay.gameObject.activeSelf == TitleScreen) Overlay.gameObject.SetActive(!TitleScreen); // no route lines on the title view
+            // No route lines on the title view, nor in the hero view, where the on-top lines would cut across buildings.
+            var overlayShown = !TitleScreen && !HeroViewActive;
+            if (Overlay.gameObject.activeSelf != overlayShown) Overlay.gameObject.SetActive(overlayShown);
+            World.CharacterScale = FigureScale; // the same in both views
             World.Sync(Sim, frameEvents, fxDt);
+            if (HeroView != null)
+            {
+                var steering = HeroViewActive && !CombatFrozen && (Sim.State == RunState.Day || Sim.State == RunState.Night);
+                HeroView.Sync(Sim, frameEvents, fxDt, steering ? Player.HeroInput : (HeroCommand?)null, !HeroViewActive && !TitleScreen, World.CharacterScale);
+                if (HeroViewActive) HeroRig.Follow(HeroView.ShownPosition, Sim, dt);
+                else if (fixedHeroCamera.HasValue) HeroRig.Follow(fixedHeroCamera.Value, Sim, dt);
+                Sky.Sync(World.NightBlend, HeroViewActive || fixedHeroCamera.HasValue, HeroRig.Camera);
+                if (HeroViewActive || fixedHeroCamera.HasValue) World.DrawGrass(HeroRig.Camera, Sim); // true-scale grass, hero view only
+                if (World.StrategicBackground.HasValue) cameraRig.Camera.backgroundColor = World.StrategicBackground.Value;
+            }
+
             Audio?.Consume(Sim, frameEvents, fxDt, dt, CombatFrozen, Suspended, TitleScreen);
             ObserveOnboarding();
+            Overlay.NightGlow = World.NightBlend;
             Overlay.Refresh(Sim, Player);
             Hud.Refresh(Sim, Player, Overlay, cameraRig);
             Hud.TickEffects(fxDt);
@@ -347,7 +524,7 @@ namespace TheLastFortress
 
         /// <summary>
         /// Prototype: the one-wave run. MVP: the never-saved placeholder behind the menu, staged as the title view — a
-        /// small settlement on a generated island (decorative placements; failures on terrain are simply skipped).
+        /// small settlement on a generated map (decorative placements; failures on terrain are simply skipped).
         /// </summary>
         public void EnterNormalMode()
         {
@@ -399,6 +576,7 @@ namespace TheLastFortress
 
         void LoadRun(RunSimulation sim)
         {
+            SetHeroView(false); // every new, loaded or restarted run starts in the strategic view
             Sim = sim;
             Definitions = sim.Definitions; // a loaded legacy save plays with its own profile's definitions
             observedState = sim.State;
@@ -653,6 +831,13 @@ namespace TheLastFortress
             Settings = settings;
             cameraRig.Sensitivity = Mathf.Clamp(settings.cameraSensitivity, 0.25f, 3f);
             cameraRig.ShakeEnabled = settings.cameraShake;
+            if (HeroRig != null)
+            {
+                HeroRig.Sensitivity = settings.lookSensitivity;
+                HeroRig.InvertY = settings.invertLook;
+                HeroRig.FieldOfView = settings.fieldOfView;
+                HeroRig.SetDefaultDistance(settings.heroDistance);
+            }
             Audio?.ApplyVolumes(settings.masterVolume, settings.musicVolume, settings.sfxVolume);
             // Window mode applies on its own; resolution falls back to the current size until one is chosen.
             if (!Application.isEditor && persist)
@@ -681,7 +866,7 @@ namespace TheLastFortress
         public bool StartNight()
         {
             if (Sim.State != RunState.Day) return false;
-            if (Persistence != null && Persistence.HasRun && (Persistence.SavePending || !Persistence.CommitDay(Sim)))
+            if (Persistence != null && Persistence.HasRun && (Persistence.SavePending || !Persistence.CommitDay(Sim, nightStart: true)))
             {
                 Audio?.Play(SoundId.UiReject);
                 return false;
@@ -692,6 +877,7 @@ namespace TheLastFortress
             observedState = RunState.Night;
             nightStartedAt = Time.unscaledTime;
             Player.CancelTool();
+            if (Settings.heroViewAtNight) SetHeroView(true);
             return true;
         }
 

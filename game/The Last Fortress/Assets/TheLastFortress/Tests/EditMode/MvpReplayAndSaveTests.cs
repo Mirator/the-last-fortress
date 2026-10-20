@@ -316,6 +316,8 @@ namespace TheLastFortress.Tests
                 var odd = store.ReadSettings(out problem);
                 Assert.IsNull(problem);
                 Assert.AreEqual((1f, 0f, 0f), (odd.masterVolume, odd.musicVolume, odd.sfxVolume), "clamped to 0–1; zero stays silence");
+                Assert.AreEqual((GameSettings.CurrentVersion, GameSettings.DefaultFieldOfView, GameSettings.DefaultHeroDistance, GameSettings.DefaultLookSensitivity),
+                    (odd.version, odd.fieldOfView, odd.heroDistance, odd.lookSensitivity), "a version 2 file (before the hero view) migrates with hero camera defaults");
 
                 Assert.IsTrue(store.WriteSettings(new GameSettings { masterVolume = 0.3f, musicVolume = 0f, sfxVolume = 0.6f }, out _));
                 var back = store.ReadSettings(out problem);

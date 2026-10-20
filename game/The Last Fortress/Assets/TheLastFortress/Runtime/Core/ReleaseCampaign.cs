@@ -9,7 +9,61 @@ namespace TheLastFortress
     /// </summary>
     public static class ReleaseCampaign
     {
-        public const string RulesVersion = "release-rules-1";
+        /// <summary>Twelve nights without the hero; kept only so saves from before the hero continue (specs/003 section 1).</summary>
+        public const string RulesV1 = "release-rules-1";
+
+        /// <summary>Twelve nights with the player hero (specs/003). Every new release run uses it.</summary>
+        public const string RulesV2 = "release-rules-2";
+
+        /// <summary>
+        /// Twelve nights with the hero at real-scale speeds (plan 015): people walk and march instead of sprinting. Enemies move
+        /// at about a third of release-rules-2 speed with 1.5x HP (2.5x overshot: slow enemies bunch at the walls);
+        /// the hero runs at 0.6 tiles/s. Every new release run uses it.
+        /// </summary>
+        public const string RulesV3 = "release-rules-3";
+
+        /// <summary>Rules version of new release runs.</summary>
+        public const string RulesVersion = RulesV3;
+
+        public static bool IsReleaseRules(string rulesVersion) => rulesVersion == RulesV1 || rulesVersion == RulesV2 || rulesVersion == RulesV3;
+
+        /// <summary>Whether this rules version has the player hero (release-rules-2 and later).</summary>
+        public static bool HasHero(string rulesVersion) => rulesVersion == RulesV2 || rulesVersion == RulesV3;
+
+        /// <summary>
+        /// Hero movement in 1/1200 tile per step: 1.5 tiles/s in release-rules-2; 0.8 (about 6.4 m/s, a run) in release-rules-3,
+        /// faster than a Runner so the hero can catch one and reach a lane in about 11 s (plan 015 review).
+        /// </summary>
+        public static int HeroMoveUnits(string rulesVersion) => rulesVersion == RulesV3 ? 48 : HeroRules.MoveUnitsPerStep;
+
+        /// <summary>
+        /// release-rules-3 (plan 015): a Bomber lights its fuse at the first solid building it walks up to, not only at its
+        /// route's attack cell. At walking speed almost none reached the attack cell alive.
+        /// </summary>
+        public static bool BombersLightOnContact(string rulesVersion) => rulesVersion == RulesV3;
+
+        /// <summary>release-rules-3 enemy HP against release-rules-2 [P]; Brute and Raider Archer have their own values below.</summary>
+        public const double WalkingHpScale = 1.5;
+
+        /// <summary>release-rules-3 enemies [P]: speeds in tiles/s (whole units per step) and HP x WalkingHpScale against release-rules-2.</summary>
+        public static PrototypeDefinitions Walking(PrototypeDefinitions defs) => defs.WithEnemies(e =>
+        {
+            switch (e.Kind)
+            {
+                case EnemyKind.Runner: e.SpeedTilesPerSecond = 0.6; break;
+                case EnemyKind.Brute: e.SpeedTilesPerSecond = 0.2; break;
+                case EnemyKind.Archer: e.SpeedTilesPerSecond = 0.25; break;
+                case EnemyKind.SiegeGolem:
+                case EnemyKind.SiegeCommander: e.SpeedTilesPerSecond = 0.15; break;
+                default: e.SpeedTilesPerSecond = 0.3; break; // Grunt, Bomber: a brisk march
+            }
+
+            // Brute 180 and Raider Archer 45 (plan 015 review): at x1.5 a Brute outlasted the hero one-on-one, and Brutes and
+            // Archers caused nearly all Keep damage on under-built defences, which then failed in a single night.
+            e.MaxHp = e.Kind == EnemyKind.Brute ? 180 : e.Kind == EnemyKind.Archer ? 45
+                : (int)System.Math.Round(e.MaxHp * WalkingHpScale, System.MidpointRounding.AwayFromZero);
+            return e;
+        });
         public const string CampaignId = "twelve-nights";
         public const int ContentVersion = 2; // 2: cheaper, weaker buildings; content-1 saves are refused, not rescaled
         public const string Label = "Twelve nights";
@@ -51,12 +105,14 @@ namespace TheLastFortress
         /// The twelve stored nights for a seed and map profile, with the release perk pool, on the board in the seed's own
         /// symmetry (<see cref="MapProfiles.SymmetryFor"/>, as <see cref="MapProfiles.Generate(string, uint)"/> builds it).
         /// </summary>
-        public static CampaignConfig Create(uint seed, string mapProfile) => Create(seed, mapProfile, MapProfiles.SymmetryFor(seed));
+        public static CampaignConfig Create(uint seed, string mapProfile, string rulesVersion = RulesVersion) =>
+            Create(seed, mapProfile, MapProfiles.SymmetryFor(seed), rulesVersion);
 
         /// <summary>The recipes' entries are written for the profiles' own layout; they turn with the map's symmetry.</summary>
-        public static CampaignConfig Create(uint seed, string mapProfile, int symmetry) => Create(seed, mapProfile, Table(), symmetry);
+        public static CampaignConfig Create(uint seed, string mapProfile, int symmetry, string rulesVersion = RulesVersion) =>
+            Create(seed, mapProfile, Table(), symmetry, rulesVersion);
 
-        public static CampaignConfig Create(uint seed, string mapProfile, IReadOnlyList<Recipe> table, int symmetry = 0)
+        public static CampaignConfig Create(uint seed, string mapProfile, IReadOnlyList<Recipe> table, int symmetry = 0, string rulesVersion = RulesVersion)
         {
             var rng = new RunRandom(seed ^ WaveSalt);
             var nights = new List<WavePlan>();
@@ -64,7 +120,7 @@ namespace TheLastFortress
             return new CampaignConfig
             {
                 Label = Label, Nights = nights, OffersRewards = true,
-                RulesVersion = RulesVersion, CampaignId = CampaignId, PerkPool = PerkRules.ReleaseIds,
+                RulesVersion = rulesVersion, CampaignId = CampaignId, PerkPool = PerkRules.ReleaseIds,
                 MapProfile = mapProfile ?? "", Difficulty = "standard",
             };
         }

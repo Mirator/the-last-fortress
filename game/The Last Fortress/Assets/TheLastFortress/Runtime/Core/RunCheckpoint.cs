@@ -59,6 +59,12 @@ namespace TheLastFortress
 
         /// <summary>Stats at the terminal moment (status Victory/Defeat), for the summary screen.</summary>
         public StatsData finalStats = new StatsData();
+
+        // release-rules-2 (plan 012): where the hero stood when the Night started, so Continue replays it from there.
+        // Written only by the Start Night checkpoint; absent (false) otherwise, which means the spawn cell.
+        public bool heroAtNight;
+
+        public int heroX, heroZ;
     }
 
     [Serializable]
@@ -98,6 +104,9 @@ namespace TheLastFortress
     public sealed class StatsData
     {
         public int nightsCleared, enemiesDefeated, buildingsPurchased, goldEarned;
+
+        /// <summary>Enemies killed by the hero (release-rules-2; 0 in older saves).</summary>
+        public int heroKills;
         public string[] synergiesEver = new string[0];
     }
 
@@ -122,8 +131,11 @@ namespace TheLastFortress
 
         public static bool TryParseU(string s, out uint v) => uint.TryParse(s, NumberStyles.None, Inv, out v);
 
-        /// <summary>Snapshot of a Day (current construction/HP/gold/perks). Throws outside Day: no mid-combat saves.</summary>
-        public static RunCheckpoint Capture(RunSimulation sim)
+        /// <summary>
+        /// Snapshot of a Day (current construction/HP/gold/perks). Throws outside Day: no mid-combat saves. With
+        /// <paramref name="nightStart"/> (the checkpoint written at Start Night) a hero run also stores the hero's position.
+        /// </summary>
+        public static RunCheckpoint Capture(RunSimulation sim, bool nightStart = false)
         {
             if (sim.State != RunState.Day) throw new InvalidOperationException("Checkpoints are Day-only.");
             if (!sim.IsCampaign) throw new InvalidOperationException("Only campaign runs are saved.");
@@ -184,6 +196,13 @@ namespace TheLastFortress
             var history = new List<OfferData>();
             foreach (var o in sim.OfferHistory) history.Add(Offer(o));
             cp.offerHistory = history.ToArray();
+            if (nightStart && sim.Hero != null)
+            {
+                cp.heroAtNight = true;
+                cp.heroX = sim.Hero.UnitsX;
+                cp.heroZ = sim.Hero.UnitsZ;
+            }
+
             return cp;
         }
 
@@ -196,7 +215,7 @@ namespace TheLastFortress
         public static StatsData Stats(RunStats s) => new StatsData
         {
             nightsCleared = s.NightsCleared, enemiesDefeated = s.EnemiesDefeated, buildingsPurchased = s.BuildingsPurchased,
-            goldEarned = s.GoldEarned, synergiesEver = new List<string>(s.SynergiesEver).ToArray(),
+            goldEarned = s.GoldEarned, heroKills = s.HeroKills, synergiesEver = new List<string>(s.SynergiesEver).ToArray(),
         };
 
         /// <summary>

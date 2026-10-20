@@ -1,19 +1,21 @@
 # Game rules
 
-Version 1.0, 2026-10-19. Status: **implemented**; this is the description of the game as it is now. It consolidates the earlier milestone specs (prototype, six-night MVP, playtest improvements, release rules; see `archive/`) with every value taken from the current code and `Data/ReleaseDefinitions.asset`.
+Version 1.5, 2026-10-20 (release-rules-3: walking speeds; one true scale; real-size models; a board in mist). Status: **implemented**; this is the description of the game as it is now. It consolidates the earlier milestone specs (prototype, six-night MVP, playtest improvements, release rules; see `archive/`) with every value taken from the current code and `Data/ReleaseDefinitions.asset`.
 
 How to read and change it:
 
-- The release profile `release-rules-1` is the game. Sections 1-14 describe it. Section 15 lists only how the legacy six-night profile differs.
+- The release profile `release-rules-3` is the game: sections 1-14 plus the hero in section 17, with the walking speeds of section 8. `release-rules-2` is the same with the earlier sprint speeds and `release-rules-1` the same without the hero; both are kept for older saves. Section 15 lists only how the legacy six-night profile differs.
 - **[I]** marks an invariant rule: changing it changes behaviour of existing runs and needs a new rules version. **[P]** marks provisional tuning: it may change after recorded evidence (scripted policy runs or playtests), with the change noted in section 16. Untagged statements are rules.
-- A feature spec (for example [003-third-person-hero.md](003-third-person-hero.md)) proposes changes. When it is implemented, merge its rules into this document and move the feature spec to `archive/`.
+- A feature spec proposes changes. When it is implemented, merge its rules into this document and move the feature spec to `archive/`.
 - Names in `code font` match the code (`Definitions.cs`, `RunSimulation.cs`, `PerkRules.cs`, `EconomyRules.cs`, `ReleaseCampaign.cs`, `MapProfiles.cs`).
 
 ## 1. Profiles
 
 | Profile | Rules version / campaign | Where | Status |
 |---|---|---|---|
-| Release | `release-rules-1` / `twelve-nights`, content version 2 | `Release.unity`, `Builds/Release/` | The game |
+| Release | `release-rules-3` / `twelve-nights`, content version 2 | `Release.unity`, `Builds/Release/` | The game (hero, walking speeds) |
+| Release, sprint speeds | `release-rules-2` / `twelve-nights`, content version 2 | Release build only, for saves made before release-rules-3 | Legacy; the release-rules-2 speeds and HP of section 8 |
+| Release before the hero | `release-rules-1` / `twelve-nights`, content version 2 | Release build only, for saves made before the hero | Legacy; same rules without section 17 |
 | Six-night MVP | `mvp-rules-1` / six nights | `Mvp.unity`; also kept in the release build so old saves continue | Frozen legacy profile (section 15) |
 | Navigation prototype | one wave, no campaign | `NavigationPrototype.unity` | Development and test scene only; rules in `archive/002-navigation-prototype.md` |
 
@@ -56,6 +58,7 @@ States: `Day(n)`, `Night(n)`, `Reward`, `Victory`, `Defeat`. Pause is a separate
   5. Enemy actions in ascending enemy ID: melee hits (with immediate, non-recursive reflection), ranged hits, Bomber detonations.
   6. Dead-enemy cleanup.
   7. Keep at 0 HP → Defeat, evaluated before the cleared-night check, so a same-step final kill never overrides defeat.
+  - With the hero (section 17): hero movement after step 2, the hero's swing after step 3, hits on the hero in step 5, hero death after step 6.
 - Damage is immediate and authoritative in the simulation [I]. Projectiles, explosions and auras are presentation only; a visual arrow arriving after its target died does nothing.
 - HP clamps to `[0, max]`. Each death resolves once; dead entities neither act nor remain targets. A destroyed building releases its cells immediately and leaves buildable land with no rubble.
 - Attack timing [I]: a newly acquired target's first hit is due one full interval after acquisition (half for towers with Overwatch, section 10); later hits every interval. Losing or changing target resets the timer. No stored attacks or catch-up after pause.
@@ -123,22 +126,24 @@ Current values [P], from `Data/ReleaseDefinitions.asset`.
 
 Current values [P].
 
+`release-rules-3` (the game) at real scale (a tile is about 8 m): people walk or march, so speeds are about a third of `release-rules-2` and HP is ×1.5, except Brute 180 and Raider Archer 45 (plan 015). HP and speed below are `release-rules-3`; the `release-rules-2` values follow in brackets.
+
 | Kind | HP | Speed tiles/s | Damage / interval | Wall × | Role |
 |---|---:|---:|---|---:|---|
-| Grunt | 30 | 1.0 | 10 / 1.0 s | 1 | Baseline melee |
-| Runner | 20 | 1.75 | 6 / 0.75 s | 1 | Fast |
-| Brute | 150 | 0.6 | 20 / 1.5 s | 2 | Heavy |
-| Raider Archer | 35 | 0.9 | 6 / 1.5 s, range 3.5 | 1 | Ranged |
-| Bomber | 40 | 1.0 | Blast 60, splash 20, fuse 1.5 s | 2 | Breacher |
-| Siege Golem (boss) | 800 | 0.4 | 40 / 2.0 s | 2 | Boss on Nights 6, 9, 11 |
-| Siege Commander (boss) | 1000 | 0.4 | 30 / 2.0 s | 2 | Final boss, Night 12; aura |
+| Grunt | 45 (30) | 0.3 (1.0) | 10 / 1.0 s | 1 | Baseline melee |
+| Runner | 30 (20) | 0.6 (1.75) | 6 / 0.75 s | 1 | Fast |
+| Brute | 180 (150) | 0.2 (0.6) | 20 / 1.5 s | 2 | Heavy |
+| Raider Archer | 45 (35) | 0.25 (0.9) | 6 / 1.5 s, range 3.5 | 1 | Ranged |
+| Bomber | 60 (40) | 0.3 (1.0) | Blast 60, splash 20, fuse 1.5 s | 2 | Breacher |
+| Siege Golem (boss) | 1200 (800) | 0.15 (0.4) | 40 / 2.0 s | 2 | Boss on Nights 6, 9, 11 |
+| Siege Commander (boss) | 1500 (1000) | 0.15 (0.4) | 30 / 2.0 s | 2 | Final boss, Night 12; aura |
 
 - Wall × multiplies damage against Walls only. It never overrides route choice: heavy enemies still take any open route.
 - No armour, resistances or flying. No melee splash.
 
 **Raider Archer.** Walks its normal route and only ever stops on a cell centre of it; it never paths to firing positions [I]. At each fresh cell-centre decision it looks for a target: living solid buildings (Keep included, traps excluded) with a footprint cell centre within 3.5 tiles, no line of sight needed [I]. Priority [I]: (1) House, Farm; (2) Watchtower, Repair Station; (3) Archer Tower, Cannon; (4) Wall; (5) Keep; then nearest footprint-cell centre; then lowest building ID. Found → stops and targets it. Sticky while the target is alive and in range; then reacquires at its next decision (fresh full interval) or resumes its route. Ranged hits are not melee: no reflection, no Barbed Defenses.
 
-**Bomber** [I]. Walks like a melee unit. At its attack cell it acquires its target (breach blocker or Keep) and lights its fuse; it never moves or retargets again and never makes ordinary attacks. On detonation (enemy phase): the primary blast hits its target if still alive (×2 against a Wall), then splash hits every other living building with HP that has a cell within Chebyshev distance 1 of the Bomber's cell, in ascending ID. The Bomber then dies without counting as defeated. Killing it before the detonation resolves (traps, shots or burn in the same step included) cancels the blast. Blasts are not hits: no reflection, no Commander aura.
+**Bomber** [I]. Walks like a melee unit. At its attack cell it acquires its target (breach blocker or Keep) and lights its fuse. Under `release-rules-3` it lights earlier: at any cell centre (fresh step) with a living solid building on a cardinal neighbour, targeting the Keep first, then a Wall, then the lowest ID. Either way, once lit it never moves or retargets again and never makes ordinary attacks. On detonation (enemy phase): the primary blast hits its target if still alive (×2 against a Wall), then splash hits every other living building with HP that has a cell within Chebyshev distance 1 of the Bomber's cell, in ascending ID. The Bomber then dies without counting as defeated. Killing it before the detonation resolves (traps, shots or burn in the same step included) cancels the blast. Blasts are not hits: no reflection, no Commander aura.
 
 **Siege Commander aura** [I]. When another living non-boss enemy makes a melee or ranged hit, its damage is +50% [P] (floored) if a living Siege Commander is within 2.5 tiles [P] of the attacker at that step. Several Commanders still give +50% once. No stored aura state; a Commander killed earlier in the same step gives no aura.
 
@@ -227,7 +232,8 @@ Common rules [I] for every profile: the boundary ring and the four entries stay 
 - **Contents**: schema version, rules version, campaign ID, content version, map profile, difficulty (`standard`), seed, terrain, map attempt and fallback flag, all night plans, checkpoint night, gold, last paid day, run status, buildings (ID, kind, anchor, orientation, HP, price), next IDs, perks, reward stream state, pending offer, offer history, run and final statistics. The map symmetry is not stored; it is derived from the seed. Stable definition IDs, never Unity references [I].
 - **Schemas** [I]: release runs write schema 2. Schema 1 is the MVP profile. A save of a profile or content version the build does not know is refused with an actionable message and left untouched (content-1 release saves are refused, not rescaled). An unknown schema reports "made by a newer version".
 - **Writes** [I]: temp file, flush, atomic replace keeping the previous file as `.bak`. A failed write keeps the run available, blocks progress with a Retry, and never shows a success indicator first. A damaged latest save offers Recover backup; a New Run never overwrites an active or damaged slot (it takes the next slot). Release and MVP builds share the save folder.
-- **Settings** (separate file, version 2): master, music and effects volume, camera sensitivity, camera shake, window mode, resolution. **Onboarding profile** (separate file): which guide steps are done or skipped.
+- **Hero runs** add two optional fields: the hero's position at Start Night (only in that checkpoint) and the hero-kill count in the statistics.
+- **Settings** (separate file, version 3): master, music and effects volume, camera sensitivity, camera shake, window mode, resolution, and the hero camera settings of section 17. **Onboarding profile** (separate file): which guide steps are done or skipped.
 
 ## 13. Controls and presentation
 
@@ -243,11 +249,12 @@ Common rules [I] for every profile: the boundary ring and the four entries stay 
 | F or speed buttons | Night speed 1× / 2× / 3× |
 | Selection panel | Sell, Repair (exact quote), Rotate (Day only) |
 
-- Camera: fixed-orientation orthographic isometric view (yaw 45°, pitch 40°), pan and zoom, no rotation, Reset Camera.
+- Camera: fixed-orientation orthographic isometric view (yaw 45°, pitch 40°), pan and zoom, no rotation, Reset Camera. Default view: centred on the Keep, half-height 5.5 tiles (zoom 2.5–14), close enough for true-scale figures; zoom out for the whole board. The hero view and its controls are in section 17.
 - UI clicks never reach the world [I]. Ghosts show footprint, price and the rejection reason; tooltips stay inside the screen.
 - Shown at all times: gold, income forecast, Keep HP (with a hit signal even when the Keep is off screen), night number, the next attack. Selection shows effective values from the simulation (damage, interval, range, income), not base definitions.
-- Board readability: entry gates in the world with direction, route chevrons, new-side warnings, BREACH label, range rings, Watchtower and Repair Station reach previews.
-- Combat feedback: lethal and non-lethal shots stay visible at the right place even after the target is removed; distinct cues for hits, Keep hits and destruction; bounded effects cleared on retry and load. One presentation clock: arrows, gait, hit reactions and burn freeze while paused or in the menu.
+- Surroundings (presentation only): outside the board, open ground fades into an edge mist (from about 2.5 tiles beyond the board, opaque by 5), in both views; nothing stands there, so the field can grow later. A road leaves each side midpoint; there are no gate structures: tonight's entries are marked by a coral pad on the entry cell and a torch on the road mouth lit at Night. Enemies are drawn walking out of the mist along their road before they spawn, timed from the simulation tick to reach the entry cell at their spawn tick (a spawn at the start of the night appears at its entry); until then they have no HP bar, cannot be inspected and cannot be shot, because the simulation does not have them yet.
+- Board readability: entry markers in the world with direction, route chevrons, new-side warnings, BREACH label, range rings, Watchtower and Repair Station reach previews.
+- Combat feedback: lethal and non-lethal shots stay visible at the right place even after the target is removed; distinct cues for hits, Keep hits and destruction; buildings never bounce or squash when hit or when they fire, and camera shake on Keep hits is off by default (a setting); bounded effects cleared on retry and load. One presentation clock: arrows, gait, hit reactions and burn freeze while paused or in the menu.
 - Day/Night lighting blends; enemies stay readable throughout. Audio is synthesized; volumes in settings; threats never depend on audio alone. Text must stay legible at 1280×720 and 1920×1080.
 - Title menu: New Run (optional seed, map profile), Continue, Recover backup, Settings, Help, Credits, Quit, version and build ID. Quit with unsaved Day changes offers Save and exit, Exit without changes, Cancel.
 - First-run guide: five skippable steps that advance only when the action happens (build a Tower, inspect its range, optional income, Start Night, choose a reward).
@@ -257,6 +264,7 @@ Common rules [I] for every profile: the boundary ring and the four entries stay 
 - Reference machine: AMD Ryzen 5 3600, GeForce GTX 1660 SUPER, 32 GiB RAM. Measure a Windows x64 non-development build at 1920×1080, VSync off, no frame cap. Editor numbers are diagnostic only.
 - Stress fixture: 100 enemies kept alive across the four entries with a fixed defensive layout, Keep and Walls invulnerable, a scripted Wall removal mid-capture to exercise route invalidation, clearly labelled as debug.
 - Gate: after 10 s warm-up, 60 s of frame times: median ≤ 16.7 ms, p95 ≤ 20 ms, p99 ≤ 33.3 ms (percentile = sorted sample at index `ceil(p × count) − 1`). Re-measure after content or rendering changes.
+- Hero view: the same fixture through the hero camera (`-hero-camera`) must stay within 1.5× of the strategic view measured in the same session, paired and alternating.
 
 ## 15. Six-night MVP profile (`mvp-rules-1`)
 
@@ -277,5 +285,51 @@ Changes to [P] values after recorded scripted policy runs (real budget, seeds 1-
 | 2026-10-16 | Nights 7-12 raised to the current table; Nights 4-6 kept | A sealed Keep with four Towers and two Cannons won every seed after 10-13 purchases; a steeper mid-game made every approach collapse on Nights 6-7 |
 | 2026-10-16 | Raider Archer range 3.0 → 3.5 | At 3.0 an Archer always stopped inside a Tower's range; 4.5 collapsed every approach on Night 5 |
 | 2026-10-16 | Content version 2: every building about 30% cheaper and about 20% weaker (values in section 7) | Players found it boring to build so little; runs now buy 14-42 buildings instead of 11-28 |
+| 2026-10-19 | Hero at true scale: speed 3.0 → 1.5 tiles/s, reach 1.0 → 0.6, enemy engage/hold 1.0/1.5 → 0.6/0.9 | Owner feedback: buildings looked small next to the hero and the hero was too fast; the figures were shrunk to true scale and the distances followed |
+| 2026-10-19 | Hero swing reach 1.2 → 1.0 tile | Owner feedback: with the smaller hero-view figures a 1.2-tile swing looked like hitting enemies out of reach |
+| 2026-10-20 | `release-rules-3`: a Bomber lights its fuse at the first solid building beside its path, not only at its attack cell | At walking speed almost no Bomber reached its attack cell (active hero, 24 runs: 5 fuses, 3 blasts). Now 46 fuses, 31 blasts; wins kill-zone 8/8, corridor 5/8, economy 8/8 (was 7/8, 5/8, 8/8). Still about 3% of Bombers detonate, so the role stays weak |
+| 2026-10-20 | `release-rules-3` review: Brute HP 225 → 180, Raider Archer 53 → 45, hero 0.6 → 0.8 tiles/s | Four-way review: a Brute outlasted the hero one-on-one (15 s vs 16.5 s), Brutes and Archers caused nearly all Keep damage so under-built defences failed in one night, and at 0.6 the hero could not catch a Runner nor reach a lane in time |
+| 2026-10-20 | `release-rules-3`: enemy speeds to about a third (Grunt/Bomber 0.3, Runner 0.6, Brute 0.2, Archer 0.25, bosses 0.15), enemy HP ×1.5, hero 0.6 tiles/s | Owner: at real scale (1 tile ≈ 8 m) people sprinted at 8–14 m/s; enemies should walk. Scripted approaches (active hero, seeds 1–8, own orientation): HP ×2.5 won 2/0/0 of 8 (slow enemies bunch at the walls); ×1.5 wins kill-zone 8/8, corridor 4/8, economy 7/8 (release-rules-2: 8/8 each); a hero alone still falls by Night 2 |
+| 2026-10-19 | Hero swing 15 damage / 0.6 s → 10 / 0.75 s | With the starting values a hero without buildings survived to Night 5 on two Crossing seeds; the owner chose these values and to judge the hero's share of kills by its Nights 6-12 average |
 
-Last recorded result: kill-zone 6/8, corridor 7/8, economy 8/8 wins on their profiles' own orientation. Economy-first is now the most forgiving approach, and the game is likely easier than before content version 2.
+Last recorded result (`release-rules-3`, plan 015, active hero, seeds 1–8 on their own orientations): kill-zone 7/8, corridor 5/8, economy 8/8; a hero alone falls by Night 3 on every seed. Log: `plans/evidence/015/hero-policy-runs-r3.txt`.
+
+## 17. Hero (`release-rules-2` and later)
+
+Every new release run has one player-controlled hero (merged from the hero feature spec, archived as `archive/006-third-person-hero.md`). `release-rules-1` is the same game without the hero, kept only so older saves continue.
+
+**State** [P values]: 200 HP; moves 0.8 tiles/s (48 units/step; 1.5 tiles/s, 90 units in `release-rules-2`); body radius 0.3 tile; position in integer 1/1200-tile units [I], not cell-bound.
+
+- **Command** [I]: one per step: move heading (16 directions or none), attack flag, facing (64 directions), or "not controlled". The simulation reads nothing else from input; the same command stream reproduces the same night. Movement and the swing arc use fixed integer direction tables.
+- **Spawn cell** [I]: the walkable cell without a solid building nearest the Keep by Manhattan distance; ties by direction from the Keep (dominant axis: N, E, S, W), then `(z, x)`. Recomputed from the current grid whenever used.
+- **Collision** [I]: the body never overlaps a solid building, non-walkable terrain or the board edge; movement resolves X then Z, sliding along obstacles, and cannot pass a diagonal gap between two blocked cells. The hero never occupies cells, never blocks or changes routes, never triggers Spike Traps; enemies and the hero pass through each other.
+- **Day**: the hero walks on its own fixed-step Day clock; nothing else advances. A building placed over the hero's body is placed anyway and the hero moves to the spawn-rule cell nearest its own cell [I]. The position at Start Night is stored in that checkpoint, so Continue replays the night from it; Save and Quit during Day returns the hero to the spawn cell.
+- **Swing** [P: 10 damage, every 0.75 s = 15 steps, reach 0.6 tile, arc 120°; I: geometry]: hits on the step it starts, every living enemy in the arc, ascending ID. Hero hits are direct damage but no tower perk applies. Kills count as defeated plus a separate hero-kill count (run and night).
+- **Guard** [I]: not controlled (strategic view), the hero holds position and swings at the nearest enemy in reach (ties lowest ID). It never walks on its own.
+- **Engagement** [I]: enemies decide only at cell-centre decision points. Grunt, Runner and Brute stop for a hero within 0.6 tile [P] where they would otherwise move on (never at their route end, never while attacking a building) and keep it within 0.9 [P]. Raider Archers treat the hero as a class-0 target (with House and Farm, nearest first); an archer the hero hits is provoked and takes the hero over any building at its next decision while the hero is alive and within its range; provocation ends when the hero dies, respawns or leaves range. Bombers and bosses ignore the hero. Hits on the hero: normal damage, Commander aura applies, no Wall multiplier or reflection. A melee hit lands only while the hero is within its own swing reach (0.6); beyond it the due hit waits, so stepping back is a real move.
+- **Death** [I]: at 0 HP the hero is down (no commands, no swings, nobody's target) and respawns at the spawn cell with full HP after 10 s [P] of simulation time. Hero death never causes Defeat. On every Day entry the hero is restored to full HP at the spawn cell.
+- **Step order** [I]: hero movement (with a due respawn) right after enemy movement; hero swing right after building attacks; hits on the hero in the enemy-action phase; hero death resolved after dead-enemy cleanup; Defeat check last as before.
+
+**Views and controls.**
+
+| Input | Strategic view | Hero view |
+|---|---|---|
+| Tab | Switch to the hero view (Day or Night, outside menus) | Switch to the strategic view |
+| W A S D | Pan | Move, relative to the camera |
+| Mouse | Hover, select, place | Look (cursor captured); left button swings |
+| 1-8 | Arm a build card | Switch to the strategic view with that card armed (never places by itself) |
+| F / speed buttons | 1× / 2× / 3× | Locked to 1× (2× and 3× dimmed) |
+| Space | Pause / resume at Night | Jump (presentation only: never affects the simulation) |
+| P | Pause / resume at Night | Pause / resume at Night |
+| Enter | Start Night (Day) | Start Night (Day), staying in the hero view |
+| H | Centre the camera on the hero | — |
+| Esc | Cancel tool, else clear selection | Free the cursor and open the menu |
+
+- Switching views is presentation only [I]: it never changes the simulation, RNG, gold or pause; entering the hero view sets 1× without resuming a pause, and leaving it restores the previous speed. A click is remembered for 0.25 s, so a quick tap between steps or late in the cooldown still swings. New, loaded and restarted runs start in the strategic view. Optional setting: enter the hero view when a night starts (off by default).
+- Figures (hero and enemies) are drawn at true scale in both views (owner decision 2026-10-19): a person about 0.22 tile tall, so a tile is about 8 m. Every model is built at real size on that scale (plan 014): the Keep is the tallest building (about 19 m), the Archer Tower about 12 m, the Watchtower about 16 m, the palisade about 4.5 m, trees 11–13 m. The views may differ in detail (the hero view adds grass, sky and haze) but never in proportions. The hero's cyan ring keeps its readable size. Presentation only. Entry tags show only as edge arrows in the hero view.
+- Hero camera: entering eases in from the strategic framing; an obstacle behind the hero first pulls the camera in, then lifts it smoothly by at most 15°; perspective orbit close behind the hero with a shoulder offset; pitch −10°…60° (by default mouse forward looks up, as for aiming; Invert look makes it look down), an aiming crosshair at the screen centre while the hero is alive and the cursor is captured, distance 0.5–2.2 (wheel, default 1.0), field of view 50–90° (default 60). It rises over the shoulder, then pulls in, rather than entering buildings, forest or rock (a read-only grid query by approximate height).
+- Responsiveness: while steering, the shown hero is the last step plus the fraction of the next step the current command makes, so input moves it in the first frame; the next real step replaces the prediction.
+- Swing presentation: the body faces where it is steered and turns to the aim (camera direction) to swing; a faint arc in front of the hero shows the reach while steering; the swing twists the body (front-loaded), a pale arc shows the reach and angle where the swing was resolved, and each struck enemy flinches with sparks and a sound at the blade's contact (`HeroHit` event, 0.08 s after the swing). The shown hero glides at most 2.4 tiles/s toward its predicted position, so key presses never jolt the view.
+- Night recap and run summary show the hero's share of kills.
+- Hero view presentation: gradient sky dome blended with day/night beyond the strategic camera's far clip, the ground fading into the same mist toward the horizon, fog only while the hero view renders; health bars face the rendering camera; screen markers project with it and never point behind it; route lines and build cards are hidden (they return with the strategic view); a coral edge tag points to the Keep when it is hit off screen. The strategic view shows the hero with a cyan ground ring. HUD: hero HP, respawn countdown, view hints.
+- Settings (version 3; older files migrate with defaults): hero look sensitivity, invert look, field of view, default hero camera distance, hero view at night start.

@@ -13,7 +13,8 @@ namespace TheLastFortress
     {
         GameObject menuOverlay, settingsPanel, saveFailedPanel, helpPanel, creditsPanel, guidePanel, announcePanel, golemBanner;
         Text menuStatus, menuContinueLabel, seedText, saveFailedText, settingsSensitivity, settingsShake, settingsWindow, settingsResolution, settingsStatus,
-            settingsMaster, settingsMusic, settingsSfx, menuTitle, menuPromise, guideHeader, guideBody, announceText, golemTitle, golemBody;
+            settingsMaster, settingsMusic, settingsSfx, menuTitle, menuPromise, guideHeader, guideBody, announceText, golemTitle, golemBody,
+            settingsLook, settingsInvert, settingsFov, settingsHeroNight;
         InputField seedInput;
         GameSettings editing;
         Resolution[] resolutions;
@@ -198,8 +199,9 @@ namespace TheLastFortress
             hideLabel.fontSize = skipLabel.fontSize = 18;
             guidePanel.SetActive(false);
 
+            if (game.IsRelease) BuildHeroPanel(root);
             gameplayLayer = BuildGameplayLayer(root, "EntryMarkers", "Resources", "Status", "BossBar", "Menu", "BuildCards", "Actions", "Speed", "Selection", "Hint",
-                "Tooltip", "BreachLabel", "StressBanner", "Diagnostic", "Announcement", "GolemBanner", "TerminalOverlay", "RewardOverlay", "Guide");
+                "Tooltip", "BreachLabel", "StressBanner", "Diagnostic", "Announcement", "GolemBanner", "HeroPanel", "KeepDirection", "TerminalOverlay", "RewardOverlay", "Guide");
 
             // Guard dialog (Restart/Quit): blocks the world and every panel underneath until a choice is made.
             confirmPanel = FullScreen(root, "Confirm", 0.65f);
@@ -296,7 +298,8 @@ namespace TheLastFortress
         void BuildSettings(RectTransform root)
         {
             settingsPanel = FullScreen(root, "Settings", 0.4f);
-            var sp = Panel(settingsPanel.transform, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820, 780));
+            var hero = game.IsRelease;
+            var sp = Panel(settingsPanel.transform, "Panel", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820, hero ? 1010 : 780));
             Opaque(sp);
             sp.pivot = new Vector2(0.5f, 0.5f);
             Label(sp, "Title", 44, TextAnchor.UpperCenter, new Vector2(0, -24), new Vector2(780, 56), Palette.Amber, true).text = "SETTINGS";
@@ -307,11 +310,21 @@ namespace TheLastFortress
             settingsMaster = SettingRow(sp, -385, "Master volume", () => StepVolume(0, -0.1f), () => StepVolume(0, 0.1f));
             settingsMusic = SettingRow(sp, -450, "Music volume", () => StepVolume(1, -0.1f), () => StepVolume(1, 0.1f));
             settingsSfx = SettingRow(sp, -515, "Effects volume", () => StepVolume(2, -0.1f), () => StepVolume(2, 0.1f));
-            Label(sp, "AudioNote", 18, TextAnchor.UpperCenter, new Vector2(0, -575), new Vector2(760, 30), Palette.HudText.WithAlpha(0.6f), true).text =
+            if (hero)
+            {
+                // Hero view camera (plan 012, settings version 3).
+                settingsLook = SettingRow(sp, -595, "Hero look sensitivity", () => StepLook(-0.25f), () => StepLook(0.25f));
+                settingsInvert = SettingRow(sp, -660, "Invert look up/down", ToggleInvert, ToggleInvert);
+                settingsFov = SettingRow(sp, -725, "Hero field of view", () => StepFov(-5f), () => StepFov(5f));
+                settingsHeroNight = SettingRow(sp, -790, "Hero view when night starts", ToggleHeroNight, ToggleHeroNight);
+            }
+
+            var noteY = hero ? -805f : -575f;
+            Label(sp, "AudioNote", 18, TextAnchor.UpperCenter, new Vector2(0, noteY - 50), new Vector2(760, 30), Palette.HudText.WithAlpha(0.6f), true).text =
                 "Changes preview immediately. Save settings keeps them; Back discards them.";
             MakeButton(sp, "Save settings", new Vector2(0.5f, 0), new Vector2(-160, 30), new Vector2(280, 60), SaveSettings, out _);
             MakeButton(sp, "Back", new Vector2(0.5f, 0), new Vector2(160, 30), new Vector2(280, 60), CloseSettings, out _);
-            settingsStatus = Label(sp, "Status", 19, TextAnchor.UpperCenter, new Vector2(0, -612), new Vector2(760, 50), Palette.WarningCoral, true);
+            settingsStatus = Label(sp, "Status", 19, TextAnchor.UpperCenter, new Vector2(0, noteY - 87), new Vector2(760, 50), Palette.WarningCoral, true);
             settingsPanel.SetActive(false);
         }
 
@@ -336,9 +349,10 @@ namespace TheLastFortress
                 "Right click or Esc  cancel the building tool or selection\n" +
                 "Hold right mouse button and drag  move around the map\n" +
                 "R  rotate the ghost or the selected building (Walls connect automatically)\n" +
-                "WASD / arrow keys  pan · mouse wheel  zoom · Reset Camera  back to the whole board\n" +
+                "WASD / arrow keys  pan · mouse wheel  zoom · Reset Camera  back to the Keep · Z  the whole board\n" +
                 "Space or PAUSE  pause and resume the night (inspection still works)\n" +
                 "F or II / 1× / 2× / 3×  night speed (picking a speed also resumes)\n" +
+                (game.IsRelease ? "Tab  hero view: WASD move · mouse look · click swing · Space jump · P pause · Enter start night · H find hero\n" : "") +
                 "Menu  save and quit by day, settings, credits";
             showGuideButton = MakeButton(hp, "Show guide", new Vector2(0.5f, 0), new Vector2(-160, 30), new Vector2(280, 60), () =>
             {
@@ -361,7 +375,7 @@ namespace TheLastFortress
                 "Music and sound: synthesized for this project by its own script (Audio/Source~/synth.py); no recordings, " +
                 "sample libraries or third-party sounds are used.\n\n" +
                 "Icons: project line icons (design/icons) and new drawings in the same style.\n\n" +
-                "Font: the runtime font shipped with the Unity Engine (LegacyRuntime.ttf).\n\n" +
+                "Fonts: the runtime font shipped with the Unity Engine (LegacyRuntime.ttf); headings use a serif already installed with Windows (Palatino Linotype, Book Antiqua or Georgia), never shipped with the game.\n\n" +
                 "Made with Unity " + Application.unityVersion + ", Universal Render Pipeline and Input System, under the Unity Engine licence.\n\n" +
                 VersionText;
             MakeButton(cp, "Close", new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(280, 60), () => creditsPanel.SetActive(false), out _);
@@ -465,6 +479,11 @@ namespace TheLastFortress
             settingsPanel.SetActive(false);
         }
 
+        void StepLook(float delta) => editing.lookSensitivity = Mathf.Clamp(Mathf.Round((editing.lookSensitivity + delta) * 4f) / 4f, 0.25f, 3f);
+        void ToggleInvert() => editing.invertLook = !editing.invertLook;
+        void StepFov(float delta) => editing.fieldOfView = Mathf.Clamp(editing.fieldOfView + delta, 50f, 90f);
+        void ToggleHeroNight() => editing.heroViewAtNight = !editing.heroViewAtNight;
+
         void StepSensitivity(float delta) => editing.cameraSensitivity = Mathf.Clamp(Mathf.Round((editing.cameraSensitivity + delta) * 4f) / 4f, 0.25f, 3f);
         void ToggleShake() => editing.cameraShake = !editing.cameraShake;
         void ToggleWindow() => editing.fullscreen = !editing.fullscreen;
@@ -502,7 +521,8 @@ namespace TheLastFortress
         {
             var keep = r.KeepDamage > 0 ? $"Keep -{r.KeepDamage} HP" : "Keep unharmed";
             var lost = r.BuildingsLost == 0 ? "no buildings lost" : r.BuildingsLost == 1 ? "1 building lost" : $"{r.BuildingsLost} buildings lost";
-            return $"{r.EnemiesDefeated} enemies defeated · {keep} · {lost}";
+            var hero = r.HeroKills > 0 ? $" (hero {r.HeroKills})" : "";
+            return $"{r.EnemiesDefeated} {(r.EnemiesDefeated == 1 ? "enemy" : "enemies")} defeated{hero} · {keep} · {lost}";
         }
 
         static string SummaryText(RunSimulation sim)
@@ -511,9 +531,10 @@ namespace TheLastFortress
             var current = sim.ActiveSynergies().Count;
             var head = sim.State == RunState.Victory
                 ? $"All {sim.TotalNights} nights survived. Keep {sim.Keep.Hp} / {sim.Keep.MaxHp} HP."
-                : $"The Keep fell on Night {sim.NightNumber} of {sim.TotalNights} after {sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture)} s; {sim.AliveEnemyCount} enemies were attacking.";
+                : $"The Keep fell on Night {sim.NightNumber} of {sim.TotalNights} after {sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture)} s; {sim.AliveEnemyCount} {(sim.AliveEnemyCount == 1 ? "enemy was" : "enemies were")} attacking.";
             var tonight = sim.State == RunState.Defeat && sim.LastNight != null ? "\nThis night: " + RecapLine(sim.LastNight) : "";
-            return $"{head}{tonight}\n\nRun: nights cleared {s.NightsCleared} / {sim.TotalNights}\nEnemies defeated {s.EnemiesDefeated}\nBuildings purchased {s.BuildingsPurchased}\n" +
+            var heroKills = sim.HasHero ? $" (hero {s.HeroKills})" : "";
+            return $"{head}{tonight}\n\nRun: nights cleared {s.NightsCleared} / {sim.TotalNights}\nEnemies defeated {s.EnemiesDefeated}{heroKills}\nBuildings purchased {s.BuildingsPurchased}\n" +
                    $"Gold earned {s.GoldEarned} (starting 250 excluded)\nBuilding links active {current} · formed this run {s.SynergiesEver.Count}\nSeed {sim.Seed.ToString(CultureInfo.InvariantCulture)}";
         }
 
@@ -640,7 +661,7 @@ namespace TheLastFortress
         {
             var show = sim.IsCampaign && !game.MenuOpen && (sim.State == RunState.Day || sim.State == RunState.Night);
             var wave = sim.Wave;
-            var cam = game.CameraRig.Camera;
+            var cam = game.ActiveCamera;
             var size = canvasRect.rect.size;
             for (var i = 0; i < entryMarkers.Length; i++)
             {
@@ -653,21 +674,30 @@ namespace TheLastFortress
                     if (s.EntryIndex == i) count++;
                 var isNew = sim.State == RunState.Day && IsNewEntry(sim, cell);
 
-                // Project the entry's gate and set the marker beside it, on the side away from the screen centre: the routes
-                // run toward the Keep in the middle, so neither the gate nor the route's first cells are covered. The marker
-                // stays inside the free play area (below the top panels, above the cards); an arrow means the gate is hidden.
+                // Project the entry's road mouth and set the tag beside it, on the side away from the screen centre: the routes
+                // run toward the Keep in the middle, so neither the entry nor the route's first cells are covered. The tag
+                // stays inside the free play area (below the top panels, above the cards); an arrow means the entry is off screen.
                 var label0 = $"{(isNew ? "NEW " : "")}{WaveText.EntryName(cell).ToUpperInvariant()} {count}";
                 var halfWidth = ((label0.Length + 2) * 12f + 26f) / 2f;
-                var sp = cam.WorldToScreenPoint(RouteOverlay.GateCenter(cell));
+                var sp = cam.WorldToScreenPoint(RouteOverlay.RoadMouth(cell));
                 var g = ScreenToCanvas(new Vector2(sp.x, sp.y));
                 if (sp.z < 0) g = size - g;
                 var p = new Vector2(g.x + (g.x < size.x * 0.5f ? -1f : 1f) * (halfWidth + 34f), g.y);
                 var minX = halfWidth + 16f;
-                const float minY = 170f;
+                var minY = game.HeroViewActive ? 300f : 170f; // the hero view keeps tags above the speed and night buttons
                 var topReserve = Mathf.Max(260f, topPanelsBottom + 30f); // stay clear of status, boss bar, announcement, banner and guide
                 var clamped = new Vector2(Mathf.Clamp(p.x, minX, size.x - minX), Mathf.Clamp(p.y, minY, size.y - topReserve));
+                // Low on screen the corners hold the Hero panel (left) and the speed and night buttons (right): keep tags between.
+                if (clamped.y < 330f) clamped.x = Mathf.Clamp(clamped.x, 400f + halfWidth, size.x - 340f - halfWidth);
                 var hidden = g.x < 0f || g.x > size.x || g.y < minY || g.y > size.y - topReserve + 22f;
                 var arrow = !hidden ? "" : g.x < 0f ? "< " : g.x > size.x ? "> " : g.y >= minY ? "^ " : "v ";
+                // The hero view shows a tag only as an edge arrow: on screen it would cover the hero and the fight.
+                if (game.HeroViewActive && !hidden)
+                {
+                    if (entryMarkers[i].activeSelf) entryMarkers[i].SetActive(false);
+                    continue;
+                }
+
                 var label = arrow + label0;
                 Set(entryMarkerTexts[i], label);
                 var rt = (RectTransform)entryMarkers[i].transform;
@@ -762,6 +792,7 @@ namespace TheLastFortress
             RefreshAnnouncements(sim);
             LayoutTop();
             RefreshEntryMarkers(sim);
+            RefreshHero(sim);
             RefreshConfirm();
 
             var persistence = game.Persistence;
@@ -840,6 +871,13 @@ namespace TheLastFortress
                 Set(settingsMaster, Percent(editing.masterVolume));
                 Set(settingsMusic, Percent(editing.musicVolume));
                 Set(settingsSfx, Percent(editing.sfxVolume));
+                if (settingsLook != null)
+                {
+                    Set(settingsLook, editing.lookSensitivity.ToString("0.00", CultureInfo.InvariantCulture) + "x");
+                    Set(settingsInvert, editing.invertLook ? "On" : "Off");
+                    Set(settingsFov, editing.fieldOfView.ToString("0", CultureInfo.InvariantCulture) + "°");
+                    Set(settingsHeroNight, editing.heroViewAtNight ? "On" : "Off");
+                }
             }
         }
 

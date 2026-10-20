@@ -93,11 +93,14 @@ namespace TheLastFortress
             return false;
         }
 
-        /// <summary>Captures and commits the current Day. Returns false (and keeps it pending) when the write fails.</summary>
-        public bool CommitDay(RunSimulation sim)
+        /// <summary>
+        /// Captures and commits the current Day. Returns false (and keeps it pending) when the write fails. The commit made
+        /// at Start Night passes <paramref name="nightStart"/>, which also stores the hero's position for a replayed night.
+        /// </summary>
+        public bool CommitDay(RunSimulation sim, bool nightStart = false)
         {
             if (!HasRun || sim.State != RunState.Day) return false;
-            var cp = CheckpointCodec.Capture(sim);
+            var cp = CheckpointCodec.Capture(sim, nightStart);
             // A replayed night keeps its frozen offer attached until that night is cleared again.
             if (LastDay != null && LastDay.hasPendingOffer && LastDay.checkpointNight == cp.checkpointNight)
             {

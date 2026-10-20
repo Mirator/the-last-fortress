@@ -16,10 +16,18 @@ namespace TheLastFortress
         public Material bank;
         public Material river;
         public Material ford;
-        public Material beach;
         public Material cliff;
-        public Material sea;
         public Material bridge;
+
+        [Header("Terrain (plan 013, mainland since plan 016; when both are set they replace the plateau and planes)")]
+        [Tooltip("TheLastFortress/Ground: the blended terrain ground (grass, soil, sand, rock by vertex weights).")]
+        public Material groundBlend;
+
+        [Tooltip("TheLastFortress/Water for rivers, ponds and ford films.")]
+        public Material riverWater;
+
+        [Tooltip("TheLastFortress/Grass: instanced clumps around the hero camera (hero view only).")]
+        public Material grass;
 
         [Tooltip("Board ground texture repeats across the 20 x 20 board.")]
         public float groundTiling = 3f;
@@ -36,12 +44,6 @@ namespace TheLastFortress
         public GameObject tuft;
 
         public GameObject fordStone;
-
-        [Tooltip("Enemy entry gate (its Banner part pulses for a new side); stands on the beach, never on a legal cell.")]
-        public GameObject gate;
-
-        [Tooltip("Distant shores placed in the sea beyond the frame corners.")]
-        public GameObject[] farIslands;
 
         [Header("Post-processing (global volumes blended by the night amount)")]
         public VolumeProfile dayProfile;
@@ -71,8 +73,5 @@ namespace TheLastFortress
 
         [Tooltip("Emission of window materials (by name ArtWindow) by day and at full night, multiplied by the torch colour.")]
         public float windowDay = 0.15f, windowNight = 2.4f;
-
-        public Color seaColorDay = new Color(0.25f, 0.4f, 0.47f);
-        public Color seaColorNight = new Color(0.06f, 0.09f, 0.16f);
     }
 }

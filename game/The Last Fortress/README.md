@@ -128,6 +128,12 @@ A third scene, `Assets/TheLastFortress/Scenes/Release.unity`, plays the release 
 | Hover a Cannon/Tower ghost or select one | Range ring from the simulation (perks and the Watchtower bonus included) |
 | Watchtower ghost / selection | Outlines the towers it boosts (+1 range, never stacks) |
 | Repair Station ghost / selection | The square it repairs at dawn |
+| `Tab` (plan 012) | Switch between the strategic view and the third-person hero view (Day or Night). New runs have the hero (`release-rules-2`); older twelve-night saves continue without it |
+| Hero view: WASD, mouse, left button | Move relative to the camera, look (cursor captured), swing. Wheel sets the camera distance |
+| Hero view: `1`–`8` / `Esc` / `F` | Back to the strategic view with that card armed / free the cursor and open the menu / nothing (Night speed is locked to 1× here) |
+| Hero view: `Space` / `P` / `Enter` | Jump (visual only) / pause and resume at Night (P works in both views) / start the night from Day (Enter also works in the strategic view) |
+| `H` (strategic view) | Centre the camera on the hero; the hero has a cyan ground ring in this view |
+| Settings | Hero look sensitivity, invert look, field of view, hero view when night starts (settings file version 3) |
 
 - Saves share the MVP folder. A six-night save **continues in the release build as six nights under its own rules** (release cards are hidden for it); an MVP build reports a twelve-night save as incompatible and never overwrites it. Release runs save checkpoint schema 2.
 - Tuning: `Data/ReleaseDefinitions.asset` (created once by setup; never overwritten). Map profiles, the night table and perks are code (`Runtime/Core/MapProfiles.cs`, `ReleaseCampaign.cs`, `PerkRules.cs`).
@@ -136,5 +142,6 @@ A third scene, `Assets/TheLastFortress/Scenes/Release.unity`, plays the release 
 - Build: `-batchmode -nographics -quit -executeMethod TheLastFortress.Editor.BuildRelease.BuildWindows` → `Builds/Release/TheLastFortress.exe` + `build-report.txt` (validates first, release scene only).
 - Extra command-line options: `-map ravine|crossing|meadow` (New Run map); `-capture <dir> -offscreen` in the release build runs the plan 008 evidence sequence (`<res>-008-capture-log.txt`).
 - G0 diagnostic: `-executeMethod TheLastFortress.Editor.TacticsDiagnostic.Run` → `TestResults/008/tactics-diagnostic.txt`.
+- Hero (plan 012): model from `Art/Source~/models_hero.py` (Blender), imported by **The Last Fortress > Art > Import and Assign Hero** (`-executeMethod TheLastFortress.Editor.ArtSetup.RunHero`). `-capture <dir> -offscreen -capture-set 012` writes the hero-view captures; `-stress -measure <file> -hero-camera` measures the stress fixture through the hero camera. Results: `plans/012-results.md`.
 
 Art and audio for the new kinds are generated blockouts and reused 007 clips; see `plans/008-art-and-audio-bible.md`. Human validation of the release is pending (`plans/008-results.md`).

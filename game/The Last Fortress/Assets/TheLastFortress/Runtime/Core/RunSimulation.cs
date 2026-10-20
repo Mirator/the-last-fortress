@@ -50,6 +50,9 @@ namespace TheLastFortress
         /// <summary>Gold received after the starting budget: daily income plus Recycling refunds (sale refunds excluded).</summary>
         public int GoldEarned;
 
+        /// <summary>Enemies killed by the hero (also counted in <see cref="EnemiesDefeated"/>).</summary>
+        public int HeroKills;
+
         /// <summary>Unique Farm-House / Wall-Trap pairs that were ever active this run.</summary>
         public readonly HashSet<string> SynergiesEver = new HashSet<string>();
     }
@@ -69,6 +72,9 @@ namespace TheLastFortress
 
         /// <summary>Non-Keep buildings destroyed in combat (sales, scripted removal and resets never count).</summary>
         public int BuildingsLost;
+
+        /// <summary>Enemies the hero killed this night (also in <see cref="EnemiesDefeated"/>).</summary>
+        public int HeroKills;
     }
 
     /// <summary>
@@ -93,7 +99,13 @@ namespace TheLastFortress
         readonly List<RewardOffer> offerHistory = new List<RewardOffer>();
         readonly HashSet<int> buffedTowers = new HashSet<int>();
         readonly List<Building> buildingScratch = new List<Building>();
+        readonly HashSet<int> provokedArchers = new HashSet<int>();
         int buffKey = -1;
+        Hero hero;
+
+        /// <summary>Bombers light at the first solid building beside them (<see cref="ReleaseCampaign.BombersLightOnContact"/>).</summary>
+        bool bombersLightOnContact;
+        long heroDayAccumulatorNs;
 
         GridState grid;
         PlacementService placement;
@@ -172,6 +184,14 @@ namespace TheLastFortress
         /// <summary>Fraction of a step accumulated since the last fixed step, for render interpolation.</summary>
         public double InterpolationAlpha => (double)accumulatorNs / StepNanoseconds;
 
+        /// <summary>The player hero (release-rules-2 runs only; null otherwise). Authoritative; views only present it.</summary>
+        public Hero Hero => hero;
+
+        public bool HasHero => hero != null;
+
+        /// <summary>Interpolation fraction for the hero: its own Day clock during Day, the Night clock otherwise.</summary>
+        public double HeroInterpolationAlpha => State == RunState.Day ? (double)heroDayAccumulatorNs / StepNanoseconds : InterpolationAlpha;
+
         public bool HasPerk(string id) => ownedPerks.Contains(id);
 
         /// <summary>Perk IDs this run can be offered: the campaign's pool (MVP: the ten MVP perks).</summary>
@@ -188,7 +208,9 @@ namespace TheLastFortress
             diagnostics.Clear();
             ownedPerks.Clear();
             offerHistory.Clear();
+            provokedArchers.Clear();
             buffKey = -1;
+            heroDayAccumulatorNs = 0;
             CurrentOffer = null;
             PendingOffer = null;
             Planner.ClearCache();
@@ -210,6 +232,9 @@ namespace TheLastFortress
             var keep = new Building(nextBuildingId++, Definitions.Keep, GridState.KeepCell, 0);
             grid.Install(keep);
             buildingsById[keep.Id] = keep;
+            bombersLightOnContact = config.Campaign != null && ReleaseCampaign.BombersLightOnContact(config.Campaign.RulesVersion);
+            hero = config.Campaign != null && config.Campaign.HasHero ? new Hero { MoveUnits = ReleaseCampaign.HeroMoveUnits(config.Campaign.RulesVersion) } : null;
+            ResetHero();
             ResetCount++;
             events.Add(new SimEvent(SimEventType.RunReset, 0));
         }
@@ -235,6 +260,7 @@ namespace TheLastFortress
             Stats.BuildingsPurchased++;
             events.Add(new SimEvent(SimEventType.BuildingPlaced, Tick, building.Id, cell: cell));
             RecordSynergies();
+            StepHeroAside();
             return result;
         }
 
@@ -328,6 +354,7 @@ namespace TheLastFortress
                 grid.Install(b);
                 Register(b);
                 events.Add(new SimEvent(SimEventType.BuildingPlaced, Tick, b.Id, cell: p.Cell));
+                StepHeroAside();
             }
 
             return failures;
@@ -590,14 +617,17 @@ namespace TheLastFortress
         public bool TogglePause() => SetPaused(!Paused);
 
         /// <summary>Consumes real elapsed seconds in whole fixed steps. Returns the number of steps run.</summary>
-        public int Advance(double seconds)
+        public int Advance(double seconds) => Advance(seconds, HeroCommand.None);
+
+        /// <summary>As <see cref="Advance(double)"/>, applying the same hero command to every step it runs.</summary>
+        public int Advance(double seconds, HeroCommand command)
         {
             if (State != RunState.Night || Paused || !(seconds > 0)) return 0;
             accumulatorNs += (long)Math.Round(seconds * 1e9);
             var steps = 0;
             while (accumulatorNs >= StepNanoseconds && State == RunState.Night)
             {
-                Step();
+                Step(command);
                 accumulatorNs -= StepNanoseconds;
                 steps++;
             }
@@ -607,15 +637,21 @@ namespace TheLastFortress
         }
 
         /// <summary>One fixed 0.05 s step. Ignored outside an unpaused Night.</summary>
-        public void Step()
+        public void Step() => Step(HeroCommand.None);
+
+        /// <summary>One fixed step with this step's hero command (specs/003 2.3 step order).</summary>
+        public void Step(HeroCommand command)
         {
             if (State != RunState.Night || Paused) return;
             ReleaseDueSpawns();
             MoveEnemies();
+            HeroMovePhase(command); // 2b
             TowerAttacks();
+            HeroAttackPhase(command); // 3b
             BurnTicks();
             EnemyAttacks();
             RemoveDeadEnemies();
+            HeroDeathPhase(); // 6
             if (Keep.Hp > 0) RefillMaintainedEntries(); // stress keeps 100 active between steps
 
             if (Keep.Hp <= 0) Finish(RunState.Defeat);
@@ -764,8 +800,11 @@ namespace TheLastFortress
             Stats = new RunStats
             {
                 NightsCleared = s.nightsCleared, EnemiesDefeated = s.enemiesDefeated, BuildingsPurchased = s.buildingsPurchased, GoldEarned = s.goldEarned,
+                HeroKills = s.heroKills,
             };
             foreach (var key in s.synergiesEver ?? new string[0]) Stats.SynergiesEver.Add(key);
+            ResetHero(); // the hero is never stored except its Night-start position
+            if (hero != null && cp.heroAtNight && !RestoreHeroPosition(cp.heroX, cp.heroZ)) return "Saved hero position is not walkable.";
             events.Clear();
             events.Add(new SimEvent(SimEventType.RunReset, 0));
             return null;
@@ -824,6 +863,7 @@ namespace TheLastFortress
             }
 
             SetState(RunState.Day);
+            ResetHero();
             DawnRepair();
             PayIncome(day);
             RecordSynergies();
@@ -1044,6 +1084,8 @@ namespace TheLastFortress
             }
 
             if (e.Definition.IsRanged && RangedHold(e, freshStep)) return;
+            if (MeleeHoldsHero(e, freshStep)) return;
+            if (e.Definition.IsBomber && bombersLightOnContact && LightOnContact(e, freshStep)) return;
 
             if (e.RouteIndex >= e.Route.ReachableEndIndex)
             {
@@ -1079,12 +1121,65 @@ namespace TheLastFortress
         }
 
         /// <summary>
+        /// Bomber at a cell centre with a living solid building on a cardinal neighbour (release-rules-3): it stops and lights
+        /// its fuse there (on a fresh step, like any attack). Target: the Keep, then a Wall (the Breacher's ×2), then lowest ID.
+        /// </summary>
+        bool LightOnContact(Enemy e, bool freshStep)
+        {
+            Building best = null;
+            foreach (var d in GridPos.CardinalOrder)
+            {
+                var b = grid.GetOccupant(e.Cell + d);
+                if (b == null || !b.IsAlive || !b.Definition.HasHp) continue;
+                if (best == null || ContactRank(b) < ContactRank(best) || (ContactRank(b) == ContactRank(best) && b.Id < best.Id)) best = b;
+            }
+
+            if (best == null) return false;
+            e.CarryUnits = 0;
+            if (!freshStep) return true; // the fuse is lit on the next simulation step
+            e.TargetBuildingId = best.Id;
+            e.AttackDueTick = Tick + e.AttackTicks;
+            e.FuseLit = true;
+            e.DetonateTick = Tick + e.FuseTicks;
+            events.Add(new SimEvent(SimEventType.FuseLit, Tick, e.Id, best.Id, e.Cell));
+            return true;
+        }
+
+        static int ContactRank(Building b) => b.Kind == BuildingKind.Keep ? 0 : b.Kind == BuildingKind.Wall ? 1 : 2;
+
+        /// <summary>
         /// Raider Archer at a cell centre of its own route (game rules section 8, Raider Archer): keeps a living target in range; otherwise picks
         /// one by class (economy, support, towers, Walls, Keep), then nearest footprint cell, then lowest ID. With a target
         /// it stays on this cell. A new target is taken on a fresh step with a full interval (cooldown reset on retarget).
         /// </summary>
         bool RangedHold(Enemy e, bool freshStep)
         {
+            if (hero != null)
+            {
+                var heroInRange = hero.Alive && HeroRangedDistanceSq(e) <= RangeSq(e);
+                if (provokedArchers.Contains(e.Id) && !heroInRange) provokedArchers.Remove(e.Id);
+                if (e.TargetsHero)
+                {
+                    if (heroInRange)
+                    {
+                        e.CarryUnits = 0; // sticky
+                        return true;
+                    }
+
+                    e.TargetsHero = false;
+                }
+                else if (provokedArchers.Contains(e.Id))
+                {
+                    // Provoked (specs/003 2.4): the hero hit this archer, so it takes the hero over any building.
+                    e.CarryUnits = 0;
+                    if (!freshStep) return true;
+                    e.TargetBuildingId = -1;
+                    e.TargetsHero = true;
+                    e.AttackDueTick = Tick + e.AttackTicks;
+                    return true;
+                }
+            }
+
             if (e.TargetBuildingId >= 0)
             {
                 var current = GetBuilding(e.TargetBuildingId);
@@ -1098,9 +1193,17 @@ namespace TheLastFortress
             }
 
             var target = AcquireRangedTarget(e);
-            if (target == null) return false;
+            var takeHero = HeroIsBetterRangedTarget(e, target);
+            if (target == null && !takeHero) return false;
             e.CarryUnits = 0;
             if (!freshStep) return true; // as for melee: the target is taken on the next simulation step
+            if (takeHero)
+            {
+                e.TargetsHero = true;
+                e.AttackDueTick = Tick + e.AttackTicks;
+                return true;
+            }
+
             e.TargetBuildingId = target.Id;
             e.AttackDueTick = Tick + e.AttackTicks;
             return true;
@@ -1210,6 +1313,12 @@ namespace TheLastFortress
             e.Burning = false;
             Stats.EnemiesDefeated++;
             if (LastNight != null) LastNight.EnemiesDefeated++;
+            if (sourceId == HeroRules.SourceId)
+            {
+                Stats.HeroKills++;
+                if (LastNight != null) LastNight.HeroKills++;
+            }
+
             events.Add(new SimEvent(SimEventType.EnemyKilled, Tick, e.Id, sourceId, e.Cell, e.X, e.Z, e.X, e.Z));
         }
 
@@ -1343,6 +1452,12 @@ namespace TheLastFortress
                     continue;
                 }
 
+                if (e.TargetsHero)
+                {
+                    HitHero(e);
+                    continue;
+                }
+
                 if (e.TargetBuildingId < 0) continue;
                 var target = GetBuilding(e.TargetBuildingId);
                 if (target == null || !target.IsAlive)
@@ -1419,6 +1534,302 @@ namespace TheLastFortress
             }
         }
 
+        // ---------- Hero (specs/003; release-rules-2 runs only) ----------
+
+        /// <summary>
+        /// Moves the hero during Day on its own fixed-step clock (specs/003 2.1): only hero movement advances, nothing is
+        /// fought and no other state changes. Returns the number of steps run.
+        /// </summary>
+        public int AdvanceDay(double seconds, HeroCommand command)
+        {
+            if (hero == null || State != RunState.Day || !(seconds > 0)) return 0;
+            heroDayAccumulatorNs += (long)Math.Round(seconds * 1e9);
+            var steps = 0;
+            while (heroDayAccumulatorNs >= StepNanoseconds)
+            {
+                MoveHero(command);
+                heroDayAccumulatorNs -= StepNanoseconds;
+                steps++;
+            }
+
+            return steps;
+        }
+
+        /// <summary>
+        /// Spawn rule (specs/003 2.1): the walkable cell without a solid building nearest <paramref name="from"/> by
+        /// Manhattan distance; ties by direction from it (N, E, S, W by dominant axis), then (z, x) ascending.
+        /// </summary>
+        public GridPos HeroSpawnCell(GridPos from)
+        {
+            var best = from;
+            var bestKey = (int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue);
+            for (var z = 0; z < GridCoordinates.Size; z++)
+            for (var x = 0; x < GridCoordinates.Size; x++)
+            {
+                var c = new GridPos(x, z);
+                if (IsHeroBlocked(c)) continue;
+                var key = (c.ManhattanDistance(from), DirectionRank(c.X - from.X, c.Z - from.Z), z, x);
+                if (key.CompareTo(bestKey) >= 0) continue;
+                best = c;
+                bestKey = key;
+            }
+
+            return best;
+        }
+
+        static int DirectionRank(int dx, int dz)
+        {
+            if (Math.Abs(dz) >= Math.Abs(dx)) return dz > 0 ? 0 : 2; // N, S
+            return dx > 0 ? 1 : 3; // E, W
+        }
+
+        /// <summary>Cells the hero's body may not overlap: off the board, non-walkable terrain, solid buildings.</summary>
+        bool IsHeroBlocked(GridPos c) => !GridCoordinates.IsInBounds(c) || grid.IsImpassableTerrain(c) || grid.IsSolid(c);
+
+        /// <summary>Whether a hero body centred at these units would overlap a blocked cell (touching is allowed).</summary>
+        public bool HeroOverlapsBlocked(int ux, int uz)
+        {
+            const int u = HeroRules.UnitsPerTile, r = HeroRules.RadiusUnits;
+            var x0 = FloorDiv(ux - r, u);
+            var x1 = FloorDiv(ux + r, u);
+            var z0 = FloorDiv(uz - r, u);
+            var z1 = FloorDiv(uz + r, u);
+            for (var z = z0; z <= z1; z++)
+            for (var x = x0; x <= x1; x++)
+            {
+                if (!IsHeroBlocked(new GridPos(x, z))) continue;
+                long cx = Math.Max(x * u, Math.Min(ux, (x + 1) * u));
+                long cz = Math.Max(z * u, Math.Min(uz, (z + 1) * u));
+                var dx = ux - cx;
+                var dz = uz - cz;
+                if (dx * dx + dz * dz < (long)r * r) return true;
+            }
+
+            return false;
+        }
+
+        static int FloorDiv(int a, int b) => a >= 0 ? a / b : (a - b + 1) / b;
+
+        void ResetHero()
+        {
+            if (hero == null) return;
+            hero.Hp = HeroRules.MaxHp;
+            hero.Alive = true;
+            hero.SwingReadyTick = 0;
+            hero.RespawnTick = 0;
+            hero.Facing = 0;
+            hero.PlaceAt(HeroSpawnCell(GridState.KeepCell));
+            provokedArchers.Clear();
+            heroDayAccumulatorNs = 0;
+        }
+
+        /// <summary>A building placed over the hero's body succeeds; the hero moves to the nearest free cell (specs/003 2.1).</summary>
+        void StepHeroAside()
+        {
+            if (hero == null || !HeroOverlapsBlocked(hero.UnitsX, hero.UnitsZ)) return;
+            hero.PlaceAt(HeroSpawnCell(hero.Cell));
+            events.Add(new SimEvent(SimEventType.HeroRelocated, Tick, HeroRules.SourceId, -1, hero.Cell, hero.X, hero.Z, hero.X, hero.Z));
+        }
+
+        /// <summary>Restores the hero position saved at Start Night (release-rules-2 checkpoints); false if it is not legal.</summary>
+        internal bool RestoreHeroPosition(int ux, int uz)
+        {
+            if (hero == null || HeroOverlapsBlocked(ux, uz)) return false;
+            hero.UnitsX = hero.PrevUnitsX = ux;
+            hero.UnitsZ = hero.PrevUnitsZ = uz;
+            return true;
+        }
+
+        /// <summary>Step phase 2b: respawn when due, then movement from the command.</summary>
+        void HeroMovePhase(HeroCommand command)
+        {
+            if (hero == null) return;
+            if (!hero.Alive && Tick >= hero.RespawnTick)
+            {
+                hero.Alive = true;
+                hero.Hp = HeroRules.MaxHp;
+                hero.SwingReadyTick = Tick;
+                hero.PlaceAt(HeroSpawnCell(GridState.KeepCell));
+                provokedArchers.Clear();
+                events.Add(new SimEvent(SimEventType.HeroRespawned, Tick, HeroRules.SourceId, -1, hero.Cell, hero.X, hero.Z, hero.X, hero.Z));
+            }
+
+            MoveHero(command);
+        }
+
+        void MoveHero(HeroCommand command)
+        {
+            hero.PrevUnitsX = hero.UnitsX;
+            hero.PrevUnitsZ = hero.UnitsZ;
+            if (!hero.Alive || !command.Controlled) return;
+            hero.Facing = command.Facing;
+            if (command.Heading < 0) return;
+            // Axis-separated so the body slides along walls; integer units keep it exact.
+            MoveHeroAxis(HeroRules.HeadingX[command.Heading] * hero.MoveUnits / HeroRules.UnitsPerTile, true);
+            MoveHeroAxis(HeroRules.HeadingZ[command.Heading] * hero.MoveUnits / HeroRules.UnitsPerTile, false);
+        }
+
+        void MoveHeroAxis(int delta, bool alongX)
+        {
+            if (delta == 0) return;
+            var sign = Math.Sign(delta);
+            var lo = 0;
+            var hi = Math.Abs(delta);
+            if (!HeroBlockedAfter(sign * hi, alongX)) lo = hi;
+            else
+                while (hi - lo > 1) // largest legal distance up to the wall
+                {
+                    var mid = (lo + hi) / 2;
+                    if (HeroBlockedAfter(sign * mid, alongX)) hi = mid;
+                    else lo = mid;
+                }
+
+            if (alongX) hero.UnitsX += sign * lo;
+            else hero.UnitsZ += sign * lo;
+        }
+
+        bool HeroBlockedAfter(int d, bool alongX) =>
+            alongX ? HeroOverlapsBlocked(hero.UnitsX + d, hero.UnitsZ) : HeroOverlapsBlocked(hero.UnitsX, hero.UnitsZ + d);
+
+        /// <summary>Step phase 3b: a player swing, or the guard's automatic swing at the nearest enemy in reach.</summary>
+        void HeroAttackPhase(HeroCommand command)
+        {
+            if (hero == null || !hero.Alive || Tick < hero.SwingReadyTick) return;
+            if (command.Controlled)
+            {
+                if (command.Attack) Swing();
+                return;
+            }
+
+            Enemy nearest = null;
+            var best = double.MaxValue;
+            foreach (var e in enemies) // ascending ID: strict comparison keeps the lowest on ties
+            {
+                if (!e.Alive) continue;
+                var dx = e.X - hero.X;
+                var dz = e.Z - hero.Z;
+                var d = dx * dx + dz * dz;
+                if (d > HeroRules.SwingReach * HeroRules.SwingReach + 1e-9 || d >= best - 1e-12) continue;
+                nearest = e;
+                best = d;
+            }
+
+            if (nearest == null) return;
+            hero.Facing = HeroRules.FacingToward(nearest.X - hero.X, nearest.Z - hero.Z);
+            Swing();
+        }
+
+        void Swing()
+        {
+            hero.SwingReadyTick = Tick + HeroRules.SwingIntervalTicks;
+            var f = hero.Facing;
+            events.Add(new SimEvent(SimEventType.HeroAttacked, Tick, HeroRules.SourceId, f, hero.Cell, hero.X, hero.Z,
+                hero.X + HeroRules.FacingX[f] / 1024.0 * HeroRules.SwingReach, hero.Z + HeroRules.FacingZ[f] / 1024.0 * HeroRules.SwingReach));
+            foreach (var e in enemies)
+            {
+                if (!e.Alive || !HeroRules.InSwing(f, e.X - hero.X, e.Z - hero.Z)) continue;
+                if (e.Kind == EnemyKind.Archer) provokedArchers.Add(e.Id);
+                events.Add(new SimEvent(SimEventType.HeroHit, Tick, HeroRules.SourceId, e.Id, e.Cell, e.X, e.Z, e.X, e.Z));
+                DamageEnemy(e, HeroRules.SwingDamage, HeroRules.SourceId);
+            }
+        }
+
+        /// <summary>
+        /// Melee engagement (specs/003 2.4) at a cell-centre decision point: Grunt, Runner and Brute stop for a hero within
+        /// 1.0 and keep it within 1.5. Never at the route end and never while attacking a building. Bombers and bosses ignore it.
+        /// </summary>
+        bool MeleeHoldsHero(Enemy e, bool freshStep)
+        {
+            if (e.TargetsHero)
+            {
+                if (hero != null && hero.Alive && HeroDistanceSq(e) <= HeroRules.StickyRange * HeroRules.StickyRange + 1e-9)
+                {
+                    e.CarryUnits = 0;
+                    return true;
+                }
+
+                e.TargetsHero = false; // resume the route at this decision point
+            }
+
+            if (hero == null || !hero.Alive || e.Definition.IsRanged || e.Definition.IsBomber || e.Definition.IsBoss) return false;
+            if (e.TargetBuildingId >= 0 || e.RouteIndex >= e.Route.ReachableEndIndex) return false;
+            if (HeroDistanceSq(e) > HeroRules.EngageRange * HeroRules.EngageRange + 1e-9) return false;
+            e.CarryUnits = 0;
+            if (!freshStep) return true; // as for buildings: the target is taken on the next simulation step
+            e.TargetsHero = true;
+            e.AttackDueTick = Tick + e.AttackTicks;
+            return true;
+        }
+
+        double HeroDistanceSq(Enemy e)
+        {
+            var dx = e.X - hero.X;
+            var dz = e.Z - hero.Z;
+            return dx * dx + dz * dz;
+        }
+
+        /// <summary>Raider Archer range test to the hero: from its cell centre, like buildings.</summary>
+        double HeroRangedDistanceSq(Enemy e)
+        {
+            GridCoordinates.TileCenter(e.Cell, out var cx, out var cz);
+            var dx = hero.X - cx;
+            var dz = hero.Z - cz;
+            return dx * dx + dz * dz;
+        }
+
+        /// <summary>The hero beats the best building when it is in range and has a lower class, or the same class and is nearer.</summary>
+        bool HeroIsBetterRangedTarget(Enemy e, Building best)
+        {
+            if (hero == null || !hero.Alive) return false;
+            var d = HeroRangedDistanceSq(e);
+            if (d > RangeSq(e)) return false;
+            if (best == null) return true;
+            var cls = RangedClass(best.Kind);
+            if (HeroRules.RangedClass != cls) return HeroRules.RangedClass < cls;
+            return d <= RangedDistanceSq(e, best) + 1e-9; // equal distance: the hero counts as the lowest ID
+        }
+
+        /// <summary>An enemy's due hit on the hero: normal damage plus the Commander aura; no Wall multiplier or reflection.</summary>
+        void HitHero(Enemy e)
+        {
+            if (hero == null || !hero.Alive)
+            {
+                e.TargetsHero = false;
+                return;
+            }
+
+            if (Tick < e.AttackDueTick) return;
+            // Melee reach is the hero's own: a hero that steps back out of reach is not hit (the due hit waits, so it lands
+            // as soon as the hero is in reach again). Hit-and-run is a real move. Ranged hits use the archer's range.
+            if (!e.Definition.IsRanged && HeroDistanceSq(e) > HeroRules.SwingReach * HeroRules.SwingReach + 1e-9) return;
+            e.AttackDueTick += e.AttackTicks;
+            var damage = e.Definition.AttackDamage;
+            var aura = CommanderAuraPercent(e);
+            if (aura > 0) damage = damage * (100 + aura) / 100;
+            hero.Hp = Math.Max(0, hero.Hp - damage);
+            events.Add(new SimEvent(SimEventType.HeroDamaged, Tick, e.Id, damage, hero.Cell, e.X, e.Z, hero.X, hero.Z));
+            if (hero.Hp > 0) return;
+            hero.Alive = false; // no longer a target; the rest is resolved in phase 6
+            hero.RespawnTick = long.MaxValue;
+        }
+
+        /// <summary>Step phase 6: a downed hero drops every enemy's hold on it and schedules its respawn. Never Defeat.</summary>
+        void HeroDeathPhase()
+        {
+            if (hero == null || hero.Alive || hero.RespawnTick != long.MaxValue) return;
+            hero.RespawnTick = Tick + HeroRules.RespawnTicks;
+            foreach (var e in enemies) e.TargetsHero = false;
+            provokedArchers.Clear();
+            events.Add(new SimEvent(SimEventType.HeroDowned, Tick, HeroRules.SourceId, -1, hero.Cell, hero.X, hero.Z, hero.X, hero.Z));
+        }
+
+        List<int> SortedProvoked()
+        {
+            var list = new List<int>(provokedArchers);
+            list.Sort();
+            return list;
+        }
+
         void Finish(RunState terminal)
         {
             nextSpawnIndex = Wave.Spawns.Count; // cancel pending spawns
@@ -1460,6 +1871,11 @@ namespace TheLastFortress
                 .Append(" stats=").Append(Stats.NightsCleared).Append('/').Append(Stats.EnemiesDefeated).Append('/')
                 .Append(Stats.BuildingsPurchased).Append('/').Append(Stats.GoldEarned).Append('/').Append(Stats.SynergiesEver.Count)
                 .AppendLine();
+            if (hero != null)
+                sb.Append("H pos=").Append(hero.UnitsX).Append(',').Append(hero.UnitsZ).Append(" hp=").Append(hero.Hp)
+                    .Append(" alive=").Append(hero.Alive).Append(" face=").Append(hero.Facing).Append(" swing=").Append(hero.SwingReadyTick)
+                    .Append(" respawn=").Append(hero.RespawnTick).Append(" kills=").Append(Stats.HeroKills)
+                    .Append(" provoked=").Append(string.Join(",", SortedProvoked())).AppendLine();
             var buildings = new List<Building>(buildingsById.Values);
             buildings.Sort((a, b) => a.Id.CompareTo(b.Id));
             foreach (var b in buildings)
@@ -1472,7 +1888,7 @@ namespace TheLastFortress
                     .Append(':').Append(e.MoveTicks).Append(':').Append(e.ProgressUnits).Append('+').Append(e.CarryUnits)
                     .Append(" pos=").Append(e.X.ToString("R", inv)).Append(',')
                     .Append(e.Z.ToString("R", inv)).Append(" ri=").Append(e.RouteIndex).Append(" tgt=")
-                    .Append(e.TargetBuildingId).Append(" due=").Append(e.AttackDueTick)
+                    .Append(e.TargetBuildingId).Append(e.TargetsHero ? "+hero" : "").Append(" due=").Append(e.AttackDueTick)
                     .Append(" burn=").Append(e.Burning).Append(':').Append(e.BurnNextTick).Append(':').Append(e.BurnExpiryTick)
                     .Append(e.FuseLit ? $" fuse={e.DetonateTick}" : "").AppendLine();
             return sb.ToString();

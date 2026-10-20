@@ -61,15 +61,17 @@ namespace TheLastFortress
         /// <summary>One camera render with the HUD temporarily drawn by that camera, read back to a PNG.</summary>
         void CaptureOffscreen(string path)
         {
-            var cam = game.CameraRig.Camera;
+            var cam = game.ActiveCamera; // strategic or hero view, whichever is rendering
             var canvas = game.Hud.Canvas;
             int w = Screen.width, h = Screen.height;
             var rt = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
             var mode = canvas.renderMode;
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
             canvas.worldCamera = cam;
-            canvas.planeDistance = cam.nearClipPlane + 0.5f;
+            canvas.planeDistance = cam.nearClipPlane + 0.005f; // in front of everything: ground and grass never cover the HUD
             Canvas.ForceUpdateCanvases();
+            // Instanced draws (hero-view grass) are queued per frame and were consumed by the frame's own render.
+            if (game.HeroViewActive) game.World.DrawGrass(cam, game.Sim);
             cam.targetTexture = rt;
             cam.Render();
             cam.targetTexture = null;
@@ -91,6 +93,27 @@ namespace TheLastFortress
             if (game.IsRelease && (captureSet == "motion" || captureSet == "fx"))
             {
                 yield return RunMotionFrames(captureSet == "fx");
+                Application.Quit();
+                yield break;
+            }
+
+            if (game.IsRelease && captureSet == "scale")
+            {
+                yield return RunScaleLineup();
+                Application.Quit();
+                yield break;
+            }
+
+            if (game.IsRelease && captureSet == "013")
+            {
+                yield return RunPlan013();
+                Application.Quit();
+                yield break;
+            }
+
+            if (game.IsRelease && captureSet == "012")
+            {
+                yield return RunPlan012();
                 Application.Quit();
                 yield break;
             }
@@ -536,12 +559,15 @@ namespace TheLastFortress
                 new SpawnEntry(44, MvpCampaign.West, 0, EnemyKind.Grunt), new SpawnEntry(48, MvpCampaign.West, 0, EnemyKind.Brute),
             }, new[] { MvpCampaign.West, MvpCampaign.East });
             var calm = new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West });
+            // The showcase plays under release-rules-2 (sprint speeds): its small fortress and step budgets were written for
+            // them, and under release-rules-3 the Keep fell before the Archer, Bomber and Commander showed. Presentation is the same.
             CampaignConfig Custom(params WavePlan[] nights) => new CampaignConfig
             {
-                Label = ReleaseCampaign.Label, Nights = nights, OffersRewards = true, RulesVersion = ReleaseCampaign.RulesVersion,
+                Label = ReleaseCampaign.Label, Nights = nights, OffersRewards = true, RulesVersion = ReleaseCampaign.RulesV2,
                 CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
             };
-            var setup = new RunSimulation(new RunConfig { Definitions = game.NewRunDefinitions, Seed = 7, Terrain = MapProfiles.Generate(MapProfiles.Meadow, 7), Campaign = Custom(wave, calm) });
+            var sprintDefinitions = game.Catalog.Find(ReleaseCampaign.RulesV2, ReleaseCampaign.CampaignId).Definitions;
+            var setup = new RunSimulation(new RunConfig { Definitions = sprintDefinitions, Seed = 7, Terrain = MapProfiles.Generate(MapProfiles.Meadow, 7), Campaign = Custom(wave, calm) });
             ContinueSaved(setup, log);
             foreach (var (kind, cell) in new[] { (BuildingKind.Cannon, new GridPos(6, 8)), (BuildingKind.Watchtower, new GridPos(8, 9)), (BuildingKind.House, new GridPos(7, 12)) })
                 log.AppendLine($"place {kind} {cell}: {game.Sim.TryPlace(kind, cell, out _)}");
@@ -585,6 +611,294 @@ namespace TheLastFortress
         }
 
         /// <summary>The same small fortress on every map: an L of Walls west and north of the Keep, two Archer Towers, a House, a Farm, a trap.</summary>
+        /// <summary>
+        /// -capture-set 012 (release build): the hero view by Day and Night on each map profile, looking out to the board
+        /// edge and back at the Keep, plus the strategic view with the hero's ring, for the close-range art audit.
+        /// </summary>
+        IEnumerator RunPlan012()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            foreach (var id in MapProfiles.All)
+            {
+                game.SetMapProfile(id);
+                game.NewRun(7, false);
+                foreach (var (kind, x, z) in Plan011Layout) game.Sim.TryPlace(kind, new GridPos(x, z), out _);
+                HeroWalk(0.65f, new HeroCommand(0, false, 0)); // north of the Keep, then west onto open ground
+                HeroWalk(1.0f, new HeroCommand(12, false, 48));
+                log.AppendLine($"{id}: {game.Sim.Config.Terrain.Describe()} hero at {game.Sim.Hero.X:0.00},{game.Sim.Hero.Z:0.00}");
+                game.SetHeroView(true);
+                game.HeroRig.SkipTransition();
+                game.HeroRig.SetOrbit(270f, 14f);
+                yield return Shot($"012-{id}-1-day-edge");
+                game.HeroRig.SetOrbit(90f, 18f);
+                yield return Shot($"012-{id}-2-day-keep");
+                game.StartNight();
+                for (var i = 0; i < 60; i++) yield return null; // night light at real frames
+                log.AppendLine($"{id} night: {StepUntil(() => game.Sim.AliveEnemyCount >= 4, 1600)} alive={game.Sim.AliveEnemyCount}");
+                game.HeroRig.SetOrbit(270f, 14f);
+                yield return Shot($"012-{id}-3-night-edge");
+                game.HeroRig.SetOrbit(90f, 18f);
+                yield return Shot($"012-{id}-4-night-keep");
+                game.SetHeroView(false);
+                yield return Shot($"012-{id}-5-strategic-night");
+                game.Sim.SetPaused(false);
+            }
+
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-012-capture-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set scale: the hero face to face with the Keep, a Wall, an Archer Tower and a House, seen from the side at
+        /// eye height in the hero view, for judging relative scale.
+        /// </summary>
+        IEnumerator RunScaleLineup()
+        {
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            game.SetMapProfile(MapProfiles.Meadow);
+            game.NewRun(7, false);
+            var sim = game.Sim;
+            foreach (var (kind, x, z) in new[] { (BuildingKind.Wall, 9, 12), (BuildingKind.Tower, 11, 12), (BuildingKind.House, 12, 11) })
+                sim.TryPlace(kind, new GridPos(x, z), out _);
+            sim.AdvanceDay(0.6f, new HeroCommand(0, false, 0)); // north of the Keep, between Wall and Tower
+            game.SetHeroView(true);
+            game.HeroRig.SkipTransition();
+            foreach (var (name, yaw, pitch) in new[] { ("side", 270f, 4f), ("front", 180f, 6f), ("back", 0f, 6f) })
+            {
+                game.HeroRig.SetOrbit(yaw, pitch);
+                yield return Shot($"scale-{name}");
+            }
+        }
+
+        /// <summary>
+        /// -capture-set 013 (release build): matched before/after views for the second visual pass, through both cameras.
+        /// Per map profile at seed 7: the plan 011 fortress by Day, a placement ghost and Night 1 in the strategic view, and
+        /// the hero view toward the board edge and the Keep by Day and Night, the whole board by Day and Night, enemies walking in. Then the slice up close (low and high hero angles, a
+        /// tower right behind the hero camera, a swing at an engaged Grunt), the dense fight in both views, every building
+        /// kind in a row, and every enemy kind passing the hero. Simulation-driven and deterministic; only presentation differs.
+        /// </summary>
+        IEnumerator RunPlan013()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            foreach (var id in MapProfiles.All)
+            {
+                game.SetMapProfile(id);
+                game.NewRun(7, false);
+                foreach (var (kind, x, z) in Plan011Layout) game.Sim.TryPlace(kind, new GridPos(x, z), out _);
+                HeroWalk(0.65f, new HeroCommand(0, false, 0)); // north of the Keep, then west onto open ground
+                HeroWalk(1.0f, new HeroCommand(12, false, 48));
+                log.AppendLine($"{id}: {game.Sim.Config.Terrain.Describe()} hero at {game.Sim.Hero.X:0.00},{game.Sim.Hero.Z:0.00}");
+                game.CameraRig.ResetView();
+                yield return Shot($"013-{id}-s1-day");
+                game.CameraRig.ShowWholeBoard();
+                yield return Shot($"013-{id}-s4-whole-day"); // plan 016: the board's edge, the roads and the mist around it
+                game.CameraRig.ResetView();
+                game.Player.SetTool(BuildingKind.Tower);
+                game.Player.HoverOverride = FirstLegal(BuildingKind.Tower, 6, 6, 9, 9);
+                yield return Shot($"013-{id}-s2-placement");
+                game.Player.HoverOverride = null;
+                game.Player.CancelTool();
+                yield return HeroShot($"013-{id}-h1-day-edge", 270f, 6f);
+                yield return HeroShot($"013-{id}-h2-day-keep", 90f, 12f);
+                game.StartNight();
+                for (var i = 0; i < 60; i++) yield return null; // night light at real frames; the simulation is not advancing
+                // Plan 016: enemies walking in out of the mist along the first entry's road, close up.
+                log.AppendLine($"{id} arrivals: {StepUntil(() => game.Sim.SpawnedCount >= 2, 400)} walking={game.World.ArrivalCount}");
+                var firstEntry = game.Sim.Wave.EntryCells[0];
+                game.CameraRig.SetView(Prims.CellCenter(firstEntry) + RouteOverlay.Outward(firstEntry) * 2.5f, 3.2f);
+                yield return Shot($"013-{id}-s6-arrivals-night");
+                game.CameraRig.ResetView();
+                log.AppendLine($"{id} night:{StepUntil(() => game.Sim.AliveEnemyCount >= 4 && game.World.ActiveArrowCount > 0, 1600)} alive={game.Sim.AliveEnemyCount}");
+                yield return Shot($"013-{id}-s3-night");
+                game.CameraRig.ShowWholeBoard();
+                yield return Shot($"013-{id}-s5-whole-night");
+                game.CameraRig.ResetView();
+                yield return HeroShot($"013-{id}-h3-night-keep", 90f, 12f);
+                yield return HeroShot($"013-{id}-h4-night-edge", 270f, 6f);
+                game.Sim.SetPaused(false);
+            }
+
+            // The slice up close on Crossing: strategic close views, the hero view low and high, and a tower behind the camera.
+            game.SetMapProfile(MapProfiles.Crossing);
+            game.NewRun(7, false);
+            foreach (var (kind, x, z) in Plan011Layout) game.Sim.TryPlace(kind, new GridPos(x, z), out _);
+            HeroWalk(0.65f, new HeroCommand(0, false, 0));
+            HeroWalk(1.0f, new HeroCommand(12, false, 48));
+            game.CameraRig.SetView(new Vector3(10f, 0f, 10.5f), 4.5f);
+            yield return Shot("013-slice-s-day-close");
+            game.CameraRig.ResetView();
+            yield return HeroShot("013-slice-h-day-low", 60f, 2f);
+            yield return HeroShot("013-slice-h-day-high", 135f, 35f);
+            var hero = game.Sim.Hero;
+            var behind = Mathf.Atan2((float)hero.X - 9.5f, (float)hero.Z - 11.5f) * Mathf.Rad2Deg; // Tower (9,11) behind the camera
+            yield return HeroShot("013-slice-h-obstruction", behind, 10f);
+            log.AppendLine($"slice: hero at {hero.X:0.00},{hero.Z:0.00}, obstruction yaw {behind:0}");
+
+            // Night on the slice: Grunts from the West walk into the hero on their row; it swings at the first that engages.
+            // The frame shows the blade one step after the swing resolved, at its contact.
+            var grunts = new System.Collections.Generic.List<SpawnEntry>();
+            for (var i = 0; i < 6; i++) grunts.Add(new SpawnEntry(i * 30, MvpCampaign.West, 0, EnemyKind.Grunt));
+            ContinueSaved(Plan013Setup(MapProfiles.Crossing, new WavePlan("slice", grunts, new[] { MvpCampaign.West }), true), log);
+            hero = game.Sim.Hero;
+            HeroWalk(1.4f, new HeroCommand(0, false, 0)); // around the north Walls into the west entry on row 10
+            HeroWalk(2.0f, new HeroCommand(12, false, 48));
+            HeroWalk(2.07f, new HeroCommand(8, false, 32));
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null;
+            log.AppendLine($"slice night: hero at {hero.X:0.00},{hero.Z:0.00} engage {StepUntil(() => NearestEnemyTo(hero, out var d) != null && d < 0.55, 2400)}");
+            game.Sim.SetPaused(false);
+            var swung = false;
+            for (var i = 0; i < 40 && game.Sim.State == RunState.Night && !swung; i++)
+            {
+                var target = NearestEnemyTo(hero, out _);
+                var facing = target == null ? hero.Facing : HeroRules.FacingToward(target.X - hero.X, target.Z - hero.Z);
+                var ready = hero.SwingReadyTick <= game.Sim.Tick;
+                game.Sim.Step(new HeroCommand(-1, true, facing));
+                swung = ready && hero.SwingReadyTick > game.Sim.Tick;
+                game.SyncViews(0.05f);
+            }
+
+            game.Sim.Step(new HeroCommand(-1, false, hero.Facing)); // one step on: the shown blade is at its contact
+            game.SyncViews(0.05f);
+            if (game.Sim.State == RunState.Night) game.Sim.SetPaused(true);
+            log.AppendLine($"slice swing: {swung} hero hp={hero.Hp}");
+            var foe = NearestEnemyTo(hero, out _);
+            var aim = foe == null ? 270f : Mathf.Atan2((float)(foe.X - hero.X), (float)(foe.Z - hero.Z)) * Mathf.Rad2Deg;
+            yield return HeroShot("013-slice-h-night-swing", aim + 35f, 8f);
+            log.AppendLine("slice cues: " + string.Join(" ", game.World.VisibleCues().Select(c => $"{c.kind}@{c.position.x:0.00},{c.position.y:0.00},{c.position.z:0.00}")) +
+                           $" particles={game.World.ParticleCount} grass={game.World.GrassDrawn}");
+            yield return HeroShot("013-slice-h-night-keep", 90f, 14f);
+            game.CameraRig.SetView(new Vector3(10f, 0f, 10.5f), 4.5f);
+            yield return Shot("013-slice-s-night-close");
+            game.CameraRig.ResetView();
+            game.Sim.SetPaused(false);
+
+            // Dense fight: 40 mixed attackers from two sides against the same fortress plus a Cannon, in both views.
+            var spawns = new System.Collections.Generic.List<SpawnEntry>();
+            var mix = new[] { EnemyKind.Grunt, EnemyKind.Grunt, EnemyKind.Runner, EnemyKind.Grunt, EnemyKind.Archer, EnemyKind.Brute, EnemyKind.Bomber, EnemyKind.Grunt };
+            for (var i = 0; i < 40; i++) spawns.Add(new SpawnEntry(i * 3, i % 2 == 0 ? MvpCampaign.West : MvpCampaign.East, i % 2, mix[i % mix.Length]));
+            ContinueSaved(Plan013Setup(MapProfiles.Meadow, new WavePlan("dense", spawns, new[] { MvpCampaign.West, MvpCampaign.East }), true), log);
+            HeroWalk(1.2f, new HeroCommand(12, false, 48));
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null;
+            log.AppendLine($"dense: {StepUntil(() => game.Sim.AliveEnemyCount >= 24, 2400)} alive={game.Sim.AliveEnemyCount}");
+            yield return Shot("013-dense-s");
+            game.CameraRig.SetView(new Vector3(8f, 0f, 10f), 5f);
+            yield return Shot("013-dense-s-close");
+            game.CameraRig.ResetView();
+            yield return HeroShot("013-dense-h-west", 270f, 10f);
+            yield return HeroShot("013-dense-h-east", 90f, 14f);
+            game.Sim.SetPaused(false);
+
+            // Every building kind in one row north of the Keep (Meadow), strategic and hero view.
+            var rowSim = Plan013Setup(MapProfiles.Meadow, new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West }), false, 1000);
+            var row = new StringBuilder();
+            foreach (var (kind, x, z) in Plan013Row)
+            {
+                GridPos? at = null;
+                for (var dx = 0; dx <= 2 && at == null; dx++)
+                for (var dz = -1; dz <= 2 && at == null; dz++)
+                    if (rowSim.CheckPlacement(kind, new GridPos(x + dx, z + dz)) == PlacementRejection.None) at = new GridPos(x + dx, z + dz);
+                row.Append($"{kind}{at}={(at.HasValue ? rowSim.TryPlace(kind, at.Value, out _).ToString() : "none")} ");
+            }
+
+            ContinueSaved(rowSim, log);
+            log.AppendLine("row: " + row);
+            HeroWalk(0.9f, new HeroCommand(0, false, 0));
+            game.CameraRig.SetView(new Vector3(10f, 0f, 13f), 5.5f);
+            yield return Shot("013-row-s-day");
+            game.CameraRig.ResetView();
+            yield return HeroShot("013-row-h-day", 0f, 8f);
+            yield return HeroShot("013-row-h-day-back", 180f, 8f); // the far side of the Keep and its neighbours
+
+            // Every enemy kind passing the hero west of the Keep: slowest first so the group arrives together.
+            var lineup = new[] { EnemyKind.SiegeCommander, EnemyKind.SiegeGolem, EnemyKind.Brute, EnemyKind.Archer, EnemyKind.Grunt, EnemyKind.Bomber, EnemyKind.Runner };
+            var lineupSpawns = new System.Collections.Generic.List<SpawnEntry>();
+            for (var i = 0; i < lineup.Length; i++) lineupSpawns.Add(new SpawnEntry(i * 22, MvpCampaign.West, 0, lineup[i]));
+            ContinueSaved(Plan013Setup(MapProfiles.Meadow, new WavePlan("lineup", lineupSpawns, new[] { MvpCampaign.West }), false), log);
+            HeroWalk(0.9f, new HeroCommand(0, false, 0));
+            HeroWalk(3.2f, new HeroCommand(12, false, 48));
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null;
+            log.AppendLine($"lineup: {StepUntil(() => game.Sim.Enemies.Count(e => e.Alive) == lineup.Length && game.Sim.Enemies.All(e => !e.Alive || e.X > 2.6), 1600)} " +
+                           string.Join(" ", game.Sim.Enemies.Where(e => e.Alive).Select(e => $"{e.Kind}@{e.X:0.0},{e.Z:0.0}")));
+            game.CameraRig.SetView(new Vector3(4f, 0f, 10.5f), 3.2f);
+            yield return Shot("013-lineup-s");
+            game.CameraRig.ResetView();
+            var cx = (float)game.Sim.Enemies.Where(e => e.Alive).DefaultIfEmpty().Average(e => e == null ? 4.0 : e.X);
+            var cz = (float)game.Sim.Enemies.Where(e => e.Alive).DefaultIfEmpty().Average(e => e == null ? 10.5 : e.Z);
+            yield return HeroShot("013-lineup-h", Mathf.Atan2(cx - (float)game.Sim.Hero.X, cz - (float)game.Sim.Hero.Z) * Mathf.Rad2Deg, 6f);
+            game.Sim.SetPaused(false);
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-013-capture-log.txt"), log.ToString());
+        }
+
+        static readonly (BuildingKind kind, int x, int z)[] Plan013Row =
+        {
+            (BuildingKind.Wall, 4, 13), (BuildingKind.Wall, 5, 13), (BuildingKind.Tower, 7, 13), (BuildingKind.House, 9, 13), (BuildingKind.Farm, 11, 13),
+            (BuildingKind.SpikeTrap, 14, 13), (BuildingKind.Cannon, 15, 13), (BuildingKind.Watchtower, 6, 15), (BuildingKind.RepairStation, 9, 16),
+        };
+
+        /// <summary>A release run on <paramref name="profile"/> at seed 7 whose first night is <paramref name="night"/>; with the plan 011 fortress (+ Cannon) or empty.</summary>
+        RunSimulation Plan013Setup(string profile, WavePlan night, bool fortress, int gold = 0)
+        {
+            var definitions = game.NewRunDefinitions;
+            var startingGold = definitions.StartingGold;
+            if (gold > 0) definitions.StartingGold = gold; // read once by the constructor; restored right after
+            var setup = new RunSimulation(new RunConfig
+            {
+                Definitions = definitions, Seed = 7, Terrain = MapProfiles.Generate(profile, 7),
+                Campaign = new CampaignConfig
+                {
+                    Label = ReleaseCampaign.Label, Nights = new[] { night, new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West }) },
+                    OffersRewards = true, RulesVersion = ReleaseCampaign.RulesVersion, CampaignId = ReleaseCampaign.CampaignId,
+                    PerkPool = PerkRules.ReleaseIds, MapProfile = profile,
+                },
+            });
+            definitions.StartingGold = startingGold;
+            if (!fortress) return setup;
+            foreach (var (kind, x, z) in Plan011Layout) setup.TryPlace(kind, new GridPos(x, z), out _);
+            setup.TryPlace(BuildingKind.Cannon, new GridPos(13, 10), out _);
+            return setup;
+        }
+
+        /// <summary>
+        /// Walks the hero by Day for the time the scripted paths were written for (release-rules-2, 1.5 tiles/s), stretched to
+        /// the run's own hero speed so it reaches the same places.
+        /// </summary>
+        void HeroWalk(float seconds, HeroCommand command) =>
+            game.Sim.AdvanceDay(seconds * HeroRules.MoveUnitsPerStep / Mathf.Max(1, game.Sim.Hero.MoveUnits), command);
+
+        /// <summary>The hero view at a fixed orbit (no transition), then back to the strategic view.</summary>
+        IEnumerator HeroShot(string name, float yaw, float pitch)
+        {
+            if (!game.SetHeroView(true) && !game.HeroViewActive) yield break;
+            game.HeroRig.SkipTransition();
+            game.HeroRig.SetOrbit(yaw, pitch);
+            for (var i = 0; i < 20; i++) yield return null; // the camera's obstacle response eases in over real frames
+            yield return Shot(name);
+            game.SetHeroView(false);
+        }
+
+        Enemy NearestEnemyTo(Hero hero, out double distance)
+        {
+            Enemy best = null;
+            distance = double.MaxValue;
+            foreach (var e in game.Sim.Enemies)
+            {
+                if (!e.Alive) continue;
+                var d = System.Math.Sqrt((e.X - hero.X) * (e.X - hero.X) + (e.Z - hero.Z) * (e.Z - hero.Z));
+                if (d < distance) (best, distance) = (e, d);
+            }
+
+            return best;
+        }
+
         static readonly (BuildingKind kind, int x, int z)[] Plan011Layout =
         {
             (BuildingKind.Wall, 8, 8), (BuildingKind.Wall, 8, 9), (BuildingKind.Wall, 8, 11), (BuildingKind.Wall, 8, 12), (BuildingKind.Wall, 9, 12),

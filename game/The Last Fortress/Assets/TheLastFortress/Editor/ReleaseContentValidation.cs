@@ -71,6 +71,8 @@ namespace TheLastFortress.Editor
             for (var k = 0; k < EnemyDefinition.KindCount; k++)
                 if (Prefab(() => content.EnemyPrefabFor((EnemyKind)k)) == null) errors.Add($"{content.name}: no prefab for enemy {(EnemyKind)k}.");
             if (content.wallShapePrefabs == null || content.wallShapePrefabs.Length != 6) errors.Add($"{content.name}.wallShapePrefabs: expected 6 connected Wall shapes.");
+            if (Prefab(() => content.heroPrefab) == null) errors.Add($"{content.name}.heroPrefab: missing (run The Last Fortress > Art > Import and Assign Hero).");
+            else if (content.heroPrefab.GetComponent<CharacterRig>() == null) errors.Add($"{content.name}.heroPrefab: no CharacterRig.");
 
             var seen = new HashSet<string>();
             foreach (var id in PerkRules.ReleaseIds)

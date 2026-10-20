@@ -30,18 +30,20 @@ namespace TheLastFortress
     }
 
     /// <summary>
-    /// Separate, versioned settings record (a corrupt run save never resets these). Version 2 added the three volumes;
-    /// a version 1 file is migrated on read (volumes set to the defaults explicitly) and rewritten only when saved.
+    /// Separate, versioned settings record (a corrupt run save never resets these). Version 2 added the three volumes,
+    /// version 3 the hero camera (plan 012). Older files are migrated on read (new fields set to their defaults explicitly)
+    /// and rewritten only when saved.
     /// </summary>
     [Serializable]
     public sealed class GameSettings
     {
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
         public const float DefaultMasterVolume = 0.8f, DefaultMusicVolume = 0.5f, DefaultSfxVolume = 0.9f;
+        public const float DefaultLookSensitivity = 1f, DefaultFieldOfView = 60f, DefaultHeroDistance = 1.0f;
 
         public int version = CurrentVersion;
         public float cameraSensitivity = 1f;
-        public bool cameraShake = true;
+        public bool cameraShake; // off by default since 2026-10-19 (no bouncing on Keep hits); Settings can turn it on
         public bool fullscreen;
         public int width;
         public int height;
@@ -49,13 +51,36 @@ namespace TheLastFortress
         public float musicVolume = DefaultMusicVolume;
         public float sfxVolume = DefaultSfxVolume;
 
-        /// <summary>Volumes inside 0–1; NaN or infinite values fall back to their defaults.</summary>
+        // Version 3: hero view (specs/003 3.2).
+        public float lookSensitivity = DefaultLookSensitivity;
+        public bool invertLook;
+        public float fieldOfView = DefaultFieldOfView;
+        public float heroDistance = DefaultHeroDistance;
+        public bool heroViewAtNight;
+
+        /// <summary>Sets the version 3 fields to their defaults (migration from older files).</summary>
+        public void ResetHeroCamera()
+        {
+            lookSensitivity = DefaultLookSensitivity;
+            invertLook = false;
+            fieldOfView = DefaultFieldOfView;
+            heroDistance = DefaultHeroDistance;
+            heroViewAtNight = false;
+        }
+
+        /// <summary>Volumes inside 0–1 and camera values inside their ranges; NaN or infinite values fall back to defaults.</summary>
         public void Sanitize()
         {
             masterVolume = Volume(masterVolume, DefaultMasterVolume);
             musicVolume = Volume(musicVolume, DefaultMusicVolume);
             sfxVolume = Volume(sfxVolume, DefaultSfxVolume);
+            lookSensitivity = Range(lookSensitivity, 0.25f, 3f, DefaultLookSensitivity);
+            fieldOfView = Range(fieldOfView, 50f, 90f, DefaultFieldOfView);
+            heroDistance = Range(heroDistance, HeroCameraRig.MinDistance, HeroCameraRig.MaxDistance, DefaultHeroDistance);
         }
+
+        static float Range(float value, float min, float max, float fallback) =>
+            float.IsNaN(value) || float.IsInfinity(value) ? fallback : Mathf.Clamp(value, min, max);
 
         static float Volume(float value, float fallback) => float.IsNaN(value) || float.IsInfinity(value) ? fallback : Mathf.Clamp01(value);
 
@@ -240,6 +265,12 @@ namespace TheLastFortress
                     s.masterVolume = GameSettings.DefaultMasterVolume;
                     s.musicVolume = GameSettings.DefaultMusicVolume;
                     s.sfxVolume = GameSettings.DefaultSfxVolume;
+                    s.version = 2;
+                }
+
+                if (s != null && s.version == 2)
+                {
+                    s.ResetHeroCamera(); // v2 had no hero view
                     s.version = GameSettings.CurrentVersion;
                 }
 

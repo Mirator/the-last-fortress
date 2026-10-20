@@ -384,6 +384,18 @@ namespace TheLastFortress
                 case SimEventType.RangedShot:
                     Play(SoundId.RaiderShot);
                     break;
+                case SimEventType.HeroAttacked:
+                    Play(SoundId.Shot); // the blade's whoosh
+                    break;
+                case SimEventType.HeroHit:
+                    Schedule(SoundId.Impact, WorldView.HeroBladeDelay); // with the shown contact
+                    break;
+                case SimEventType.HeroDamaged:
+                    Play(sim.GetEnemy(e.SourceId) is Enemy heavy && (heavy.Kind == EnemyKind.Brute || heavy.Definition.IsBoss) ? SoundId.HeavyStrike : SoundId.Impact);
+                    break;
+                case SimEventType.HeroDowned:
+                    Play(SoundId.KeepHit);
+                    break;
                 case SimEventType.FuseLit:
                     Play(SoundId.FuseLit);
                     break;

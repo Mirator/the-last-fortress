@@ -154,6 +154,22 @@ namespace TheLastFortress.Tests
             Assert.IsFalse(events.Any(e => e.Type == SimEventType.EnemyKilled));
         }
 
+        [TestCase(ReleaseCampaign.RulesV2, false)]
+        [TestCase(ReleaseCampaign.RulesV3, true)]
+        public void UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo(string rules, bool lightsAtHouse)
+        {
+            var sim = new RunSimulation(new RunConfig
+            {
+                Definitions = ToughBomber(), // the idle hero by the Keep must not decide the case
+                Campaign = new CampaignConfig { Label = "t", Nights = new[] { Wave((0, EnemyKind.Bomber)) }, RulesVersion = rules },
+            });
+            var house = Place(sim, BuildingKind.House, 4, 11); // beside the West route (z = 10), not in its way
+            Assert.IsTrue(sim.StartNight());
+            var lit = StepCollect(sim, b => b.Any(e => e.Type == SimEventType.FuseLit)).Single(e => e.Type == SimEventType.FuseLit);
+            Assert.AreEqual(lightsAtHouse ? (house.Id, new GridPos(4, 10)) : (sim.Keep.Id, new GridPos(9, 10)), (lit.TargetId, lit.Cell),
+                "release-rules-3 lights beside the House; release-rules-2 saves walk on to the Keep");
+        }
+
         [Test]
         public void BlastThatEmptiesTheKeepOnTheLastEnemysStepIsDefeat()
         {
@@ -226,8 +242,9 @@ namespace TheLastFortress.Tests
     /// <summary>Plan 008 G1: profile-tagged saves, legacy six-night continuation and rejection of unknown profiles.</summary>
     public class ReleaseSaveTests
     {
-        static readonly RulesCatalog ReleaseBuild = new RulesCatalog(
-            RulesProfile.TwelveNights(ReleaseDefinitions.CreateDefault()), RulesProfile.SixNights(MvpDefinitions.CreateDefault()));
+        static readonly RulesCatalog ReleaseBuild = new RulesCatalog(RulesProfile.TwelveNightsWalking(ReleaseDefinitions.CreateDefault()),
+            RulesProfile.TwelveNightsHero(ReleaseDefinitions.CreateDefault()), RulesProfile.TwelveNights(ReleaseDefinitions.CreateDefault()),
+            RulesProfile.SixNights(MvpDefinitions.CreateDefault()));
 
         static RunSimulation NewReleaseRun(uint seed, string profile) => new RunSimulation(new RunConfig
         {
@@ -290,6 +307,44 @@ namespace TheLastFortress.Tests
             (badPerk.checkpointNight, badPerk.lastPaidDay, badPerk.perks) = (2, 2, new[] { "NotAPerk" });
             Assert.IsNull(CheckpointCodec.Restore(badPerk, ReleaseBuild, out problem, out _));
             Assert.AreEqual(CheckpointProblem.Invalid, problem);
+        }
+
+        [Test]
+        public void ASaveFromBeforeTheHeroContinuesWithoutAHero()
+        {
+            var old = new RunSimulation(new RunConfig
+            {
+                Definitions = ReleaseDefinitions.CreateDefault(), Seed = 5, Terrain = MapProfiles.Generate(MapProfiles.Ravine, 5),
+                Campaign = ReleaseCampaign.Create(5, MapProfiles.Ravine, "release-rules-1"),
+            });
+            Assert.IsFalse(old.HasHero);
+            var json = JsonUtility.ToJson(CheckpointCodec.Capture(old, nightStart: true));
+            StringAssert.Contains("\"rulesVersion\":\"release-rules-1\"", json);
+            var back = CheckpointCodec.Restore(JsonUtility.FromJson<RunCheckpoint>(json), ReleaseBuild, out var problem, out var message);
+            Assert.AreEqual(CheckpointProblem.None, problem, message);
+            Assert.AreEqual(("release-rules-1", false), (back.Campaign.RulesVersion, back.HasHero), "never converted to the hero rules");
+            Assert.AreEqual("release-rules-1", CheckpointCodec.Capture(back).rulesVersion, "and it keeps saving as release-rules-1");
+        }
+
+        /// <summary>
+        /// Plan 015: new runs walk (release-rules-3), and a release-rules-2 save keeps its sprint speeds, enemy HP and hero speed
+        /// when it is continued in this build. Fails if the walking tuning leaks into older saves or new runs lose it.
+        /// </summary>
+        [Test]
+        public void ASprintSpeedSaveKeepsItsSpeedsAndNewRunsWalk()
+        {
+            foreach (var (rules, grunt, gruntHp, heroUnits) in new[] { ("release-rules-2", 1.0, 30, 90), (ReleaseCampaign.RulesVersion, 0.3, 45, 48) })
+            {
+                var run = new RunSimulation(new RunConfig
+                {
+                    Definitions = ReleaseBuild.Find(rules, ReleaseCampaign.CampaignId).Definitions, Seed = 5, Terrain = MapProfiles.Generate(MapProfiles.Meadow, 5),
+                    Campaign = ReleaseCampaign.Create(5, MapProfiles.Meadow, rules),
+                });
+                var back = CheckpointCodec.Restore(JsonUtility.FromJson<RunCheckpoint>(JsonUtility.ToJson(CheckpointCodec.Capture(run))), ReleaseBuild, out var problem, out var message);
+                Assert.AreEqual(CheckpointProblem.None, problem, message);
+                Assert.AreEqual((rules, grunt, gruntHp, heroUnits),
+                    (back.Campaign.RulesVersion, back.Definitions.Grunt.SpeedTilesPerSecond, back.Definitions.Grunt.MaxHp, back.Hero.MoveUnits), rules);
+            }
         }
     }
 

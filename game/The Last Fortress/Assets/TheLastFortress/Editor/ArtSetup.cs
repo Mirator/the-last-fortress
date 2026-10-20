@@ -46,11 +46,10 @@ namespace TheLastFortress.Editor
             var cannon = Variant("ArtCannon");
             var watchtower = Variant("ArtWatchtower");
             var repair = Variant("ArtRepairStation");
-            var gate = Variant("ArtGate");
             var walls = new GameObject[6];
             for (var s = 0; s < 6; s++) walls[s] = Variant("ArtWall" + WallShapes[s]);
             var env = new Dictionary<string, GameObject>();
-            foreach (var n in new[] { "ArtPine", "ArtBroadleaf", "ArtBush", "ArtRockLarge", "ArtRockSmall", "ArtReeds", "ArtTuft", "ArtFordStone", "ArtFarIslandA", "ArtFarIslandB" })
+            foreach (var n in new[] { "ArtPine", "ArtBroadleaf", "ArtBush", "ArtRockLarge", "ArtRockSmall", "ArtReeds", "ArtTuft", "ArtFordStone" })
                 env[n] = Variant(n, go =>
                 {
                     // Small props cast no shadow (cheaper, and no dark blots that could read as holes or obstacles).
@@ -58,7 +57,7 @@ namespace TheLastFortress.Editor
                         foreach (var r in go.GetComponentsInChildren<MeshRenderer>()) r.shadowCastingMode = ShadowCastingMode.Off;
                 });
             var direction = CreateDirection(mats, env);
-            if (direction.gate == null) direction.gate = gate;
+            var hero = Variant("ArtHero", AddRig);
 
             foreach (var path in new[] { PrototypeSetup.ContentPath, MvpSetup.ContentPath, ReleaseSetup.ContentPath })
             {
@@ -82,6 +81,7 @@ namespace TheLastFortress.Editor
                 content.raiderArcherPrefab = enemy["RaiderArcher"];
                 content.bomberPrefab = enemy["Bomber"];
                 content.commanderPrefab = enemy["SiegeCommander"];
+                if (path == ReleaseSetup.ContentPath) content.heroPrefab = hero;
                 EditorUtility.SetDirty(content);
             }
 
@@ -98,10 +98,12 @@ namespace TheLastFortress.Editor
                 var path = AssetDatabase.GUIDToAssetPath(guid);
                 var importer = (TextureImporter)AssetImporter.GetAtPath(path);
                 var normal = path.EndsWith("_normal.png");
-                var changed = importer.textureType != (normal ? TextureImporterType.NormalMap : TextureImporterType.Default) || importer.anisoLevel != 4;
+                var detail = path.EndsWith("_detail.png"); // a x2 multiply map: linear, so mid-grey stays exactly 0.5
+                var changed = importer.textureType != (normal ? TextureImporterType.NormalMap : TextureImporterType.Default) || importer.anisoLevel != 4
+                              || importer.sRGBTexture != !(normal || detail);
                 if (!changed) continue;
                 importer.textureType = normal ? TextureImporterType.NormalMap : TextureImporterType.Default;
-                importer.sRGBTexture = !normal;
+                importer.sRGBTexture = !(normal || detail);
                 importer.mipmapEnabled = true;
                 importer.wrapMode = TextureWrapMode.Repeat;
                 importer.filterMode = FilterMode.Trilinear;
@@ -126,12 +128,12 @@ namespace TheLastFortress.Editor
             Color C(int hex) => Palette.Hex(hex);
             var specs = new Dictionary<string, Spec>
             {
-                ["ArtStone"] = new Spec { Tex = "stone", Tint = new Color(0.98f, 0.95f, 0.9f), Tiling = 2f },
-                ["ArtStoneDark"] = new Spec { Tex = "stone", Tint = new Color(0.7f, 0.67f, 0.62f), Tiling = 2.5f },
-                ["ArtTimber"] = new Spec { Tex = "wood", Tint = new Color(0.86f, 0.62f, 0.4f), Tiling = 2f },
-                ["ArtTimberDark"] = new Spec { Tex = "wood", Tint = new Color(0.5f, 0.37f, 0.27f), Tiling = 2f },
-                ["ArtShingle"] = new Spec { Tex = "shingle", Tint = new Color(0.66f, 0.38f, 0.27f), Tiling = 1.6f, Smoothness = 0.18f },
-                ["ArtDoor"] = new Spec { Tex = "wood", Tint = new Color(0.36f, 0.25f, 0.17f), Tiling = 3f },
+                ["ArtStone"] = new Spec { Tex = "stone", Tint = new Color(0.98f, 0.95f, 0.9f), Tiling = 5.7f },
+                ["ArtStoneDark"] = new Spec { Tex = "stone", Tint = new Color(0.7f, 0.67f, 0.62f), Tiling = 7f },
+                ["ArtTimber"] = new Spec { Tex = "wood", Tint = new Color(0.86f, 0.62f, 0.4f), Tiling = 8f },
+                ["ArtTimberDark"] = new Spec { Tex = "wood", Tint = new Color(0.5f, 0.37f, 0.27f), Tiling = 8f },
+                ["ArtShingle"] = new Spec { Tex = "shingle", Tint = new Color(0.66f, 0.38f, 0.27f), Tiling = 5f, Smoothness = 0.18f },
+                ["ArtDoor"] = new Spec { Tex = "wood", Tint = new Color(0.36f, 0.25f, 0.17f), Tiling = 8f },
                 ["ArtIron"] = new Spec { Tint = C(0x4A4D50), Smoothness = 0.42f, Metallic = 0.65f },
                 ["ArtFlame"] = new Spec { Tint = new Color(1f, 0.72f, 0.35f), Emission = new Color(1f, 0.6f, 0.22f) * 3.2f },
                 ["ArtWindow"] = new Spec { Tint = new Color(0.22f, 0.15f, 0.08f), Emission = new Color(1f, 0.66f, 0.32f) * 0.15f },
@@ -144,10 +146,10 @@ namespace TheLastFortress.Editor
                 ["ArtEnemyEyes"] = new Spec { Tint = Palette.WarningCoral, Emission = Palette.WarningCoral * 1.4f },
                 ["ArtFoliage"] = new Spec { Tex = "grass", Tint = new Color(0.62f, 0.72f, 0.48f), Tiling = 3f, Smoothness = 0.08f },
                 ["ArtFoliageDark"] = new Spec { Tex = "grass", Tint = new Color(0.42f, 0.55f, 0.4f), Tiling = 3f, Smoothness = 0.08f },
-                ["ArtRock"] = new Spec { Tex = "stone", Tint = new Color(0.66f, 0.64f, 0.6f), Tiling = 3f, Smoothness = 0.1f },
+                ["ArtRock"] = new Spec { Tex = "rock", Tint = new Color(0.66f, 0.64f, 0.6f), Tiling = 1.3f, Smoothness = 0.1f },
                 ["ArtReed"] = new Spec { Tint = Palette.Hex(0x8C9256), Smoothness = 0.1f },
                 ["ArtFlower"] = new Spec { Tint = new Color(0.93f, 0.88f, 0.72f) },
-                ["ArtPlaster"] = new Spec { Tex = "soil", Tint = new Color(0.98f, 0.95f, 0.88f), Tiling = 2f, Smoothness = 0.06f },
+                ["ArtPlaster"] = new Spec { Tex = "soil", Tint = new Color(0.98f, 0.95f, 0.88f), Tiling = 5f, Smoothness = 0.06f },
                 ["ArtCrop"] = new Spec { Tex = "grass", Tint = new Color(0.66f, 0.74f, 0.42f), Tiling = 3f, Smoothness = 0.08f },
                 ["ArtSoilTilled"] = new Spec { Tex = "soil", Tint = new Color(0.52f, 0.4f, 0.3f), Tiling = 1.5f, Smoothness = 0.06f },
                 ["ArtHay"] = new Spec { Tex = "wood", Tint = new Color(0.95f, 0.82f, 0.5f), Tiling = 4f },
@@ -159,23 +161,15 @@ namespace TheLastFortress.Editor
                 ["ArtArcherCloth"] = new Spec { Tex = "cloth", Tint = Palette.Hex(0x6E7F3A), Tiling = 4f, Emission = Palette.Hex(0x6E7F3A) * 0.4f },
                 ["ArtBomberCloth"] = new Spec { Tex = "cloth", Tint = Palette.Hex(0x3E3A52), Tiling = 4f, Emission = Palette.Hex(0x3E3A52) * 0.4f },
                 ["ArtCommanderCloth"] = new Spec { Tex = "cloth", Tint = Palette.Hex(0x6B3F8C), Tiling = 4f, Emission = Palette.Hex(0x6B3F8C) * 0.5f },
-                ["ArtWarBanner"] = new Spec { Tex = "cloth", Tint = Palette.WarningCoral, Tiling = 3f, Emission = Palette.WarningCoral * 0.25f },
                 ["ArtGolemStone"] = new Spec { Tex = "stone", Tint = Palette.Hex(0x8C877E), Tiling = 3f, Emission = Palette.Hex(0x8C877E) * 0.08f },
                 ["ArtGolemGlow"] = new Spec { Tint = Palette.WarningCoral, Emission = Palette.WarningCoral * 2f },
                 ["ArtEnemyIron"] = new Spec { Tint = new Color(0.27f, 0.28f, 0.3f), Smoothness = 0.38f, Metallic = 0.6f },
                 ["ArtBone"] = new Spec { Tint = new Color(0.86f, 0.82f, 0.7f), Smoothness = 0.2f },
-                ["ArtFarGround"] = new Spec { Tex = "grass", Tint = new Color(0.62f, 0.68f, 0.62f), Tiling = 2f, Smoothness = 0.05f },
-                ["ArtFarCliff"] = new Spec { Tex = "stone", Tint = new Color(0.42f, 0.44f, 0.44f), Tiling = 1f },
-                ["ArtFarFoliage"] = new Spec { Tex = "grass", Tint = new Color(0.4f, 0.5f, 0.44f), Tiling = 3f, Smoothness = 0.05f },
-                ["ArtFarFoliageDark"] = new Spec { Tex = "grass", Tint = new Color(0.3f, 0.4f, 0.38f), Tiling = 3f, Smoothness = 0.05f },
-                ["ArtFarTrunk"] = new Spec { Tint = new Color(0.25f, 0.24f, 0.24f) },
                 ["ArtGround"] = new Spec { Tex = "grass", Tint = Color.white, Tiling = 1f, Smoothness = 0.05f },
                 ["ArtBank"] = new Spec { Tex = "soil", Tint = new Color(0.8f, 0.72f, 0.55f), Tiling = 1f, Smoothness = 0.1f },
-                ["ArtBeach"] = new Spec { Tex = "soil", Tint = new Color(0.9f, 0.83f, 0.66f), Tiling = 1f, Smoothness = 0.08f },
-                ["ArtCliff"] = new Spec { Tex = "stone", Tint = new Color(0.55f, 0.5f, 0.43f), Tiling = 1f },
+                ["ArtCliff"] = new Spec { Tex = "rock", Tint = new Color(0.55f, 0.5f, 0.43f), Tiling = 1.3f },
                 ["ArtRiver"] = new Spec { Tex = "water", NormalOnly = true, Tint = C(0x3B6E8C), Tiling = 1f, Smoothness = 0.82f },
                 ["ArtFord"] = new Spec { Tex = "water", NormalOnly = true, Tint = C(0x6A9DB2), Tiling = 1f, Smoothness = 0.78f },
-                ["ArtSea"] = new Spec { Tex = "water", NormalOnly = true, Tint = new Color(0.25f, 0.4f, 0.47f), Tiling = 1f, Smoothness = 0.7f },
                 ["ArtBridge"] = new Spec { Tex = "wood", Tint = new Color(0.6f, 0.45f, 0.31f), Tiling = 1f },
             };
             var result = new Dictionary<string, Material>();
@@ -224,11 +218,31 @@ namespace TheLastFortress.Editor
 
         // ------------------------------------------------------------ models and prefabs
 
-        static void ConfigureModels(Dictionary<string, Material> mats)
+        /// <summary>
+        /// Plan 012: imports only the hero model (Art/Source~/models_hero.py) and assigns it to the release content, leaving
+        /// every other model, prefab and material untouched. Batch: -executeMethod TheLastFortress.Editor.ArtSetup.RunHero
+        /// </summary>
+        [MenuItem("The Last Fortress/Art/Import and Assign Hero")]
+        public static void RunHero()
+        {
+            PrototypeSetup.EnsureFolder(Prefabs);
+            AssetDatabase.Refresh();
+            ConfigureModels(CreateMaterials(), $"{Models}/ArtHero.fbx");
+            var hero = Variant("ArtHero", AddRig);
+            var content = AssetDatabase.LoadAssetAtPath<PrototypeContent>(ReleaseSetup.ContentPath);
+            if (content == null) throw new FileNotFoundException("Release content missing; run the release setup first.");
+            content.heroPrefab = hero;
+            EditorUtility.SetDirty(content);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Hero imported and assigned to the release content.");
+        }
+
+        static void ConfigureModels(Dictionary<string, Material> mats, string only = null)
         {
             foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { Models }))
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (only != null && path != only) continue;
                 var importer = (ModelImporter)AssetImporter.GetAtPath(path);
                 importer.bakeAxisConversion = true;
                 importer.globalScale = 1f;
@@ -257,6 +271,7 @@ namespace TheLastFortress.Editor
         static readonly Dictionary<string, string> Joints = new Dictionary<string, string>
         {
             ["Torso"] = "Hips", ["Head"] = "Torso", ["ArmL"] = "Torso", ["ArmR"] = "Torso", ["Weapon"] = "ArmR", ["LegL"] = "Hips", ["LegR"] = "Hips",
+            ["ShinL"] = "LegL", ["ShinR"] = "LegR", ["OffHand"] = "ArmL", // plan 013 knees and the hero's shield
             ["Bow"] = "Archer",
         };
 
@@ -303,9 +318,11 @@ namespace TheLastFortress.Editor
             rig.weapon = FindDeep(go.transform, "Weapon");
             rig.legL = FindDeep(go.transform, "LegL");
             rig.legR = FindDeep(go.transform, "LegR");
+            rig.shinL = FindDeep(go.transform, "ShinL");
+            rig.shinR = FindDeep(go.transform, "ShinR");
             // Plan 011 performance: only the torso and legs cast shadows. That is the silhouette that reads on the ground;
             // head, arms, weapon and hips add many small shadow draws per enemy (100+ enemies) for no visible gain.
-            foreach (var part in new[] { rig.head, rig.armL, rig.armR, rig.weapon, rig.hips })
+            foreach (var part in new[] { rig.head, rig.armL, rig.armR, rig.weapon, rig.hips, FindDeep(go.transform, "OffHand") })
                 if (part != null && part.TryGetComponent<MeshRenderer>(out var r)) r.shadowCastingMode = ShadowCastingMode.Off;
         }
 
@@ -337,9 +354,7 @@ namespace TheLastFortress.Editor
             if (d.bank == null) d.bank = mats["ArtBank"];
             if (d.river == null) d.river = mats["ArtRiver"];
             if (d.ford == null) d.ford = mats["ArtFord"];
-            if (d.beach == null) d.beach = mats["ArtBeach"];
             if (d.cliff == null) d.cliff = mats["ArtCliff"];
-            if (d.sea == null) d.sea = mats["ArtSea"];
             if (d.bridge == null) d.bridge = mats["ArtBridge"];
             if (d.pine == null) d.pine = env["ArtPine"];
             if (d.broadleaf == null) d.broadleaf = env["ArtBroadleaf"];
@@ -349,11 +364,46 @@ namespace TheLastFortress.Editor
             if (d.reeds == null) d.reeds = env["ArtReeds"];
             if (d.tuft == null) d.tuft = env["ArtTuft"];
             if (d.fordStone == null) d.fordStone = env["ArtFordStone"];
-            if (d.farIslands == null || d.farIslands.Length == 0) d.farIslands = new[] { env["ArtFarIslandA"], env["ArtFarIslandB"] };
+            if (d.groundBlend == null) d.groundBlend = TerrainMaterial("ArtTerrainGround", "TheLastFortress/Ground", m =>
+            {
+                m.SetTexture("_GrassMap", Tex("grass_albedo"));
+                m.SetTexture("_GrassDetail", Tex("grass_detail"));
+                m.SetTexture("_SoilMap", Tex("soil_albedo"));
+                m.SetTexture("_SandMap", Tex("sand_albedo"));
+                m.SetTexture("_RockMap", Tex("rock_albedo"));
+                m.SetTexture("_NormalMap", Tex("grass_detail_normal"));
+            });
+            if (d.riverWater == null) d.riverWater = TerrainMaterial("ArtRiverWater", "TheLastFortress/Water", m =>
+            {
+                m.SetTexture("_NormalMap", Tex("water_normal"));
+                m.SetColor("_ShallowColor", new Color(0.44f, 0.66f, 0.6f));
+                m.SetColor("_DeepColor", new Color(0.17f, 0.37f, 0.44f));
+                m.SetFloat("_DepthRange", 0.13f);
+                m.SetFloat("_FoamWidth", 0.022f);
+                m.SetFloat("_NormalTiles", 1.7f);
+                m.SetVector("_Flow", new Vector4(0.07f, 0.11f, -0.05f, 0.09f));
+            });
+            if (d.grass == null) d.grass = TerrainMaterial("ArtGrass", "TheLastFortress/Grass", m => m.enableInstancing = true);
             if (d.dayProfile == null) d.dayProfile = Profile("DayProfile", false);
             if (d.nightProfile == null) d.nightProfile = Profile("NightProfile", true);
             EditorUtility.SetDirty(d);
             return d;
+        }
+
+        static Texture2D Tex(string name) => AssetDatabase.LoadAssetAtPath<Texture2D>($"{Textures}/{name}.png");
+
+        /// <summary>A material on one of the Art/Shaders shaders, created once when missing (then owned by whoever tunes it).</summary>
+        static Material TerrainMaterial(string name, string shader, System.Action<Material> fill)
+        {
+            var path = $"{Materials}/{name}.mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m != null) return m;
+            var s = Shader.Find(shader);
+            if (s == null) throw new FileNotFoundException($"Art setup: shader {shader} missing (Art/Shaders).");
+            m = new Material(s) { name = name };
+            fill(m);
+            AssetDatabase.CreateAsset(m, path);
+            return m;
         }
 
         /// <summary>

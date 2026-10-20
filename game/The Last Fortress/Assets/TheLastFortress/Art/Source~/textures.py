@@ -209,7 +209,73 @@ def water():
     save("water_normal", normal_from_height(0.6 * a + 0.4 * b, 6.0))
 
 
+def grass_detail():
+    """Plan 013: close-range grass for the ground shader, multiplied (x2) over the macro map, so it averages to ~0.5 grey.
+    Short blade strokes in random directions, clover-dark clumps and pale dry tips; tiled about every 2.4 tiles, so one
+    tile is ~210 px and the strokes read at the hero's feet while averaging out to a soft texture from the strategic view."""
+    rng = np.random.default_rng(83)
+    h = periodic_noise(rng, SIZE, 60, 2) * 0.3
+    tips = np.zeros((SIZE, SIZE))
+    for _ in range(5200):
+        x, y = rng.uniform(0, SIZE, 2)
+        a = rng.uniform(-0.6, 0.6) + (np.pi / 2 if rng.random() < 0.5 else 0)
+        length = rng.uniform(4, 11)
+        val = rng.uniform(0.55, 1.0)
+        for k in range(int(length)):
+            px = int(x + np.cos(a) * k) % SIZE
+            py = int(y + np.sin(a) * k) % SIZE
+            fade = 1 - k / length
+            h[py, px] = max(h[py, px], val * (0.5 + 0.5 * fade))
+            if k > length * 0.7:
+                tips[py, px] = max(tips[py, px], 0.6)
+    clumps = periodic_noise(rng, SIZE, 22, 2)
+    dark = np.clip((0.4 - clumps) * 4, 0, 1)
+    gray = 0.42 + 0.16 * h - 0.08 * dark
+    r = gray * (0.98 + 0.06 * tips)
+    g = gray * (1.02 - 0.02 * tips)
+    b = gray * (0.92 + 0.02 * tips)
+    rgb = np.dstack([r, g, b])
+    rgb = rgb / rgb.mean() * 0.5
+    save("grass_detail", rgb * 255)
+    save("grass_detail_normal", normal_from_height(h, 2.0))  # blades only: broad clumps read as crumpled paper
+
+
+def sand():
+    """Plan 013: beach and bank sand: fine grain, faint wind ripples and scattered shell/pebble flecks."""
+    rng = np.random.default_rng(89)
+    yy, xx = np.mgrid[0:SIZE, 0:SIZE]
+    warp = periodic_noise(rng, SIZE, 4, 2)
+    ripple = 0.5 + 0.5 * np.sin((yy / SIZE * 2 * np.pi * 18) + warp * 9)
+    fine = periodic_noise(rng, SIZE, 160, 2)
+    flecks = np.clip((periodic_noise(rng, SIZE, 70, 1) - 0.72) * 10, 0, 1)
+    gray = 0.84 + 0.05 * (ripple - 0.5) + 0.12 * (fine - 0.5) + 0.1 * flecks
+    save("sand_albedo", np.dstack([gray, gray * 0.95, gray * 0.84]) * 220)
+
+
+def rock():
+    """Plan 013: island cliffs and rock faces: stepped horizontal strata (side projection) split by vertical joints that
+    shift from layer to layer, with lichen-dark blotches. Reads as layered sandstone from the hero view."""
+    rng = np.random.default_rng(97)
+    yy, xx = np.mgrid[0:SIZE, 0:SIZE]
+    warp = periodic_noise(rng, SIZE, 3, 3)
+    layer_f = (yy / SIZE * 6 + (warp - 0.5) * 1.2) % 6
+    layer = np.floor(layer_f).astype(int)
+    within = layer_f - layer
+    shade = rng.uniform(-1, 1, 6)[layer]
+    lip = np.clip((within - 0.82) * 6, 0, 1)  # the overhanging top of each layer catches light
+    joints = np.zeros((SIZE, SIZE))
+    for l in range(6):
+        for x0 in rng.uniform(0, SIZE, 5):
+            d = np.abs(((xx - x0 + SIZE / 2) % SIZE) - SIZE / 2)
+            joints = np.maximum(joints, np.where(layer == l, np.clip(1 - d / 2.5, 0, 1), 0))
+    blotch = periodic_noise(rng, SIZE, 8, 3)
+    fine = periodic_noise(rng, SIZE, 120, 2)
+    gray = 0.66 + 0.07 * shade + 0.12 * lip - 0.06 * (1 - within) + 0.1 * (fine - 0.5) - 0.3 * joints         - 0.1 * np.clip(blotch - 0.55, 0, 1) * 3
+    save("rock_albedo", np.dstack([gray, gray * 0.97, gray * 0.92]) * 230)
+    save("rock_normal", normal_from_height(within * 0.5 + lip * 0.3 + fine * 0.2 - joints * 0.5, 7.0))
+
+
 if __name__ == "__main__":
-    for f in (stone, wood, shingle, grass, soil, cloth, water):
+    for f in (stone, wood, shingle, grass, soil, cloth, water, grass_detail, sand, rock):
         f()
         print("wrote", f.__name__)

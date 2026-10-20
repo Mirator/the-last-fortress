@@ -1,0 +1,6 @@
+ravine: ravine seed 7: generated (attempt 0) hero at 7,50,13,30
+ravine night: True alive=4
+crossing: crossing seed 7: generated (attempt 0) hero at 7,50,13,30
+crossing night: True alive=4
+meadow: meadow seed 7: generated (attempt 0) hero at 7,50,13,30
+meadow night: True alive=4

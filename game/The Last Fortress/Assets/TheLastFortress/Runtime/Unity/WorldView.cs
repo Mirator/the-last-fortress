@@ -27,7 +27,7 @@ namespace TheLastFortress
     /// while Night is paused or the menu is open. It never drains simulation events: the bootstrap drains once per frame
     /// and hands the same batch to this view and the audio director.
     /// </summary>
-    public sealed class WorldView : MonoBehaviour
+    public sealed partial class WorldView : MonoBehaviour
     {
         /// <summary>Arrow flight time; a kill caused by the shot shows its cue when the arrow lands.</summary>
         public const float ArrowSeconds = 0.18f;
@@ -111,6 +111,9 @@ namespace TheLastFortress
             public GameObject HpBar;
             public GameObject Burn;
 
+            /// <summary>Where the burn flame and the fuse spark sit on the model at size 1; they follow the figure's shown size.</summary>
+            public Vector3 BurnAt, FuseAt;
+
             /// <summary>Bomber fuse spark (shown while lit) and Siege Commander aura ring (always shown while alive).</summary>
             public GameObject Fuse;
 
@@ -132,6 +135,9 @@ namespace TheLastFortress
             /// <summary>Fixed world offset so enemies sharing a lane do not stand inside each other (presentation only, never turns).</summary>
             public Vector3 Offset;
 
+            /// <summary>How much of <see cref="Offset"/> is applied: eases from 0 after the spawn (plan 016 walk-ins).</summary>
+            public float OffsetIn;
+
             /// <summary>Bomber: the wick tip and the hand torch (particle sources), and emission accumulators.</summary>
             public Transform Wick, Torch;
 
@@ -144,6 +150,64 @@ namespace TheLastFortress
             public CharacterRig Rig;
 
             public float LightWind, Hit, HitDelay;
+
+            /// <summary>
+            /// How far (root units) the strike carries the body toward its target (plan 013): enough for the weapon to meet
+            /// the building's face or the hero, whatever the figure's shown size. Presentation only; reach is the simulation's.
+            /// </summary>
+            public float Reach = DefaultReach;
+
+            /// <summary>World width of the HP bar at scale 1 (bar width times the root's enemy scale).</summary>
+            public float BarWidth;
+
+            /// <summary>How far (root units) the engaged figure has walked toward its target's face (eases toward Reach).</summary>
+            public float Approach;
+
+            /// <summary>Last shown velocity (world/s), gait rate and run amount: a body killed by a projectile keeps walking until it lands.</summary>
+            public Vector3 Velocity;
+
+            public float PhasePerTile, Run;
+        }
+
+        const float DefaultReach = 0.12f;
+
+        /// <summary>Standing height of each kind's model in model units (before the enemy and hero-view scales).</summary>
+        static float BodyHeight(EnemyKind kind)
+        {
+            switch (kind)
+            {
+                case EnemyKind.Runner: return 0.55f;
+                case EnemyKind.Brute: return 0.78f;
+                case EnemyKind.Bomber: return 0.52f;
+                case EnemyKind.SiegeCommander: return 0.75f; // a 2.1 m man (plan 014), the banner rises above
+                case EnemyKind.SiegeGolem: return 1.2f;
+                default: return 0.6f;
+            }
+        }
+
+        /// <summary>
+        /// Strike reach in root units for an enemy at <paramref name="at"/> engaging a building or the hero: the gap from its
+        /// weapon's reach (about 0.45 of its shown height) to the building's face (footprint inset 0.07) or the hero's body,
+        /// capped so a long gap reads as a step-in, never a teleport.
+        /// </summary>
+        float ContactReach(RunSimulation sim, Enemy e, EnemyView view, Vector3 at)
+        {
+            var rootScale = Mathf.Max(0.01f, view.Root.transform.localScale.x);
+            var body = BodyHeight(e.Kind) * rootScale * CharacterScale;
+            float gap;
+            if (e.TargetsHero && sim.Hero != null)
+                gap = new Vector2((float)sim.Hero.X - at.x, (float)sim.Hero.Z - at.z).magnitude - 0.1f * CharacterScale;
+            else if (e.TargetBuildingId >= 0 && sim.GetBuilding(e.TargetBuildingId) is Building b)
+            {
+                var size = b.Definition.FootprintSize;
+                const float inset = 0.07f;
+                var dx = Mathf.Max(Mathf.Max(b.Cell.X + inset - at.x, 0f), at.x - (b.Cell.X + size - inset));
+                var dz = Mathf.Max(Mathf.Max(b.Cell.Z + inset - at.z, 0f), at.z - (b.Cell.Z + size - inset));
+                gap = Mathf.Sqrt(dx * dx + dz * dz);
+            }
+            else return DefaultReach * CharacterScale;
+
+            return Mathf.Clamp(gap - 0.45f * body, 0.03f * rootScale * CharacterScale, 0.6f) / rootScale;
         }
 
         sealed class ArrowFx
@@ -155,7 +219,7 @@ namespace TheLastFortress
             /// <summary>Cannon shell: lands with a splash ring of this radius (0 for arrows).</summary>
             public float Splash;
 
-            public float Duration, Arc;
+            public float Duration, Arc, Smoke;
         }
 
         readonly List<Cue> cues = new List<Cue>();
@@ -180,6 +244,49 @@ namespace TheLastFortress
 
         /// <summary>0 = day lighting, 1 = night lighting; eased toward the phase by the presentation clock.</summary>
         public float NightBlend { get; private set; }
+
+        /// <summary>Delay from the hero's swing event to the blade's contact in the shown swing.</summary>
+        public const float HeroBladeDelay = 0.08f;
+
+        readonly List<(int enemy, float left)> pendingSparks = new List<(int, float)>();
+
+        /// <summary>Sparks off enemies the hero's blade reaches, when the shown swing connects (presentation clock).</summary>
+        void EmitHeroSparks(float dt)
+        {
+            for (var i = pendingSparks.Count - 1; i >= 0; i--)
+            {
+                var (id, left) = pendingSparks[i];
+                left -= dt;
+                if (left > 0f)
+                {
+                    pendingSparks[i] = (id, left);
+                    continue;
+                }
+
+                pendingSparks.RemoveAt(i);
+                Vector3 at;
+                if (enemyViews.TryGetValue(id, out var v)) at = v.Root.transform.position;
+                else
+                {
+                    var body = dying.Find(d => d.Id == id); // killed by this swing: sparks at its falling body
+                    if (body == null) continue;
+                    at = body.Root.transform.position;
+                }
+                at += Vector3.up * 0.3f * CharacterScale;
+                for (var k = 0; k < 4; k++)
+                    particles.Emit(at, Vector3.up * particles.Range(0.6f, 1.2f) + particles.InSphere(1.1f), particles.Range(0.15f, 0.3f), 0.03f, 0.008f, Spark, SparkEnd, 6f, 0.5f);
+            }
+        }
+
+        /// <summary>
+        /// Size of the walking figures relative to their model size: true scale against the buildings, the same in both views
+        /// (see <see cref="PrototypeBootstrap.FigureScale"/>).
+        /// </summary>
+        public float CharacterScale { get; set; } = 1f;
+
+        /// <summary>Clear colour of the strategic camera for the current light (kept even while the hero view renders).</summary>
+        public Color? StrategicBackground { get; private set; }
+
 
         /// <summary>Event batches and events received from the bootstrap (diagnostics: one delivery per batch).</summary>
         public int BatchesSeen { get; private set; }
@@ -211,6 +318,11 @@ namespace TheLastFortress
         /// <summary>Local offset of an enemy's animated model (gait/contact), or null when it has no view.</summary>
         public Vector3? EnemyModelOffset(int enemyId) => enemyViews.TryGetValue(enemyId, out var v) ? v.Model.localPosition : (Vector3?)null;
 
+        /// <summary>How far into its walk an enemy's shown gait is (0 standing .. 1 walking), or null when it has no view.</summary>
+        public Vector3? EnemyShownPosition(int enemyId) => enemyViews.TryGetValue(enemyId, out var v) ? v.Root.transform.position : (Vector3?)null;
+
+        public float? EnemyGait(int enemyId) => enemyViews.TryGetValue(enemyId, out var v) ? v.GaitAmount : (float?)null;
+
         PrototypeContent content;
         Light sun;
         Transform buildingsRoot, enemiesRoot, fxRoot;
@@ -238,6 +350,12 @@ namespace TheLastFortress
             public GameObject[] Hide;
 
             public CharacterRig Rig;
+
+            /// <summary>Enemy only: its id (sparks at the blade's contact), and the walk it carried in from life.</summary>
+            public int Id = -1;
+
+            public Vector3 Velocity;
+            public float GaitPhase, GaitAmount, PhasePerTile, Run;
         }
 
         readonly List<Dying> dying = new List<Dying>();
@@ -250,9 +368,12 @@ namespace TheLastFortress
         MaterialPropertyBlock cueBlock;
 
         /// <summary>Enemy fall and building collapse lengths, and the most of them shown at once (oldest finish first).</summary>
-        public const float EnemyDeathSeconds = 0.35f, BuildingCollapseSeconds = 0.45f;
+        public const float EnemyDeathSeconds = 1.15f, BuildingCollapseSeconds = 0.45f;
 
-        public const int MaxDying = 48;
+        /// <summary>An enemy's fall: tipped over by this age, lying still until <see cref="EnemyLieSeconds"/>, then sinking.</summary>
+        const float EnemyFallSeconds = 0.45f, EnemyLieSeconds = 0.85f;
+
+        public const int MaxDying = 96;
 
         public int DyingCount => dying.Count;
         readonly Stack<GameObject> arrowPool = new Stack<GameObject>();
@@ -337,7 +458,7 @@ namespace TheLastFortress
             BuildBoard();
             var keepLightGo = new GameObject("KeepTorchLight");
             keepLightGo.transform.SetParent(transform, false);
-            keepLightGo.transform.position = new Vector3(10.5f, 2.2f, 10.5f);
+            keepLightGo.transform.position = new Vector3(10.5f, 2.7f, 10.5f); // above the real-scale Keep's roof
             keepLight = keepLightGo.AddComponent<Light>();
             keepLight.type = LightType.Point;
             keepLight.color = Palette.Amber;
@@ -352,7 +473,7 @@ namespace TheLastFortress
         ArtDirection art;
 
         /// <summary>Runtime copies of authored materials the view animates (never the assets themselves, so play mode leaves them untouched).</summary>
-        Material windowSource, windowMat, riverMat, fordMat, seaMat;
+        Material windowSource, windowMat, riverMat, fordMat;
 
         UnityEngine.Rendering.Volume dayVolume, nightVolume;
 
@@ -362,14 +483,13 @@ namespace TheLastFortress
         {
             riverMat = art.river != null ? new Material(art.river) : null;
             fordMat = art.ford != null ? new Material(art.ford) : null;
-            seaMat = art.sea != null ? new Material(art.sea) : null;
-            if (seaMat != null) seaMat.SetTextureScale("_BaseMap", Vector2.one * 24f);
             // The window material glows with the night; find it on the Keep so the prefabs need no extra reference.
             if (content.keepPrefab != null)
                 foreach (var r in content.keepPrefab.GetComponentsInChildren<Renderer>(true))
                 foreach (var m in r.sharedMaterials)
                     if (m != null && m.name == "ArtWindow") windowSource = m;
             if (windowSource != null) windowMat = new Material(windowSource);
+            InitializeTerrain();
             dayVolume = CreateVolume("DayVolume", art.dayProfile, 1f);
             nightVolume = CreateVolume("NightVolume", art.nightProfile, 0f);
             var cam = Camera.main;
@@ -419,21 +539,18 @@ namespace TheLastFortress
         {
             var board = new GameObject("Board").transform;
             board.SetParent(transform, false);
-            var ground = Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.1f, 10f), new Vector3(20f, 0.2f, 20f), art?.ground != null ? art.ground : content.grass, "Ground");
-            ground.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            if (art?.ground != null) Tile(ground, art.groundTiling);
-            var edge = Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.45f, 10f), new Vector3(20.4f, 0.5f, 20.4f), art?.cliff != null ? art.cliff : content.timberShadow, "IslandEdge");
-            if (art?.cliff != null) Tile(edge, 8f);
-            var water = Prims.Create(PrimitiveType.Plane, board, new Vector3(10f, -0.3f, 10f), new Vector3(8f, 1f, 8f), seaMat != null ? seaMat : content.water, "DecorativeWater");
-            water.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-            if (content.IsMvp) BuildShoreAndGround(board);
-            if (art?.farIslands != null && art.farIslands.Length > 0)
+            // With authored terrain the ground and water are its meshes, rebuilt per map in SetTerrain; without art (the
+            // prototype scene) a plain plateau stands over a flat water plane.
+            if (!HasTerrain)
             {
-                // Beyond the sea at the four frame corners of the default view: the board sits in a wider world.
-                var spots = new[] { new Vector3(7f, -0.7f, 32f), new Vector3(32f, -0.7f, 7f), new Vector3(-11f, -0.7f, 14f), new Vector3(14f, -0.7f, -11f) };
-                for (var i = 0; i < spots.Length; i++)
-                    Prop(art.farIslands[i % art.farIslands.Length], board, spots[i], i * 83f, 1.1f + 0.1f * i);
+                var ground = Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.1f, 10f), new Vector3(20f, 0.2f, 20f), art?.ground != null ? art.ground : content.grass, "Ground");
+                ground.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                if (art?.ground != null) Tile(ground, art.groundTiling);
+                var edge = Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.45f, 10f), new Vector3(20.4f, 0.5f, 20.4f), art?.cliff != null ? art.cliff : content.timberShadow, "BoardEdge");
+                if (art?.cliff != null) Tile(edge, 8f);
+                var water = Prims.Create(PrimitiveType.Plane, board, new Vector3(10f, -0.3f, 10f), new Vector3(8f, 1f, 8f), content.water, "DecorativeWater");
+                water.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
             }
 
             buildGrid = new GameObject("BuildGrid");
@@ -447,60 +564,6 @@ namespace TheLastFortress
             ring.AddComponent<MeshFilter>().sharedMesh = ReservedRingMesh();
             ring.AddComponent<MeshRenderer>().sharedMaterial = ringMat;
             buildGrid.SetActive(false);
-        }
-
-        /// <summary>Static decoration count (shore pieces and ground patches); bounded and created once per scene.</summary>
-        public int ShoreDecorationCount { get; private set; }
-
-        /// <summary>
-        /// MVP island finish, decoration only: a pale beach ring just above the sea, stones and reeds on it (outside the
-        /// 20 x 20 board, so no legal cell looks blocked), and a few soft dark-grass patches flat on the ground — broad,
-        /// low-contrast shapes rather than per-cell checkerboard noise. Deterministic; never touches the simulation.
-        /// </summary>
-        void BuildShoreAndGround(Transform board)
-        {
-            var sand = art?.beach != null ? art.beach : Prims.Tinted(content.rock, Palette.Hex(0xC9B98F));
-            var reeds = Prims.Tinted(content.foliage, Palette.Hex(0x7E8C4E));
-            var beach = Prims.Create(PrimitiveType.Cube, board, new Vector3(10f, -0.36f, 10f), new Vector3(21.3f, 0.2f, 21.3f), sand, "Beach");
-            beach.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            if (art?.beach != null) Tile(beach, 10f);
-            var shore = new GameObject("Shore").transform;
-            shore.SetParent(board, false);
-            for (var i = 0; i < 64; i++)
-            {
-                // Walk the perimeter of the beach ring (0.2–0.45 outside the island edge).
-                var u = (i + 0.5f) / 64f * 4f;
-                var side = (int)u;
-                var along = (u - side) * 21f - 0.5f;
-                var h = (i * 37 % 11) / 11f; // stable per-piece variation, not gameplay randomness
-                var outward = 20.55f + 0.2f * h;
-                Vector3 p;
-                switch (side)
-                {
-                    case 0: p = new Vector3(along, 0f, -outward + 20f); break;
-                    case 1: p = new Vector3(outward, 0f, along); break;
-                    case 2: p = new Vector3(20f - along, 0f, outward); break;
-                    default: p = new Vector3(-outward + 20f, 0f, 20f - along); break;
-                }
-
-                p.y = -0.26f;
-                if (art?.rockSmall != null && i % 3 != 2)
-                    Prop(i % 3 == 0 ? art.rockSmall : art.reeds, shore, p, 40f * h + i * 17f, 1.2f + 0.6f * h);
-                else if (i % 3 == 0)
-                {
-                    Prims.Create(PrimitiveType.Cube, shore, p + new Vector3(0, 0.06f, 0), new Vector3(0.22f, 0.14f, 0.18f) * (0.8f + 0.5f * h), content.rock, "ShoreStone",
-                        Quaternion.Euler(6f * h, 40f * h + i * 17f, 0f));
-                }
-                else if (i % 3 == 1)
-                {
-                    for (var r = 0; r < 3; r++)
-                        Prims.Create(PrimitiveType.Cube, shore, p + new Vector3((r - 1) * 0.07f, 0.12f + 0.03f * r, (r % 2) * 0.05f), new Vector3(0.03f, 0.26f + 0.06f * r, 0.03f), reeds, "Reed",
-                            Quaternion.Euler((r - 1) * 9f, 0f, (r - 1) * 7f));
-                }
-                else continue;
-
-                ShoreDecorationCount++;
-            }
         }
 
         static Mesh GridLinesMesh()
@@ -567,6 +630,14 @@ namespace TheLastFortress
             terrainMeshes.Clear();
             terrainRoot = null;
             TerrainDecorationCount = 0;
+            if (HasTerrain && map == null)
+            {
+                terrainRoot = new GameObject("Terrain");
+                terrainRoot.transform.SetParent(transform, false);
+                BuildTerrain(null); // flat ground under the title or a map-less run, never a hole
+                return;
+            }
+
             if (map == null || content.foliage == null) return;
             if (poolWater == null) poolWater = riverMat != null ? riverMat : Prims.Tinted(content.water, Palette.Hex(0x3B6E8C));
             terrainRoot = new GameObject("Terrain");
@@ -611,6 +682,7 @@ namespace TheLastFortress
                 TerrainDecorationCount++;
             }
 
+            if (HasTerrain) BuildTerrain(map);
             BuildWater(map);
             if (art != null && art.tuft != null) BuildGroundDetail(map);
         }
@@ -651,7 +723,7 @@ namespace TheLastFortress
 
         /// <summary>
         /// Plan 010 stage 2.1 for the art pass: low tufts (under 0.08, no shadow) on Land cells only, outside a readability
-        /// mask (the reserved ring where entries and gates are, the Keep and its neighbours, water banks, fords and the cells
+        /// mask (the reserved ring where the entries are, the Keep and its neighbours, water banks, fords and the cells
         /// either side of each ford). Reeds and pebbles go in water cells along the banks, which are impassable anyway.
         /// Derived from the played map each run; deterministic; never touches the simulation.
         /// </summary>
@@ -679,13 +751,14 @@ namespace TheLastFortress
                     // Reeds and a pebble on the bank side of some water cells (water is never walkable or buildable).
                     if (hash % 3 != 0 || art.reeds == null) continue;
                     var side = new Vector3(((hash / 3) % 3 - 1) * 0.3f, 0f, ((hash / 9) % 3 - 1) * 0.3f);
-                    Prop(art.reeds, detail, Prims.CellCenter(cell) + side + Vector3.up * WaterY, hash * 7f, 0.9f + hash % 4 * 0.1f);
+                    Prop(art.reeds, detail, Prims.CellCenter(cell) + side + Vector3.up * (HasTerrain ? RiverLevel - 0.03f : WaterY), hash * 7f, 0.9f + hash % 4 * 0.1f);
                     continue;
                 }
 
                 if (map.Cells[i] != TerrainType.Land || GridCoordinates.IsReservedRing(cell) || mask.Contains(cell) || hash >= 22) continue;
                 var offset = new Vector3((hash % 7 - 3) * 0.1f, 0f, (hash % 5 - 2) * 0.12f);
-                groundDetail[cell] = Prop(art.tuft, detail, Prims.CellCenter(cell) + offset, hash * 13f, 1f + (hash % 3) * 0.25f);
+                // True scale next to a 0.22-tile person (plan 013): ankle-high grass, not knee-high; the ground shader carries the rest.
+                groundDetail[cell] = Prop(art.tuft, detail, Prims.CellCenter(cell) + offset, hash * 13f, HasTerrain ? 0.45f + (hash % 3) * 0.1f : 1f + (hash % 3) * 0.25f);
             }
         }
 
@@ -715,8 +788,7 @@ namespace TheLastFortress
         /// <summary>
         /// Water as connected surfaces: a cell's water runs to every side whose neighbor is also water (or a ford / ring
         /// crossing on a Crossing river) and has a sand bank on the others, so rivers read as one stream and pools as ponds.
-        /// Fords get shallow water and stepping stones, ring crossings a bridge, and a river at the board edge spills onto
-        /// the beach. Decoration only: everything stays below the route lines and never touches the simulation.
+        /// Fords get shallow water and stepping stones and ring crossings a bridge. Decoration only: everything stays below the route lines and never touches the simulation.
         /// </summary>
         void BuildWater(TerrainMap map)
         {
@@ -765,7 +837,15 @@ namespace TheLastFortress
                     foreach (var side in new[] { -0.39f, 0.39f })
                         Prims.Create(PrimitiveType.Cube, props, center + (alongZ ? Vector3.forward : Vector3.right) * side + new Vector3(0, 0.055f, 0),
                             alongZ ? new Vector3(1f, 0.03f, 0.05f) : new Vector3(0.05f, 0.03f, 1f), content.timberShadow, "BridgeRail");
-                    if (content.IsMvp) AddOutlet(deep, cell, alongZ);
+                    if (HasTerrain)
+                        foreach (var side in new[] { -0.36f, 0.36f })
+                        foreach (var end in new[] { -0.42f, 0.42f })
+                        {
+                            // Piers down to the carved channel floor: the deck visibly spans the river instead of floating.
+                            var at = center + (alongZ ? Vector3.forward : Vector3.right) * side + across * end;
+                            var pier = Prims.Create(PrimitiveType.Cube, props, new Vector3(at.x, (ChannelFloor + 0.03f) * 0.5f, at.z), new Vector3(0.07f, 0.03f - ChannelFloor, 0.07f), bridgeTimber, "BridgePier");
+                            pier.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                        }
                 }
                 else
                 {
@@ -781,52 +861,10 @@ namespace TheLastFortress
                 }
             }
 
+            if (HasTerrain) return; // channels, banks and water are part of the terrain meshes; only the props above remain
             MeshChild("RiverWater", deep, poolWater);
             MeshChild("Ford", shallow, shallowWater);
             MeshChild("RiverBank", banks, bankSand);
-        }
-
-        /// <summary>Where a river leaves the board: down the island edge and across the beach to the sea.</summary>
-        static void AddOutlet((List<Vector3>, List<int>) mesh, GridPos cell, bool alongZ)
-        {
-            var max = GridCoordinates.Size;
-            Vector3 outward, a, b;
-            if (alongZ)
-            {
-                var edge = cell.Z == 0 ? 0f : max;
-                outward = cell.Z == 0 ? Vector3.back : Vector3.forward;
-                a = new Vector3(cell.X + BankWidth, 0, edge);
-                b = new Vector3(cell.X + 1 - BankWidth, 0, edge);
-            }
-            else
-            {
-                var edge = cell.X == 0 ? 0f : max;
-                outward = cell.X == 0 ? Vector3.left : Vector3.right;
-                a = new Vector3(edge, 0, cell.Z + BankWidth);
-                b = new Vector3(edge, 0, cell.Z + 1 - BankWidth);
-            }
-
-            // ground side (top 0 .. -0.2), island-edge top (0.2 wide at -0.2), its face, then the beach top (-0.26) to the sea
-            (float t, float y)[] profile = { (0.005f, WaterY), (0.005f, -0.195f), (0.205f, -0.195f), (0.205f, -0.25f), (0.75f, -0.25f) };
-            for (var k = 0; k + 1 < profile.Length; k++)
-            {
-                var (t0, y0) = profile[k];
-                var (t1, y1) = profile[k + 1];
-                AddQuadBothSides(mesh.Item1, mesh.Item2, a + outward * t0 + Vector3.up * y0, b + outward * t0 + Vector3.up * y0,
-                    b + outward * t1 + Vector3.up * y1, a + outward * t1 + Vector3.up * y1);
-            }
-        }
-
-        static void AddQuadBothSides(List<Vector3> v, List<int> t, Vector3 a, Vector3 b, Vector3 c, Vector3 d)
-        {
-            // Separate vertices per side: shared ones would get opposite face normals averaged to zero (rendered black).
-            var i = v.Count;
-            v.Add(a); v.Add(b); v.Add(c); v.Add(d);
-            v.Add(a); v.Add(b); v.Add(c); v.Add(d);
-            t.Add(i); t.Add(i + 1); t.Add(i + 2);
-            t.Add(i); t.Add(i + 2); t.Add(i + 3);
-            t.Add(i + 4); t.Add(i + 6); t.Add(i + 5);
-            t.Add(i + 4); t.Add(i + 7); t.Add(i + 6);
         }
 
         void MeshChild(string name, (List<Vector3>, List<int>) data, Material material)
@@ -851,6 +889,8 @@ namespace TheLastFortress
 
         public void ClearAll()
         {
+            pendingSparks.Clear();
+            ClearArrivals();
             foreach (var v in buildingViews.Values) Destroy(v.Root);
             foreach (var v in enemyViews.Values) Destroy(v.Root);
             foreach (var a in arrows)
@@ -916,7 +956,7 @@ namespace TheLastFortress
                         SpawnArrow(e, cannon != null ? (float)sim.SplashRadius(cannon) : 0f, false, muzzle);
                         shotTargets.Add(e.TargetId);
                         shotFlight[e.TargetId] = flight;
-                        if (e.HasPositions) SpawnCue(CueKind.Fire, muzzle ?? Pos(e.FromX, e.FromZ, 2.05f), 0f);
+                        if (e.HasPositions) SpawnCue(CueKind.Fire, muzzle ?? Pos(e.FromX, e.FromZ, 1.0f), 0f);
                         if (muzzle.HasValue) EmitMuzzleBlast(muzzle.Value, shooter.AimDirection);
                         if (shooter != null) shooter.Recoil = 0.14f;
                         if (shooter?.Bow != null && e.HasPositions)
@@ -954,8 +994,9 @@ namespace TheLastFortress
                     case SimEventType.EnemyKilled:
                         // A Tower kill shows when its arrow lands; trap/burn/reflection kills show immediately. One cue per kill.
                         // The body falls when the same projectile lands, never before it.
-                        killDelay[e.SourceId] = shotFlight.TryGetValue(e.SourceId, out var landsIn) ? landsIn : 0f;
-                        if (e.HasPositions) SpawnCue(CueKind.Kill, Pos(e.ToX, e.ToZ, 0.3f), killDelay[e.SourceId]);
+                        killDelay[e.SourceId] = Mathf.Max(shotFlight.TryGetValue(e.SourceId, out var landsIn) ? landsIn : 0f,
+                            pendingSparks.Exists(p => p.enemy == e.SourceId) ? HeroBladeDelay : 0f); // the hero's blade: at its contact
+                        if (e.HasPositions) SpawnCue(CueKind.Kill, Pos(e.ToX, e.ToZ, 0.3f), killDelay[e.SourceId]); // height follows the view (ApplyCue)
                         break;
                     case SimEventType.BuildingDamaged:
                         // Actual damage only (invulnerable fixture targets emit no BuildingDamaged).
@@ -966,6 +1007,24 @@ namespace TheLastFortress
                         {
                             attacker.Lunge = 0.25f;
                             if (sim.GetBuilding(e.TargetId) is Building struck) EmitStrikeImpact(attacker.Root.transform.position, struck);
+                        }
+
+                        break;
+                    case SimEventType.HeroHit:
+                        // The hero's blade connects when the shown swing peaks (~0.08 s in): flinch and sparks then, not before.
+                        if (enemyViews.TryGetValue(e.TargetId, out var bladed))
+                        {
+                            bladed.HitDelay = Mathf.Max(bladed.HitDelay, HeroBladeDelay);
+                            pendingSparks.Add((e.TargetId, HeroBladeDelay));
+                        }
+
+                        break;
+                    case SimEventType.HeroDamaged:
+                        // An enemy's hit on the hero (plan 012): the attacker strikes; an archer's arrow flies to the hero.
+                        if (enemyViews.TryGetValue(e.SourceId, out var heroAttacker))
+                        {
+                            heroAttacker.Lunge = 0.25f;
+                            if (heroAttacker.Enemy.Definition.IsRanged) SpawnArrow(e, 0f, true);
                         }
 
                         break;
@@ -981,12 +1040,17 @@ namespace TheLastFortress
                 }
             }
 
+            var viewer = Camera.main;
+            barViewer = viewer;
+            BarRotation = Quaternion.Euler(0f, viewer != null ? viewer.transform.eulerAngles.y : CameraRig.Yaw, 0f);
             if (riverMat != null) riverMat.SetTextureOffset("_BaseMap", new Vector2(fxTime * 0.02f, fxTime * 0.045f));
             if (fordMat != null) fordMat.SetTextureOffset("_BaseMap", new Vector2(fxTime * 0.03f, fxTime * 0.06f));
-            if (seaMat != null) seaMat.SetTextureOffset("_BaseMap", new Vector2(fxTime * 0.01f, fxTime * 0.016f));
+            TickWater(deltaTime);
             SyncGroundDetail(sim);
             SyncBuildings(sim, deltaTime);
+            SyncArrivals(sim);
             SyncEnemies(sim, deltaTime);
+            EmitHeroSparks(deltaTime);
             UpdateCues(deltaTime); // before arrows: cues spawned by landing arrows this frame start at age zero
             UpdateArrows(deltaTime);
             UpdateDying(deltaTime);
@@ -1048,22 +1112,14 @@ namespace TheLastFortress
                 {
                     SetFill(view.HpFill, fraction);
                     view.HpBar.transform.rotation = BarRotation; // flat to the screen whatever the building's facing
+                    view.HpBar.transform.localScale = Vector3.one * BarScale(view.HpBar.transform.position, 0.84f, 1f);
                 }
 
-                if (view.Flash > 0f)
-                {
-                    view.Flash -= dt;
-                    var s = 1f + Mathf.Clamp01(view.Flash / 0.18f) * 0.06f;
-                    view.Root.transform.localScale = new Vector3(s, 1f / s, s);
-                }
-                else if (view.Recoil > 0f)
-                {
-                    // Firing moment: the Tower briefly rises and settles (presentation only; the shot already happened).
-                    view.Recoil = Mathf.Max(0f, view.Recoil - dt);
-                    var k = Mathf.Sin(view.Recoil / 0.14f * Mathf.PI) * 0.035f;
-                    view.Root.transform.localScale = new Vector3(1f - k * 0.5f, 1f + k, 1f - k * 0.5f);
-                }
-                else if (view.Root.transform.localScale != Vector3.one) view.Root.transform.localScale = Vector3.one;
+                // Buildings never bounce (owner feedback 2026-10-19): no squash on a hit, no rise when a tower fires. Hits read
+                // through impact sparks, the HP bar and the Keep cues; shots through the archer, muzzle and projectile.
+                if (view.Flash > 0f) view.Flash -= dt;
+                if (view.Recoil > 0f) view.Recoil = Mathf.Max(0f, view.Recoil - dt);
+                if (view.Root.transform.localScale != Vector3.one) view.Root.transform.localScale = Vector3.one;
 
                 var damaged = b.Definition.HasHp && fraction < DamagedFraction && b.IsAlive;
                 if (damaged && view.Smoke == null) view.Smoke = CreateSmoke(view.Root.transform, height * 0.7f, 5);
@@ -1105,6 +1161,14 @@ namespace TheLastFortress
                 {
                     view = CreateEnemyView(e);
                     enemyViews[e.Id] = view;
+                    if (TakeArrival(e, out var arrivedFacing, out var arrivedPhase))
+                    {
+                        // Plan 016: it walked in out of the mist; keep its stride and heading through the hand-over.
+                        view.Root.transform.rotation = arrivedFacing;
+                        view.Oriented = true;
+                        view.GaitPhase = arrivedPhase;
+                        view.GaitAmount = 1f;
+                    }
                 }
 
                 var prev = new Vector3((float)e.PrevX, 0f, (float)e.PrevZ);
@@ -1116,6 +1180,8 @@ namespace TheLastFortress
                 Vector3 facing;
                 if (e.TargetBuildingId >= 0 && sim.GetBuilding(e.TargetBuildingId) is Building target)
                     facing = new Vector3((float)target.CenterX, 0f, (float)target.CenterZ) - cur; // a 2x2 target's centre, not its anchor
+                else if (e.TargetsHero && sim.Hero != null)
+                    facing = new Vector3((float)sim.Hero.X, 0f, (float)sim.Hero.Z) - cur;
                 else facing = cur - prev;
                 if (!view.Oriented && facing.sqrMagnitude <= 1e-6f) facing = Prims.CellCenter(GridState.KeepCell) - cur; // standing spawn: face the Keep
                 t.position = pos;
@@ -1128,7 +1194,16 @@ namespace TheLastFortress
                     view.Oriented = true;
                 }
 
-                t.position = pos + view.Offset;
+                // A new enemy eases into its lane offset instead of starting beside where it walked in.
+                view.OffsetIn = Mathf.MoveTowards(view.OffsetIn, 1f, dt * 1.5f);
+                t.position = pos + view.Offset * view.OffsetIn;
+                if (!Mathf.Approximately(view.Model.localScale.x, CharacterScale))
+                {
+                    view.Model.localScale = Vector3.one * CharacterScale;
+                    view.HpBar.transform.localPosition = new Vector3(0f, view.Height * CharacterScale, 0f);
+                    view.Burn.transform.localPosition = view.BurnAt * CharacterScale; // markers keep their size, not their height
+                    if (view.Fuse != null) view.Fuse.transform.localPosition = view.FuseAt * CharacterScale;
+                }
                 // The bar drops when the projectile lands, not when it is fired, then drains over ~0.15 s.
                 if (shotFlight.TryGetValue(e.Id, out var landsIn))
                 {
@@ -1150,6 +1225,8 @@ namespace TheLastFortress
                 if (view.HpBar.activeSelf != showBar) view.HpBar.SetActive(showBar);
                 if (showBar) SetFill(view.HpFill, view.ShownFraction);
                 view.HpBar.transform.rotation = BarRotation;
+                // Strategic: half the old width over true-scale figures; hero view: constant on-screen size.
+                if (showBar) view.HpBar.transform.localScale = Vector3.one * BarScale(view.HpBar.transform.position, view.BarWidth, 0.5f);
                 if (view.Burn.activeSelf != e.Burning) view.Burn.SetActive(e.Burning);
                 if (e.Burning) view.Burn.transform.localScale = BurnSize * (0.8f + 0.25f * Mathf.Sin(fxTime * 18f + e.Id));
                 EmitEnemyFire(view, e.Burning, e.FuseLit, dt);
@@ -1168,7 +1245,7 @@ namespace TheLastFortress
                 }
                 // The hit lands during the step that runs while Tick == AttackDueTick, which comes after the interpolated
                 // frame shown now: hence +1 step. Without it the pose thinks the hit is overdue one step early and drops out.
-                var dueAny = e.TargetBuildingId >= 0 && !e.FuseLit && sim.State == RunState.Night ? (e.AttackDueTick - sim.Tick + 1 - alpha) * PrototypeDefinitions.StepSeconds : double.MaxValue;
+                var dueAny = (e.TargetBuildingId >= 0 || e.TargetsHero) && !e.FuseLit && sim.State == RunState.Night ? (e.AttackDueTick - sim.Tick + 1 - alpha) * PrototypeDefinitions.StepSeconds : double.MaxValue;
                 view.StrikeRise = dueAny >= 0 && dueAny < StrikeRiseSeconds ? 1f - (float)(dueAny / StrikeRiseSeconds) : 0f;
                 var due = heavy ? dueAny : double.MaxValue;
                 var windUp = due >= 0 && due < WindUpSeconds ? 1f - (float)(due / WindUpSeconds) : 0f;
@@ -1177,6 +1254,7 @@ namespace TheLastFortress
                 // Light kinds with a rig raise the weapon over the last 0.3 s instead (same timing source, no delay to the hit).
                 var light = !heavy && dueAny >= 0 && dueAny < LightWindSeconds ? 1f - (float)(dueAny / LightWindSeconds) : 0f;
                 view.LightWind = light >= view.LightWind ? light : Mathf.Max(light, view.LightWind - dt / WindUpReleaseSeconds);
+                view.Reach = (e.TargetBuildingId >= 0 || e.TargetsHero) && !e.Definition.IsRanged && !e.Moving ? ContactReach(sim, e, view, pos + view.Offset) : 0f;
                 AnimateModel(view, pos, dt);
             }
 
@@ -1192,7 +1270,14 @@ namespace TheLastFortress
                 else
                 {
                     StartDying(v.Root, v.Model, false, delay, v.HpBar, v.Burn, v.Fuse, v.Aura);
-                    dying[dying.Count - 1].Rig = v.Rig;
+                    var d = dying[dying.Count - 1];
+                    d.Rig = v.Rig;
+                    d.Id = id;
+                    d.Velocity = v.Velocity;
+                    d.GaitPhase = v.GaitPhase;
+                    d.GaitAmount = v.GaitAmount;
+                    d.PhasePerTile = v.PhasePerTile;
+                    d.Run = v.Run;
                 }
             }
         }
@@ -1268,7 +1353,7 @@ namespace TheLastFortress
         const float CannonAimHoldSeconds = 0.6f;
 
         /// <summary>Parts of the Cannon blockout that traverse; the stone platform and merlons stay square on the grid.</summary>
-        static readonly string[] TurretParts = { "Carriage", "Barrel", "Muzzle", "Wheel", "Shot" };
+        static readonly string[] TurretParts = { "Carriage", "Barrel", "Muzzle", "Wheel" }; // the Shot pile stays on the deck
 
         /// <summary>Moves the gun parts of a Cannon view under one pivot so only the gun turns.</summary>
         static Transform BuildTurret(GameObject root)
@@ -1320,14 +1405,15 @@ namespace TheLastFortress
         {
             switch (kind)
             {
-                case BuildingKind.Keep: return 1.95f;
-                case BuildingKind.Tower: return 2.3f;
-                case BuildingKind.House: return 1.35f;
-                case BuildingKind.Farm: return 0.9f;
-                case BuildingKind.Cannon: return 1.45f;
-                case BuildingKind.Watchtower: return 2.6f;
-                case BuildingKind.RepairStation: return 1.5f;
-                default: return 1.05f;
+                // Just above each model at real scale (plan 014: 1 tile = 8 m, the Keep tallest).
+                case BuildingKind.Keep: return 2.55f;
+                case BuildingKind.Tower: return 1.6f;
+                case BuildingKind.House: return 1.05f;
+                case BuildingKind.Farm: return 0.75f;
+                case BuildingKind.Cannon: return 0.65f;
+                case BuildingKind.Watchtower: return 2.15f;
+                case BuildingKind.RepairStation: return 1.6f;
+                default: return 0.8f;
             }
         }
 
@@ -1351,13 +1437,33 @@ namespace TheLastFortress
                 default: cadence = 3.0f; bob = 0.04f; sway = 6f; break;
             }
 
-            var stride = cadence / Mathf.Max(0.05f, (float)view.Enemy.Definition.SpeedTilesPerSecond);
+            var speed = Mathf.Max(0.05f, (float)view.Enemy.Definition.SpeedTilesPerSecond);
+            var stride = cadence / speed;
+            // Rigged figures step by their shown size (plan 013), so the planted foot keeps pace with the ground in both
+            // views: the large strategic figures walk, the true-scale hero-view figures run with longer strides.
+            var shownHeight = BodyHeight(kind) * view.Root.transform.localScale.x * CharacterScale;
+            var run = view.Rig != null ? CharacterRig.RunAmount(speed, shownHeight) : 0f;
+            var phasePerTile = view.Rig != null ? CharacterRig.PhasePerTile(shownHeight, run) : stride * Mathf.PI;
 
-            var moved = new Vector2(pos.x - view.LastPosition.x, pos.z - view.LastPosition.z).magnitude;
+            var delta = new Vector2(pos.x - view.LastPosition.x, pos.z - view.LastPosition.z);
+            var moved = delta.magnitude;
             view.LastPosition = pos;
+            // Contact (plan 015 review): an engaged figure walks the last gap to the wall face or the hero at its own pace,
+            // with its feet stepping, instead of skating metres on every blow. Presentation only; the hit timing is the event's.
+            var rootScale = Mathf.Max(0.01f, view.Root.transform.localScale.x);
             if (dt > 0f)
             {
-                view.GaitPhase += moved * stride * Mathf.PI;
+                var before = view.Approach;
+                view.Approach = Mathf.MoveTowards(view.Approach, view.Reach, speed / rootScale * dt);
+                moved += Mathf.Abs(view.Approach - before) * rootScale;
+                view.Velocity = new Vector3(delta.x, 0f, delta.y) / dt;
+            }
+
+            view.PhasePerTile = phasePerTile;
+            view.Run = run;
+            if (dt > 0f)
+            {
+                view.GaitPhase += moved * phasePerTile;
                 var walking = moved > 1e-4f;
                 view.GaitAmount = Mathf.MoveTowards(view.GaitAmount, walking ? 1f : 0f, dt * 6f);
                 view.Lunge = Mathf.Max(0f, view.Lunge - dt);
@@ -1366,16 +1472,19 @@ namespace TheLastFortress
             var step = Mathf.Sin(view.GaitPhase);
             // The strike is at its furthest the moment the hit lands (the event), then recovers.
             var strike = Mathf.Max(view.StrikeRise, view.Lunge > 0f ? Mathf.Pow(view.Lunge / 0.25f, 2f) : 0f);
-            var lunge = strike * 0.12f;
+            // The blow itself is a short lean-in (a fifth of the body height); the distance was walked by the approach.
+            var lunge = view.Approach + strike * 0.2f * BodyHeight(kind) * CharacterScale;
             var windUp = view.WindUp * view.WindUp;
+            var size = CharacterScale; // offsets are in root units: they shrink with the hero-view figures
             if (view.Rig != null)
             {
                 // Limbs carry the stride, the strike and the flinch; the whole-body sway stays as a small accent.
-                view.Rig.Pose(view.GaitPhase, view.GaitAmount, strike, Mathf.Max(view.WindUp, view.LightWind), view.Hit, 0f);
+                view.Rig.Pose(view.GaitPhase, view.GaitAmount, strike, Mathf.Max(view.WindUp, view.LightWind), view.Hit, 0f, run, fxTime * 2.1f + view.Enemy.Id);
                 sway *= 0.35f;
-                lunge -= view.Hit * 0.05f;
+                bob = 0f; // the rig's hips bob in the right phase; a whole-body bob lifted the planted feet
+                lunge -= view.Hit * 0.05f * size;
             }
-            view.Model.localPosition = new Vector3(0f, Mathf.Abs(step) * bob * view.GaitAmount, lunge - windUp * 0.08f);
+            view.Model.localPosition = new Vector3(0f, Mathf.Abs(step) * bob * view.GaitAmount * size, lunge - windUp * 0.08f * size);
             view.Model.localRotation = Quaternion.Euler((kind == EnemyKind.Runner ? 6f * view.GaitAmount : 0f) - windUp * 12f, 0f, step * sway * view.GaitAmount);
         }
 
@@ -1388,7 +1497,7 @@ namespace TheLastFortress
             model.name = "Model";
             model.localPosition = Vector3.zero;
             model.localRotation = Quaternion.identity;
-            var height = e.Definition.IsBoss ? 1.75f : e.Kind == EnemyKind.Brute ? 1.05f : e.Definition.IsBomber ? 0.95f : 0.8f;
+            var height = e.Kind == EnemyKind.SiegeGolem ? 1.75f : e.Kind == EnemyKind.Brute || e.Kind == EnemyKind.SiegeCommander ? 1.05f : e.Definition.IsBomber ? 0.95f : 0.8f;
             var width = e.Definition.IsBoss ? 1.0f : e.Kind == EnemyKind.Brute ? 0.7f : 0.5f;
             var bar = CreateBar(root.transform, height, width, hpFillEnemy, out var fill);
             // Burn feedback: a small flickering amber flame above the enemy (shape + motion, not color alone).
@@ -1421,8 +1530,9 @@ namespace TheLastFortress
             return new EnemyView
             {
                 Enemy = e, Root = root, Model = model, HpBar = bar, HpFill = fill, Burn = burn, Fuse = fuse, Aura = aura, Offset = offset,
-                LastPosition = new Vector3((float)sx, 0f, (float)sz) + offset, Height = height, Wick = model.Find("WickTip"), Torch = model.Find("TorchFlame"),
-                Rig = model.GetComponent<CharacterRig>(),
+                BurnAt = burn.transform.localPosition, FuseAt = fuse != null ? fuse.transform.localPosition : Vector3.zero,
+                LastPosition = new Vector3((float)sx, 0f, (float)sz), Height = height, Wick = model.Find("WickTip"), Torch = model.Find("TorchFlame"),
+                Rig = model.GetComponent<CharacterRig>(), BarWidth = (width + 0.04f) * root.transform.localScale.x,
             };
         }
 
@@ -1452,6 +1562,15 @@ namespace TheLastFortress
                 if (d.Delay > 0f)
                 {
                     d.Delay -= dt;
+                    if (!d.Building && dt > 0f)
+                    {
+                        // Until the arrow or shell lands the body keeps walking: no freeze mid-stride, then a snap.
+                        d.Root.transform.position += d.Velocity * dt;
+                        d.BasePosition = d.Root.transform.position;
+                        d.GaitPhase += d.Velocity.magnitude * dt * d.PhasePerTile;
+                        if (d.Rig != null) d.Rig.Pose(d.GaitPhase, d.GaitAmount, 0f, 0f, 0f, 0f, d.Run, 0f);
+                    }
+
                     if (d.Delay > 0f) continue;
                     foreach (var h in d.Hide)
                         if (h != null) h.SetActive(false);
@@ -1475,14 +1594,20 @@ namespace TheLastFortress
                 }
                 else
                 {
-                    if (d.Rig != null) d.Rig.Pose(0f, 0f, 0f, 0f, 1f - t, t); // limbs go slack as the body tips
+                    // Tip over with an ease-in (a falling body starts slow), the stride fading out over the first 0.15 s; lie
+                    // still; then sink into the ground at full size (plan 015 review: it used to drop in 0.1 s and deflate).
+                    var tip = Mathf.Clamp01(d.Age / EnemyFallSeconds);
+                    var fall = 1f - Mathf.Cos(tip * Mathf.PI * 0.5f);
+                    var gait = d.GaitAmount * (1f - Mathf.Clamp01(d.Age / 0.15f));
+                    if (d.Rig != null) d.Rig.Pose(d.GaitPhase, gait, 0f, 0f, 1f - tip, tip, d.Run, 0f); // limbs go slack as the body tips
                     if (d.Model != null)
                     {
-                        d.Model.localRotation = Quaternion.Euler(-80f * Mathf.Sin(t * Mathf.PI * 0.5f), 0f, 0f);
-                        d.Model.localScale = Vector3.one * Mathf.Lerp(1f, 0.6f, ease);
+                        d.Model.localRotation = Quaternion.Euler(-85f * fall, 0f, 0f);
+                        d.Model.localScale = Vector3.one * CharacterScale;
                     }
 
-                    d.Root.transform.position = d.BasePosition + Vector3.down * 0.12f * ease;
+                    var sink = Mathf.Clamp01((d.Age - EnemyLieSeconds) / (EnemyDeathSeconds - EnemyLieSeconds));
+                    d.Root.transform.position = d.BasePosition + Vector3.down * (0.08f * sink * sink * CharacterScale);
                 }
             }
         }
@@ -1527,8 +1652,25 @@ namespace TheLastFortress
             return bar;
         }
 
-        /// <summary>HP bars share the fixed camera's yaw, so they read as horizontal on screen instead of following a world axis.</summary>
-        static readonly Quaternion BarRotation = Quaternion.Euler(0f, CameraRig.Yaw, 0f);
+        /// <summary>
+        /// HP bars share the rendering camera's yaw, so they read as horizontal on screen instead of following a world axis:
+        /// the strategic camera's fixed 45 degrees, or the hero camera's current orbit (updated each sync).
+        /// </summary>
+        Quaternion BarRotation = Quaternion.Euler(0f, CameraRig.Yaw, 0f);
+
+        Camera barViewer;
+
+        /// <summary>
+        /// HP-bar scale (plan 015 review). Strategic camera: <paramref name="strategic"/>. Perspective (hero) camera: a constant
+        /// on-screen width, about 5% of the view height, whatever the distance, so a damaged Wall next to the hero never puts a
+        /// metres-wide slab across the fight. <paramref name="worldWidth"/> is the bar's world width at scale 1.
+        /// </summary>
+        float BarScale(Vector3 at, float worldWidth, float strategic)
+        {
+            if (barViewer == null || barViewer.orthographic) return strategic;
+            var distance = Vector3.Distance(barViewer.transform.position, at);
+            return Mathf.Clamp(distance * 0.05f / Mathf.Max(0.01f, worldWidth), 0.02f, strategic);
+        }
 
         /// <summary>Fastest enemy turn rate (Runner): a 90° corner in 0.125 s. Heavier kinds turn slower.</summary>
         public const float TurnDegreesPerSecond = 720f;
@@ -1592,15 +1734,17 @@ namespace TheLastFortress
             if (!e.HasPositions) return;
             GameObject go;
             if (splash > 0f)
-                go = shellPool.Count > 0 ? shellPool.Pop() : Prims.Create(PrimitiveType.Sphere, fxRoot, Vector3.zero, Vector3.one * 0.22f, glowMat, "Shell");
+                go = shellPool.Count > 0 ? shellPool.Pop() : Prims.Create(PrimitiveType.Sphere, fxRoot, Vector3.zero, Vector3.one * 0.07f, glowMat, "Shell"); // a glowing ball, readable but not 2 m
             else
                 go = arrowPool.Count > 0 ? arrowPool.Pop() : CreateArrow();
             if (splash <= 0f) go.GetComponent<MeshRenderer>().sharedMaterial = enemy ? enemyArrowMat : content.arrow;
             go.SetActive(true);
-            var from = origin ?? (enemy ? Pos(e.FromX, e.FromZ, 0.6f) : Pos(e.FromX, e.FromZ, splash > 0f ? 1.1f : 1.75f));
+            // Launch heights at real scale: a Raider Archer's bow, the archer on the tower's 7 m platform, the gun's muzzle.
+            var from = origin ?? (enemy ? Pos(e.FromX, e.FromZ, 0.6f * CharacterScale) : Pos(e.FromX, e.FromZ, splash > 0f ? 0.3f : 1.0f));
             var a = new ArrowFx
             {
-                Go = go, From = from, To = Pos(e.ToX, e.ToZ, enemy ? 0.8f : 0.35f), Splash = splash,
+                // An enemy arrow at the hero lands at chest height of the shown body; at a building, on its wall.
+                Go = go, From = from, To = Pos(e.ToX, e.ToZ, enemy ? (e.Type == SimEventType.HeroDamaged ? 0.55f * CharacterScale : 0.45f) : 0.35f * CharacterScale), Splash = splash,
                 Duration = splash > 0f ? ShellSeconds : ArrowSeconds, Arc = splash > 0f ? ShellArc : ArrowArc,
             };
             go.transform.position = a.From;
@@ -1629,9 +1773,15 @@ namespace TheLastFortress
 
                 var p = Vector3.Lerp(a.From, a.To, a.T) + Vector3.up * Mathf.Sin(a.T * Mathf.PI) * a.Arc;
                 a.Go.transform.position = p;
-                if (a.Splash > 0f && dt > 0f) // a thin smoke trail behind the shell
-                    particles.Emit(p, Vector3.up * 0.2f + particles.InSphere(0.1f), 0.45f, 0.07f, 0.2f, SmokeLight.WithAlpha(0.4f), SmokeLight.WithAlpha(0f), -0.3f, 1f);
-                var dir = a.To - a.From;
+                if (a.Splash > 0f && dt > 0f) // a thin smoke trail behind the shell, by time (per frame it scaled with frame rate)
+                {
+                    a.Smoke += dt;
+                    for (; a.Smoke >= 0.03f; a.Smoke -= 0.03f)
+                        particles.Emit(p, Vector3.up * 0.15f + particles.InSphere(0.06f), 0.4f, 0.03f, 0.09f, SmokeLight.WithAlpha(0.4f), SmokeLight.WithAlpha(0f), -0.3f, 1f);
+                }
+
+                // Point along the arc (its tangent), not the straight line from bow to target.
+                var dir = a.To - a.From + Vector3.up * (Mathf.Cos(a.T * Mathf.PI) * Mathf.PI * a.Arc);
                 if (dir.sqrMagnitude > 1e-4f) a.Go.transform.rotation = Quaternion.LookRotation(dir);
             }
         }
@@ -1713,6 +1863,10 @@ namespace TheLastFortress
         void ApplyCue(Cue c)
         {
             var t = Mathf.Clamp01(c.Age / CueSeconds[(int)c.Kind]);
+            // Hit flashes and kill shards belong to a figure: in the hero view they shrink with it (plan 013).
+            var figure = c.Kind == CueKind.Hit || c.Kind == CueKind.Kill ? CharacterScale : 1f;
+            if (!Mathf.Approximately(c.Go.transform.localScale.x, figure)) c.Go.transform.localScale = Vector3.one * figure;
+            if (c.Kind == CueKind.Kill) c.Go.transform.position = new Vector3(c.Position.x, c.Position.y * figure, c.Position.z); // chest height of the shown body
             if (c.Kind == CueKind.Hit)
             {
                 c.Parts[0].localScale = Vector3.one * Mathf.Lerp(0.12f, 0.32f, t) * (1f - t * 0.6f);
@@ -1962,6 +2116,7 @@ namespace TheLastFortress
 
             var go = new GameObject("Arrow");
             go.transform.SetParent(fxRoot, false);
+            go.transform.localScale = Vector3.one * 0.3f; // a 1 m arrow at real scale (plan 015 review; the mesh is authored 0.42 long)
             go.AddComponent<MeshFilter>().sharedMesh = arrowMesh;
             var r = go.AddComponent<MeshRenderer>();
             r.sharedMaterial = content.arrow;
@@ -1971,7 +2126,7 @@ namespace TheLastFortress
                 // A short pale streak behind the head so fast arrows read in a crowded fight; part of the pooled arrow,
                 // so it costs nothing per frame (a per-frame particle trail scaled with frame rate).
                 trailMat ??= Prims.Tinted(content.overlay, ArrowTrail);
-                Prims.Create(PrimitiveType.Cube, go.transform, new Vector3(0f, 0f, -0.42f), new Vector3(0.012f, 0.012f, 0.5f), trailMat, "Trail")
+                Prims.Create(PrimitiveType.Cube, go.transform, new Vector3(0f, 0f, -0.62f), new Vector3(0.012f, 0.012f, 0.9f), trailMat, "Trail")
                     .GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             }
 
@@ -2073,8 +2228,8 @@ namespace TheLastFortress
 
         /// <summary>
         /// Authored day/night: trilight ambient (sky, horizon, ground) instead of one flat colour so forms keep their depth,
-        /// warm sun to cool moonlight, softer night shadows, amber settlement light (Keep, tower torches, windows), the sea
-        /// and background darkening, and the day/night post profiles cross-faded. Values live in the ArtDirection asset.
+        /// warm sun to cool moonlight, softer night shadows, amber settlement light (Keep, tower torches, windows), the
+        /// mist and background darkening, and the day/night post profiles cross-faded. Values live in the ArtDirection asset.
         /// </summary>
         void ApplyArtLighting(float t)
         {
@@ -2100,9 +2255,9 @@ namespace TheLastFortress
             // Water loses its daylight colour at night instead of staying saturated blue under the moon.
             if (riverMat != null) riverMat.SetColor("_BaseColor", art.river.GetColor("_BaseColor") * Mathf.Lerp(1f, 0.4f, t));
             if (fordMat != null) fordMat.SetColor("_BaseColor", art.ford.GetColor("_BaseColor") * Mathf.Lerp(1f, 0.45f, t));
-            var sea = Color.Lerp(art.seaColorDay, art.seaColorNight, t);
-            if (seaMat != null) seaMat.SetColor("_BaseColor", sea);
-            if (Camera.main != null) Camera.main.backgroundColor = sea * 0.9f;
+            ApplyTerrainLighting(t);
+            StrategicBackground = MistColor(t); // plan 016: anything the ground misses is mist
+            if (Camera.main != null) Camera.main.backgroundColor = StrategicBackground.Value;
             if (dayVolume != null) dayVolume.weight = 1f - t;
             if (nightVolume != null) nightVolume.weight = t;
             foreach (var v in buildingViews.Values)

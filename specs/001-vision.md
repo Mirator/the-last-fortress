@@ -1,6 +1,6 @@
 # The Last Fortress — vision
 
-Version 2.0, 2026-10-19. Single-player strategy / roguelite / base defense for PC (Steam, Windows), premium. Unity 6.3 LTS (`6000.3.16f1`), URP, project in `game/The Last Fortress/`.
+Version 2.1, 2026-10-20. Single-player strategy / roguelite / base defense for PC (Steam, Windows), premium. Unity 6.3 LTS (`6000.3.16f1`), URP, project in `game/The Last Fortress/`.
 
 This document says what the game is for and what it must protect. It contains no rules or numbers: the current game is described in [002-game-rules.md](002-game-rules.md), and planned changes in their own feature specs (see [README.md](README.md)). Where this document and a rules spec disagree on a concrete rule, the rules spec wins.
 
@@ -43,7 +43,7 @@ Economic and defensive openings should both be viable, depending on the map and 
 
 ## Visual and audio direction
 
-Minimalist, colourful, readable low-poly 3D on a small island. Day is warm and inviting; night is dark with strong contrast and warm torchlight. Buildings are identifiable by shape alone, enemy classes are distinguishable at low zoom, and effects emphasise meaningful attacks rather than filling the screen. Simple rigs or procedural motion. Mood references are in `design/README.md`.
+Minimalist, colourful, readable low-poly 3D; the world beyond the board is lost in mist, and enemies come out of the mist along four roads. Day is warm and inviting; night is dark with strong contrast and warm torchlight. Buildings are identifiable by shape alone, enemy classes are distinguishable at low zoom, and effects emphasise meaningful attacks rather than filling the screen. Simple rigs or procedural motion. Mood references are in `design/README.md`.
 
 Music moves between calm day themes and tense night combat. Sound effects make combat legible (arrows, explosions, wall damage, destruction, placement, incoming attack warnings), and a large approaching threat is audible without watching every edge.
 
@@ -51,7 +51,7 @@ Music moves between calm day themes and tense night combat. Sound effects make c
 
 Candidates, none committed until a feature spec exists:
 
-- A player-controlled hero with a switchable third-person view: specified in [003-third-person-hero.md](003-third-person-hero.md).
+- A player-controlled hero with a switchable third-person view: implemented (game rules section 17); hero progression is a later candidate.
 - Soldiers and Barracks with simple orders (Hold, Move, Attack Target).
 - More biomes and maps, a larger board, flying enemies, more bosses, building upgrade tiers, difficulty modes, challenges and daily seeds.
 - Meta-progression that unlocks strategic options, not large unconditional stat increases; a skilled player wins with the starting set.

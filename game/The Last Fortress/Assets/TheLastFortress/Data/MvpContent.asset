@@ -31,6 +31,7 @@ MonoBehaviour:
   raiderArcherPrefab: {fileID: 7120807620281102858, guid: 9f9fa7a5fe606f6439b0cd5c0fbed5e2, type: 3}
   bomberPrefab: {fileID: 2359386809958955175, guid: 6a50c7ea44548aa46a9def3fd9e3d5e5, type: 3}
   commanderPrefab: {fileID: 5108529738428571984, guid: 988740485a79f2a4898a9c3e59c4f09f, type: 3}
+  heroPrefab: {fileID: 0}
   wallShapePrefabs:
   - {fileID: 1818984170239210886, guid: fe749c50637e0b246969e2ba5654df01, type: 3}
   - {fileID: 5246436114326698459, guid: 471a064dd18e92f4d9335a1aa8a0864c, type: 3}

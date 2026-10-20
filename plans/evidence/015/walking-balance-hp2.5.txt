@@ -1,0 +1,2 @@
+First try, HP x2.5 (same script):
+release-rules-3 kill-zone: 2/8, corridor: 0/8, economy: 0/8

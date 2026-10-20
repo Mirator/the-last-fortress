@@ -138,6 +138,10 @@ namespace TheLastFortress
         public int RouteIndex;
 
         public int TargetBuildingId = -1;
+
+        /// <summary>Melee or ranged enemy whose current target is the hero (then <see cref="TargetBuildingId"/> is -1).</summary>
+        public bool TargetsHero;
+
         public long AttackDueTick;
 
         /// <summary>Bomber: fuse lit at its attack cell; it never moves or retargets again and detonates at <see cref="DetonateTick"/>.</summary>

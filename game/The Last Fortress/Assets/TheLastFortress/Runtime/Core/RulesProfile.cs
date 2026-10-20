@@ -20,7 +20,7 @@ namespace TheLastFortress
         public IReadOnlyList<string> PerkPool;
         public IReadOnlyList<BuildingKind> PurchasableKinds;
 
-        public bool IsRelease => RulesVersion == ReleaseCampaign.RulesVersion;
+        public bool IsRelease => ReleaseCampaign.IsReleaseRules(RulesVersion);
 
         public static readonly BuildingKind[] MvpKinds =
             { BuildingKind.Wall, BuildingKind.Tower, BuildingKind.House, BuildingKind.Farm, BuildingKind.SpikeTrap };
@@ -40,7 +40,23 @@ namespace TheLastFortress
 
         public static RulesProfile TwelveNights(PrototypeDefinitions defs) => new RulesProfile
         {
-            RulesVersion = ReleaseCampaign.RulesVersion, CampaignId = ReleaseCampaign.CampaignId, Label = ReleaseCampaign.Label,
+            RulesVersion = ReleaseCampaign.RulesV1, CampaignId = ReleaseCampaign.CampaignId, Label = ReleaseCampaign.Label,
+            ContentVersion = ReleaseCampaign.ContentVersion, Schema = RunCheckpoint.CurrentSchema, Definitions = defs,
+            PerkPool = PerkRules.ReleaseIds, PurchasableKinds = ReleaseKinds,
+        };
+
+        /// <summary>Twelve nights with the hero at real-scale speeds (release-rules-3): every new release run.</summary>
+        public static RulesProfile TwelveNightsWalking(PrototypeDefinitions defs) => new RulesProfile
+        {
+            RulesVersion = ReleaseCampaign.RulesV3, CampaignId = ReleaseCampaign.CampaignId, Label = ReleaseCampaign.Label,
+            ContentVersion = ReleaseCampaign.ContentVersion, Schema = RunCheckpoint.CurrentSchema, Definitions = ReleaseCampaign.Walking(defs),
+            PerkPool = PerkRules.ReleaseIds, PurchasableKinds = ReleaseKinds,
+        };
+
+        /// <summary>Twelve nights with the player hero (release-rules-2): kept so saves from before release-rules-3 continue.</summary>
+        public static RulesProfile TwelveNightsHero(PrototypeDefinitions defs) => new RulesProfile
+        {
+            RulesVersion = ReleaseCampaign.RulesV2, CampaignId = ReleaseCampaign.CampaignId, Label = ReleaseCampaign.Label,
             ContentVersion = ReleaseCampaign.ContentVersion, Schema = RunCheckpoint.CurrentSchema, Definitions = defs,
             PerkPool = PerkRules.ReleaseIds, PurchasableKinds = ReleaseKinds,
         };

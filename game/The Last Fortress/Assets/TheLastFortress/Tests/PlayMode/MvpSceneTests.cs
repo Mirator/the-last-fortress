@@ -78,6 +78,8 @@ namespace TheLastFortress.Tests
         {
             Assert.IsTrue(game.MenuOpen, "the MVP opens on its menu");
             game.NewRun(1, flat: true);
+            // The default view is close (plan 014); this scenario needs the whole board: entry marker on screen, cell (5,5) clickable.
+            game.CameraRig.SetView(CameraRig.DefaultFocus, 10.5f);
             yield return null;
             Assert.IsTrue(game.IsMvp);
             Assert.IsTrue(game.Sim.IsCampaign);
@@ -287,10 +289,10 @@ namespace TheLastFortress.Tests
             panel.Find("CamerashakeonKeephits>Button").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
             panel.Find("SavesettingsButton").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
             Assert.AreEqual(1.5f, game.CameraRig.Sensitivity, 1e-4f, "applied");
-            Assert.IsFalse(game.CameraRig.ShakeEnabled);
+            Assert.IsTrue(game.CameraRig.ShakeEnabled, "shake is off by default; the toggle turned it on");
             var stored = game.Persistence.Store.ReadSettings(out var problem);
             Assert.IsNull(problem);
-            Assert.AreEqual((1.5f, false), (stored.cameraSensitivity, stored.cameraShake), "persisted separately from the run");
+            Assert.AreEqual((1.5f, true), (stored.cameraSensitivity, stored.cameraShake), "persisted separately from the run");
 
             // Master volume to zero: real silence at once (preview), persisted on save.
             for (var i = 0; i < 12; i++) panel.Find("Mastervolume<Button").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
@@ -311,13 +313,14 @@ namespace TheLastFortress.Tests
             Assert.IsTrue(game.StartNight());
             var first = game.Sim.Enemies[0];
 
-            // Gait follows real movement: the walking Grunt's model bobs while its root stays on the simulated position.
+            // Gait follows real movement: the walking Grunt's legs carry a gait (plan 015: its hips bob, not the whole model,
+            // which lifted the planted feet) while its root stays on the simulated position.
             var maxBob = 0f;
             for (var i = 0; i < 12; i++)
             {
                 game.Sim.Step();
                 game.SyncViews(0.05f);
-                maxBob = Mathf.Max(maxBob, game.World.EnemyModelOffset(first.Id)?.y ?? 0f);
+                maxBob = Mathf.Max(maxBob, game.World.EnemyGait(first.Id) ?? 0f);
             }
 
             Assert.Greater(maxBob, 0.001f, "moving enemy shows a gait");

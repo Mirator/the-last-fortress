@@ -9,7 +9,7 @@ namespace TheLastFortress
     public sealed partial class HudView : MonoBehaviour
     {
         PrototypeBootstrap game;
-        Font font;
+        Font font, headingFont;
         RectTransform canvasRect;
 
         sealed class BuildCard
@@ -84,6 +84,7 @@ namespace TheLastFortress
         {
             this.game = game;
             font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            headingFont = HeadingFont() ?? font;
             if (panelSprite == null) panelSprite = SlicedSprite("HudPanel", 0.86f, 0.72f, 0.95f);
             if (buttonSprite == null) buttonSprite = SlicedSprite("HudButton", 1f, 0.8f, 1f);
 
@@ -414,10 +415,11 @@ namespace TheLastFortress
             if (!show) return;
             var paused = sim.State == RunState.Night && sim.Paused;
             speedButtons[0].interactable = sim.State == RunState.Night;
+            for (var i = 2; i < speedButtons.Length; i++) speedButtons[i].interactable = !game.HeroViewActive; // 1x only in the hero view
             for (var i = 0; i < speedButtons.Length; i++)
             {
                 var lit = i == 0 ? paused : !paused && game.GameSpeed == PrototypeBootstrap.GameSpeeds[i - 1];
-                speedButtons[i].image.color = lit ? Palette.Amber : Palette.Hex(0x35525C);
+                speedButtons[i].image.color = (lit ? Palette.Amber : Palette.Hex(0x35525C)).WithAlpha(speedButtons[i].interactable ? 1f : 0.35f);
                 speedLabels[i].color = lit ? Palette.HudSurface : Palette.HudText;
             }
         }
@@ -449,7 +451,8 @@ namespace TheLastFortress
 
                     break;
                 case RunState.Night:
-                    Set(stateText, sim.Paused ? $"NIGHT{nightTag} — PAUSED" : $"NIGHT{nightTag}  {sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture)}s{(game.GameSpeed > 1 ? $"  ·  {game.GameSpeed}×" : "")}");
+                    var clock = sim.NightElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture);
+                    Set(stateText, sim.Paused ? $"NIGHT{nightTag}  {clock}s — PAUSED" : $"NIGHT{nightTag}  {clock}s{(game.GameSpeed > 1 ? $"  ·  {game.GameSpeed}×" : "")}");
                     Set(infoText, $"Enemies alive {sim.AliveEnemyCount} · still to come {sim.ScheduledRemaining}");
                     break;
                 case RunState.Reward:
@@ -490,8 +493,9 @@ namespace TheLastFortress
 
             // Build cards
             var canBuild = sim.State == RunState.Day && !sim.StressMode;
-            // Nothing can be built at Night: the cards fade to a faint, click-through strip so they do not hide the fight.
-            var nightCards = sim.State == RunState.Night && game.IsMvp;
+            // Building is closed at Night, during the reward choice and after the run ends: the cards fade out and click through,
+            // so they never cover the fight at the close default zoom (plan 015 review).
+            var nightCards = game.IsMvp && (sim.State == RunState.Night || sim.State == RunState.Reward || sim.IsTerminal);
             cardGroup.alpha = Mathf.MoveTowards(cardGroup.alpha, nightCards ? NightCardAlpha : 1f, Time.unscaledDeltaTime * 4f);
             cardGroup.blocksRaycasts = !nightCards;
             foreach (var card in cards)
@@ -575,19 +579,16 @@ namespace TheLastFortress
                     ? $"{def.DisplayName}{size} — {price} gold\nOK: can build here{extra}{detail}"
                     : $"{def.DisplayName}{size} — {price} gold\nCan't build: {PlacementText.Describe(overlay.GhostRejection)}");
                 tooltipText.color = overlay.GhostValid ? Palette.HudText : Palette.WarningCoral;
-                var anchor = player.HoverOverride.HasValue ? rig.CellToScreen(player.HoverOverride.Value) : player.PointerPosition;
+                var anchor = player.HoverOverride.HasValue ? (Vector2)ProjectToScreen(Prims.CellCenter(player.HoverOverride.Value)) : player.PointerPosition;
                 if (game.IsMvp) PlaceTooltip(ScreenToCanvas(anchor));
                 else tooltipRect.anchoredPosition = ScreenToCanvas(anchor) + new Vector2(28, -12);
             }
 
             // Breach label
-            var showBreach = overlay.BreachMarkerVisible;
+            var breach = overlay.BreachMarkerVisible ? ProjectToScreen(overlay.BreachMarkerPosition + Vector3.up * 1.3f) : Vector3.back;
+            var showBreach = overlay.BreachMarkerVisible && breach.z > 0f; // never pointing at something behind the camera
             if (breachLabel.activeSelf != showBreach) breachLabel.SetActive(showBreach);
-            if (showBreach)
-            {
-                var p = rig.Camera.WorldToScreenPoint(overlay.BreachMarkerPosition + Vector3.up * 1.3f);
-                breachRect.anchoredPosition = ScreenToCanvas(new Vector2(p.x, p.y));
-            }
+            if (showBreach) breachRect.anchoredPosition = ScreenToCanvas(new Vector2(breach.x, breach.y));
 
             if (stressBanner.activeSelf != sim.StressMode) stressBanner.SetActive(sim.StressMode);
 
@@ -648,7 +649,7 @@ namespace TheLastFortress
         CanvasGroup cardGroup;
 
         /// <summary>Build-card opacity during Night (MVP scenes).</summary>
-        public const float NightCardAlpha = 0.18f;
+        public const float NightCardAlpha = 0f;
 
         public float CardBarAlpha => cardGroup.alpha;
 
@@ -753,6 +754,9 @@ namespace TheLastFortress
             return scale > 0 ? screen / scale : screen;
         }
 
+        /// <summary>World point to screen with the camera that is rendering (strategic or hero view); z below 0 is behind it.</summary>
+        Vector3 ProjectToScreen(Vector3 world) => (game != null ? game.ActiveCamera : Camera.main).WorldToScreenPoint(world);
+
         static void Set(Text t, string value)
         {
             if (t.text != value) t.text = value;
@@ -789,6 +793,19 @@ namespace TheLastFortress
             var line = accent.gameObject.AddComponent<Image>();
             line.color = Palette.Amber.WithAlpha(0.45f);
             line.raycastTarget = false;
+            foreach (var end in new[] { 0f, 1f })
+            {
+                // Small amber diamonds cap the rule: the one heraldic touch, kept tiny so it never competes with content.
+                var cap = new GameObject("AccentCap", typeof(RectTransform)).GetComponent<RectTransform>();
+                cap.SetParent(accent, false);
+                cap.anchorMin = cap.anchorMax = new Vector2(end, 0.5f);
+                cap.sizeDelta = new Vector2(6f, 6f);
+                cap.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                var capImage = cap.gameObject.AddComponent<Image>();
+                capImage.color = Palette.Amber.WithAlpha(0.7f);
+                capImage.raycastTarget = false;
+            }
+
             return rt;
         }
 
@@ -827,11 +844,23 @@ namespace TheLastFortress
             return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(radius + 3, radius + 3, radius + 3, radius + 3));
         }
 
+        /// <summary>
+        /// Plan 013 typography: large headings (30 px and up) use a book serif already installed with Windows, for a restrained
+        /// medieval accent; nothing is shipped or downloaded. Body text keeps the engine's bundled font, so layouts are unchanged.
+        /// </summary>
+        static Font HeadingFont()
+        {
+            var installed = new System.Collections.Generic.HashSet<string>(Font.GetOSInstalledFontNames());
+            foreach (var name in new[] { "Palatino Linotype", "Book Antiqua", "Georgia" })
+                if (installed.Contains(name)) return Font.CreateDynamicFontFromOSFont(name, 32);
+            return null;
+        }
+
         Text Label(Transform parent, string name, int size, TextAnchor align, Vector2 position, Vector2 box, Color color, bool centered = false)
         {
             var rt = Rect(parent, name, centered ? new Vector2(0.5f, 1) : new Vector2(0, 1), position, box);
             var t = rt.gameObject.AddComponent<Text>();
-            t.font = font;
+            t.font = size >= 30 ? headingFont : font;
             t.fontSize = size;
             t.alignment = align;
             t.color = color;

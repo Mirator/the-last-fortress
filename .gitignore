@@ -30,3 +30,6 @@
 # OS
 Thumbs.db
 .DS_Store
+
+# Python bytecode (Blender art sources)
+__pycache__/

@@ -1,8 +1,8 @@
 # Plan 012 — Third-person hero and switchable views
 
-Status: **TODO** (planned 2026-10-19 at `4b5baba`). Priority P1. Effort L, staged (rough: 3-5 weeks for one agent-driven developer, most of it in Stages 3-4).
+Status: **IMPLEMENTED** 2026-10-19, see [012-results.md](012-results.md) (planned at `4b5baba`). Priority P1. Effort L, staged (rough: 3-5 weeks for one agent-driven developer, most of it in Stages 3-4).
 
-Implements [specs/003-third-person-hero.md](../specs/003-third-person-hero.md) (version 0.1 with owner decisions 1-12, 2026-10-19) on top of [specs/002-game-rules.md](../specs/002-game-rules.md). The spec is the contract; this plan only orders the work and names files. If the code and the spec disagree in a way this plan does not cover, stop and ask the owner (root `AGENTS.md`).
+Implements [specs/003-third-person-hero.md](../specs/archive/006-third-person-hero.md) (archived as `specs/archive/006-third-person-hero.md` after implementation; rules now in `specs/002-game-rules.md` section 17) (version 0.1 with owner decisions 1-12, 2026-10-19) on top of [specs/002-game-rules.md](../specs/002-game-rules.md). The spec is the contract; this plan only orders the work and names files. If the code and the spec disagree in a way this plan does not cover, stop and ask the owner (root `AGENTS.md`).
 
 Paths below are relative to `game/The Last Fortress/Assets/TheLastFortress/` unless they start with `specs/` or `plans/`. Line anchors are from `4b5baba` and will drift.
 

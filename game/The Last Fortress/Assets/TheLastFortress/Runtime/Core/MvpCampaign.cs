@@ -27,7 +27,10 @@ namespace TheLastFortress
 
         public string Difficulty = "standard";
 
-        public bool IsRelease => RulesVersion == ReleaseCampaign.RulesVersion;
+        public bool IsRelease => ReleaseCampaign.IsReleaseRules(RulesVersion);
+
+        /// <summary>The run has the player hero (release-rules-2, specs/003).</summary>
+        public bool HasHero => ReleaseCampaign.HasHero(RulesVersion);
 
         public int TotalNights => Nights.Count;
     }

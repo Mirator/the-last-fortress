@@ -98,12 +98,13 @@ namespace TheLastFortress.Tests
             Assert.AreEqual(8, RulesProfile.ReleaseKinds.Count(k => game.Hud.CardFor(k).gameObject.activeSelf), "all eight build cards");
 
             // A custom stored night with every 008 threat, loaded through the real save path.
-            // The Bomber comes from the undefended east so it lives to light its fuse; the rest walk into the Cannon.
+            // The Bomber and the Raider Archer come from the undefended east so they live to light a fuse and to shoot (at
+            // release-rules-3 walking speed an archer crossing the Cannon's cover dies first); the rest walk into the Cannon.
             var wave = new WavePlan("threats", new[]
             {
                 new SpawnEntry(0, MvpCampaign.West, 0, EnemyKind.Grunt), new SpawnEntry(0, MvpCampaign.West, 0, EnemyKind.Grunt),
                 new SpawnEntry(0, MvpCampaign.West, 0, EnemyKind.Grunt), new SpawnEntry(10, MvpCampaign.East, 1, EnemyKind.Bomber),
-                new SpawnEntry(10, MvpCampaign.West, 0, EnemyKind.Archer), new SpawnEntry(20, MvpCampaign.West, 0, EnemyKind.SiegeCommander),
+                new SpawnEntry(10, MvpCampaign.East, 1, EnemyKind.Archer), new SpawnEntry(20, MvpCampaign.West, 0, EnemyKind.SiegeCommander),
             }, new[] { MvpCampaign.West, MvpCampaign.East });
             var campaign = new CampaignConfig
             {
@@ -210,15 +211,15 @@ namespace TheLastFortress.Tests
         }
 
         [UnityTest]
-        public IEnumerator GatesStandAtTonightsEntriesAndChevronsFlowTowardTheKeep()
+        public IEnumerator EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep()
         {
             game.NewRun(7, false); // a turned board: Night 1 does not come from the West
             yield return null;
             var entries = game.Sim.Wave.EntryCells;
-            Assert.AreEqual(entries.Count, game.Overlay.VisibleGateCount);
-            var gate = game.Overlay.GatePosition(0);
-            Assert.Less(Vector3.Distance(gate, Prims.CellCenter(entries[0], gate.y)), 1.2f, "the gate stands at tonight's entry");
-            Assert.IsTrue(gate.x < 0f || gate.x > 20f || gate.z < 0f || gate.z > 20f, "on the beach, never on a legal cell");
+            Assert.AreEqual(entries.Count, game.Overlay.VisibleEntryCount);
+            var marker = game.Overlay.EntryMarkerPosition(0);
+            Assert.Less(Vector3.Distance(marker, Prims.CellCenter(entries[0], marker.y)), 1.2f, "the marker stands at tonight's entry");
+            Assert.IsTrue(marker.x < 0f || marker.x > 20f || marker.z < 0f || marker.z > 20f, "its torch on the road, never on a legal cell");
 
             Assert.Greater(game.Overlay.VisibleChevronCount, 3);
             var keep = Prims.CellCenter(GridState.KeepCell);
@@ -232,7 +233,130 @@ namespace TheLastFortress.Tests
             Assert.Greater(toward, 0f, "chevrons point from the entries toward the Keep, not back out");
             Assert.IsTrue(game.StartNight());
             yield return null;
-            Assert.AreEqual((entries.Count, 0), (game.Overlay.VisibleGateCount, game.Overlay.VisibleChevronCount), "gates stay at Night; route chevrons are a Day preview");
+            Assert.AreEqual((entries.Count, 0), (game.Overlay.VisibleEntryCount, game.Overlay.VisibleChevronCount), "entry markers stay at Night; route chevrons are a Day preview");
+        }
+
+        /// <summary>
+        /// Plan 016: an enemy walks in out of the mist along its road before it spawns, and the real enemy takes over where
+        /// the walk-in stood, without a pop (a missed hand-over would jump by the lane offset or the whole road).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator EnemiesWalkInAlongTheRoadAndTakeOverWithoutAJump()
+        {
+            game.NewRun(7, false);
+            game.AutoAdvance = false;
+            yield return null;
+            Assert.IsTrue(game.StartNight());
+            var spawn = game.Sim.Wave.Spawns[3]; // a few spawns in: long enough after the start to walk the whole road
+            var early = spawn.Tick - 60;
+            for (var i = 0; i < 400 && game.Sim.Tick < early; i++) game.AdvanceSimulation(0.05f);
+            yield return null;
+            var walking = game.World.ArrivalShownPosition(3);
+            Assert.IsTrue(walking.HasValue, "three seconds before its spawn the enemy is already walking in");
+            var entry = Prims.CellCenter(spawn.Cell);
+            Assert.Greater(Vector2.Distance(new Vector2(walking.Value.x, walking.Value.z), new Vector2(entry.x, entry.z)), 0.4f, "out on the road, not at the entry yet");
+
+            // One step and one frame at a time, until the step that spawns it: remember where the walk-in was drawn last.
+            Vector3? last = null;
+            for (var i = 0; i < 200 && game.Sim.SpawnedCount <= 3; i++)
+            {
+                last = game.World.ArrivalShownPosition(3);
+                game.AdvanceSimulation(0.05f);
+                if (game.Sim.SpawnedCount <= 3) yield return null;
+            }
+
+            Assert.IsTrue(last.HasValue, "it walked until its spawn");
+            Assert.AreEqual(4, game.Sim.SpawnedCount);
+            var enemy = game.Sim.Enemies[game.Sim.Enemies.Count - 1];
+            yield return null;
+            var shown = game.World.EnemyShownPosition(enemy.Id);
+            Assert.IsTrue(shown.HasValue);
+            Assert.IsFalse(game.World.ArrivalShownPosition(3).HasValue, "the walk-in is gone once the enemy exists");
+            Assert.Less(Vector2.Distance(new Vector2(shown.Value.x, shown.Value.z), new Vector2(last.Value.x, last.Value.z)), 0.06f,
+                "the enemy appears where its walk-in stood");
+        }
+
+        /// <summary>
+        /// Plan 012: switching views is presentation only (specs/003 3.1). An untoggled twin restored from the same Start
+        /// Night checkpoint must stay identical while Tab is pressed repeatedly, at 3x and while paused; the hero view locks
+        /// 1x without resuming a pause. In the hero view, held W moves the hero and F leaves the speed alone.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator SwitchingViewsNeverChangesTheNightAndTheHeroMovesWithInput()
+        {
+            static string Snapshot(RunSimulation s) => System.Text.RegularExpressions.Regex.Replace(s.CaptureSnapshot(), @" acc=\d+", "");
+            game.NewRun(11, false);
+            game.AutoAdvance = false;
+            yield return null;
+            Assert.IsTrue(game.Sim.HasHero, "every new release run has the hero");
+            var json = JsonUtility.ToJson(CheckpointCodec.Capture(game.Sim, nightStart: true));
+            var twin = CheckpointCodec.Restore(JsonUtility.FromJson<RunCheckpoint>(json), game.Catalog, out var problem, out var message);
+            Assert.AreEqual(CheckpointProblem.None, problem, message);
+            Assert.IsTrue(game.StartNight());
+            Assert.IsTrue(twin.StartNight());
+            game.Hud.SpeedButton(3).onClick.Invoke();
+            game.Player.HeroInputOverride = HeroCommand.None; // the same (absent) command in both views: only presentation differs
+
+            for (var frame = 0; frame < 160 && game.Sim.State == RunState.Night; frame++)
+            {
+                if (frame % 9 == 0)
+                {
+                    var wasPaused = game.Sim.Paused;
+                    yield return Press(Key.Tab);
+                    Assert.AreEqual(wasPaused, game.Sim.Paused, "a switch never pauses or resumes");
+                    if (game.HeroViewActive) Assert.AreEqual(1, game.GameSpeed, "the hero view runs at 1x");
+                }
+
+                if (frame == 40 || frame == 70) game.TogglePause();
+                if (frame == 100 && !game.HeroViewActive) game.Hud.SpeedButton(3).onClick.Invoke();
+                var steps = game.AdvanceSimulation(0.1f);
+                for (var i = 0; i < steps; i++) twin.Step(HeroCommand.None);
+                game.SyncViews(0.1f);
+            }
+
+            Assert.AreEqual(Snapshot(twin), Snapshot(game.Sim), "toggling views changed the simulation");
+
+            // A fresh Day (the undefended night above may have ended): the hero walks on its own Day clock.
+            game.Player.HeroInputOverride = null;
+            game.NewRun(12, false);
+            yield return null;
+            Assert.IsFalse(game.HeroViewActive, "a new run starts in the strategic view");
+            yield return Press(Key.Tab);
+            Assert.IsTrue(game.HeroViewActive);
+            Assert.IsTrue(Camera.main == game.HeroRig.Camera && !Camera.main.orthographic, "the perspective hero camera renders");
+            // Owner's choice (2026-10-20, aiming for a future bow): with Invert look off (the default), pushing the mouse forward looks up.
+            game.HeroRig.SkipTransition();
+            game.SyncViews(0.02f);
+            var pitchBefore = game.HeroRig.Pitch;
+            var lookBefore = game.HeroRig.transform.forward.y;
+            InputSystem.QueueStateEvent(mouse, new MouseState { delta = new Vector2(0f, 60f) });
+            yield return null;
+            game.SyncViews(0.02f);
+            Assert.IsFalse(game.Settings.invertLook, "Invert look is off by default");
+            Assert.Less(game.HeroRig.Pitch, pitchBefore, "mouse forward tilts the view up");
+            Assert.Greater(game.HeroRig.transform.forward.y, lookBefore, "the camera looks further up after pushing the mouse forward");
+            Assert.IsTrue(game.Hud.CrosshairShown, "the hero view shows its aiming crosshair");
+            InputSystem.QueueStateEvent(mouse, new MouseState());
+            yield return null;
+            var before = new Vector2((float)game.Sim.Hero.X, (float)game.Sim.Hero.Z);
+            var shownBefore = game.HeroView.ShownPosition;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.W));
+            yield return null; // the player tick samples the held key into this frame's hero command
+            // Responsiveness (specs/003 3.3): within the first frame, before any whole step, the shown hero already moves.
+            Assert.AreEqual(0, game.AdvanceSimulation(0.02f));
+            game.SyncViews(0.02f);
+            Assert.AreEqual(before, new Vector2((float)game.Sim.Hero.X, (float)game.Sim.Hero.Z), "no simulation step yet");
+            Assert.Greater(Vector3.Distance(shownBefore, game.HeroView.ShownPosition), 0.01f, "the presented hero moves on the first frame");
+            Assert.AreEqual(10, game.AdvanceSimulation(0.5f), "half a second of Day walking: ten hero steps");
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return null;
+            Assert.Greater(Vector2.Distance(before, new Vector2((float)game.Sim.Hero.X, (float)game.Sim.Hero.Z)), 0.05f, "held W moved the hero");
+            yield return Press(Key.F);
+            Assert.AreEqual(1, game.GameSpeed, "F does nothing in the hero view");
+            yield return Press(Key.Escape);
+            Assert.IsTrue(game.MenuOpen && !game.CursorLocked, "Esc opens the menu and frees the cursor");
+            yield return null;
+            Assert.IsFalse(game.Hud.CrosshairShown, "no crosshair over the menu");
         }
     }
 }

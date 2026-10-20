@@ -38,6 +38,25 @@ namespace TheLastFortress
 
         /// <summary>A Repair Station spent its dawn budget (source station, target = HP restored in total).</summary>
         DawnRepair,
+
+        // Plan 012 (hero, release-rules-2). Source is HeroRules.SourceId unless stated; positions are the hero's.
+        /// <summary>The hero swung (target = facing 0..63; From = hero, To = the tip of its reach).</summary>
+        HeroAttacked,
+
+        /// <summary>An enemy hit the hero (source enemy, target = damage; From = attacker, To = hero).</summary>
+        HeroDamaged,
+
+        /// <summary>The hero fell (0 HP) and will respawn later.</summary>
+        HeroDowned,
+
+        /// <summary>The hero respawned at its spawn cell with full HP.</summary>
+        HeroRespawned,
+
+        /// <summary>A building was placed over the hero, which moved to the nearest free cell.</summary>
+        HeroRelocated,
+
+        /// <summary>The hero's swing struck this enemy (target enemy; positions = the enemy), before its damage applies.</summary>
+        HeroHit,
     }
 
     /// <summary>Notification for presentation adapters. Simulation state stays authoritative.</summary>

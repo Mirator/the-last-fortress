@@ -14,8 +14,9 @@ namespace TheLastFortress
         public const float Yaw = 45f;
         public const float Pitch = 40f;
         public static readonly Vector3 DefaultFocus = new Vector3(10f, 0f, 10f);
-        public const float DefaultSize = 10.5f;
-        const float MinSize = 4f, MaxSize = 14f, PanSpeed = 12f, Distance = 40f;
+        // Plan 014: closer by default so true-scale figures (about 0.22 tile) read; zoom out for the whole board.
+        public const float DefaultSize = 5.5f;
+        const float MinSize = 2.5f, MaxSize = 14f, PanSpeed = 12f, Distance = 40f;
 
         Camera cam;
         Vector3 focus = DefaultFocus;
@@ -59,6 +60,12 @@ namespace TheLastFortress
         }
 
         public void ResetView() => SetView(DefaultFocus, DefaultSize);
+
+        /// <summary>Half-height that frames the whole board with its entries (the pre-plan-014 default).</summary>
+        public const float WholeBoardSize = 10.5f;
+
+        /// <summary>Z: the whole board at once, e.g. to see every entry before a night.</summary>
+        public void ShowWholeBoard() => SetView(DefaultFocus, WholeBoardSize);
 
         public void SetView(Vector3 newFocus, float newSize)
         {
