@@ -42,6 +42,12 @@ namespace TheLastFortress
         [Tooltip("Plan 012 player hero (CharacterRig). Null shows a tinted Grunt rig as a placeholder.")]
         public GameObject heroPrefab;
 
+        [Tooltip("Plan 019 release-rules-4 hero (HeroAnimationRig: elbows, wrists, ankles). Null falls back to the legacy hero.")]
+        public GameObject contactHeroPrefab;
+
+        [Tooltip("release-rules-4 1 x 1 Cannon (field gun on a timber turntable, no stone emplacement). Null draws the 2 x 2 model at half size.")]
+        public GameObject compactCannonPrefab;
+
         [Tooltip("MVP connected Walls, indexed by WallShape (Isolated, End, Straight, Corner, T, Cross), canonical facing north. Empty keeps the prototype Wall.")]
         public GameObject[] wallShapePrefabs;
 
@@ -104,6 +110,15 @@ namespace TheLastFortress
             if (prefab == null) throw new InvalidOperationException($"No prefab assigned for {kind} in {name}; run the setup menu.");
             return prefab;
         }
+
+        /// <summary>
+        /// The model for this run's definition: a 1 x 1 (release-rules-4) Cannon uses <see cref="compactCannonPrefab"/> when it
+        /// is assigned; everything else as <see cref="PrefabFor(BuildingKind)"/>.
+        /// </summary>
+        public GameObject PrefabFor(BuildingDefinition def) => CompactCannon(def) ? compactCannonPrefab : PrefabFor(def.Kind);
+
+        public bool CompactCannon(BuildingDefinition def) =>
+            def != null && def.Kind == BuildingKind.Cannon && def.FootprintSize == 1 && compactCannonPrefab != null;
 
         /// <summary>Explicit per kind; a missing prefab is a setup error, never a silent substitute.</summary>
         public GameObject PrefabFor(BuildingKind kind)

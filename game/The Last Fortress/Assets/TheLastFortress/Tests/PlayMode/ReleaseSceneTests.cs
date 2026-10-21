@@ -117,18 +117,19 @@ namespace TheLastFortress.Tests
             yield return Press(Key.Digit6);
             Assert.AreEqual(BuildingKind.Cannon, game.Player.Tool, "hotkey 6 = Cannon");
             yield return Click(game.CameraRig.CellToScreen(new GridPos(6, 8)));
-            var cannon = game.Sim.Grid.GetOccupant(new GridPos(7, 9));
-            Assert.IsNotNull(cannon, "2x2 Cannon placed through the Input System");
+            var cannon = game.Sim.Grid.GetOccupant(new GridPos(6, 8));
+            Assert.IsNotNull(cannon, "Cannon placed through the Input System");
             Assert.AreEqual((BuildingKind.Cannon, new GridPos(6, 8)), (cannon.Kind, cannon.Cell));
-            Assert.AreEqual(1, game.World.CountBuildingViews(BuildingKind.Cannon), "one view for four cells");
+            Assert.IsNull(game.Sim.Grid.GetOccupant(new GridPos(7, 9)), "release-rules-4: the Cannon takes one tile (owner, 2026-10-21)");
+            Assert.AreEqual(1, game.World.CountBuildingViews(BuildingKind.Cannon), "one view");
 
             game.AutoAdvance = false;
             yield return Press(Key.Digit7);
-            game.Player.HoverOverride = new GridPos(8, 9);
+            game.Player.HoverOverride = new GridPos(7, 8); // beside the 1 x 1 Cannon
             yield return null; // the hover is read on the next player tick
             Assert.AreEqual(1, game.Overlay.BuffMarkCount, "the Watchtower ghost outlines the Cannon it would boost");
             game.Player.HoverOverride = null;
-            Assert.AreEqual(PlacementRejection.None, game.Sim.TryPlace(BuildingKind.Watchtower, new GridPos(8, 9), out _));
+            Assert.AreEqual(PlacementRejection.None, game.Sim.TryPlace(BuildingKind.Watchtower, new GridPos(7, 8), out _));
             game.Player.CancelTool();
             game.Player.Select(cannon);
             game.SyncViews();
@@ -346,7 +347,8 @@ namespace TheLastFortress.Tests
             Assert.AreEqual(0, game.AdvanceSimulation(0.02f));
             game.SyncViews(0.02f);
             Assert.AreEqual(before, new Vector2((float)game.Sim.Hero.X, (float)game.Sim.Hero.Z), "no simulation step yet");
-            Assert.Greater(Vector3.Distance(shownBefore, game.HeroView.ShownPosition), 0.01f, "the presented hero moves on the first frame");
+            // release-rules-4 accelerates from rest (14 units in the first step), so the first 0.02 s shows about 0.005 tile.
+            Assert.Greater(Vector3.Distance(shownBefore, game.HeroView.ShownPosition), 0.002f, "the presented hero moves on the first frame");
             Assert.AreEqual(10, game.AdvanceSimulation(0.5f), "half a second of Day walking: ten hero steps");
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
@@ -357,6 +359,118 @@ namespace TheLastFortress.Tests
             Assert.IsTrue(game.MenuOpen && !game.CursorLocked, "Esc opens the menu and frees the cursor");
             yield return null;
             Assert.IsFalse(game.Hud.CrosshairShown, "no crosshair over the menu");
+        }
+
+        /// <summary>
+        /// Plan 019 (specs/003 section 6): with the camera behind the hero over the Keep, at the field-of-view and distance
+        /// extremes, every shown pose keeps its near-plane volume out of the drawn buildings and the ground, the Keep pulls
+        /// the camera in, and the distance settles instead of pumping; the eased entry from the strategic view stays clear
+        /// or is cut to the validated pose.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheHeroCameraKeepsItsNearPlaneOutOfBuildingsAndSettles()
+        {
+            game.NewRun(14, false);
+            game.AutoAdvance = false;
+            yield return null;
+            yield return Press(Key.Tab); // the spawn cell is north of the Keep: looking north puts the camera over it
+            Assert.IsTrue(game.HeroViewActive);
+            foreach (var (fov, distance) in new[] { (50f, 0.5f), (90f, 2.2f), (50f, 2.2f), (90f, 0.5f) })
+            {
+                game.HeroRig.FieldOfView = fov;
+                game.HeroRig.SetDefaultDistance(distance);
+                game.HeroRig.SkipTransition();
+                game.HeroRig.SetOrbit(0f, 16f);
+                var shown = new System.Collections.Generic.List<float>();
+                for (var i = 0; i < 40; i++)
+                {
+                    game.SyncViews(1f / 30f);
+                    Assert.IsTrue(game.HeroRig.ShownPoseClear(), $"fov {fov}, distance {distance}, frame {i}: the near plane entered a blocker");
+                    shown.Add(game.HeroRig.ShownDistance);
+                }
+
+                Assert.Greater(game.HeroRig.Obstacles.Boxes.Count, 0, "the drawn buildings are blockers");
+                if (distance > 1f) Assert.Less(game.HeroRig.ShownDistance, distance - 0.05f, "the Keep behind pulled the camera in");
+                var turns = 0;
+                for (var i = 12; i < shown.Count; i++)
+                    if (Mathf.Sign(shown[i] - shown[i - 1]) * Mathf.Sign(shown[i - 1] - shown[i - 2]) < 0f) turns++;
+                Assert.LessOrEqual(turns, 1, $"fov {fov}, distance {distance}: the distance pumps");
+            }
+
+            yield return Press(Key.Tab);
+            Assert.IsFalse(game.HeroViewActive);
+            yield return Press(Key.Tab); // eased entry, not skipped
+            for (var i = 0; i < 20; i++)
+            {
+                game.SyncViews(1f / 30f);
+                var cam = game.HeroRig.transform.position;
+                Assert.IsFalse(game.HeroRig.Obstacles.Blocked(cam, 0f), $"entry frame {i}: the camera entered a blocker");
+                Assert.IsTrue(game.HeroRig.InTransition || game.HeroRig.ShownPoseClear(), $"entry frame {i}: the settled pose is not clear");
+            }
+
+            Assert.IsFalse(game.HeroRig.InTransition, "the entry finished within 0.35 s");
+            Assert.AreEqual(0f, game.HeroRig.Yaw, 1e-3f, "the orbit is kept within the run");
+        }
+
+        /// <summary>
+        /// Plan 019 (specs/003 section 6): losing window focus frees the cursor and stops the night without touching the
+        /// player's pause; after focus returns or the menu closes, the first click only recaptures the cursor and never
+        /// attacks, even while held, and a later tap between steps is kept until the hero accepts it.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator FocusLossAndMenuReturnRecaptureWithAClickThatNeverAttacks()
+        {
+            game.NewRun(13, false);
+            game.AutoAdvance = false;
+            yield return null;
+            Assert.IsTrue(game.StartNight());
+            yield return Press(Key.Tab);
+            Assert.IsTrue(game.HeroViewActive && game.CursorLocked);
+            var hero = game.Sim.Hero;
+            game.SetApplicationFocus(false);
+            Assert.IsTrue(game.FocusSuspended && !game.CursorLocked, "focus loss frees the cursor");
+            Assert.AreEqual(0, game.AdvanceSimulation(0.5f), "and stops the night");
+            Assert.IsFalse(game.Sim.Paused, "without touching the pause");
+            game.SetApplicationFocus(true);
+            yield return null;
+            Assert.IsFalse(game.CursorLocked, "focus return waits for a click");
+            var started = hero.AttackStartTick;
+            InputSystem.QueueStateEvent(mouse, new MouseState().WithButton(MouseButton.Left, true));
+            yield return null;
+            Assert.IsTrue(game.CursorLocked, "the click recaptured the cursor");
+            Assert.IsFalse(game.Player.HeroInput.Attack, "the recapture click never attacks, even held");
+            for (var i = 0; i < 6; i++) game.AdvanceSimulation(0.05f);
+            Assert.AreEqual(started, hero.AttackStartTick, "no attack accepted from it");
+            InputSystem.QueueStateEvent(mouse, new MouseState());
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState().WithButton(MouseButton.Left, true));
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState());
+            yield return null;
+            Assert.IsTrue(game.Player.HeroInput.Attack, "a released tap is kept between steps");
+            Assert.AreEqual(1, game.AdvanceSimulation(0.05f));
+            Assert.Greater(hero.AttackStartTick, started, "and the hero accepts it");
+            // The shown attack runs on the simulation's ticks: winding up between steps, at its contact pose on the frame
+            // that shows the contact step, frozen while paused.
+            Assert.AreEqual(0, game.AdvanceSimulation(0.02f));
+            game.SyncViews(0.02f);
+            Assert.That(game.HeroView.ShownAttackPhase, Is.GreaterThan(0f).And.LessThan(1f), "winding up before the contact step");
+            Assert.IsNotNull(game.HeroView.AnimationRig, "release-rules-4 shows the articulated hero");
+            for (var i = 0; i < hero.Profile.WindUpTicks; i++) game.AdvanceSimulation(0.05f);
+            Assert.IsFalse(hero.AttackPending, "the contact step ran");
+            game.SyncViews(0.02f);
+            var atContact = game.HeroView.ShownAttackPhase;
+            Assert.GreaterOrEqual(atContact, 1f, "the frame showing the contact step shows the contact pose");
+            game.TogglePause();
+            game.AdvanceSimulation(0.05f);
+            game.SyncViews(0.05f);
+            Assert.AreEqual(atContact, game.HeroView.ShownAttackPhase, 1e-5f, "pause freezes the attack pose");
+            game.TogglePause();
+            yield return Press(Key.Escape);
+            Assert.IsTrue(game.MenuOpen);
+            game.CloseMenu();
+            yield return null;
+            Assert.IsTrue(game.AwaitingRecapture && !game.CursorLocked, "back from the menu, a click recaptures");
         }
     }
 }

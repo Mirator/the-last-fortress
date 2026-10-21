@@ -37,6 +37,14 @@ namespace TheLastFortress
 
         const float ShellArc = 1.1f, ArrowArc = 0.4f;
 
+        /// <summary>
+        /// The 1 x 1 field gun fires flatter: its arc peaks this fraction of the distance above the line (0.35 tile at
+        /// most), so a near shot stays low and a far one lobs a little.
+        /// </summary>
+        const float FieldShellArcPerTile = 0.12f, FieldShellArcMax = 0.35f;
+
+        const float CompactCannonBarHeight = 0.62f;
+
         /// <summary>Hard caps on simultaneous cues per kind (oldest recycled first) and their lifetimes.</summary>
         public static readonly int[] CueCaps = { 40, 30, 12, 24, 12, 16 };
         public static readonly float[] CueSeconds = { 0.16f, 0.45f, 0.6f, 0.1f, 0.4f, 0.7f };
@@ -79,6 +87,9 @@ namespace TheLastFortress
 
             /// <summary>Cannon only: the pivot of the parts that aim, its muzzle, and the direction held after a shot.</summary>
             public Transform Turret;
+
+            /// <summary>A release-rules-4 1 x 1 field gun: a flatter shot, smaller shell, trail and smoke.</summary>
+            public bool Compact;
 
             public Transform Muzzle;
             public Vector3 AimDirection;
@@ -141,7 +152,7 @@ namespace TheLastFortress
             /// <summary>Bomber: the wick tip and the hand torch (particle sources), and emission accumulators.</summary>
             public Transform Wick, Torch;
 
-            public float Height, BurnAccum, WickAccum, TorchAccum;
+            public float Height, BurnAccum, WickAccum, TorchAccum, GlowAccum;
 
             /// <summary>0..1 forward strike building up over the last moment before a hit is due.</summary>
             public float StrikeRise;
@@ -220,6 +231,9 @@ namespace TheLastFortress
             public float Splash;
 
             public float Duration, Arc, Smoke;
+
+            /// <summary>Fired by a 1 x 1 field gun: a thinner, shorter trail.</summary>
+            public bool Field;
         }
 
         readonly List<Cue> cues = new List<Cue>();
@@ -245,8 +259,70 @@ namespace TheLastFortress
         /// <summary>0 = day lighting, 1 = night lighting; eased toward the phase by the presentation clock.</summary>
         public float NightBlend { get; private set; }
 
-        /// <summary>Delay from the hero's swing event to the blade's contact in the shown swing.</summary>
+        /// <summary>The hero camera renders this frame (set by the bootstrap): close-range cues replace the strategic markers.</summary>
+        public bool HeroCameraShown { get; set; }
+
+        /// <summary>Changes whenever a building view or the terrain decoration is created, rebuilt, turned or removed.</summary>
+        public int CameraBlockerVersion { get; private set; }
+
+        static readonly List<MeshRenderer> blockerRenderers = new List<MeshRenderer>();
+
+        /// <summary>
+        /// Presentation-only camera blockers (specs/003 section 6): the world bounds of every mesh drawn for a building and
+        /// for each tree, bush and boulder on forest and rock cells, one box per renderer so they follow the silhouettes.
+        /// Health bars, smoke, glows, units, effects and overlays are excluded. Never read by the simulation.
+        /// </summary>
+        public void CollectCameraBlockers(List<Bounds> into)
+        {
+            into.Clear();
+            foreach (var view in buildingViews.Values)
+            {
+                if (view.Root == null) continue;
+                view.Root.GetComponentsInChildren(false, blockerRenderers);
+                foreach (var r in blockerRenderers)
+                    if (!IsUnder(r.transform, view.HpBar) && !IsUnder(r.transform, view.Smoke) && !IsUnder(r.transform, view.Glow)) into.Add(r.bounds);
+            }
+
+            if (terrainRoot == null) return;
+            foreach (Transform cell in terrainRoot.transform)
+            {
+                if (!cell.name.StartsWith("Forest") && !cell.name.StartsWith("Rock")) continue;
+                cell.GetComponentsInChildren(false, blockerRenderers);
+                foreach (var r in blockerRenderers) AddPropBlocker(into, r.bounds);
+            }
+        }
+
+        /// <summary>
+        /// A tall prop (a tree) is a narrow trunk column under a canopy box from 30% of its height, not one box as wide as
+        /// its crown down to the ground: the camera may pass under and beside the crown as the drawn tree allows. Low props
+        /// (bushes, boulders) keep their whole box.
+        /// </summary>
+        static void AddPropBlocker(List<Bounds> into, Bounds b)
+        {
+            var height = b.size.y;
+            if (height < 0.6f)
+            {
+                into.Add(b);
+                return;
+            }
+
+            var bottom = b.min.y;
+            var crownFrom = bottom + height * 0.3f;
+            into.Add(new Bounds(new Vector3(b.center.x, (bottom + crownFrom) * 0.5f, b.center.z), new Vector3(0.08f, crownFrom - bottom, 0.08f)));
+            into.Add(new Bounds(new Vector3(b.center.x, (crownFrom + b.max.y) * 0.5f, b.center.z), new Vector3(b.size.x, b.max.y - crownFrom, b.size.z)));
+        }
+
+        static bool IsUnder(Transform t, GameObject root) => root != null && t.IsChildOf(root.transform);
+
+        /// <summary>Delay from the hero's swing event to the blade's contact in the shown swing (legacy rules).</summary>
         public const float HeroBladeDelay = 0.08f;
+
+        /// <summary>
+        /// When a hero hit shows after its event: legacy rules at the timed swing's peak; release-rules-4 at once, because the
+        /// event is the contact itself and the shown blade reaches it on the same frame (a hair above zero so the pending
+        /// cue still runs through the presentation clock and stays frozen while paused).
+        /// </summary>
+        public static float HeroHitDelay(RunSimulation sim) => sim.Hero != null && sim.Hero.Profile.ContactPhase ? 1e-4f : HeroBladeDelay;
 
         readonly List<(int enemy, float left)> pendingSparks = new List<(int, float)>();
 
@@ -633,6 +709,7 @@ namespace TheLastFortress
             if (HasTerrain && map == null)
             {
                 terrainRoot = new GameObject("Terrain");
+                CameraBlockerVersion++;
                 terrainRoot.transform.SetParent(transform, false);
                 BuildTerrain(null); // flat ground under the title or a map-less run, never a hole
                 return;
@@ -642,6 +719,7 @@ namespace TheLastFortress
             if (poolWater == null) poolWater = riverMat != null ? riverMat : Prims.Tinted(content.water, Palette.Hex(0x3B6E8C));
             terrainRoot = new GameObject("Terrain");
             terrainRoot.transform.SetParent(transform, false);
+            CameraBlockerVersion++;
             for (var i = 0; i < map.Cells.Length; i++)
             {
                 var type = map.Cells[i];
@@ -687,7 +765,10 @@ namespace TheLastFortress
             if (art != null && art.tuft != null) BuildGroundDetail(map);
         }
 
-        /// <summary>Two trees (pine or broadleaf by cell) and a bush per forest cell; one boulder group per rock cell. Inside the cell.</summary>
+        /// <summary>
+        /// Two trees (pine or broadleaf by cell) and a bush per forest cell; one boulder group per rock cell. Inside the cell.
+        /// The release-rules-4 hero collides with exactly this layout (RunSimulation.TerrainPropsOverlap): change both together.
+        /// </summary>
         void PlaceArtCell(Transform root, TerrainType type, GridPos cell, float h)
         {
             if (type == TerrainType.Forest)
@@ -953,11 +1034,12 @@ namespace TheLastFortress
                         }
 
                         var flight = cannon != null ? ShellSeconds : ArrowSeconds;
-                        SpawnArrow(e, cannon != null ? (float)sim.SplashRadius(cannon) : 0f, false, muzzle);
+                        var fieldGun = shooter != null && shooter.Compact;
+                        SpawnArrow(e, cannon != null ? (float)sim.SplashRadius(cannon) : 0f, false, muzzle, fieldGun);
                         shotTargets.Add(e.TargetId);
                         shotFlight[e.TargetId] = flight;
                         if (e.HasPositions) SpawnCue(CueKind.Fire, muzzle ?? Pos(e.FromX, e.FromZ, 1.0f), 0f);
-                        if (muzzle.HasValue) EmitMuzzleBlast(muzzle.Value, shooter.AimDirection);
+                        if (muzzle.HasValue) EmitMuzzleBlast(muzzle.Value, shooter.AimDirection, fieldGun ? 0.5f : 1f);
                         if (shooter != null) shooter.Recoil = 0.14f;
                         if (shooter?.Bow != null && e.HasPositions)
                         {
@@ -995,7 +1077,7 @@ namespace TheLastFortress
                         // A Tower kill shows when its arrow lands; trap/burn/reflection kills show immediately. One cue per kill.
                         // The body falls when the same projectile lands, never before it.
                         killDelay[e.SourceId] = Mathf.Max(shotFlight.TryGetValue(e.SourceId, out var landsIn) ? landsIn : 0f,
-                            pendingSparks.Exists(p => p.enemy == e.SourceId) ? HeroBladeDelay : 0f); // the hero's blade: at its contact
+                            pendingSparks.Exists(p => p.enemy == e.SourceId) ? HeroHitDelay(sim) : 0f); // the hero's blade: at its contact
                         if (e.HasPositions) SpawnCue(CueKind.Kill, Pos(e.ToX, e.ToZ, 0.3f), killDelay[e.SourceId]); // height follows the view (ApplyCue)
                         break;
                     case SimEventType.BuildingDamaged:
@@ -1011,11 +1093,11 @@ namespace TheLastFortress
 
                         break;
                     case SimEventType.HeroHit:
-                        // The hero's blade connects when the shown swing peaks (~0.08 s in): flinch and sparks then, not before.
+                        // The hero's blade connects when the shown swing peaks (legacy ~0.08 s in; release-rules-4: this frame).
                         if (enemyViews.TryGetValue(e.TargetId, out var bladed))
                         {
-                            bladed.HitDelay = Mathf.Max(bladed.HitDelay, HeroBladeDelay);
-                            pendingSparks.Add((e.TargetId, HeroBladeDelay));
+                            bladed.HitDelay = Mathf.Max(bladed.HitDelay, HeroHitDelay(sim));
+                            pendingSparks.Add((e.TargetId, HeroHitDelay(sim)));
                         }
 
                         break;
@@ -1035,7 +1117,7 @@ namespace TheLastFortress
                     case SimEventType.BuildingDestroyed:
                         destroyedThisFrame.Add(e.SourceId);
                         if (e.HasPositions) SpawnCue(CueKind.Collapse, Pos(e.ToX, e.ToZ, 0.25f), 0f);
-                        if (buildingViews.TryGetValue(e.SourceId, out var fallen)) EmitCollapseDust(fallen.Root.transform.position, Footprint(fallen.Building.Kind));
+                        if (buildingViews.TryGetValue(e.SourceId, out var fallen)) EmitCollapseDust(fallen.Root.transform.position, Footprint(fallen.Building));
                         break;
                 }
             }
@@ -1084,6 +1166,7 @@ namespace TheLastFortress
                 {
                     view = CreateBuildingView(sim, b);
                     buildingViews[b.Id] = view;
+                    CameraBlockerVersion++;
                 }
                 else if (topologyChanged && b.Kind == BuildingKind.Wall && WallTopology.Mask(sim.Grid, b.Cell) != view.WallMask)
                 {
@@ -1093,12 +1176,14 @@ namespace TheLastFortress
                     view.Flash = flash;
                     buildingViews[b.Id] = view;
                     WallRebuildCount++;
+                    CameraBlockerVersion++;
                 }
 
                 if (b.Kind != BuildingKind.Wall && view.Orientation != b.Orientation)
                 {
                     view.Orientation = b.Orientation;
                     view.Root.transform.rotation = Quaternion.Euler(0, b.Orientation * 90f, 0);
+                    CameraBlockerVersion++;
                 }
 
                 if (view.Turret != null) AimCannon(sim, b, view, dt);
@@ -1146,6 +1231,7 @@ namespace TheLastFortress
             {
                 var v = buildingViews[id];
                 buildingViews.Remove(id);
+                CameraBlockerVersion++;
                 // Destroyed in combat: collapse in place. Sold or reset: gone at once.
                 if (destroyedThisFrame.Contains(id)) StartDying(v.Root, null, true, 0f, v.HpBar, v.Smoke, v.Glow);
                 else Destroy(v.Root);
@@ -1194,8 +1280,12 @@ namespace TheLastFortress
                     view.Oriented = true;
                 }
 
-                // A new enemy eases into its lane offset instead of starting beside where it walked in.
-                view.OffsetIn = Mathf.MoveTowards(view.OffsetIn, 1f, dt * 1.5f);
+                // A new enemy eases into its lane offset instead of starting beside where it walked in. Near the hero (fighting,
+                // chasing, or within half a tile) it eases back onto its true position, so what the hero view shows is what a
+                // swing can reach (plan 019 review).
+                var nearHero = e.TargetsHero || e.Pursuing || e.Returning ||
+                               sim.Hero != null && sim.Hero.Alive && (e.X - sim.Hero.X) * (e.X - sim.Hero.X) + (e.Z - sim.Hero.Z) * (e.Z - sim.Hero.Z) < 0.25;
+                view.OffsetIn = Mathf.MoveTowards(view.OffsetIn, nearHero ? 0f : 1f, dt * (nearHero ? 4f : 1.5f));
                 t.position = pos + view.Offset * view.OffsetIn;
                 if (!Mathf.Approximately(view.Model.localScale.x, CharacterScale))
                 {
@@ -1227,7 +1317,8 @@ namespace TheLastFortress
                 view.HpBar.transform.rotation = BarRotation;
                 // Strategic: half the old width over true-scale figures; hero view: constant on-screen size.
                 if (showBar) view.HpBar.transform.localScale = Vector3.one * BarScale(view.HpBar.transform.position, view.BarWidth, 0.5f);
-                if (view.Burn.activeSelf != e.Burning) view.Burn.SetActive(e.Burning);
+                var marker = e.Burning && !HeroCameraShown;
+                if (view.Burn.activeSelf != marker) view.Burn.SetActive(marker);
                 if (e.Burning) view.Burn.transform.localScale = BurnSize * (0.8f + 0.25f * Mathf.Sin(fxTime * 18f + e.Id));
                 EmitEnemyFire(view, e.Burning, e.FuseLit, dt);
                 // Heavy enemies telegraph their strike: a short lean back before the attack is due (no timing change).
@@ -1294,13 +1385,24 @@ namespace TheLastFortress
                 prefab = content.wallShapePrefabs[(int)shape];
                 yaw = turns * 90f;
             }
-            else prefab = content.PrefabFor(b.Kind);
+            else prefab = content.PrefabFor(b.Definition);
 
+            var compactCannon = content.CompactCannon(b.Definition);
             var root = Instantiate(prefab, buildingsRoot);
             root.name = $"{b.Kind} #{b.Id} {b.Cell}";
-            root.transform.position = Prims.CellCenter(b.Cell) + RouteOverlay.FootprintOffset(b.Kind);
+            root.transform.position = Prims.CellCenter(b.Cell) + RouteOverlay.FootprintOffset(b.Definition.FootprintSize);
             root.transform.rotation = Quaternion.Euler(0, yaw, 0);
-            var height = BarHeight(b.Kind);
+            // A release-rules-4 Cannon stands on one tile: its own field gun, or (no such model assigned) the 2 x 2 model's
+            // parts drawn at half size (bars and cues added below keep their size).
+            var modelScale = compactCannon ? 1f : RouteOverlay.ModelScale(b.Definition);
+            if (modelScale != 1f)
+                foreach (Transform part in root.transform)
+                {
+                    part.localScale *= modelScale;
+                    part.localPosition *= modelScale;
+                }
+
+            var height = compactCannon ? CompactCannonBarHeight : BarHeight(b.Kind) * (modelScale != 1f ? 0.65f : 1f);
             var bar = CreateBar(root.transform, height, 0.8f, hpFill, out var fill);
             GameObject glow = null;
             if (b.Kind == BuildingKind.House && windowMat == null) // an authored House glows through its window material
@@ -1341,7 +1443,7 @@ namespace TheLastFortress
             UseRuntimeMaterials(root);
             return new BuildingView
             {
-                Building = b, Root = root, HpBar = bar, HpFill = fill, Glow = glow, Turret = turret, Muzzle = muzzle, WallMask = mask,
+                Building = b, Root = root, Compact = compactCannon, HpBar = bar, HpFill = fill, Glow = glow, Turret = turret, Muzzle = muzzle, WallMask = mask,
                 Orientation = b.Kind == BuildingKind.Wall ? 0 : b.Orientation, Torches = torches.ToArray(), Bow = bow,
                 BowRest = bow != null ? bow.localPosition : Vector3.zero, TorchLight = torchLight,
             };
@@ -1353,7 +1455,7 @@ namespace TheLastFortress
         const float CannonAimHoldSeconds = 0.6f;
 
         /// <summary>Parts of the Cannon blockout that traverse; the stone platform and merlons stay square on the grid.</summary>
-        static readonly string[] TurretParts = { "Carriage", "Barrel", "Muzzle", "Wheel" }; // the Shot pile stays on the deck
+        static readonly string[] TurretParts = { "Carriage", "Barrel", "Muzzle", "Wheel", "Gunner" }; // the Shot pile stays on the deck
 
         /// <summary>Moves the gun parts of a Cannon view under one pivot so only the gun turns.</summary>
         static Transform BuildTurret(GameObject root)
@@ -1500,8 +1602,10 @@ namespace TheLastFortress
             var height = e.Kind == EnemyKind.SiegeGolem ? 1.75f : e.Kind == EnemyKind.Brute || e.Kind == EnemyKind.SiegeCommander ? 1.05f : e.Definition.IsBomber ? 0.95f : 0.8f;
             var width = e.Definition.IsBoss ? 1.0f : e.Kind == EnemyKind.Brute ? 0.7f : 0.5f;
             var bar = CreateBar(root.transform, height, width, hpFillEnemy, out var fill);
-            // Burn feedback: a small flickering amber flame above the enemy (shape + motion, not color alone).
-            var burn = Prims.Create(PrimitiveType.Cube, root.transform, new Vector3(0, height - 0.18f, 0), BurnSize, content.arrow, "Burn",
+            // Burn feedback in the strategic view: a small flickering flame-coloured marker above the enemy (shape + motion,
+            // not colour alone). Close up, in the hero view, the flames on the body say it instead.
+            burnMarker ??= Prims.Tinted(content.overlay != null ? content.overlay : content.arrow, new Color(1f, 0.55f, 0.12f, 0.9f));
+            var burn = Prims.Create(PrimitiveType.Cube, root.transform, new Vector3(0, height - 0.18f, 0), BurnSize, burnMarker, "Burn",
                 Quaternion.Euler(0, 45, 0));
             burn.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             burn.SetActive(false);
@@ -1704,8 +1808,10 @@ namespace TheLastFortress
         /// <summary>How long before a Brute/Golem strike its wind-up pose begins.</summary>
         const double WindUpSeconds = 0.35;
 
-        /// <summary>Burn flame size; the flicker scales around it rather than replacing it.</summary>
-        static readonly Vector3 BurnSize = new Vector3(0.14f, 0.2f, 0.14f);
+        /// <summary>Burn marker size (strategic view); the flicker scales around it rather than replacing it.</summary>
+        static readonly Vector3 BurnSize = new Vector3(0.09f, 0.14f, 0.09f);
+
+        Material burnMarker;
 
         static readonly Vector3 FuseSize = new Vector3(0.12f, 0.12f, 0.12f);
 
@@ -1729,23 +1835,34 @@ namespace TheLastFortress
         /// Arrow (or Cannon shell, or a Raider Archer's coral arrow) from the positions recorded on the event; needs neither
         /// the shooter nor the target alive. A shell lands with a splash ring of the radius actually used by the shot.
         /// </summary>
-        void SpawnArrow(SimEvent e, float splash = 0f, bool enemy = false, Vector3? origin = null)
+        /// <param name="fieldGun">A release-rules-4 1 x 1 Cannon: a smaller shell on a flatter arc with a thinner trail.</param>
+        void SpawnArrow(SimEvent e, float splash = 0f, bool enemy = false, Vector3? origin = null, bool fieldGun = false)
         {
             if (!e.HasPositions) return;
             GameObject go;
             if (splash > 0f)
+            {
                 go = shellPool.Count > 0 ? shellPool.Pop() : Prims.Create(PrimitiveType.Sphere, fxRoot, Vector3.zero, Vector3.one * 0.07f, glowMat, "Shell"); // a glowing ball, readable but not 2 m
+                go.transform.localScale = Vector3.one * (fieldGun ? 0.045f : 0.07f);
+            }
             else
                 go = arrowPool.Count > 0 ? arrowPool.Pop() : CreateArrow();
             if (splash <= 0f) go.GetComponent<MeshRenderer>().sharedMaterial = enemy ? enemyArrowMat : content.arrow;
             go.SetActive(true);
             // Launch heights at real scale: a Raider Archer's bow, the archer on the tower's 7 m platform, the gun's muzzle.
             var from = origin ?? (enemy ? Pos(e.FromX, e.FromZ, 0.6f * CharacterScale) : Pos(e.FromX, e.FromZ, splash > 0f ? 0.3f : 1.0f));
+            var arc = splash > 0f ? ShellArc : ArrowArc;
+            if (fieldGun)
+            {
+                var run = new Vector2((float)(e.ToX - e.FromX), (float)(e.ToZ - e.FromZ)).magnitude;
+                arc = Mathf.Min(FieldShellArcMax, FieldShellArcPerTile * run);
+            }
+
             var a = new ArrowFx
             {
                 // An enemy arrow at the hero lands at chest height of the shown body; at a building, on its wall.
                 Go = go, From = from, To = Pos(e.ToX, e.ToZ, enemy ? (e.Type == SimEventType.HeroDamaged ? 0.55f * CharacterScale : 0.45f) : 0.35f * CharacterScale), Splash = splash,
-                Duration = splash > 0f ? ShellSeconds : ArrowSeconds, Arc = splash > 0f ? ShellArc : ArrowArc,
+                Duration = splash > 0f ? ShellSeconds : ArrowSeconds, Arc = arc, Field = fieldGun,
             };
             go.transform.position = a.From;
             arrows.Add(a);
@@ -1777,7 +1894,10 @@ namespace TheLastFortress
                 {
                     a.Smoke += dt;
                     for (; a.Smoke >= 0.03f; a.Smoke -= 0.03f)
-                        particles.Emit(p, Vector3.up * 0.15f + particles.InSphere(0.06f), 0.4f, 0.03f, 0.09f, SmokeLight.WithAlpha(0.4f), SmokeLight.WithAlpha(0f), -0.3f, 1f);
+                        if (a.Field)
+                            particles.Emit(p, Vector3.up * 0.08f + particles.InSphere(0.03f), 0.25f, 0.018f, 0.045f, SmokeLight.WithAlpha(0.3f), SmokeLight.WithAlpha(0f), -0.2f, 1f);
+                        else
+                            particles.Emit(p, Vector3.up * 0.15f + particles.InSphere(0.06f), 0.4f, 0.03f, 0.09f, SmokeLight.WithAlpha(0.4f), SmokeLight.WithAlpha(0f), -0.3f, 1f);
                 }
 
                 // Point along the arc (its tangent), not the straight line from bow to target.
@@ -1923,6 +2043,13 @@ namespace TheLastFortress
         static readonly Color FlameHot = new Color(1f, 0.93f, 0.6f, 0.95f);
         static readonly Color FlameMid = new Color(1f, 0.58f, 0.16f, 0.85f);
         static readonly Color FlameEnd = new Color(0.62f, 0.14f, 0.05f, 0f);
+
+        /// <summary>Burning bodies (2026-10-21): saturated, so close up they read as fire rather than pale blocks.</summary>
+        static readonly Color FlameCore = new Color(1f, 0.88f, 0.38f, 1f);
+        static readonly Color FlameTongue = new Color(1f, 0.52f, 0.08f, 0.95f);
+        static readonly Color FlameDeep = new Color(0.72f, 0.1f, 0.02f, 0f);
+        static readonly Color SmokeWisp = new Color(0.2f, 0.18f, 0.17f, 0.45f);
+        static readonly Color FlameGlow = new Color(1f, 0.55f, 0.18f, 0.08f);
         static readonly Color Spark = new Color(1f, 0.96f, 0.75f, 1f);
         static readonly Color SparkEnd = new Color(1f, 0.45f, 0.1f, 0f);
         static readonly Color SmokeDark = new Color(0.16f, 0.15f, 0.15f, 0.7f);
@@ -1939,7 +2066,7 @@ namespace TheLastFortress
             return n;
         }
 
-        static float Footprint(BuildingKind kind) => kind == BuildingKind.Farm || kind == BuildingKind.Cannon || kind == BuildingKind.RepairStation ? 0.75f : 0.3f;
+        static float Footprint(Building b) => b.Definition.FootprintSize > 1 ? 0.75f : 0.3f;
 
         /// <summary>Torches flicker at night; a building below a third of its HP burns, with embers.</summary>
         void EmitBuildingFire(BuildingView view, float fraction, float height, float dt)
@@ -1958,7 +2085,7 @@ namespace TheLastFortress
 
             var b = view.Building;
             if (!b.Definition.HasHp || !b.IsAlive || fraction >= 0.34f) return;
-            var r = Footprint(b.Kind) * 0.8f;
+            var r = Footprint(b) * 0.8f;
             var c = view.Root.transform.position;
             var fires = Due(ref view.FireAccum, Mathf.Lerp(26f, 12f, fraction / 0.34f), dt);
             for (var i = 0; i < fires; i++)
@@ -1979,11 +2106,42 @@ namespace TheLastFortress
             if (dt <= 0f) return;
             if (burning)
             {
-                var n = Due(ref view.BurnAccum, 16f, dt);
-                var basePos = view.Root.transform.position + Vector3.up * view.Height * 0.5f;
+                // Flames on the body as shown (true scale): tongues licking up from hips to head, sized to the figure.
+                var h = view.Height * CharacterScale;
+                var feet = view.Model.position;
+                var n = Due(ref view.BurnAccum, 80f, dt);
                 for (var i = 0; i < n; i++)
-                    particles.Emit(basePos + particles.InSphere(0.14f), new Vector3(0f, particles.Range(0.8f, 1.3f), 0f) + particles.InSphere(0.15f),
-                        particles.Range(0.3f, 0.5f), particles.Range(0.1f, 0.15f), 0.02f, i % 2 == 0 ? FlameHot : FlameMid, FlameEnd, -0.5f, 0.6f);
+                {
+                    // Born on a ring just outside the body's silhouette (inside it the opaque model hid them), from the hips
+                    // to over the head. Layers by share: white-yellow core tongues low, orange tongues cooling to deep red
+                    // licking up and over the head, a few embers, a thin dark smoke wisp above.
+                    var k = i % 10;
+                    var a = particles.Range(0f, Mathf.PI * 2f);
+                    var ring = particles.Range(0.16f, 0.26f) * h;
+                    var at = feet + new Vector3(Mathf.Sin(a) * ring, 0f, Mathf.Cos(a) * ring);
+                    var inward = new Vector3(-Mathf.Sin(a), 0f, -Mathf.Cos(a)) * 0.35f * h; // tongues lean in over the body
+                    if (k < 2)
+                        particles.Emit(at + Vector3.up * particles.Range(0.15f, 0.45f) * h, new Vector3(0f, particles.Range(1.4f, 2f) * h, 0f) + inward,
+                            particles.Range(0.16f, 0.24f), particles.Range(0.15f, 0.2f) * h, 0.05f * h, FlameCore, FlameTongue.WithAlpha(0f), -1f * h, 0.6f, stretch: 1.5f, tongue: true);
+                    else if (k < 8)
+                        particles.Emit(at + Vector3.up * particles.Range(0.3f, 0.9f) * h, new Vector3(0f, particles.Range(2f, 3f) * h, 0f) + inward + particles.InSphere(0.15f * h),
+                            particles.Range(0.3f, 0.45f), particles.Range(0.22f, 0.3f) * h, 0.05f * h, FlameTongue, FlameDeep, -1.5f * h, 0.6f, stretch: 1.6f, tongue: true);
+                    else if (k == 8)
+                        particles.Emit(feet + Vector3.up * particles.Range(0.6f, 1f) * h, new Vector3(0f, particles.Range(3f, 4.5f) * h, 0f) + particles.InSphere(0.8f * h),
+                            particles.Range(0.5f, 0.8f), 0.03f * h, 0.01f * h, Spark, SparkEnd, -0.5f * h, 0.8f);
+                    else
+                        particles.Emit(feet + Vector3.up * particles.Range(1f, 1.15f) * h, new Vector3(0f, particles.Range(1.2f, 1.8f) * h, 0f) + particles.InSphere(0.25f * h),
+                            particles.Range(0.6f, 0.9f), 0.14f * h, 0.36f * h, SmokeWisp, SmokeWisp.WithAlpha(0f), -0.5f * h, 0.8f);
+                }
+
+                // At night the fire lights the ground under it: two faint round discs (a soft falloff), flickering and
+                // short-lived so they follow the walk. Close-range only: from the strategic camera they would read as markings.
+                if (NightBlend > 0.3f && HeroCameraShown && Due(ref view.GlowAccum, 20f, dt) > 0)
+                {
+                    var flicker = particles.Range(0.75f, 1f) * FlameGlow.a * NightBlend;
+                    particles.Emit(feet + Vector3.up * 0.004f, Vector3.zero, 0.09f, 1.9f * h, 1.9f * h, FlameGlow.WithAlpha(flicker * 0.5f), FlameGlow.WithAlpha(flicker * 0.3f), disc: true);
+                    particles.Emit(feet + Vector3.up * 0.006f, Vector3.zero, 0.09f, 1.1f * h, 1.1f * h, FlameGlow.WithAlpha(flicker), FlameGlow.WithAlpha(flicker * 0.6f), disc: true);
+                }
             }
 
             if (view.Torch != null)
@@ -2043,15 +2201,17 @@ namespace TheLastFortress
         }
 
         /// <summary>Cannon shot: muzzle fire and a grey smoke cloud blown along the barrel.</summary>
-        void EmitMuzzleBlast(Vector3 muzzle, Vector3 aim)
+        /// <param name="scale">Size of the blast (0.5 for the 1 x 1 field gun, so the smoke no longer hides it).</param>
+        void EmitMuzzleBlast(Vector3 muzzle, Vector3 aim, float scale = 1f)
         {
             var dir = aim.sqrMagnitude > 1e-4f ? aim.normalized : Vector3.forward;
-            Flash(muzzle, new Color(1f, 0.75f, 0.4f), 3f, 3.5f, 0.15f);
+            Flash(muzzle, new Color(1f, 0.75f, 0.4f), 3f, 3.5f * scale, 0.15f);
             for (var i = 0; i < 5; i++)
-                particles.Emit(muzzle + dir * 0.1f, dir * particles.Range(3f, 5f) + particles.InSphere(0.6f), 0.12f, 0.2f, 0.05f, FlameHot, FlameEnd, 0f, 4f);
-            for (var i = 0; i < 8; i++)
-                particles.Emit(muzzle + dir * 0.15f, dir * particles.Range(0.8f, 2.2f) + particles.InSphere(0.35f) + Vector3.up * 0.3f, particles.Range(0.7f, 1.2f),
-                    0.14f, particles.Range(0.38f, 0.5f), SmokeLight, SmokeLight.WithAlpha(0f), -0.25f, 2.5f);
+                particles.Emit(muzzle + dir * 0.1f * scale, dir * particles.Range(3f, 5f) * scale + particles.InSphere(0.6f * scale), 0.12f, 0.2f * scale, 0.05f * scale, FlameHot, FlameEnd, 0f, 4f);
+            var puffs = scale < 1f ? 5 : 8;
+            for (var i = 0; i < puffs; i++)
+                particles.Emit(muzzle + dir * 0.15f * scale, (dir * particles.Range(0.8f, 2.2f) + particles.InSphere(0.35f) + Vector3.up * 0.3f) * scale, particles.Range(0.7f, 1.2f),
+                    0.14f * scale, particles.Range(0.38f, 0.5f) * scale, SmokeLight, SmokeLight.WithAlpha(0f), -0.25f * scale, 2.5f);
         }
 
         /// <summary>A Cannon shell landing: a fountain of dirt, a short flash of fire and dust.</summary>

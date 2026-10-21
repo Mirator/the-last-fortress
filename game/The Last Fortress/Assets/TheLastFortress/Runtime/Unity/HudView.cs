@@ -306,6 +306,18 @@ namespace TheLastFortress
         }
 
 
+        /// <summary>
+        /// The reward cards ignore pointer clicks for a moment after they appear and until the button that was held when they
+        /// appeared is released, so an attack click at the end of a fight never picks a perk (owner, 2026-10-21).
+        /// </summary>
+        public const float RewardLockSeconds = 0.8f;
+
+        string rewardLockFor;
+        float rewardShownAt;
+        bool rewardReleased;
+
+        public bool RewardLocked => rewardLockFor != null && (Time.unscaledTime < rewardShownAt + RewardLockSeconds || !rewardReleased);
+
         void Choose(int index)
         {
             if (shownOfferId == null || shownPerks == null || index >= shownPerks.Length) return;
@@ -323,6 +335,15 @@ namespace TheLastFortress
                 return;
             }
 
+            if (rewardLockFor != offer.OfferId)
+            {
+                rewardLockFor = offer.OfferId;
+                rewardShownAt = Time.unscaledTime;
+                rewardReleased = false;
+            }
+
+            var mouse = game.Player.Mouse;
+            if (mouse == null || !mouse.leftButton.isPressed) rewardReleased = true;
             shownOfferId = offer.OfferId;
             shownPerks = offer.PerkIds;
             Set(rewardRecap, sim.LastNight != null && sim.LastNight.Night == offer.ClearedNight ? $"Night {offer.ClearedNight}: {RecapLine(sim.LastNight)}" : "");
@@ -430,7 +451,9 @@ namespace TheLastFortress
             Set(goldText, $"Gold  {sim.Gold}");
             Set(keepText, $"Keep  {sim.Keep.Hp} / {sim.Keep.MaxHp}");
             keepFill.anchorMax = new Vector2(Mathf.Clamp01((float)sim.Keep.Hp / sim.Keep.MaxHp), 1);
-            Set(incomeText, sim.IsCampaign ? IncomeLine(sim) : "");
+            // Plan 019: in the hero view at Night the income forecast steps back (it cannot change until dawn); gold, Keep HP,
+            // the night and the threat lines stay.
+            Set(incomeText, sim.IsCampaign && !(game.HeroViewActive && sim.State == RunState.Night) ? IncomeLine(sim) : "");
 
             var wave = sim.Wave;
             var campaign = sim.IsCampaign;
@@ -946,7 +969,7 @@ namespace TheLastFortress
                     var farm = sim != null && sim.HasPerk(PerkRules.EfficientFarming) ? d.DailyIncome * (100 + PerkRules.EfficientFarmingPercent) / 100 : d.DailyIncome;
                     return $"+{farm}/day · 2x2 tiles";
                 case BuildingKind.SpikeTrap: return "Hurts enemies on it";
-                case BuildingKind.Cannon: return "Splash · slow · 2x2";
+                case BuildingKind.Cannon: return d.FootprintSize > 1 ? "Splash · slow · 2x2" : "Splash · slow";
                 case BuildingKind.Watchtower: return $"+{d.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range nearby";
                 case BuildingKind.RepairStation: return "Repairs at dawn · 2x2";
                 default: return "";

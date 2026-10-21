@@ -87,7 +87,7 @@ namespace TheLastFortress
         {
             var def = definitions.For(kind);
             if (def == null || !def.Purchasable) return PlacementRejection.NotPurchasable;
-            foreach (var cell in BuildingDefinition.FootprintCells(kind, anchor))
+            foreach (var cell in def.Footprint(anchor))
             {
                 if (!GridCoordinates.IsInBounds(cell)) return PlacementRejection.OutOfBounds;
                 if (GridCoordinates.IsReservedRing(cell)) return PlacementRejection.ReservedRing;

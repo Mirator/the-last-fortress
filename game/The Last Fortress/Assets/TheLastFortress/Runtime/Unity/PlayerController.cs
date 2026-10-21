@@ -52,6 +52,7 @@ namespace TheLastFortress
         public void Reset()
         {
             HeroInput = HeroCommand.None;
+            ClearHeroInput();
             Tool = null;
             Selected = null;
             HoverCell = null;
@@ -143,6 +144,7 @@ namespace TheLastFortress
         /// </summary>
         void TickHeroView(Keyboard keyboard, Mouse mouse)
         {
+            if (recaptureHeld && (mouse == null || !mouse.leftButton.isPressed)) recaptureHeld = false; // the consumed click ended
             HoverCell = null;
             Tool = null;
             Selected = null; // selection belongs to the strategic view
@@ -151,7 +153,7 @@ namespace TheLastFortress
             {
                 if (keyboard.tabKey.wasPressedThisFrame)
                 {
-                    game.SetHeroView(false);
+                    game.SetHeroView(false, true); // eased back to the map
                     HeroInput = HeroCommand.None;
                     return;
                 }
@@ -160,7 +162,7 @@ namespace TheLastFortress
                     if (keyboard[DigitKeys[i]].wasPressedThisFrame || keyboard[NumpadKeys[i]].wasPressedThisFrame)
                     {
                         var kind = game.PurchasableKinds[i];
-                        game.SetHeroView(false);
+                        game.SetHeroView(false, true); // eased back to the map
                         HeroInput = HeroCommand.None;
                         SetTool(kind); // armed only where building is allowed (Day); never places by itself
                         return;
@@ -196,7 +198,78 @@ namespace TheLastFortress
                 if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) move.x -= 1;
             }
 
-            var yaw = rig.Yaw * Mathf.Deg2Rad;
+            var fine = sim.Hero != null && sim.Hero.Profile.ContactPhase;
+            bool attack;
+            if (fine) attack = ContactAttackInput(mouse, sim);
+            else
+            {
+                // A click is remembered for a moment, so a quick tap between fixed steps or late in the cooldown still swings.
+                if (mouse != null && mouse.leftButton.wasPressedThisFrame && game.CursorLocked && !recaptureHeld) attackLatchUntil = Time.unscaledTime + AttackLatchSeconds;
+                attack = mouse != null && game.CursorLocked && ((mouse.leftButton.isPressed && !recaptureHeld) || Time.unscaledTime < attackLatchUntil);
+            }
+
+            HeroInput = SteerCommand(move, rig.Yaw, attack, fine);
+        }
+
+        /// <summary>release-rules-4: a tap is kept for this many Night steps of advancing, unpaused play (0.25 s).</summary>
+        const int TapSteps = 5;
+
+        bool tapPending;
+        long tapTick;
+        RunState tapState;
+
+        /// <summary>
+        /// release-rules-4 attack input (specs/003 section 4): Night only. A held button asks every step (so it repeats when
+        /// the hero is ready); one tap is kept until an attack is accepted at or after it, or for five Night steps, so a
+        /// tap between steps or late in the recovery still lands, and a paused or suspended night never ages it. A new tap
+        /// replaces the kept one; nothing queues. Day input never carries into the Night.
+        /// </summary>
+        bool ContactAttackInput(Mouse mouse, RunSimulation sim)
+        {
+            var hero = sim.Hero;
+            var playing = sim.State == RunState.Night || sim.State == RunState.Day && hero != null && hero.Profile.DayAttacks;
+            if (mouse == null || !game.CursorLocked || !playing || hero == null || !hero.Alive || sim.State != tapState)
+            {
+                tapPending = false;
+                tapState = sim.State; // a tap never carries across Day and Night
+                if (mouse == null || !game.CursorLocked || !playing || hero == null || !hero.Alive) return false;
+            }
+
+            var clock = sim.HeroClock;
+            if (mouse.leftButton.wasPressedThisFrame && !ConsumeRecaptureClick())
+            {
+                tapPending = true;
+                tapTick = clock;
+            }
+
+            if (tapPending && (hero.AttackStartTick >= tapTick || clock >= tapTick + TapSteps)) tapPending = false;
+            return tapPending || (mouse.leftButton.isPressed && !recaptureHeld);
+        }
+
+        /// <summary>Drops unaccepted attack input (leaving the hero view, menu, focus loss, run boundaries).</summary>
+        public void ClearHeroInput()
+        {
+            tapPending = false;
+            attackLatchUntil = 0f;
+        }
+
+        bool recaptureHeld;
+
+        /// <summary>
+        /// The click that recaptured the cursor after focus loss or a menu (specs/003 section 6) is consumed: it never
+        /// attacks, including while it is still held. Set by <see cref="PrototypeBootstrap"/> when it recaptures.
+        /// </summary>
+        public void ConsumeNextClick() => recaptureHeld = true;
+
+        bool ConsumeRecaptureClick() => recaptureHeld;
+
+        /// <summary>
+        /// The hero command for a camera-relative move (x right, y forward; zero for none) under the camera's yaw: the
+        /// release-rules-4 motor gets 64 headings, legacy rules 16; facing is the camera direction (64).
+        /// </summary>
+        public static HeroCommand SteerCommand(Vector2 move, float yawDegrees, bool attack, bool fine)
+        {
+            var yaw = yawDegrees * Mathf.Deg2Rad;
             var forward = new Vector2(Mathf.Sin(yaw), Mathf.Cos(yaw)); // (x, z)
             var right = new Vector2(forward.y, -forward.x);
             var facing = HeroRules.FacingToward(forward.x, forward.y);
@@ -204,13 +277,11 @@ namespace TheLastFortress
             if (move != Vector2.zero)
             {
                 var dir = right * move.x + forward * move.y;
-                heading = (HeroRules.FacingToward(dir.x, dir.y) + 2) / 4 % 16;
+                heading = HeroRules.FacingToward(dir.x, dir.y);
+                if (!fine) heading = (heading + 2) / 4 % 16;
             }
 
-            // A click is remembered for a moment, so a quick tap between fixed steps or late in the cooldown still swings.
-            if (mouse != null && mouse.leftButton.wasPressedThisFrame && game.CursorLocked) attackLatchUntil = Time.unscaledTime + AttackLatchSeconds;
-            var attack = mouse != null && game.CursorLocked && (mouse.leftButton.isPressed || Time.unscaledTime < attackLatchUntil);
-            HeroInput = new HeroCommand(heading, attack, facing);
+            return fine ? HeroCommand.Fine(heading, attack, facing) : new HeroCommand(heading, attack, facing);
         }
 
         const float AttackLatchSeconds = 0.25f;

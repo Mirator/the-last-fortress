@@ -55,7 +55,16 @@ namespace TheLastFortress
         readonly int[] costs = new int[CellCount];
         readonly int[] predecessors = new int[CellCount];
         readonly bool[] settled = new bool[CellCount];
+        readonly int[] toGoal = new int[CellCount];
+        readonly Queue<int> bfs = new Queue<int>();
         readonly Frontier frontier = new Frontier();
+
+        /// <summary>
+        /// release-rules-4: an open route keeps its length and goal but, among equally short routes, goes straight from the
+        /// start and turns as late as possible (it first heads along the axis with the larger distance to the goal), instead
+        /// of the search's first-predecessor shape, which often stepped sideways at the entry. Breach routes are unchanged.
+        /// </summary>
+        public bool TurnLate { get; set; }
 
         public int SearchCount { get; private set; }
 
@@ -139,7 +148,7 @@ namespace TheLastFortress
                 var cell = FromIndex(nodeIndex);
 
                 var isGoal = IsKeepNeighbor(cell) && (breach || !IsSolid(grid, cell, preview));
-                if (isGoal) return BuildRoute(grid, preview, nodeIndex, nodeCost, breach);
+                if (isGoal) return !breach && TurnLate ? BuildStraightRoute(grid, preview, start, nodeIndex, nodeCost) : BuildRoute(grid, preview, nodeIndex, nodeCost, breach);
 
                 foreach (var dir in GridPos.CardinalOrder)
                 {
@@ -178,6 +187,66 @@ namespace TheLastFortress
             }
 
             return new Route(true, breach, cells.AsReadOnly(), cost, grid.Revision, blocker);
+        }
+
+        /// <summary>
+        /// Turn-late open route to the goal the search chose, with the same length: walk from the start choosing at each cell
+        /// a neighbour one step closer to the goal, preferring the current direction, then the axis with more distance left,
+        /// then N, E, S, W.
+        /// </summary>
+        Route BuildStraightRoute(GridState grid, ICollection<GridPos> preview, GridPos start, int goalIndex, int cost)
+        {
+            for (var i = 0; i < CellCount; i++) toGoal[i] = int.MaxValue;
+            bfs.Clear();
+            toGoal[goalIndex] = 0;
+            bfs.Enqueue(goalIndex);
+            var startIndex = Index(start);
+            while (bfs.Count > 0)
+            {
+                var i = bfs.Dequeue();
+                if (i == startIndex) break;
+                var cell = FromIndex(i);
+                foreach (var dir in GridPos.CardinalOrder)
+                {
+                    var next = cell + dir;
+                    if (!GridCoordinates.IsInBounds(next)) continue;
+                    var ni = Index(next);
+                    if (toGoal[ni] != int.MaxValue) continue;
+                    if (ni != startIndex && EnterCost(grid, next, preview, false) < 0) continue;
+                    toGoal[ni] = toGoal[i] + 1;
+                    bfs.Enqueue(ni);
+                }
+            }
+
+            if (toGoal[startIndex] != cost) return BuildRoute(grid, preview, goalIndex, cost, false); // never expected
+            var goal = FromIndex(goalIndex);
+            var cells = new List<GridPos> { start };
+            var at = start;
+            var heading = default(GridPos);
+            var hasHeading = false;
+            while (at != goal)
+            {
+                var best = default(GridPos);
+                var bestRank = int.MaxValue;
+                for (var k = 0; k < GridPos.CardinalOrder.Length; k++)
+                {
+                    var dir = GridPos.CardinalOrder[k];
+                    var next = at + dir;
+                    if (!GridCoordinates.IsInBounds(next) || toGoal[Index(next)] != toGoal[Index(at)] - 1) continue;
+                    var major = Math.Abs(goal.X - at.X) >= Math.Abs(goal.Z - at.Z) ? dir.X != 0 : dir.Z != 0;
+                    var rank = (hasHeading && dir == heading ? 0 : major ? 1 : 2) * 10 + k;
+                    if (rank >= bestRank) continue;
+                    bestRank = rank;
+                    best = dir;
+                }
+
+                heading = best;
+                hasHeading = true;
+                at += best;
+                cells.Add(at);
+            }
+
+            return new Route(true, false, cells.AsReadOnly(), cost, grid.Revision, -1);
         }
 
         /// <summary>Binary heap ordered by (cost, z, x, insertion sequence).</summary>

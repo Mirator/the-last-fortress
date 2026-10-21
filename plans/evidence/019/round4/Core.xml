@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="40" result="Passed" total="40" passed="40" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:25Z" duration="0,5250325">
+  <test-suite type="TestSuite" id="1000" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="128" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:25Z" duration="0.525033" total="40" passed="40" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1159" name="TheLastFortress.EditMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.EditMode.Tests.dll" runstate="Runnable" testcasecount="128" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:25Z" duration="0.513291" total="40" passed="40" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="13092" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1160" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="128" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:25Z" duration="0.509881" total="40" passed="40" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1161" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="128" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:25Z" duration="0.506907" total="40" passed="40" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1040" name="HeroRulesTests" fullname="TheLastFortress.Tests.HeroRulesTests" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.303729" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1053" name="AContactAttackHitsOnceAtItsDueStepWithTheCommittedAim" fullname="TheLastFortress.Tests.HeroRulesTests.AContactAttackHitsOnceAtItsDueStepWithTheCommittedAim" methodname="AContactAttackHitsOnceAtItsDueStepWithTheCommittedAim" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="464841804" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.077437" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1057" name="AContactStrikeCannotPassASolidCorner" fullname="TheLastFortress.Tests.HeroRulesTests.AContactStrikeCannotPassASolidCorner" methodname="AContactStrikeCannotPassASolidCorner" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="1024509975" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.001959" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1042" name="AnEnemyAttackingABuildingNeverSwitchesToAHeroBesideIt" fullname="TheLastFortress.Tests.HeroRulesTests.AnEnemyAttackingABuildingNeverSwitchesToAHeroBesideIt" methodname="AnEnemyAttackingABuildingNeverSwitchesToAHeroBesideIt" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="438354469" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.009748" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1043" name="AProvokedRaiderArcherTakesTheHeroOverAHouseAndForgetsItOutOfRange" fullname="TheLastFortress.Tests.HeroRulesTests.AProvokedRaiderArcherTakesTheHeroOverAHouseAndForgetsItOutOfRange" methodname="AProvokedRaiderArcherTakesTheHeroOverAHouseAndForgetsItOutOfRange" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="765411153" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.019553" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1054" name="ATouchingEnemyIsStruckThenChasesTheHeroBrieflyAndReturnsToItsRoute" fullname="TheLastFortress.Tests.HeroRulesTests.ATouchingEnemyIsStruckThenChasesTheHeroBrieflyAndReturnsToItsRoute" methodname="ATouchingEnemyIsStruckThenChasesTheHeroBrieflyAndReturnsToItsRoute" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="2101540319" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.009299" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1055" name="ContactRulesRoutesGoStraightAndTurnLate" fullname="TheLastFortress.Tests.HeroRulesTests.ContactRulesRoutesGoStraightAndTurnLate" methodname="ContactRulesRoutesGoStraightAndTurnLate" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="807233310" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.002121" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1056" name="DeathCancelsAnUnlandedContactAttack" fullname="TheLastFortress.Tests.HeroRulesTests.DeathCancelsAnUnlandedContactAttack" methodname="DeathCancelsAnUnlandedContactAttack" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="2058942690" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.004681" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1044" name="HeroDeathIsNeverDefeatButAKeepFallingTheSameStepStillIs" fullname="TheLastFortress.Tests.HeroRulesTests.HeroDeathIsNeverDefeatButAKeepFallingTheSameStepStillIs" methodname="HeroDeathIsNeverDefeatButAKeepFallingTheSameStepStillIs" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="102713610" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.010790" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1041" name="MeleeEngagesOnlyAtACellCentreAndAnEnemyHittingABuildingIgnoresTheHero" fullname="TheLastFortress.Tests.HeroRulesTests.MeleeEngagesOnlyAtACellCentreAndAnEnemyHittingABuildingIgnoresTheHero" methodname="MeleeEngagesOnlyAtACellCentreAndAnEnemyHittingABuildingIgnoresTheHero" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="1161576353" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.005308" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1052" name="TheContactHeroPassesBetweenDrawnBuildingsAndSwingsByDay" fullname="TheLastFortress.Tests.HeroRulesTests.TheContactHeroPassesBetweenDrawnBuildingsAndSwingsByDay" methodname="TheContactHeroPassesBetweenDrawnBuildingsAndSwingsByDay" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="1403224780" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.003787" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1051" name="TheContactHeroSlidesStopsAtWallsAndPredictionIsTheNextStepWithoutWritingIt" fullname="TheLastFortress.Tests.HeroRulesTests.TheContactHeroSlidesStopsAtWallsAndPredictionIsTheNextStepWithoutWritingIt" methodname="TheContactHeroSlidesStopsAtWallsAndPredictionIsTheNextStepWithoutWritingIt" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="1582448958" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.027017" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1050" name="TheContactMotorAcceleratesBrakesReversesAndNeverExceedsItsCap" fullname="TheLastFortress.Tests.HeroRulesTests.TheContactMotorAcceleratesBrakesReversesAndNeverExceedsItsCap" methodname="TheContactMotorAcceleratesBrakesReversesAndNeverExceedsItsCap" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="801291085" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.006501" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1045" name="TheHeroNeverEntersSolidOrNonWalkableCellsOrCutsADiagonalCorner" fullname="TheLastFortress.Tests.HeroRulesTests.TheHeroNeverEntersSolidOrNonWalkableCellsOrCutsADiagonalCorner" methodname="TheHeroNeverEntersSolidOrNonWalkableCellsOrCutsADiagonalCorner" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="518458418" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.001208" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1046" name="TheHeroSpawnsOnTheNearestFreeCellAndStepsAsideForABuilding" fullname="TheLastFortress.Tests.HeroRulesTests.TheHeroSpawnsOnTheNearestFreeCellAndStepsAsideForABuilding" methodname="TheHeroSpawnsOnTheNearestFreeCellAndStepsAsideForABuilding" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="604868334" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.002329" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1049" name="TheSameCommandsReplayTheNightAndAContinuedNightStartsWhereTheHeroStood" fullname="TheLastFortress.Tests.HeroRulesTests.TheSameCommandsReplayTheNightAndAContinuedNightStartsWhereTheHeroStood" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.097697" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1047" name="TheSameCommandsReplayTheNightAndAContinuedNightStartsWhereTheHeroStood(&quot;release-rules-3&quot;)" fullname="TheLastFortress.Tests.HeroRulesTests.TheSameCommandsReplayTheNightAndAContinuedNightStartsWhereTheHeroStood(&quot;release-rules-3&quot;)" methodname="TheSameCommandsReplayTheNightAndAContinuedNightStartsWhereTheHeroStood" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="1580287535" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.062188" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1048" name="TheSameCommandsReplayTheNightAndAContinuedNightStartsWhereTheHeroStood(&quot;release-rules-4&quot;)" fullname="TheLastFortress.Tests.HeroRulesTests.TheSameCommandsReplayTheNightAndAContinuedNightStartsWhereTheHeroStood(&quot;release-rules-4&quot;)" methodname="TheSameCommandsReplayTheNightAndAContinuedNightStartsWhereTheHeroStood" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="1773842492" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.031490" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestFixture" id="1120" name="ReleaseMechanicsTests" fullname="TheLastFortress.Tests.ReleaseMechanicsTests" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:25Z" duration="0.063482" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1129" name="BlastThatEmptiesTheKeepOnTheLastEnemysStepIsDefeat" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.BlastThatEmptiesTheKeepOnTheLastEnemysStepIsDefeat" methodname="BlastThatEmptiesTheKeepOnTheLastEnemysStepIsDefeat" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="419644735" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.003828" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1125" name="BomberBlastBreaksItsWallSplashesNeighboursAndIsNotCountedAsDefeated" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.BomberBlastBreaksItsWallSplashesNeighboursAndIsNotCountedAsDefeated" methodname="BomberBlastBreaksItsWallSplashesNeighboursAndIsNotCountedAsDefeated" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="1449673058" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.003417" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1124" name="BomberKilledDuringItsFuseNeverDetonates" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.BomberKilledDuringItsFuseNeverDetonates" methodname="BomberKilledDuringItsFuseNeverDetonates" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="317846042" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.003125" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1121" name="CannonSplashHitsEveryEnemyInRadiusOnceInIdOrderMeasuredFromTheFootprintCentre" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.CannonSplashHitsEveryEnemyInRadiusOnceInIdOrderMeasuredFromTheFootprintCentre" methodname="CannonSplashHitsEveryEnemyInRadiusOnceInIdOrderMeasuredFromTheFootprintCentre" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="1014875272" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.006877" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1131" name="CommanderAuraAddsHalfToNearbyHitsAndEndsWhenItDies" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.CommanderAuraAddsHalfToNearbyHitsAndEndsWhenItDies" methodname="CommanderAuraAddsHalfToNearbyHitsAndEndsWhenItDies" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="262103651" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.001897" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1130" name="RaiderArcherStopsOnItsRouteKeepsItsTargetAndResetsTheCooldownOnRetarget" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.RaiderArcherStopsOnItsRouteKeepsItsTargetAndResetsTheCooldownOnRetarget" methodname="RaiderArcherStopsOnItsRouteKeepsItsTargetAndResetsTheCooldownOnRetarget" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="818878475" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.007749" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1123" name="RepairStationRestoresOnceAtDawnLowestHpFractionFirstWithinReach" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.RepairStationRestoresOnceAtDawnLowestHpFractionFirstWithinReach" methodname="RepairStationRestoresOnceAtDawnLowestHpFractionFirstWithinReach" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="1966249614" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.020287" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1128" name="UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.006236" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1126" name="UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo(&quot;release-rules-2&quot;,False)" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo(&quot;release-rules-2&quot;,False)" methodname="UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="1229686556" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.001730" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1127" name="UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo(&quot;release-rules-3&quot;,True)" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo(&quot;release-rules-3&quot;,True)" methodname="UnderWalkingRulesABomberLightsAtTheFirstBuildingItWalksUpTo" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="651781177" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:24Z" duration="0.000862" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1122" name="WatchtowersDoNotStackAndLosingOneMidCombatKeepsTheTowerCooldown" fullname="TheLastFortress.Tests.ReleaseMechanicsTests.WatchtowersDoNotStackAndLosingOneMidCombatKeepsTheTowerCooldown" methodname="WatchtowersDoNotStackAndLosingOneMidCombatKeepsTheTowerCooldown" classname="TheLastFortress.Tests.ReleaseMechanicsTests" runstate="Runnable" seed="272842543" result="Passed" start-time="2026-10-21 07:28:24Z" end-time="2026-10-21 07:28:25Z" duration="0.003640" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1132" name="ReleaseSaveTests" fullname="TheLastFortress.Tests.ReleaseSaveTests" classname="TheLastFortress.Tests.ReleaseSaveTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.079832" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1135" name="ASaveFromBeforeTheHeroContinuesWithoutAHero" fullname="TheLastFortress.Tests.ReleaseSaveTests.ASaveFromBeforeTheHeroContinuesWithoutAHero" methodname="ASaveFromBeforeTheHeroContinuesWithoutAHero" classname="TheLastFortress.Tests.ReleaseSaveTests" runstate="Runnable" seed="1086562232" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.005818" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1136" name="ASprintSpeedSaveKeepsItsSpeedsAndNewRunsWalk" fullname="TheLastFortress.Tests.ReleaseSaveTests.ASprintSpeedSaveKeepsItsSpeedsAndNewRunsWalk" methodname="ASprintSpeedSaveKeepsItsSpeedsAndNewRunsWalk" classname="TheLastFortress.Tests.ReleaseSaveTests" runstate="Runnable" seed="416457986" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.009463" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1134" name="ReleaseSaveRoundTripsProfileMapWavesAndNewBuildingsAndUnknownProfilesAreRejected" fullname="TheLastFortress.Tests.ReleaseSaveTests.ReleaseSaveRoundTripsProfileMapWavesAndNewBuildingsAndUnknownProfilesAreRejected" methodname="ReleaseSaveRoundTripsProfileMapWavesAndNewBuildingsAndUnknownProfilesAreRejected" classname="TheLastFortress.Tests.ReleaseSaveTests" runstate="Runnable" seed="1040113672" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.051376" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1133" name="SixNightSaveWithoutProfileFieldsContinuesAsSixNightsUnderMvpRules" fullname="TheLastFortress.Tests.ReleaseSaveTests.SixNightSaveWithoutProfileFieldsContinuesAsSixNightsUnderMvpRules" methodname="SixNightSaveWithoutProfileFieldsContinuesAsSixNightsUnderMvpRules" classname="TheLastFortress.Tests.ReleaseSaveTests" runstate="Runnable" seed="1881288392" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.008566" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1140" name="RoutingTests" fullname="TheLastFortress.Tests.RoutingTests" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.046072" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1144" name="DestroyedBlockerReleasesOnceAndEnemyTakesOpenedRoute" fullname="TheLastFortress.Tests.RoutingTests.DestroyedBlockerReleasesOnceAndEnemyTakesOpenedRoute" methodname="DestroyedBlockerReleasesOnceAndEnemyTakesOpenedRoute" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="1450636833" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.006052" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1142" name="DetourIsFollowedAndWallsNeverDamaged" fullname="TheLastFortress.Tests.RoutingTests.DetourIsFollowedAndWallsNeverDamaged" methodname="DetourIsFollowedAndWallsNeverDamaged" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="1007339127" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.006805" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1141" name="EmptyMapRouteIsStraightToWestNeighbor" fullname="TheLastFortress.Tests.RoutingTests.EmptyMapRouteIsStraightToWestNeighbor" methodname="EmptyMapRouteIsStraightToWestNeighbor" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="375141393" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.000662" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1143" name="FullEnclosureBreachesWestWallFromWestNeighbor" fullname="TheLastFortress.Tests.RoutingTests.FullEnclosureBreachesWestWallFromWestNeighbor" methodname="FullEnclosureBreachesWestWallFromWestNeighbor" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="869702160" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.002035" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1146" name="IndestructibleBarrierIsValidationErrorNotTarget" fullname="TheLastFortress.Tests.RoutingTests.IndestructibleBarrierIsValidationErrorNotTarget" methodname="IndestructibleBarrierIsValidationErrorNotTarget" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="1794603892" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.003781" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1147" name="MovingEnemyFinishesSegmentThenReplans" fullname="TheLastFortress.Tests.RoutingTests.MovingEnemyFinishesSegmentThenReplans" methodname="MovingEnemyFinishesSegmentThenReplans" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="1297517261" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.002543" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1145" name="PreviewParityWithoutMutation" fullname="TheLastFortress.Tests.RoutingTests.PreviewParityWithoutMutation" methodname="PreviewParityWithoutMutation" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="1678252645" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.003039" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1149" name="RevisionInvalidatesCache" fullname="TheLastFortress.Tests.RoutingTests.RevisionInvalidatesCache" methodname="RevisionInvalidatesCache" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="1542467772" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.001421" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1150" name="StressLayoutWestRouteBreachesAWall" fullname="TheLastFortress.Tests.RoutingTests.StressLayoutWestRouteBreachesAWall" methodname="StressLayoutWestRouteBreachesAWall" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="687663845" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.008742" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[West stress route: (0,10) (0,9) (1,9) (2,9) (3,9) (4,9) (5,9) (6,9) (7,9) (8,9) (9,9) (10,9); blocker (6,9)
+]]></output>
+            </test-case>
+            <test-case id="1148" name="TieBreakIsStableAcrossPlanners" fullname="TheLastFortress.Tests.RoutingTests.TieBreakIsStableAcrossPlanners" methodname="TieBreakIsStableAcrossPlanners" classname="TheLastFortress.Tests.RoutingTests" runstate="Runnable" seed="1541006911" result="Passed" start-time="2026-10-21 07:28:25Z" end-time="2026-10-21 07:28:25Z" duration="0.002948" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\EditMode-20261021-092825.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="7" result="Passed" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-20 18:28:58Z" end-time="2026-10-20 18:29:07Z" duration="8,9805174">
+  <test-suite type="TestSuite" id="1035" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-10-20 18:28:58Z" end-time="2026-10-20 18:29:07Z" duration="8.980517" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1029" name="TheLastFortress.PlayMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.PlayMode.Tests.dll" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-10-20 18:28:58Z" end-time="2026-10-20 18:29:07Z" duration="8.971046" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="39784" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1030" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-10-20 18:28:58Z" end-time="2026-10-20 18:29:07Z" duration="8.969528" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1031" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-10-20 18:28:58Z" end-time="2026-10-20 18:29:07Z" duration="8.968211" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1021" name="ReleaseSceneTests" fullname="TheLastFortress.Tests.ReleaseSceneTests" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-10-20 18:28:58Z" end-time="2026-10-20 18:29:07Z" duration="8.965502" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1026" name="EnemiesWalkInAlongTheRoadAndTakeOverWithoutAJump" fullname="TheLastFortress.Tests.ReleaseSceneTests.EnemiesWalkInAlongTheRoadAndTakeOverWithoutAJump" methodname="EnemiesWalkInAlongTheRoadAndTakeOverWithoutAJump" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="1975296844" result="Passed" start-time="2026-10-20 18:28:58Z" end-time="2026-10-20 18:29:00Z" duration="1.932071" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: meadow seed 7: generated (attempt 0)
+]]></output>
+            </test-case>
+            <test-case id="1025" name="EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep" fullname="TheLastFortress.Tests.ReleaseSceneTests.EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep" methodname="EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="270298867" result="Passed" start-time="2026-10-20 18:29:00Z" end-time="2026-10-20 18:29:01Z" duration="0.749876" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: meadow seed 7: generated (attempt 0)
+]]></output>
+            </test-case>
+            <test-case id="1028" name="FocusLossAndMenuReturnRecaptureWithAClickThatNeverAttacks" fullname="TheLastFortress.Tests.ReleaseSceneTests.FocusLossAndMenuReturnRecaptureWithAClickThatNeverAttacks" methodname="FocusLossAndMenuReturnRecaptureWithAClickThatNeverAttacks" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="1581287598" result="Passed" start-time="2026-10-20 18:29:01Z" end-time="2026-10-20 18:29:02Z" duration="1.456517" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: crossing seed 13: generated (attempt 0)
+]]></output>
+            </test-case>
+            <test-case id="1022" name="NewKindsPlaceThroughInputAndEveryNewThreatIsPresentedWithinBudgets" fullname="TheLastFortress.Tests.ReleaseSceneTests.NewKindsPlaceThroughInputAndEveryNewThreatIsPresentedWithinBudgets" methodname="NewKindsPlaceThroughInputAndEveryNewThreatIsPresentedWithinBudgets" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="1172613527" result="Passed" start-time="2026-10-20 18:29:02Z" end-time="2026-10-20 18:29:04Z" duration="1.542653" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: crossing seed 7: generated (attempt 0)
+]]></output>
+            </test-case>
+            <test-case id="1024" name="NightSpeedRunsMoreFixedStepsAndPauseHoldsBothClocks" fullname="TheLastFortress.Tests.ReleaseSceneTests.NightSpeedRunsMoreFixedStepsAndPauseHoldsBothClocks" methodname="NightSpeedRunsMoreFixedStepsAndPauseHoldsBothClocks" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="183600761" result="Passed" start-time="2026-10-20 18:29:04Z" end-time="2026-10-20 18:29:05Z" duration="0.839962" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: meadow seed 7: generated (attempt 0)
+]]></output>
+            </test-case>
+            <test-case id="1023" name="SixNightSaveContinuesInTheReleaseBuildWithItsOwnRulesAndCards" fullname="TheLastFortress.Tests.ReleaseSceneTests.SixNightSaveContinuesInTheReleaseBuildWithItsOwnRulesAndCards" methodname="SixNightSaveContinuesInTheReleaseBuildWithItsOwnRulesAndCards" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="677994600" result="Passed" start-time="2026-10-20 18:29:05Z" end-time="2026-10-20 18:29:05Z" duration="0.769264" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1027" name="SwitchingViewsNeverChangesTheNightAndTheHeroMovesWithInput" fullname="TheLastFortress.Tests.ReleaseSceneTests.SwitchingViewsNeverChangesTheNightAndTheHeroMovesWithInput" methodname="SwitchingViewsNeverChangesTheNightAndTheHeroMovesWithInput" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="1803440923" result="Passed" start-time="2026-10-20 18:29:05Z" end-time="2026-10-20 18:29:07Z" duration="1.649723" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: meadow seed 11: generated (attempt 0)
+New run: ravine seed 12: generated (attempt 0)
+<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\PlayMode-20261020-202907.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

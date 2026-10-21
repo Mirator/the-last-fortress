@@ -242,13 +242,13 @@ namespace TheLastFortress.Tests
     /// <summary>Plan 008 G1: profile-tagged saves, legacy six-night continuation and rejection of unknown profiles.</summary>
     public class ReleaseSaveTests
     {
-        static readonly RulesCatalog ReleaseBuild = new RulesCatalog(RulesProfile.TwelveNightsWalking(ReleaseDefinitions.CreateDefault()),
+        static readonly RulesCatalog ReleaseBuild = new RulesCatalog(RulesProfile.TwelveNightsContact(ReleaseDefinitions.CreateDefault()), RulesProfile.TwelveNightsWalking(ReleaseDefinitions.CreateDefault()),
             RulesProfile.TwelveNightsHero(ReleaseDefinitions.CreateDefault()), RulesProfile.TwelveNights(ReleaseDefinitions.CreateDefault()),
             RulesProfile.SixNights(MvpDefinitions.CreateDefault()));
 
         static RunSimulation NewReleaseRun(uint seed, string profile) => new RunSimulation(new RunConfig
         {
-            Definitions = ReleaseDefinitions.CreateDefault(), Seed = seed, Terrain = MapProfiles.Generate(profile, seed),
+            Definitions = ReleaseBuild.Find(ReleaseCampaign.RulesVersion, ReleaseCampaign.CampaignId).Definitions, Seed = seed, Terrain = MapProfiles.Generate(profile, seed),
             Campaign = ReleaseCampaign.Create(seed, profile),
         });
 
@@ -277,7 +277,7 @@ namespace TheLastFortress.Tests
         {
             var sim = NewReleaseRun(21, MapProfiles.Crossing);
             var cannon = Place(sim, BuildingKind.Cannon, 11, 11); // central cells are always land
-            Place(sim, BuildingKind.Watchtower, 10, 12);
+            Place(sim, BuildingKind.Watchtower, 11, 12); // beside the Cannon (1 x 1 under release-rules-4)
             cannon.Hp = 77;
             var cp = CheckpointCodec.Capture(sim);
             Assert.AreEqual((2, ReleaseCampaign.RulesVersion, ReleaseCampaign.CampaignId, MapProfiles.Crossing, "standard"),
@@ -333,7 +333,8 @@ namespace TheLastFortress.Tests
         [Test]
         public void ASprintSpeedSaveKeepsItsSpeedsAndNewRunsWalk()
         {
-            foreach (var (rules, grunt, gruntHp, heroUnits) in new[] { ("release-rules-2", 1.0, 30, 90), (ReleaseCampaign.RulesVersion, 0.3, 45, 48) })
+            // Literal versions: release-rules-4 (plan 019) keeps the release-rules-3 enemies with its own hero top speed.
+            foreach (var (rules, grunt, gruntHp, heroUnits, cannon) in new[] { ("release-rules-2", 1.0, 30, 90, 2), ("release-rules-3", 0.3, 45, 48, 2), ("release-rules-4", 0.3, 45, 42, 1) })
             {
                 var run = new RunSimulation(new RunConfig
                 {
@@ -342,8 +343,8 @@ namespace TheLastFortress.Tests
                 });
                 var back = CheckpointCodec.Restore(JsonUtility.FromJson<RunCheckpoint>(JsonUtility.ToJson(CheckpointCodec.Capture(run))), ReleaseBuild, out var problem, out var message);
                 Assert.AreEqual(CheckpointProblem.None, problem, message);
-                Assert.AreEqual((rules, grunt, gruntHp, heroUnits),
-                    (back.Campaign.RulesVersion, back.Definitions.Grunt.SpeedTilesPerSecond, back.Definitions.Grunt.MaxHp, back.Hero.MoveUnits), rules);
+                Assert.AreEqual((rules, grunt, gruntHp, heroUnits, cannon),
+                    (back.Campaign.RulesVersion, back.Definitions.Grunt.SpeedTilesPerSecond, back.Definitions.Grunt.MaxHp, back.Hero.MoveUnits, back.Definitions.Cannon.FootprintSize), rules);
             }
         }
     }

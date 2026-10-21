@@ -35,7 +35,7 @@ namespace TheLastFortress
             Kind = definition.Kind;
             Definition = definition;
             Cell = cell;
-            Cells = BuildingDefinition.FootprintCells(definition.Kind, cell);
+            Cells = definition.Footprint(cell);
             PurchasePrice = purchasePrice;
             MaxHp = definition.MaxHp;
             Hp = definition.MaxHp;
@@ -143,6 +143,16 @@ namespace TheLastFortress
         public bool TargetsHero;
 
         public long AttackDueTick;
+
+        /// <summary>
+        /// release-rules-4 bounded pursuit of the hero (game rules section 18): chasing off the route until
+        /// <see cref="PursueUntilTick"/>, then <see cref="Returning"/> to its cell centre before it replans. Position in
+        /// integer units while off the route.
+        /// </summary>
+        public bool Pursuing, Returning;
+
+        public long PursueUntilTick, PursueCooldownTick, ProvokedUntilTick;
+        public int OffUnitsX, OffUnitsZ;
 
         /// <summary>Bomber: fuse lit at its attack cell; it never moves or retargets again and detonates at <see cref="DetonateTick"/>.</summary>
         public bool FuseLit;

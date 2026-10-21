@@ -151,6 +151,7 @@ namespace TheLastFortress
                 case SoundId.Destroy:
                 case SoundId.BomberBlast: return 70;
                 case SoundId.FuseLit: return 65; // a threat warning: above towers and strikes, below destruction
+                case SoundId.HeroDown: return 62; // the hero falling: below every threat warning
                 case SoundId.HeavyStrike:
                 case SoundId.CannonShot: return 60;
                 case SoundId.Reward: return 55;
@@ -161,7 +162,11 @@ namespace TheLastFortress
                 case SoundId.Sell:
                 case SoundId.Repair: return 40;
                 case SoundId.UiClick: return 30;
+                case SoundId.HeroHurt: return 35;
+                case SoundId.HeroImpact: return 25;
                 case SoundId.Impact: return 20;
+                case SoundId.HeroSwing: return 18;
+                case SoundId.Footstep: return 5; // dropped first when voices run out
                 default: return 15; // Shot, RaiderShot
             }
         }
@@ -169,7 +174,8 @@ namespace TheLastFortress
         static bool IsCombat(SoundId id) =>
             id == SoundId.Shot || id == SoundId.Impact || id == SoundId.Trap || id == SoundId.HeavyStrike || id == SoundId.Destroy ||
             id == SoundId.KeepHit || id == SoundId.GolemArrival || id == SoundId.CannonShot || id == SoundId.RaiderShot || id == SoundId.FuseLit ||
-            id == SoundId.BomberBlast || id == SoundId.CommanderArrival;
+            id == SoundId.BomberBlast || id == SoundId.CommanderArrival || id == SoundId.HeroSwing || id == SoundId.HeroImpact ||
+            id == SoundId.HeroHurt || id == SoundId.HeroDown || id == SoundId.Footstep;
 
         static int FamilyCap(SoundId id)
         {
@@ -183,6 +189,10 @@ namespace TheLastFortress
                 case SoundId.Defeat:
                 case SoundId.Reward: return 1;
                 case SoundId.KeepHit: return 2;
+                case SoundId.HeroSwing:
+                case SoundId.HeroImpact:
+                case SoundId.HeroDown:
+                case SoundId.Footstep: return 2;
                 default: return MaxPerFamily;
             }
         }
@@ -199,12 +209,25 @@ namespace TheLastFortress
                 case SoundId.Build:
                 case SoundId.Sell:
                 case SoundId.Repair: return 0.75f;
+                case SoundId.Footstep: return 0.4f;
+                case SoundId.HeroSwing: return 0.55f;
+                case SoundId.HeroImpact: return 0.75f;
+                case SoundId.HeroHurt: return 0.8f;
                 default: return 1f;
             }
         }
 
+        /// <summary>
+        /// The hero camera is the listener (hero view): the hero's sounds then play in the world at their position with a
+        /// short falloff. Otherwise everything stays 2D, as before; UI, music, stingers and every other sound are never spatial.
+        /// </summary>
+        public bool HeroListener { get; set; }
+
         /// <summary>Plays a one-shot within the voice limits; returns false when it was dropped.</summary>
-        public bool Play(SoundId id)
+        public bool Play(SoundId id) => Play(id, null);
+
+        /// <summary>A hero sound at a world position (spatial only while <see cref="HeroListener"/>).</summary>
+        public bool Play(SoundId id, Vector3? at)
         {
             var clip = content != null ? content.Clip(id, variant++) : null;
             var priority = Priority(id);
@@ -249,6 +272,17 @@ namespace TheLastFortress
             playCounts[(int)id]++;
             if (clip != null)
             {
+                var spatial = at.HasValue && HeroListener;
+                voice.Source.spatialBlend = spatial ? 1f : 0f;
+                if (spatial)
+                {
+                    voice.Source.transform.position = at.Value;
+                    voice.Source.rolloffMode = AudioRolloffMode.Linear;
+                    voice.Source.minDistance = 0.4f; // tiles: full level within about 3 m, gone by about 50 m
+                    voice.Source.maxDistance = 6f;
+                    voice.Source.dopplerLevel = 0f;
+                }
+
                 voice.Source.clip = clip;
                 voice.Source.pitch = pitch;
                 voice.Source.volume = Gain(id) * sfxVolume;
@@ -262,6 +296,16 @@ namespace TheLastFortress
 
             return true;
         }
+
+        long lastHeroImpactTick = -1;
+
+        /// <summary>A planted foot of the shown release-rules-4 hero (its animation's contact, never a timer).</summary>
+        public void Footfall(Vector3 at)
+        {
+            if (!combatFrozen) Play(SoundId.Footstep, at);
+        }
+
+        static Vector3 At(double x, double z) => new Vector3((float)x, 0.12f, (float)z);
 
         /// <summary>Actual Keep HP loss (the same observation that drives the HUD cue); rate-limited, highest priority.</summary>
         public void KeepHit()
@@ -340,6 +384,8 @@ namespace TheLastFortress
             UpdateLoopVolumes();
         }
 
+        static bool ContactHero(RunSimulation sim) => sim.Hero != null && sim.Hero.Profile.ContactPhase;
+
         void SetCombatFrozen(bool frozen)
         {
             if (combatFrozen == frozen) return;
@@ -385,16 +431,33 @@ namespace TheLastFortress
                     Play(SoundId.RaiderShot);
                     break;
                 case SimEventType.HeroAttacked:
-                    Play(SoundId.Shot); // the blade's whoosh
+                    if (!ContactHero(sim)) Play(SoundId.Shot); // the blade's whoosh (legacy swing)
+                    break;
+                case SimEventType.HeroContact:
+                    Play(SoundId.HeroSwing, At(e.FromX, e.FromZ)); // release-rules-4: the whoosh with the blade's sweep, also on a miss
                     break;
                 case SimEventType.HeroHit:
-                    Schedule(SoundId.Impact, WorldView.HeroBladeDelay); // with the shown contact
+                    if (!ContactHero(sim)) Schedule(SoundId.Impact, WorldView.HeroBladeDelay); // with the shown contact
+                    else if (e.Tick != lastHeroImpactTick)
+                    {
+                        lastHeroImpactTick = e.Tick; // one bite per contact, however many it struck
+                        Play(SoundId.HeroImpact, At(e.ToX, e.ToZ));
+                    }
+
                     break;
                 case SimEventType.HeroDamaged:
-                    Play(sim.GetEnemy(e.SourceId) is Enemy heavy && (heavy.Kind == EnemyKind.Brute || heavy.Definition.IsBoss) ? SoundId.HeavyStrike : SoundId.Impact);
+                    var heavyHit = sim.GetEnemy(e.SourceId) is Enemy heavy && (heavy.Kind == EnemyKind.Brute || heavy.Definition.IsBoss);
+                    if (!ContactHero(sim)) Play(heavyHit ? SoundId.HeavyStrike : SoundId.Impact);
+                    else
+                    {
+                        if (heavyHit) Play(SoundId.HeavyStrike, At(e.FromX, e.FromZ));
+                        Play(SoundId.HeroHurt, At(e.ToX, e.ToZ));
+                    }
+
                     break;
                 case SimEventType.HeroDowned:
-                    Play(SoundId.KeepHit);
+                    if (ContactHero(sim)) Play(SoundId.HeroDown, At(e.FromX, e.FromZ));
+                    else Play(SoundId.KeepHit);
                     break;
                 case SimEventType.FuseLit:
                     Play(SoundId.FuseLit);

@@ -30,6 +30,7 @@ namespace TheLastFortress
         string routeAfter = "";
         int minActive = int.MaxValue, maxActive;
         long simStepsAtStart;
+        bool heroView;
 
         public void Begin(PrototypeBootstrap game, string outPath)
         {
@@ -44,8 +45,17 @@ namespace TheLastFortress
             if (target == null || target.Kind != BuildingKind.Wall) Debug.LogError("Stress measurement: west route has no Wall blocker.");
             // Plan 012 (-hero-camera): the same fight seen through the perspective hero camera from a ground vantage west of
             // the Keep, looking across the board toward the busiest entries (the stress fixture itself has no hero).
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-hero-camera") >= 0)
-                game.ViewFromHeroCamera(new Vector3(4.5f, 0f, 10.5f), 90f);
+            heroView = Array.IndexOf(Environment.GetCommandLineArgs(), "-hero-camera") >= 0;
+            if (heroView && game.Sim.HasHero && game.SetHeroView(true))
+            {
+                // Plan 019 (-stress-hero -hero-camera): the real hero view following the fixture's hero, which holds the
+                // attack toward the West lane, so the camera, the articulated figure, its contacts and cues all run.
+                game.FocusGateEnabled = false;
+                game.HeroRig.SkipTransition();
+                game.HeroRig.SetOrbit(270f, 14f);
+                game.Player.HeroInputOverride = HeroCommand.Fine(-1, true, 48);
+            }
+            else if (heroView) game.ViewFromHeroCamera(new Vector3(4.5f, 0f, 10.5f), 90f);
             // Plan 016 (-hero-camera-out): from the west edge looking out into the edge mist, which then covers most of the frame.
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-hero-camera-out") >= 0)
                 game.ViewFromHeroCamera(new Vector3(2.5f, 0f, 12.5f), 270f);
@@ -103,7 +113,11 @@ namespace TheLastFortress
             sb.AppendLine($"resolution={Screen.width}x{Screen.height} fullscreen={Screen.fullScreenMode}");
             sb.AppendLine($"quality={QualitySettings.names[QualitySettings.GetQualityLevel()]} vsync={QualitySettings.vSyncCount} targetFrameRate={Application.targetFrameRate}");
             sb.AppendLine($"cpu={SystemInfo.processorType} gpu={SystemInfo.graphicsDeviceName} ram_mb={SystemInfo.systemMemorySize} api={SystemInfo.graphicsDeviceType}");
-            sb.AppendLine($"unity={Application.unityVersion} rules_version={CheckpointCodec.RulesVersion} scene={(game.IsMvp ? "MVP (MVP prefabs, connected Walls, effects)" : "prototype")}");
+            var hero = game.Sim.Hero;
+            sb.AppendLine($"unity={Application.unityVersion} scene={(game.IsRelease ? "release" : game.IsMvp ? "MVP (MVP prefabs, connected Walls, effects)" : "prototype")} " +
+                          $"new_run_rules={(game.IsRelease ? ReleaseCampaign.RulesVersion : CheckpointCodec.RulesVersion)}");
+            sb.AppendLine($"hero={(hero != null ? $"{(hero.Profile.ContactPhase ? ReleaseCampaign.RulesV4 : "legacy")} figure={(game.HeroView != null && game.HeroView.AnimationRig != null ? "HeroAnimationRig" : "CharacterRig")} kills={game.Sim.Stats.HeroKills} alive={hero.Alive}" : "none")} " +
+                          $"view={(game.HeroViewActive ? "hero (following the hero)" : heroView ? "hero camera at a fixed point (no hero)" : "strategic")}");
             var wave = game.Sim.Wave;
             var mix = wave.MaintainMix == null ? $"{wave.MaintainActivePerEntry} Grunt" : string.Join(", ", System.Array.ConvertAll(wave.MaintainMix, m => $"{m.count} {m.kind}"));
             sb.AppendLine($"fixture={wave.Name} entries={string.Join(" ", wave.EntryCells)} maintained_per_entry=[{mix}] respawn=same archetype at same entry; Keep/Walls invulnerable (fixture only)");

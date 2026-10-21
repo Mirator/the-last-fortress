@@ -32,6 +32,18 @@ Prepared on 2026-10-15 using the improve skill. These plans are implementation h
 | [015](015-walking-speeds-and-review.md) | release-rules-3 walking speeds, then a four-way review (graphics, UI/UX, animation, gameplay) and its fixes | P1 | M | 014 | IMPLEMENTED: EditMode 117/117, PlayMode 21/21 + 1 skipped, perf pass with MSAA. Open owner decisions: strategic class markers, Bomber behaviour, hero-view 2×, boss timing |
 | [016](016-mainland-clearing.md) | Mainland forest clearing with four roads and an edge mist instead of the island; enemies walk out of the mist (presentation only) | P2 | M-L | 015 | IMPLEMENTED: depth-based edge mist (no forest belt, owner), roads, walk-ins, no gates, hero crosshair and look-up default; EditMode 119/119, PlayMode 22/22 + 1 skipped, perf pass. Owner look pending |
 
+## Current third-person audit (2026-10-20)
+
+[017-third-person-audit.md](017-third-person-audit.md): read-only audit against game rules v1.5. **AUDIT COMPLETE**. Owner resolved the dependent choices: combat/movement redesign allowed; camera pulls in first and lifts only if needed. The planning task itself ran no tests or builds; plan 019 was then executed on 2026-10-20 (fresh tests, build, captures and paired performance in [019 results](019-results.md)).
+
+| Deliverable | Role | Status |
+|---|---|---|
+| [018 feature-spec proposal](018-third-person-spec-proposal.md) | v0.1 production-slice contract: V4 motor, physical melee/contact timing, camera, animation, sound, quality/balance gates | Registered as `specs/003-…`, implemented, merged into `specs/002-game-rules.md` v1.7 §18 and archived as `specs/archive/007-third-person-production-slice.md`; this copy is the planning record |
+| [019 implementation plan](019-third-person-production-slice.md) | Implements proposal v0.1; register under specs first, preserve old profiles, finish and verify one hero slice | TECHNICAL COMPLETE; HUMAN ACCEPTANCE PENDING (owner motion/art/listening review); see [019 results](019-results.md) |
+| [020 implementation prompt](020-third-person-implementation-prompt.md) | Ready-to-paste task prompt for the future implementing chat | Executed 2026-10-20; see [019 results](019-results.md) |
+
+Execution dependency: register 018 as the proposed/in-progress feature spec, then execute 019 in order. Existing plans 012–016 remain implemented historical work; do not repeat them. On implementation the rules were merged into `specs/002-game-rules.md` v1.7 §18 and the feature spec archived, with the indexes updated together.
+
 ## Latest handoff — 008 implemented, 009 planned (2026-10-16)
 
 Plan 008's technical milestone is implemented; see [008 results](008-results.md), the frozen [rules](../specs/archive/005-release-rules.md), [content matrix](008-content-matrix.md) and [art/audio bible](008-art-and-audio-bible.md). Fresh run after the last change: EditMode 105/105, PlayMode 18/18, release content validation 0 errors, release and MVP builds succeeded, offscreen captures at 720p/1080p, MVP regression capture. Deliverable: the whole `game/The Last Fortress/Builds/Release/` folder; old six-night saves continue in it.

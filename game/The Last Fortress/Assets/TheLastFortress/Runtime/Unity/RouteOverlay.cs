@@ -287,7 +287,15 @@ namespace TheLastFortress
                 var g = Instantiate(content.PrefabFor(kind), ghostRoot.transform);
                 g.name = $"Ghost{kind}";
                 g.transform.localPosition = FootprintOffset(kind);
-                foreach (var r in g.GetComponentsInChildren<MeshRenderer>())
+                if (kind == BuildingKind.Cannon && content.compactCannonPrefab != null)
+                {
+                    // The release-rules-4 field gun, shown instead of the 2 x 2 parts when the run's Cannon is 1 x 1.
+                    var compact = Instantiate(content.compactCannonPrefab, g.transform);
+                    compact.name = "Compact";
+                    compact.SetActive(false);
+                }
+
+                foreach (var r in g.GetComponentsInChildren<MeshRenderer>(true))
                 {
                     r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                     r.sharedMaterial = ghostValid;
@@ -336,11 +344,21 @@ namespace TheLastFortress
         }
 
         /// <summary>Offset from the anchor cell center to the footprint center (Farm: half a tile north-east).</summary>
-        public static Vector3 FootprintOffset(BuildingKind kind)
+        public static Vector3 FootprintOffset(BuildingKind kind) => FootprintOffset(BuildingDefinition.FootprintSizeOf(kind));
+
+        public static Vector3 FootprintOffset(int size)
         {
-            var half = (BuildingDefinition.FootprintSizeOf(kind) - 1) / 2f;
+            var half = (size - 1) / 2f;
             return new Vector3(half, 0f, half);
         }
+
+        /// <summary>
+        /// Drawn size of a building's model against its art: a release-rules-4 Cannon stands on one tile, so without its own
+        /// field-gun model (<see cref="PrototypeContent.compactCannonPrefab"/>) the 2 x 2 model is shown at half size. 1 for
+        /// everything else.
+        /// </summary>
+        public static float ModelScale(BuildingDefinition def) =>
+            def != null && def.Kind == BuildingKind.Cannon && def.FootprintSize < BuildingDefinition.FootprintSizeOf(BuildingKind.Cannon) ? 0.5f : 1f;
 
         public void HideAll()
         {
@@ -463,7 +481,22 @@ namespace TheLastFortress
                     if (r.sharedMaterial != mat) r.sharedMaterial = mat;
             }
 
-            ghostInvalidMark.transform.localPosition = FootprintOffset(kind);
+            var ghostDef = sim.Definitions.For(kind);
+            var ghostSize = ghostDef?.FootprintSize ?? BuildingDefinition.FootprintSizeOf(kind);
+            ghostInvalidMark.transform.localPosition = FootprintOffset(ghostSize);
+            // The ghost follows the run's own footprint (a release-rules-4 Cannon is 1 x 1: its field gun, or the 2 x 2
+            // model at half size).
+            var ghost = ghosts[kind].transform;
+            var compactGhost = content.CompactCannon(ghostDef);
+            ghost.localPosition = FootprintOffset(ghostSize);
+            ghost.localScale = Vector3.one * (compactGhost ? 1f : ModelScale(ghostDef));
+            foreach (Transform child in ghost)
+            {
+                var show = child.name == "FootprintCell" ? ghostSize > 1
+                    : kind != BuildingKind.Cannon ? child.gameObject.activeSelf // other kinds manage their own parts (Wall variants)
+                    : child.name == "Compact" ? compactGhost : !compactGhost;
+                if (child.gameObject.activeSelf != show) child.gameObject.SetActive(show);
+            }
             ghostInvalidMark.SetActive(!GhostValid);
             if (RunSimulation.IsRotatable(kind)) ghosts[kind].transform.localRotation = Quaternion.Euler(0, player.GhostOrientation * 90f, 0);
             if (kind == BuildingKind.Wall && wallGhosts[0] != null)
@@ -625,7 +658,7 @@ namespace TheLastFortress
             var ghostKind = ghostRoot.activeSelf && player.Tool.HasValue && player.HoverCell.HasValue ? player.Tool : null;
             if (ghostKind.HasValue && IsAttacker(ghostKind.Value))
             {
-                rangeCenter = Prims.CellCenter(player.HoverCell.Value, 0.05f) + FootprintOffset(ghostKind.Value);
+                rangeCenter = Prims.CellCenter(player.HoverCell.Value, 0.05f) + FootprintOffset(sim.Definitions.For(ghostKind.Value)?.FootprintSize ?? BuildingDefinition.FootprintSizeOf(ghostKind.Value));
                 radius = (float)sim.TowerRange(sim.Definitions.For(ghostKind.Value));
             }
             else if (player.Selected != null && IsAttacker(player.Selected.Kind))
@@ -681,7 +714,7 @@ namespace TheLastFortress
 
             if (player.Selected != null)
             {
-                var size = BuildingDefinition.FootprintSizeOf(player.Selected.Kind);
+                var size = player.Selected.Definition.FootprintSize;
                 var min = new Vector3(player.Selected.Cell.X, 0.05f, player.Selected.Cell.Z);
                 selectionSquare.positionCount = 4;
                 selectionSquare.SetPosition(0, min);

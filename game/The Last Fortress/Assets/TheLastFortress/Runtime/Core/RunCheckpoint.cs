@@ -65,6 +65,9 @@ namespace TheLastFortress
         public bool heroAtNight;
 
         public int heroX, heroZ;
+
+        // release-rules-4 (plan 019): the motor velocity at Start Night, so a moving start replays. Absent (0) means rest.
+        public int heroVx, heroVz;
     }
 
     [Serializable]
@@ -201,6 +204,11 @@ namespace TheLastFortress
                 cp.heroAtNight = true;
                 cp.heroX = sim.Hero.UnitsX;
                 cp.heroZ = sim.Hero.UnitsZ;
+                if (sim.Hero.Profile.ContactPhase)
+                {
+                    cp.heroVx = sim.Hero.VelX;
+                    cp.heroVz = sim.Hero.VelZ;
+                }
             }
 
             return cp;

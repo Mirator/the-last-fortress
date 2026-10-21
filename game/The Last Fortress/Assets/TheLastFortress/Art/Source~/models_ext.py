@@ -16,7 +16,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from models import (Part, beam, box_bm, cyl_bm, empty, export, ico_bm, pyramid_bm, root, trs, wall_torch,  # noqa: E402
-                    STONE, STONE_DARK, TIMBER, TIMBER_DARK, SHINGLE, IRON, DOOR, FLAME, WINDOW, BANNER, ENEMY_LEATHER, ENEMY_EYES)
+                    PLAYER_CLOTH, STONE, STONE_DARK, TIMBER, TIMBER_DARK, SHINGLE, IRON, DOOR, FLAME, WINDOW, BANNER, ENEMY_LEATHER, ENEMY_EYES)
 import bmesh  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
@@ -76,8 +76,8 @@ def house():
 
 
 def farm():
-    """2 x 2 field (pivot at the footprint centre), ~0.35 (shed ~0.55): tilled furrows with crop rows, a wattle fence on
-    two sides, a small shingled shed and hay bales. Low, so it never reads as a wall."""
+    """2 x 2 field (pivot at the footprint centre), ~0.35 (shed ~0.55): tilled furrows with crop rows, a wattle fence all
+    around (owner, 2026-10-21; it was on two sides), a small shingled shed and hay bales. Low, so it never reads as a wall."""
     rng = random.Random(41)
     r = root("Farm")
     p = Part("Body")
@@ -91,13 +91,15 @@ def farm():
                 h = rng.uniform(0.1, 0.135)
                 p.add(cyl_bm(0.007, h, 4, radius_top=0.0), CROP, trs((x + rng.uniform(-0.035, 0.035), y + rng.uniform(-0.04, 0.04), 0.07),
                                                                      (rng.uniform(-8, 8), rng.uniform(-8, 8), rng.uniform(0, 360))))
-    for k in range(9):
-        t = -0.84 + k * 0.21
-        p.add(cyl_bm(0.012, 0.15, 5), TIMBER_DARK, trs((t, -0.86, 0.04)), grain=(0, 0, 1))
-        p.add(cyl_bm(0.012, 0.15, 5), TIMBER_DARK, trs((-0.86, t, 0.04)), grain=(0, 0, 1))
-    for z in (0.09, 0.15):
-        p.add(box_bm((1.72, 0.016, 0.02), 0.003), TIMBER, trs((0, -0.86, z)), grain=(1, 0, 0))
-        p.add(box_bm((0.016, 1.72, 0.02), 0.003), TIMBER, trs((-0.86, 0, z)), grain=(0, 1, 0))
+    for side in (-0.86, 0.86):
+        for k in range(9):
+            t = -0.84 + k * 0.21
+            p.add(cyl_bm(0.012, 0.15, 5), TIMBER_DARK, trs((t, side, 0.04)), grain=(0, 0, 1))
+            p.add(cyl_bm(0.012, 0.15, 5), TIMBER_DARK, trs((side, t, 0.04)), grain=(0, 0, 1))
+        p.add(cyl_bm(0.012, 0.15, 5), TIMBER_DARK, trs((0.86, 0.86, 0.04)), grain=(0, 0, 1))  # the far corner post
+        for z in (0.09, 0.15):
+            p.add(box_bm((1.72, 0.016, 0.02), 0.003), TIMBER, trs((0, side, z)), grain=(1, 0, 0))
+            p.add(box_bm((0.016, 1.72, 0.02), 0.003), TIMBER, trs((side, 0, z)), grain=(0, 1, 0))
     p.add(box_bm((0.36, 0.32, 0.3), 0.01), TIMBER, trs((0.62, -0.62, 0.04)), grain=(0, 0, 1))
     p.add(prism_bm(0.46, 0.42, 0.2), SHINGLE, trs((0.62, -0.62, 0.34)))
     p.add(box_bm((0.11, 0.02, 0.25), 0.003), DOOR, trs((0.62, -0.785, 0.04)))
@@ -178,6 +180,68 @@ def cannon():
     export("ArtCannon")
 
 
+def cannon_field():
+    """release-rules-4 1 x 1 field gun (owner, 2026-10-21): no stone emplacement, just a low timber turntable (radius 0.37)
+    and the gun on it, scaled to read on one tile (~0.5 high, swing radius ~0.38). Same part names as cannon(): Body
+    (static), Carriage, Barrel, Muzzle (pivot at the mouth), Wheel (the gun that traverses) and Shot, plus the Gunner who
+    turns with the gun; powder kegs and the shot sit in opposite corners outside the swing."""
+    r = root("CannonField")
+    p = Part("Body")
+    p.add(cyl_bm(0.37, 0.025, 8, radius_top=0.36, bevel=0.004), STONE_DARK, trs((0, 0, 0), (0, 0, 22.5)))
+    p.add(cyl_bm(0.33, 0.012, 16), TIMBER, trs((0, 0, 0.025)), grain=(1, 0, 0))
+    for k in range(8):  # iron pins of the traverse ring
+        a = math.radians(22.5 + 45 * k)
+        p.add(cyl_bm(0.014, 0.012, 6), IRON, trs((math.cos(a) * 0.345, math.sin(a) * 0.345, 0.025)))
+    for (x, y) in ((0.345, 0.4), (0.41, 0.35)):  # powder kegs in the corner opposite the shot (hero collision: RunSimulation.FieldGunOverlaps)
+        p.add(cyl_bm(0.042, 0.09, 10), KEG, trs((x, y, 0.0)), grain=(0, 0, 1))
+        for z in (0.015, 0.07):
+            p.add(cyl_bm(0.044, 0.008, 10), IRON, trs((x, y, z)))
+    p.build(r)
+    # The cannon() gun at 0.7 (it was 0.42 on its 2 x 2 deck), wheels standing on the turntable.
+    G = Matrix.Translation((0, -0.02, 0.037)) @ Matrix.Scale(0.7, 4) @ Matrix.Translation((0, 0.05, -0.25))
+    carriage = Part("Carriage")
+    for sx in (-1, 1):
+        carriage.add_scaled(G, box_bm((0.07, 0.62, 0.26), 0.012), TIMBER_DARK, trs((sx * 0.17, -0.05, 0.33)), grain=(0, 1, 0))
+    carriage.add_scaled(G, box_bm((0.36, 0.5, 0.06), 0.01), TIMBER_DARK, trs((0, -0.05, 0.36)), grain=(1, 0, 0))
+    carriage.add_scaled(G, box_bm((0.3, 0.06, 0.06), 0.008), IRON, trs((0, -0.32, 0.36)))
+    carriage.build(r)
+    barrel = Part("Barrel")
+    barrel.add_scaled(G, cyl_bm(0.11, 0.78, 12, radius_top=0.085, bevel=0.008), IRON, trs((0, -0.25, 0.62), (-70, 0, 0)))
+    for t in (0.0, 0.3, 0.62):
+        d = Vector((0, math.cos(math.radians(20)), math.sin(math.radians(20))))
+        barrel.add_scaled(G, cyl_bm(0.12 - t * 0.05, 0.035, 12), IRON, trs(Vector((0, -0.25, 0.62)) + d * t * 0.78 - Vector((0, 0, 0.01)), (-70, 0, 0)))
+    barrel.add_scaled(G, ico_bm(0.07, 1), IRON, trs((0, -0.29, 0.6)))
+    barrel.build(r)
+    d = Vector((0, math.cos(math.radians(20)), math.sin(math.radians(20))))
+    mouth = Vector((0, -0.25, 0.62)) + d * 0.8
+    muzzle = Part("Muzzle")
+    muzzle.add_scaled(G, cyl_bm(0.105, 0.06, 12), IRON, trs(mouth - d * 0.06, (-70, 0, 0)))
+    muzzle.build(r, G @ mouth)
+    wheel = Part("Wheel")
+    for sx in (-1, 1):
+        wheel.add_scaled(G, cyl_bm(0.17, 0.05, 12, bevel=0.008), TIMBER_DARK, trs((sx * 0.235, -0.05, 0.42), (0, 90, 0)))
+        wheel.add_scaled(G, cyl_bm(0.05, 0.06, 8), IRON, trs((sx * 0.24, -0.05, 0.42), (0, 90, 0)))
+    wheel.build(r)
+    # The gunner (owner, 2026-10-21): stands behind the breech with a smouldering linstock and turns with the gun, inside
+    # the hero collision disc (RunSimulation.FieldGunOverlaps). Same figure style and size as the tower archer.
+    gunner = Part("Gunner")
+    F = Matrix.Translation((0.06, -0.255, 0.037))
+    gunner.add_scaled(F, cyl_bm(0.045, 0.1, 8, radius_top=0.05), PLAYER_CLOTH, trs((0, 0, 0)))
+    gunner.add_scaled(F, cyl_bm(0.05, 0.075, 8, radius_top=0.035), PLAYER_CLOTH, trs((0, 0, 0.1)))
+    gunner.add_scaled(F, box_bm((0.075, 0.06, 0.015), 0.004), TIMBER_DARK, trs((0, 0, 0.1)))
+    gunner.add_scaled(F, ico_bm(0.032, 1), "ArtSkin", trs((0, 0.004, 0.205)))
+    gunner.add_scaled(F, cyl_bm(0.036, 0.02, 8, radius_top=0.03), TIMBER_DARK, trs((0, 0, 0.225)))  # felt cap
+    gunner.add_scaled(F, box_bm((0.025, 0.055, 0.02), 0.004), PLAYER_CLOTH, trs((0.03, 0.025, 0.14)))  # arm to the linstock
+    gunner.add_scaled(F, cyl_bm(0.006, 0.26, 6), TIMBER_DARK, trs((0.045, 0.05, 0.0), (-6, 0, 0)))  # linstock
+    gunner.add_scaled(F, ico_bm(0.012, 1), FLAME, trs((0.045, 0.077, 0.26)))  # slow match
+    gunner.build(r)
+    shot = Part("Shot")  # a small pyramid of balls in the opposite corner, outside the swing
+    for (x, y, z) in ((-0.415, -0.405, 0), (-0.345, -0.405, 0), (-0.38, -0.345, 0), (-0.38, -0.385, 0.055)):
+        shot.add(ico_bm(0.035, 1), IRON, trs((x, y, 0.035 + z)))
+    shot.build(r)
+    export("ArtCannonField")
+
+
 def watchtower():
     """Tall thin lookout at real scale (plan 014), about 14 m: a small stone footing, four 0.3 m stilts with braces and
     two landings, a lookout box at 11 m with a shingle cap and an amber pennant on a pole (support, not a weapon)."""
@@ -256,10 +320,16 @@ def repair_station():
 
 
 if __name__ == "__main__":
+    only = sys.argv[sys.argv.index("--") + 2:] if "--" in sys.argv else []
+    if only:  # e.g. -- <output folder> cannon_field: regenerate only the named models
+        for name in only:
+            globals()[name]()
+        sys.exit(0)
     house()
     farm()
     spike_trap()
     cannon()
+    cannon_field()
     watchtower()
     repair_station()
     # the six other enemy kinds: characters.py (plan 013)

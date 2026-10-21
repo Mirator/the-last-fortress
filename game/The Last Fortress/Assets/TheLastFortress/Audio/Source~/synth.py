@@ -643,6 +643,77 @@ def music_conclusion():
     return out
 
 
+# ---------------------------------------------------------------- plan 019 hero (release-rules-4)
+# The hero's own families, so its swing, blade, hurt, fall and steps no longer borrow tower and Keep sounds. Each is
+# seeded on its own (see CLIPS), so adding them changes no earlier clip.
+
+def _bands(x, centres, weights, q=1.6):
+    out = np.zeros_like(x)
+    for f, w in zip(centres, weights):
+        out += biquad_bp(x, f, q) * w
+    return out
+
+
+def hero_swing(variant):
+    """Blade whoosh: air rushing past a moving edge, rising to the contact and trailing off; no impact."""
+    s = 0.24
+    n = int(s * SR)
+    t = t_axis(s)
+    x = noise(s)
+    peak = [0.085, 0.095][variant]
+    low = _bands(x, [450, 700], [1.0, 0.7])
+    high = _bands(x, [1600, 2600, 3800], [0.8, 0.6, 0.3], 2.2)
+    rise = np.clip(t / peak, 0, 1) ** 2
+    fall = np.exp(-np.clip(t - peak, 0, None) / 0.045)
+    env = rise * fall
+    return (low * (1 - rise * 0.6) + high * rise) * env * 1.4
+
+
+def hero_impact(variant):
+    """The blade biting: a bright edge tick, a padded leather-and-body thump and a short iron ring."""
+    s = 0.24
+    n = int(s * SR)
+    tick = hp(noise(s), 2600) * env_ad(n, 0.0002, 0.005) * 0.9
+    body = thud([115, 100][variant], s, 0.7) * 0.8
+    ring = modal([2050, 3320, 4710], [1.0, 0.55, 0.3], [0.05, 0.035, 0.02], s) * 0.22
+    padded = lp(noise(s), 900, 2) * env_ad(n, 0.0008, 0.03) * 1.6
+    return tick + body + ring + padded
+
+
+def hero_hurt():
+    """Taking a hit: a short voiced exhale (a low buzz through two vowel formants) over a dull body blow."""
+    s = 0.32
+    n = int(s * SR)
+    t = t_axis(s)
+    f0 = 118 * (1 - 0.18 * t / s)
+    voice = np.sign(np.sin(2 * np.pi * np.cumsum(f0) / SR)) * 0.5
+    voice = _bands(voice, [650, 1150, 2400], [1.0, 0.6, 0.15], 4.0)
+    env = env_ad(n, 0.012, 0.09)
+    return voice * env * 1.3 + thud(85, s, 0.5) * 0.6
+
+
+def hero_down():
+    """The hero falling: knees, then the body and shield on the ground, a rattle of gear and settling dust."""
+    s = 0.8
+    out = np.zeros(int(s * SR))
+    place(out, thud(95, 0.4, 0.6), 0.0, 0.7)
+    place(out, thud(70, 0.5, 0.8), 0.14, 1.0)
+    place(out, modal([1300, 2150, 3400], [1.0, 0.6, 0.3], [0.08, 0.05, 0.03], 0.3) * 0.3, 0.16, 1.0)
+    dust = lp(noise(s), 700, 2) * env_ad(len(out), 0.18, 0.2) * 0.35
+    return out + dust
+
+
+def footstep(variant):
+    """A boot on packed earth and grass: a soft heel thump and a short gritty scuff."""
+    s = 0.12
+    n = int(s * SR)
+    cut = [900, 750, 1050, 820][variant]
+    scuff = lp(noise(s), cut, 2) * env_ad(n, 0.002, 0.018) * 1.6
+    grit = hp(noise(s), 2500) * env_ad(n, 0.001, 0.006) * 0.12
+    heel = thud([72, 66, 78, 69][variant], s, 0.25) * 0.5
+    return scuff + grit + heel
+
+
 CLIPS = {
     "ui_click": (ui_click, -6),
     "ui_confirm": (ui_confirm, -3),
@@ -671,6 +742,16 @@ CLIPS = {
     "fuse_lit": (seeded(8003, fuse_lit), -2),
     "bomber_blast": (seeded(8004, bomber_blast), -1),
     "commander_arrival": (seeded(8005, commander_arrival), -0.5),
+    "hero_swing_0": (seeded(9001, lambda: hero_swing(0)), -6),
+    "hero_swing_1": (seeded(9002, lambda: hero_swing(1)), -6),
+    "hero_impact_0": (seeded(9003, lambda: hero_impact(0)), -3),
+    "hero_impact_1": (seeded(9004, lambda: hero_impact(1)), -3),
+    "hero_hurt": (seeded(9005, hero_hurt), -4),
+    "hero_down": (seeded(9006, hero_down), -3),
+    "footstep_0": (seeded(9007, lambda: footstep(0)), -10),
+    "footstep_1": (seeded(9008, lambda: footstep(1)), -10),
+    "footstep_2": (seeded(9009, lambda: footstep(2)), -10),
+    "footstep_3": (seeded(9010, lambda: footstep(3)), -10),
 }
 
 LOOPS = {

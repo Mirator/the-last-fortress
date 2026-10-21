@@ -29,6 +29,12 @@ namespace TheLastFortress
         /// <summary>Stress fixture: Keep and Walls ignore combat damage; killed enemies respawn. Never set for the main wave.</summary>
         public bool StressMode;
 
+        /// <summary>
+        /// Stress fixture only (plan 019): a hero of this rules version on the fixture board, so performance is measured with
+        /// the hero, its motor and its attacks in play. Null: no hero, as before. Ignored outside stress mode.
+        /// </summary>
+        public string StressHeroRules;
+
         /// <summary>Optional multi-night MVP run. Null keeps the single-wave prototype; invalid together with stress.</summary>
         public CampaignConfig Campaign;
 
@@ -233,7 +239,11 @@ namespace TheLastFortress
             grid.Install(keep);
             buildingsById[keep.Id] = keep;
             bombersLightOnContact = config.Campaign != null && ReleaseCampaign.BombersLightOnContact(config.Campaign.RulesVersion);
-            hero = config.Campaign != null && config.Campaign.HasHero ? new Hero { MoveUnits = ReleaseCampaign.HeroMoveUnits(config.Campaign.RulesVersion) } : null;
+            var heroRules = config.Campaign != null && config.Campaign.HasHero ? config.Campaign.RulesVersion
+                : config.StressMode && ReleaseCampaign.HasHero(config.StressHeroRules) ? config.StressHeroRules : null;
+            hero = heroRules != null ? new Hero { MoveUnits = ReleaseCampaign.HeroMoveUnits(heroRules), Profile = HeroProfile.For(heroRules) } : null;
+            Planner.TurnLate = hero != null && hero.Profile.TurnLateRoutes;
+            Planner.ClearCache();
             ResetHero();
             ResetCount++;
             events.Add(new SimEvent(SimEventType.RunReset, 0));
@@ -562,7 +572,7 @@ namespace TheLastFortress
         {
             previewScratch.Clear();
             if (kind != BuildingKind.SpikeTrap)
-                foreach (var c in BuildingDefinition.FootprintCells(kind, anchor)) previewScratch.Add(c);
+                foreach (var c in (Definitions.For(kind)?.Footprint(anchor) ?? BuildingDefinition.FootprintCells(kind, anchor))) previewScratch.Add(c);
             return Planner.Plan(grid, start, previewScratch);
         }
 
@@ -601,6 +611,13 @@ namespace TheLastFortress
 
             Tick = 0;
             accumulatorNs = 0;
+            if (hero != null && hero.Profile.ContactPhase)
+            {
+                // release-rules-4: no attack crosses into the Night; the motor keeps its velocity so a moving start replays.
+                hero.ClearAttack();
+                hero.SwingReadyTick = 0;
+            }
+
             LastNight = new NightRecap { Night = NightNumber }; // before the time-zero spawn
             SetState(RunState.Night);
             ReleaseDueSpawns(); // the time-zero spawn appears on entering Night, before any movement step
@@ -772,7 +789,7 @@ namespace TheLastFortress
                     keepSeen = true;
                 }
 
-                foreach (var c in BuildingDefinition.FootprintCells(kind, cell))
+                foreach (var c in def.Footprint(cell))
                 {
                     if (!GridCoordinates.IsInBounds(c) || grid.IsImpassableTerrain(c)) return $"Building {bd.id} lies outside buildable land.";
                     if (kind != BuildingKind.Keep && GridCoordinates.IsReservedRing(c)) return $"Building {bd.id} lies on the reserved ring.";
@@ -805,6 +822,7 @@ namespace TheLastFortress
             foreach (var key in s.synergiesEver ?? new string[0]) Stats.SynergiesEver.Add(key);
             ResetHero(); // the hero is never stored except its Night-start position
             if (hero != null && cp.heroAtNight && !RestoreHeroPosition(cp.heroX, cp.heroZ)) return "Saved hero position is not walkable.";
+            if (hero != null && cp.heroAtNight && hero.Profile.ContactPhase && !RestoreHeroVelocity(cp.heroVx, cp.heroVz)) return "Saved hero velocity is out of range.";
             events.Clear();
             events.Add(new SimEvent(SimEventType.RunReset, 0));
             return null;
@@ -1037,6 +1055,12 @@ namespace TheLastFortress
                 e.PrevX = e.X;
                 e.PrevZ = e.Z;
                 if (!e.Alive) continue;
+                if (e.Pursuing || e.Returning)
+                {
+                    PursueStep(e);
+                    continue;
+                }
+
                 if (e.Moving)
                 {
                     AdvanceSegment(e);
@@ -1084,7 +1108,7 @@ namespace TheLastFortress
             }
 
             if (e.Definition.IsRanged && RangedHold(e, freshStep)) return;
-            if (MeleeHoldsHero(e, freshStep)) return;
+            if (hero != null && hero.Profile.PursuitTicks > 0 ? StartsPursuit(e, freshStep) : MeleeHoldsHero(e, freshStep)) return;
             if (e.Definition.IsBomber && bombersLightOnContact && LightOnContact(e, freshStep)) return;
 
             if (e.RouteIndex >= e.Route.ReachableEndIndex)
@@ -1548,6 +1572,8 @@ namespace TheLastFortress
             while (heroDayAccumulatorNs >= StepNanoseconds)
             {
                 MoveHero(command);
+                if (hero.Profile.DayAttacks) ContactAttackPhase(command); // release-rules-4: a swing by Day hits nothing but is real
+                heroDayTick++;
                 heroDayAccumulatorNs -= StepNanoseconds;
                 steps++;
             }
@@ -1589,7 +1615,9 @@ namespace TheLastFortress
         /// <summary>Whether a hero body centred at these units would overlap a blocked cell (touching is allowed).</summary>
         public bool HeroOverlapsBlocked(int ux, int uz)
         {
-            const int u = HeroRules.UnitsPerTile, r = HeroRules.RadiusUnits;
+            if (hero != null && hero.Profile.ContactPhase) return HeroOverlapsDrawn(ux, uz);
+            const int u = HeroRules.UnitsPerTile;
+            var r = hero != null ? hero.Profile.RadiusUnits : HeroRules.RadiusUnits;
             var x0 = FloorDiv(ux - r, u);
             var x1 = FloorDiv(ux + r, u);
             var z0 = FloorDiv(uz - r, u);
@@ -1610,6 +1638,198 @@ namespace TheLastFortress
 
         static int FloorDiv(int a, int b) => a >= 0 ? a / b : (a - b + 1) / b;
 
+        /// <summary>
+        /// release-rules-4 hero collision: off-board and impassable terrain cells block whole; a solid building blocks its
+        /// footprint shrunk by <see cref="HeroProfile.BuildingInsetUnits"/> on every side, matching the drawn model, so the
+        /// hero fits through gaps the art shows. Enemies and routes still use whole cells.
+        /// </summary>
+        bool HeroOverlapsDrawn(int ux, int uz)
+        {
+            const int u = HeroRules.UnitsPerTile;
+            var p = hero.Profile;
+            var r = p.RadiusUnits;
+            var x0 = FloorDiv(ux - r, u);
+            var x1 = FloorDiv(ux + r, u);
+            var z0 = FloorDiv(uz - r, u);
+            var z1 = FloorDiv(uz + r, u);
+            for (var z = z0; z <= z1; z++)
+            for (var x = x0; x <= x1; x++)
+            {
+                var c = new GridPos(x, z);
+                if (!IsHeroBlocked(c)) continue;
+                if (TerrainPropsOverlap(c, ux, uz, r, out var drawnOnly))
+                    return true;
+                if (drawnOnly) continue;
+                long minX = x * u, minZ = z * u, maxX = (x + 1) * u, maxZ = (z + 1) * u;
+                var b = GridCoordinates.IsInBounds(c) && !grid.IsImpassableTerrain(c) ? grid.GetOccupant(c) : null;
+                if (b != null && b.Kind == BuildingKind.Wall)
+                {
+                    if (WallOverlaps(b.Cell, ux, uz, r)) return true;
+                    continue;
+                }
+
+                if (b != null && b.Kind == BuildingKind.Cannon && b.Definition.FootprintSize == 1)
+                {
+                    if (FieldGunOverlaps(b, ux, uz, r)) return true;
+                    continue;
+                }
+
+                if (b == null && GridCoordinates.IsInBounds(c) && config.Terrain != null && config.Terrain.Cells[c.Z * GridCoordinates.Size + c.X] == TerrainType.Water)
+                {
+                    if (WaterOverlaps(c, ux, uz, r)) return true;
+                    continue;
+                }
+
+                if (b != null)
+                {
+                    var inset = p.BuildingInsetUnits(b.Kind);
+                    var size = b.Definition.FootprintSize * u;
+                    int insetX = inset, insetZ = inset;
+                    if (b.Kind == BuildingKind.House)
+                    {
+                        // 0.86 wide and 0.76 deep, turned in 90 degree steps.
+                        if ((b.Orientation & 1) == 0) insetZ = HeroProfile.HouseDepthInsetUnits;
+                        else insetX = HeroProfile.HouseDepthInsetUnits;
+                    }
+
+                    minX = b.Cell.X * u + insetX;
+                    minZ = b.Cell.Z * u + insetZ;
+                    maxX = b.Cell.X * u + size - insetX;
+                    maxZ = b.Cell.Z * u + size - insetZ;
+                }
+
+                if (BoxOverlaps(minX, minZ, maxX, maxZ, ux, uz, r)) return true;
+            }
+
+            return false;
+        }
+
+        static bool BoxOverlaps(long minX, long minZ, long maxX, long maxZ, int ux, int uz, int r)
+        {
+            long cx = Math.Max(minX, Math.Min(ux, maxX));
+            long cz = Math.Max(minZ, Math.Min(uz, maxZ));
+            var dx = ux - cx;
+            var dz = uz - cz;
+            return dx * dx + dz * dz < (long)r * r;
+        }
+
+        /// <summary>
+        /// release-rules-4 Wall as drawn: the centre post plus an arm to the edge of each side with a neighbouring Wall (the
+        /// same connection mask the view builds its shape from), each <see cref="HeroProfile.WallHalfUnits"/> either side of
+        /// its line; a lone Wall is a ring of logs.
+        /// </summary>
+        bool WallOverlaps(GridPos cell, int ux, int uz, int r)
+        {
+            const int u = HeroRules.UnitsPerTile;
+            long cx = cell.X * u + u / 2, cz = cell.Z * u + u / 2;
+            var mask = WallTopology.Mask(grid, cell);
+            if (mask == 0) return BoxOverlaps(cx - HeroProfile.LoneWallHalfUnits, cz - HeroProfile.LoneWallHalfUnits, cx + HeroProfile.LoneWallHalfUnits, cz + HeroProfile.LoneWallHalfUnits, ux, uz, r);
+            const int w = HeroProfile.WallHalfUnits;
+            if (BoxOverlaps(cx - w, cz - w, cx + w, cz + w, ux, uz, r)) return true;
+            if ((mask & 1) != 0 && BoxOverlaps(cx - w, cz, cx + w, cz + u / 2, ux, uz, r)) return true; // north
+            if ((mask & 2) != 0 && BoxOverlaps(cx, cz - w, cx + u / 2, cz + w, ux, uz, r)) return true; // east
+            if ((mask & 4) != 0 && BoxOverlaps(cx - w, cz - u / 2, cx + w, cz, ux, uz, r)) return true; // south
+            return (mask & 8) != 0 && BoxOverlaps(cx - u / 2, cz - w, cx, cz + w, ux, uz, r); // west
+        }
+
+        /// <summary>
+        /// release-rules-4 1 x 1 Cannon as drawn (owner playtest 2026-10-21: the hero fits between the gun and its corner
+        /// props): the gun a disc of <see cref="HeroProfile.FieldGunRadiusUnits"/> at the cell centre, and the shot pile and
+        /// powder kegs a disc each in two opposite corners, the diagonal turning with the Cannon.
+        /// </summary>
+        static bool FieldGunOverlaps(Building b, int ux, int uz, int r)
+        {
+            const int u = HeroRules.UnitsPerTile, o = HeroProfile.FieldGunPropOffsetUnits;
+            long cx = b.Cell.X * u + u / 2, cz = b.Cell.Z * u + u / 2;
+            if (DiscOverlaps(cx, cz, HeroProfile.FieldGunRadiusUnits, ux, uz, r)) return true;
+            var sz = (b.Orientation & 1) == 0 ? 1 : -1;
+            return DiscOverlaps(cx + o, cz + sz * o, HeroProfile.FieldGunPropRadiusUnits, ux, uz, r) ||
+                   DiscOverlaps(cx - o, cz - sz * o, HeroProfile.FieldGunPropRadiusUnits, ux, uz, r);
+        }
+
+        static bool DiscOverlaps(long cx, long cz, int radius, int ux, int uz, int r)
+        {
+            var dx = ux - cx;
+            var dz = uz - cz;
+            long reach = radius + r;
+            return dx * dx + dz * dz < reach * reach;
+        }
+
+        HashSet<GridPos> riverCrossings;
+
+        /// <summary>
+        /// release-rules-4 water cell: the hero may stand on its drawn bank, within <see cref="HeroProfile.BankUnits"/> of a side
+        /// (or a corner) whose neighbour is land; elsewhere the cell is water. The body is tested at its centre and eight
+        /// points on its rim, in integers.
+        /// </summary>
+        bool WaterOverlaps(GridPos cell, int ux, int uz, int r)
+        {
+            riverCrossings ??= new HashSet<GridPos>(MapProfiles.RiverCrossings(config.Terrain));
+            bool Land(int x, int z)
+            {
+                var n = new GridPos(x, z);
+                return GridCoordinates.IsInBounds(n) && config.Terrain.Cells[z * GridCoordinates.Size + x] != TerrainType.Water && !riverCrossings.Contains(n);
+            }
+
+            const int u = HeroRules.UnitsPerTile, bank = HeroProfile.BankUnits;
+            bool W = Land(cell.X - 1, cell.Z), E = Land(cell.X + 1, cell.Z), S = Land(cell.X, cell.Z - 1), N = Land(cell.X, cell.Z + 1);
+            var d = r * 707 / 1000;
+            int[] ox = { 0, r, -r, 0, 0, d, d, -d, -d }, oz = { 0, 0, 0, r, -r, d, -d, d, -d };
+            for (var i = 0; i < ox.Length; i++)
+            {
+                int fx = ux + ox[i] - cell.X * u, fz = uz + oz[i] - cell.Z * u;
+                if (fx < 0 || fx > u || fz < 0 || fz > u) continue; // this point is not in the water cell
+                var dry = W && fx <= bank || E && u - fx <= bank || S && fz <= bank || N && u - fz <= bank;
+                if (!dry)
+                {
+                    bool Corner(bool a, bool b2, int dx, int dz, long px, long pz) =>
+                        !a && !b2 && Land(cell.X + dx, cell.Z + dz) && px * px + pz * pz <= (long)bank * bank;
+                    dry = Corner(W, S, -1, -1, fx, fz) || Corner(E, S, 1, -1, u - fx, fz) || Corner(W, N, -1, 1, fx, u - fz) || Corner(E, N, 1, 1, u - fx, u - fz);
+                }
+
+                if (!dry) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// release-rules-4: a forest or rock cell of a generated map blocks the hero only where its props stand (owner playtest
+        /// 2026-10-21): two tree trunks (radius 48 units at fixed spots) and a bush (radius 144, corner chosen by the cell's
+        /// stable hash) on forest; one boulder disc (radius about 0.31-0.35 tile, scaled by the same hash) on rock. This
+        /// mirrors the art layout in WorldView.PlaceArtCell; change both together. Water and test-only impassable cells
+        /// (no terrain map) stay whole: <paramref name="drawnOnly"/> is false for them.
+        /// </summary>
+        bool TerrainPropsOverlap(GridPos c, int ux, int uz, int r, out bool drawnOnly)
+        {
+            drawnOnly = false;
+            var map = config.Terrain;
+            if (map == null || !GridCoordinates.IsInBounds(c) || grid.GetOccupant(c) != null) return false;
+            var type = map.Cells[c.Z * GridCoordinates.Size + c.X];
+            if (type != TerrainType.Forest && type != TerrainType.Rock) return false;
+            drawnOnly = true;
+            const int u = HeroRules.UnitsPerTile;
+            int cx = c.X * u + u / 2, cz = c.Z * u + u / 2;
+            var h7 = (c.X * 73 + c.Z * 151) % 7; // WorldView's per-cell variation h = h7 / 7
+            bool Disc(int ox, int oz, int radius)
+            {
+                long dx = ux - (cx + ox), dz = uz - (cz + oz), reach = r + radius;
+                return dx * dx + dz * dz < reach * reach;
+            }
+
+            if (type == TerrainType.Rock) return Disc(0, 0, 376 + 59 * h7 / 7);
+            var bush = h7 >= 4 ? 264 : -264;
+            return Disc(-216, 180, 48) || Disc(240, -204, 48) || Disc(bush, bush, 144);
+        }
+
+        long heroDayTick;
+
+        /// <summary>
+        /// The hero's own clock: the Night step during Night, its Day clock during Day (release-rules-4 swings by Day too).
+        /// Attack ticks are on this clock; Night start clears them.
+        /// </summary>
+        public long HeroClock => State == RunState.Day ? heroDayTick : Tick;
+
         void ResetHero()
         {
             if (hero == null) return;
@@ -1618,15 +1838,20 @@ namespace TheLastFortress
             hero.SwingReadyTick = 0;
             hero.RespawnTick = 0;
             hero.Facing = 0;
+            hero.VelX = hero.VelZ = 0;
+            hero.ClearAttack();
             hero.PlaceAt(HeroSpawnCell(GridState.KeepCell));
             provokedArchers.Clear();
             heroDayAccumulatorNs = 0;
+            heroDayTick = 0;
         }
 
         /// <summary>A building placed over the hero's body succeeds; the hero moves to the nearest free cell (specs/003 2.1).</summary>
         void StepHeroAside()
         {
             if (hero == null || !HeroOverlapsBlocked(hero.UnitsX, hero.UnitsZ)) return;
+            hero.VelX = hero.VelZ = 0;
+            hero.ClearAttack();
             hero.PlaceAt(HeroSpawnCell(hero.Cell));
             events.Add(new SimEvent(SimEventType.HeroRelocated, Tick, HeroRules.SourceId, -1, hero.Cell, hero.X, hero.Z, hero.X, hero.Z));
         }
@@ -1640,6 +1865,18 @@ namespace TheLastFortress
             return true;
         }
 
+        /// <summary>
+        /// Restores the release-rules-4 velocity saved at Start Night after the position (a moving start replays); false if
+        /// it exceeds the profile's top speed, which only a damaged or edited save can hold.
+        /// </summary>
+        internal bool RestoreHeroVelocity(int vx, int vz)
+        {
+            if (hero == null || (long)vx * vx + (long)vz * vz > (long)hero.Profile.MaxSpeedUnits * hero.Profile.MaxSpeedUnits) return false;
+            hero.VelX = vx;
+            hero.VelZ = vz;
+            return true;
+        }
+
         /// <summary>Step phase 2b: respawn when due, then movement from the command.</summary>
         void HeroMovePhase(HeroCommand command)
         {
@@ -1649,6 +1886,8 @@ namespace TheLastFortress
                 hero.Alive = true;
                 hero.Hp = HeroRules.MaxHp;
                 hero.SwingReadyTick = Tick;
+                hero.VelX = hero.VelZ = 0;
+                hero.ClearAttack();
                 hero.PlaceAt(HeroSpawnCell(GridState.KeepCell));
                 provokedArchers.Clear();
                 events.Add(new SimEvent(SimEventType.HeroRespawned, Tick, HeroRules.SourceId, -1, hero.Cell, hero.X, hero.Z, hero.X, hero.Z));
@@ -1661,39 +1900,43 @@ namespace TheLastFortress
         {
             hero.PrevUnitsX = hero.UnitsX;
             hero.PrevUnitsZ = hero.UnitsZ;
-            if (!hero.Alive || !command.Controlled) return;
-            hero.Facing = command.Facing;
-            if (command.Heading < 0) return;
-            // Axis-separated so the body slides along walls; integer units keep it exact.
-            MoveHeroAxis(HeroRules.HeadingX[command.Heading] * hero.MoveUnits / HeroRules.UnitsPerTile, true);
-            MoveHeroAxis(HeroRules.HeadingZ[command.Heading] * hero.MoveUnits / HeroRules.UnitsPerTile, false);
+            if (!hero.Alive)
+            {
+                hero.VelX = hero.VelZ = 0;
+                return;
+            }
+
+            // Legacy rules: an uncontrolled hero stands still. release-rules-4: it brakes to rest with the motor.
+            if (!command.Controlled && !hero.Profile.ContactPhase) return;
+            if (command.Controlled) hero.Facing = command.Facing;
+            HeroMotion.Step(ref hero.UnitsX, ref hero.UnitsZ, ref hero.VelX, ref hero.VelZ, command, hero.Attacking(HeroClock), hero.Profile, HeroOverlaps);
         }
 
-        void MoveHeroAxis(int delta, bool alongX)
+        HeroMotion.Overlaps heroOverlaps;
+        HeroMotion.Overlaps HeroOverlaps => heroOverlaps ?? (heroOverlaps = HeroOverlapsBlocked);
+
+        /// <summary>
+        /// Read-only prediction for the view: where the next fixed step would put the hero with this command, computed by the
+        /// same movement code on copies of its position and velocity. Never changes the hero, the grid or the clocks.
+        /// </summary>
+        public void PredictHeroStep(HeroCommand command, out int ux, out int uz)
         {
-            if (delta == 0) return;
-            var sign = Math.Sign(delta);
-            var lo = 0;
-            var hi = Math.Abs(delta);
-            if (!HeroBlockedAfter(sign * hi, alongX)) lo = hi;
-            else
-                while (hi - lo > 1) // largest legal distance up to the wall
-                {
-                    var mid = (lo + hi) / 2;
-                    if (HeroBlockedAfter(sign * mid, alongX)) hi = mid;
-                    else lo = mid;
-                }
-
-            if (alongX) hero.UnitsX += sign * lo;
-            else hero.UnitsZ += sign * lo;
+            ux = hero?.UnitsX ?? 0;
+            uz = hero?.UnitsZ ?? 0;
+            if (hero == null || !hero.Alive || (!command.Controlled && !hero.Profile.ContactPhase)) return;
+            int vx = hero.VelX, vz = hero.VelZ;
+            HeroMotion.Step(ref ux, ref uz, ref vx, ref vz, command, hero.Attacking(HeroClock), hero.Profile, HeroOverlaps);
         }
-
-        bool HeroBlockedAfter(int d, bool alongX) =>
-            alongX ? HeroOverlapsBlocked(hero.UnitsX + d, hero.UnitsZ) : HeroOverlapsBlocked(hero.UnitsX, hero.UnitsZ + d);
 
         /// <summary>Step phase 3b: a player swing, or the guard's automatic swing at the nearest enemy in reach.</summary>
         void HeroAttackPhase(HeroCommand command)
         {
+            if (hero != null && hero.Profile.ContactPhase)
+            {
+                ContactAttackPhase(command);
+                return;
+            }
+
             if (hero == null || !hero.Alive || Tick < hero.SwingReadyTick) return;
             if (command.Controlled)
             {
@@ -1735,6 +1978,85 @@ namespace TheLastFortress
         }
 
         /// <summary>
+        /// release-rules-4 phase 3b (specs/003 section 4): first a due contact of an attack accepted on an earlier step, then,
+        /// when ready, a new acceptance: the player's attack with the aim committed now, or the guard's at the nearest enemy
+        /// it can strike. Contact follows WindUpTicks later against whoever is in reach and arc of the hero's position then.
+        /// </summary>
+        void ContactAttackPhase(HeroCommand command)
+        {
+            if (!hero.Alive) return;
+            var now = HeroClock;
+            if (hero.AttackPending && now >= hero.ContactTick) ResolveContact();
+            if (now < hero.SwingReadyTick) return;
+            int facing;
+            if (command.Controlled)
+            {
+                if (!command.Attack) return;
+                facing = command.Facing;
+            }
+            else
+            {
+                var p = hero.Profile;
+                Enemy nearest = null;
+                var best = double.MaxValue;
+                foreach (var e in enemies) // ascending ID: strict comparison keeps the lowest on ties
+                {
+                    if (!e.Alive) continue;
+                    var dx = e.X - hero.X;
+                    var dz = e.Z - hero.Z;
+                    var d = dx * dx + dz * dz;
+                    if (d > p.SwingReach * p.SwingReach + 1e-9 || d >= best - 1e-12 || !StrikeClear(e)) continue;
+                    nearest = e;
+                    best = d;
+                }
+
+                if (nearest == null) return;
+                facing = HeroRules.FacingToward(nearest.X - hero.X, nearest.Z - hero.Z);
+                hero.Facing = facing;
+            }
+
+            var profile = hero.Profile;
+            hero.AttackPending = true;
+            hero.AttackStartTick = now;
+            hero.ContactTick = now + profile.WindUpTicks;
+            hero.SwingReadyTick = now + profile.SwingIntervalTicks;
+            hero.AttackFacing = facing;
+            events.Add(new SimEvent(SimEventType.HeroAttacked, now, HeroRules.SourceId, facing, hero.Cell, hero.X, hero.Z,
+                hero.X + HeroRules.FacingX[facing] / 1024.0 * profile.SwingReach, hero.Z + HeroRules.FacingZ[facing] / 1024.0 * profile.SwingReach));
+        }
+
+        readonly List<Enemy> contactVictims = new List<Enemy>();
+
+        /// <summary>The single contact of an accepted attack: committed facing, the hero's position now, living enemies now.</summary>
+        void ResolveContact()
+        {
+            var p = hero.Profile;
+            var f = hero.AttackFacing;
+            hero.AttackPending = false;
+            contactVictims.Clear();
+            foreach (var e in enemies)
+                if (e.Alive && p.InSwing(f, e.X - hero.X, e.Z - hero.Z) && StrikeClear(e)) contactVictims.Add(e);
+            events.Add(new SimEvent(SimEventType.HeroContact, HeroClock, HeroRules.SourceId, contactVictims.Count, hero.Cell, hero.X, hero.Z,
+                hero.X + HeroRules.FacingX[f] / 1024.0 * p.SwingReach, hero.Z + HeroRules.FacingZ[f] / 1024.0 * p.SwingReach));
+            foreach (var e in contactVictims)
+            {
+                if (e.Kind == EnemyKind.Archer) provokedArchers.Add(e.Id);
+                else e.ProvokedUntilTick = Tick + p.ProvokeTicks; // a struck melee enemy turns on the hero at its next decision
+                events.Add(new SimEvent(SimEventType.HeroHit, Tick, HeroRules.SourceId, e.Id, e.Cell, e.X, e.Z, e.X, e.Z));
+                DamageEnemy(e, p.SwingDamage, HeroRules.SourceId);
+            }
+
+            contactVictims.Clear();
+        }
+
+        HeroCombatRules.CellBlocked strikeBlocked;
+
+        /// <summary>release-rules-4: no solid building or impassable terrain touches the line from the hero to the enemy.</summary>
+        bool StrikeClear(Enemy e) => HeroCombatRules.StrikeClear(hero.UnitsX, hero.UnitsZ,
+            (long)Math.Round(e.X * HeroRules.UnitsPerTile), (long)Math.Round(e.Z * HeroRules.UnitsPerTile),
+            strikeBlocked ?? (strikeBlocked = IsHeroBlocked));
+
+        /// <summary>
         /// Melee engagement (specs/003 2.4) at a cell-centre decision point: Grunt, Runner and Brute stop for a hero within
         /// 1.0 and keep it within 1.5. Never at the route end and never while attacking a building. Bombers and bosses ignore it.
         /// </summary>
@@ -1742,7 +2064,7 @@ namespace TheLastFortress
         {
             if (e.TargetsHero)
             {
-                if (hero != null && hero.Alive && HeroDistanceSq(e) <= HeroRules.StickyRange * HeroRules.StickyRange + 1e-9)
+                if (hero != null && hero.Alive && HeroDistanceSq(e) <= hero.Profile.StickyRange * hero.Profile.StickyRange + 1e-9)
                 {
                     e.CarryUnits = 0;
                     return true;
@@ -1753,12 +2075,108 @@ namespace TheLastFortress
 
             if (hero == null || !hero.Alive || e.Definition.IsRanged || e.Definition.IsBomber || e.Definition.IsBoss) return false;
             if (e.TargetBuildingId >= 0 || e.RouteIndex >= e.Route.ReachableEndIndex) return false;
-            if (HeroDistanceSq(e) > HeroRules.EngageRange * HeroRules.EngageRange + 1e-9) return false;
+            if (HeroDistanceSq(e) > hero.Profile.EngageRange * hero.Profile.EngageRange + 1e-9) return false;
             e.CarryUnits = 0;
             if (!freshStep) return true; // as for buildings: the target is taken on the next simulation step
             e.TargetsHero = true;
             e.AttackDueTick = Tick + e.AttackTicks;
             return true;
+        }
+
+        /// <summary>
+        /// release-rules-4 threat at a cell-centre decision point: a Grunt, Runner or Brute struck by the hero (even one
+        /// hitting a building), or one not attacking a building with the hero within the start distance and its cooldown
+        /// over, starts a bounded chase when nothing solid lies between them. Bombers, bosses and archers never chase.
+        /// </summary>
+        bool StartsPursuit(Enemy e, bool freshStep)
+        {
+            var p = hero.Profile;
+            if (!hero.Alive || e.Definition.IsRanged || e.Definition.IsBomber || e.Definition.IsBoss) return false;
+            var provoked = Tick < e.ProvokedUntilTick;
+            var near = e.TargetBuildingId < 0 && Tick >= e.PursueCooldownTick && HeroDistanceSq(e) <= p.PursuitStart * p.PursuitStart + 1e-9;
+            if (!provoked && !near) return false;
+            if (!PursuitLineClear(e)) return false;
+            e.CarryUnits = 0;
+            if (!freshStep) return true; // as for buildings: the chase starts on the next simulation step
+            e.Pursuing = true;
+            e.PursueUntilTick = Tick + p.PursuitTicks;
+            e.ProvokedUntilTick = 0;
+            e.TargetBuildingId = -1;
+            e.TargetsHero = false;
+            e.OffUnitsX = (int)Math.Round(e.X * HeroRules.UnitsPerTile);
+            e.OffUnitsZ = (int)Math.Round(e.Z * HeroRules.UnitsPerTile);
+            return true;
+        }
+
+        bool PursuitLineClear(Enemy e) => HeroCombatRules.StrikeClear((long)Math.Round(e.X * HeroRules.UnitsPerTile), (long)Math.Round(e.Z * HeroRules.UnitsPerTile),
+            hero.UnitsX, hero.UnitsZ, strikeBlocked ?? (strikeBlocked = IsHeroBlocked));
+
+        /// <summary>
+        /// One step of a chase (straight at the hero, at the enemy's own speed, stopping just inside its hit reach and then
+        /// holding the hero as its target) or of the walk back to its cell centre afterwards. The line to the hero is clear of
+        /// solid cells, so every point on it lies on walkable ground. Spike Traps trigger on entering their cell, as on a route.
+        /// </summary>
+        void PursueStep(Enemy e)
+        {
+            var p = hero?.Profile;
+            if (e.Pursuing)
+            {
+                var keep = hero != null && hero.Alive && Tick < e.PursueUntilTick && HeroDistanceSq(e) <= p.PursuitLeash * p.PursuitLeash + 1e-9 && PursuitLineClear(e);
+                if (!keep)
+                {
+                    e.Pursuing = false;
+                    e.Returning = true;
+                    e.TargetsHero = false;
+                    e.PursueCooldownTick = Tick + (p?.PursuitCooldownTicks ?? 0);
+                }
+                else
+                {
+                    long dx = hero.UnitsX - e.OffUnitsX, dz = hero.UnitsZ - e.OffUnitsZ;
+                    var length = HeroMotion.IsqrtCeil(dx * dx + dz * dz);
+                    var stopAt = (long)(p.EnemyHitReach * HeroRules.UnitsPerTile * 0.75);
+                    if (length <= (long)(p.EnemyHitReach * HeroRules.UnitsPerTile))
+                    {
+                        if (!e.TargetsHero)
+                        {
+                            e.TargetsHero = true;
+                            e.AttackDueTick = Tick + e.AttackTicks;
+                        }
+                    }
+
+                    if (length > stopAt) MoveOff(e, dx, dz, Math.Min(e.MoveUnitsPerStep, length - stopAt), length);
+                    return;
+                }
+            }
+
+            GridCoordinates.TileCenter(e.Cell, out var cx, out var cz);
+            long bx = (long)Math.Round(cx * HeroRules.UnitsPerTile) - e.OffUnitsX, bz = (long)Math.Round(cz * HeroRules.UnitsPerTile) - e.OffUnitsZ;
+            var back = HeroMotion.IsqrtCeil(bx * bx + bz * bz);
+            if (back > e.MoveUnitsPerStep)
+            {
+                MoveOff(e, bx, bz, e.MoveUnitsPerStep, back);
+                return;
+            }
+
+            e.Returning = false; // back on its cell centre: plan again from here, as after any route change
+            e.X = cx;
+            e.Z = cz;
+            e.Route = null;
+            e.RouteIndex = 0;
+            e.CarryUnits = 0;
+        }
+
+        /// <summary>Moves an off-route enemy <paramref name="step"/> units along (dx, dz) of length <paramref name="length"/>.</summary>
+        void MoveOff(Enemy e, long dx, long dz, long step, long length)
+        {
+            if (length <= 0 || step <= 0) return;
+            e.OffUnitsX += (int)(dx * step / length);
+            e.OffUnitsZ += (int)(dz * step / length);
+            e.X = e.OffUnitsX / (double)HeroRules.UnitsPerTile;
+            e.Z = e.OffUnitsZ / (double)HeroRules.UnitsPerTile;
+            var cell = new GridPos((int)Math.Floor(e.X), (int)Math.Floor(e.Z));
+            if (cell == e.Cell) return;
+            e.Cell = e.NextCell = cell;
+            TriggerTrap(e);
         }
 
         double HeroDistanceSq(Enemy e)
@@ -1801,7 +2219,7 @@ namespace TheLastFortress
             if (Tick < e.AttackDueTick) return;
             // Melee reach is the hero's own: a hero that steps back out of reach is not hit (the due hit waits, so it lands
             // as soon as the hero is in reach again). Hit-and-run is a real move. Ranged hits use the archer's range.
-            if (!e.Definition.IsRanged && HeroDistanceSq(e) > HeroRules.SwingReach * HeroRules.SwingReach + 1e-9) return;
+            if (!e.Definition.IsRanged && HeroDistanceSq(e) > hero.Profile.EnemyHitReach * hero.Profile.EnemyHitReach + 1e-9) return;
             e.AttackDueTick += e.AttackTicks;
             var damage = e.Definition.AttackDamage;
             var aura = CommanderAuraPercent(e);
@@ -1811,6 +2229,8 @@ namespace TheLastFortress
             if (hero.Hp > 0) return;
             hero.Alive = false; // no longer a target; the rest is resolved in phase 6
             hero.RespawnTick = long.MaxValue;
+            hero.VelX = hero.VelZ = 0;
+            hero.ClearAttack(); // an unlanded release-rules-4 attack dies with the hero
         }
 
         /// <summary>Step phase 6: a downed hero drops every enemy's hold on it and schedules its respawn. Never Defeat.</summary>
@@ -1875,7 +2295,9 @@ namespace TheLastFortress
                 sb.Append("H pos=").Append(hero.UnitsX).Append(',').Append(hero.UnitsZ).Append(" hp=").Append(hero.Hp)
                     .Append(" alive=").Append(hero.Alive).Append(" face=").Append(hero.Facing).Append(" swing=").Append(hero.SwingReadyTick)
                     .Append(" respawn=").Append(hero.RespawnTick).Append(" kills=").Append(Stats.HeroKills)
-                    .Append(" provoked=").Append(string.Join(",", SortedProvoked())).AppendLine();
+                    .Append(" provoked=").Append(string.Join(",", SortedProvoked()))
+                    .Append(hero.Profile.ContactPhase ? $" v={hero.VelX},{hero.VelZ} atk={hero.AttackPending}:{hero.AttackStartTick}:{hero.ContactTick}:{hero.AttackFacing}" : "")
+                    .AppendLine();
             var buildings = new List<Building>(buildingsById.Values);
             buildings.Sort((a, b) => a.Id.CompareTo(b.Id));
             foreach (var b in buildings)
@@ -1890,7 +2312,10 @@ namespace TheLastFortress
                     .Append(e.Z.ToString("R", inv)).Append(" ri=").Append(e.RouteIndex).Append(" tgt=")
                     .Append(e.TargetBuildingId).Append(e.TargetsHero ? "+hero" : "").Append(" due=").Append(e.AttackDueTick)
                     .Append(" burn=").Append(e.Burning).Append(':').Append(e.BurnNextTick).Append(':').Append(e.BurnExpiryTick)
-                    .Append(e.FuseLit ? $" fuse={e.DetonateTick}" : "").AppendLine();
+                    .Append(e.FuseLit ? $" fuse={e.DetonateTick}" : "")
+                    .Append(e.Pursuing || e.Returning || e.PursueCooldownTick > 0 || e.ProvokedUntilTick > 0
+                        ? $" chase={(e.Pursuing ? "p" : e.Returning ? "r" : "-")}:{e.PursueUntilTick}:{e.PursueCooldownTick}:{e.ProvokedUntilTick}:{e.OffUnitsX},{e.OffUnitsZ}" : "")
+                    .AppendLine();
             return sb.ToString();
         }
     }

@@ -4,9 +4,11 @@ using UnityEngine.InputSystem;
 namespace TheLastFortress
 {
     /// <summary>
-    /// Third-person perspective camera for the hero view (specs/003 3.2). A separate camera from the strategic
-    /// <see cref="CameraRig"/>, enabled instead of it. Mouse look orbits behind the hero; the wheel sets the distance. It never
-    /// touches the simulation: collision is a read-only query of the grid (buildings, forest, rock) by approximate height.
+    /// Third-person perspective camera for the hero view (game rules section 17, specs/003 section 6). A separate camera from
+    /// the strategic <see cref="CameraRig"/>, enabled instead of it. Mouse look orbits behind the hero; the wheel sets the
+    /// distance. Obstacles (what is drawn for buildings, trees and boulders, and the ground) first pull the camera in; only
+    /// when even the close pose cannot clear them does it lift, by at most 15 degrees. Every shown pose, transitions
+    /// included, keeps its near-plane volume clear or takes a documented fallback. It never touches the simulation.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public sealed class HeroCameraRig : MonoBehaviour
@@ -25,17 +27,30 @@ namespace TheLastFortress
 
         const float ShoulderOffset = 0.12f;
 
-        /// <summary>Most the camera rises over the shoulder to clear an obstacle behind the hero, and how fast it gets there.</summary>
-        const float MaxLift = 15f, LiftDegreesPerSecond = 75f;
+        /// <summary>
+        /// Most the camera rises over the shoulder, in 5 degree candidates, and how fast it rises (lowering is damped).
+        /// It lifts only when the pulled-in distance at the current lift is below <see cref="CloseDistance"/>.
+        /// </summary>
+        const float MaxLift = 15f, LiftDegreesPerSecond = 75f, CloseDistance = 0.2f;
+
+        /// <summary>Outward release time constant (specs/003: 0.15 s, within 5% after 0.5 s); inward is immediate.</summary>
+        const float ReleaseSeconds = 0.15f;
 
         Camera cam;
         float distance = GameSettings.DefaultHeroDistance, shownDistance = GameSettings.DefaultHeroDistance;
-        float shownZoom = GameSettings.DefaultHeroDistance, shownLift;
+        float shownZoom = GameSettings.DefaultHeroDistance, shownLift, targetLift;
         float transition;
+        bool orbitKept;
         Vector3 fromPosition;
         Quaternion fromRotation;
+        Vector3 lastPivot, lastPosition;
+        Quaternion lastRotation;
+        bool hasLast;
 
         public Camera Camera => cam != null ? cam : cam = GetComponent<Camera>();
+
+        /// <summary>Read-only presentation blockers (refreshed from the world view by the bootstrap).</summary>
+        public HeroCameraObstacles Obstacles { get; } = new HeroCameraObstacles();
 
         /// <summary>Orbit yaw in degrees (0 = looking north/+Z, clockwise); the hero faces this way when controlled.</summary>
         public float Yaw { get; private set; } = CameraRig.Yaw;
@@ -54,24 +69,99 @@ namespace TheLastFortress
 
         public bool InTransition => transition > 0f;
 
+        /// <summary>Distance and lift actually shown this frame (after obstacles and damping).</summary>
+        public float ShownDistance => shownDistance;
+
+        public float ShownLift => shownLift;
+
+        /// <summary>The pivot the shown pose orbits (shoulder, or a fallback when the shoulder is inside a blocker).</summary>
+        public Vector3 ShownPivot => lastPivot;
+
+        /// <summary>Entry transitions cut short because an interpolated pose would have entered a blocker.</summary>
+        public int TransitionCuts { get; private set; }
+
+        /// <summary>Frames that used the tight-space fallback (no clear pose: the last clear pose was held).</summary>
+        public int FallbackFrames { get; private set; }
+
         public void SetDefaultDistance(float d) => distance = shownDistance = shownZoom = Mathf.Clamp(d, MinDistance, MaxDistance);
 
         /// <summary>
         /// Starts the view from the strategic camera and eases to the orbit pose (skipped with <see cref="SkipTransition"/>).
         /// The start sits along the strategic direction at the distance where this perspective camera frames what the
-        /// orthographic view framed, so the move is a smooth push-in instead of a dive from 40 units out.
+        /// orthographic view framed, so the move is a smooth push-in instead of a dive from 40 units out. Within a run the
+        /// last orbit is kept; a new, loaded or restarted run begins from the strategic yaw (<see cref="ResetOrbit"/>).
         /// </summary>
         public void BeginFrom(Transform from, float yaw, float orthographicSize, Vector3 focus)
         {
-            Yaw = yaw;
-            Pitch = 16f;
+            if (!orbitKept)
+            {
+                Yaw = yaw;
+                Pitch = 16f;
+                orbitKept = true;
+            }
+
             var frame = orthographicSize / Mathf.Tan(Camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
             fromPosition = focus - from.forward * frame;
             fromRotation = from.rotation;
             transition = TransitionSeconds;
             shownDistance = shownZoom = distance;
-            shownLift = 0f;
+            shownLift = targetLift = 0f;
+            hasLast = false;
         }
+
+        bool exiting;
+        float exitLeft;
+        Vector3 exitFrom;
+        Quaternion exitFromRotation;
+
+        /// <summary>Easing back out to the strategic framing (owner, 2026-10-21: both directions smooth).</summary>
+        public bool Exiting => exiting;
+
+        /// <summary>Starts the eased exit from the pose shown now toward the strategic camera's framing.</summary>
+        public void BeginExit()
+        {
+            exiting = true;
+            exitLeft = TransitionSeconds;
+            exitFrom = transform.position;
+            exitFromRotation = transform.rotation;
+            transition = 0f;
+        }
+
+        /// <summary>Re-entering during an exit: ease back in from the pose shown now (the orbit is kept).</summary>
+        public void BeginFromCurrent()
+        {
+            exiting = false;
+            fromPosition = transform.position;
+            fromRotation = transform.rotation;
+            transition = TransitionSeconds;
+            shownDistance = shownZoom = distance;
+            shownLift = targetLift = 0f;
+            hasLast = false;
+        }
+
+        /// <summary>
+        /// One frame of the exit: the perspective camera moves to where it frames what the orthographic strategic camera
+        /// frames (as the entry starts), then the views swap. A pose that would enter a blocker ends the exit at once.
+        /// Returns true when it is finished.
+        /// </summary>
+        public bool FollowExit(Transform strategic, float orthographicSize, Vector3 focus, float dt)
+        {
+            if (!exiting) return true;
+            var frame = orthographicSize / Mathf.Tan(Camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            var to = focus - strategic.forward * frame;
+            exitLeft = Mathf.Max(0f, exitLeft - dt);
+            var t = Mathf.SmoothStep(0f, 1f, 1f - exitLeft / TransitionSeconds);
+            var p = Vector3.Lerp(exitFrom, to, t);
+            var r = Quaternion.Slerp(exitFromRotation, strategic.rotation, t);
+            if (exitLeft > 0f && (Obstacles.Blocked(p, HeroCameraObstacles.Margin) || !NearPlaneClear(p, r, Camera))) exitLeft = 0f;
+            else transform.SetPositionAndRotation(p, r);
+            if (exitLeft > 0f) return false;
+            exiting = false;
+            return true;
+        }
+
+        /// <summary>A new, loaded or restarted run: the next entry starts from the strategic yaw again.</summary>
+        public void ResetOrbit() => orbitKept = false;
 
         public void SkipTransition() => transition = 0f;
 
@@ -80,6 +170,7 @@ namespace TheLastFortress
         {
             Yaw = Mathf.Repeat(yaw, 360f);
             Pitch = Mathf.Clamp(pitch, MinPitch, MaxPitch);
+            orbitKept = true;
         }
 
         /// <summary>Mouse look and wheel distance; real (unscaled) time, so it also works while Night is paused.</summary>
@@ -95,84 +186,135 @@ namespace TheLastFortress
             if (Mathf.Abs(scroll) > 0.01f) distance = Mathf.Clamp(distance - Mathf.Sign(scroll) * 0.15f, MinDistance, MaxDistance);
         }
 
-        /// <summary>Places the camera behind <paramref name="hero"/> (the displayed position), pulled in by solid obstacles.</summary>
-        public void Follow(Vector3 hero, RunSimulation sim, float dt)
+        /// <summary>
+        /// The pivot for an orbit rotation: the shoulder, or nearer the head when the shoulder is inside a blocker (a wall the
+        /// hero stands against), or lower under an overhang. Null when none is clear.
+        /// </summary>
+        Vector3? Pivot(Vector3 hero, Quaternion rotation, float pad)
         {
-            // An obstacle behind the hero first pulls the camera in; only when even a short distance is blocked does it rise
-            // over the shoulder, smoothly and at most MaxLift, so it neither jumps in steps nor flips to a top-down view.
-            var targetLift = MaxLift;
-            for (var lift = 0f; lift <= MaxLift; lift += 5f)
+            var head = hero + PivotHeight * 0.7f;
+            foreach (var (height, shoulder) in new[] { (1f, ShoulderOffset), (1f, 0f), (0.8f, 0f), (0.6f, 0f) })
             {
-                var r = Quaternion.Euler(Mathf.Min(MaxPitch, Pitch + lift), Yaw, 0f);
-                var p = hero + PivotHeight + r * Vector3.right * ShoulderOffset;
-                if (ClearDistance(sim, p, r * Vector3.back, distance) < Mathf.Min(distance, 0.55f)) continue;
-                targetLift = lift;
-                break;
+                var p = hero + PivotHeight * height + rotation * Vector3.right * shoulder;
+                var toPivot = p - head;
+                var length = toPivot.magnitude;
+                if (Obstacles.Blocked(p, pad)) continue;
+                if (length > 1e-4f && Obstacles.FreeDistance(head, toPivot / length, length, 0f) < length - 1e-4f) continue;
+                return p;
             }
 
-            shownLift = dt > 0f ? Mathf.MoveTowards(shownLift, targetLift, LiftDegreesPerSecond * dt) : targetLift;
-            var rotation = Quaternion.Euler(Mathf.Min(MaxPitch, Pitch + shownLift), Yaw, 0f);
-            var pivot = hero + PivotHeight + rotation * Vector3.right * ShoulderOffset;
-            var allowed = ClearDistance(sim, pivot, rotation * Vector3.back, distance);
-            // The wheel eases in and out; an obstacle pulls in at once and releases gently, so the view does not pump.
+            return null;
+        }
+
+        /// <summary>The clear distance behind the pivot at one lift, the pivot and rotation used (distance -1: no clear pivot).</summary>
+        float Solve(Vector3 hero, float lift, float wanted, float pad, out Vector3 pivot, out Quaternion rotation)
+        {
+            rotation = Quaternion.Euler(Mathf.Min(MaxPitch, Pitch + lift), Yaw, 0f);
+            var p = Pivot(hero, rotation, pad);
+            pivot = p ?? hero + PivotHeight;
+            if (!p.HasValue) return -1f;
+            return Obstacles.FreeDistance(pivot, rotation * Vector3.back, wanted, pad);
+        }
+
+        /// <summary>Places the camera behind <paramref name="hero"/> (the displayed root), clear of every presentation blocker.</summary>
+        public void Follow(Vector3 hero, RunSimulation sim, float dt)
+        {
+            var c = Camera;
+            var pad = HeroCameraObstacles.NearPadding(c);
+            // The wheel eases in and out.
             shownZoom = dt > 0f ? Mathf.MoveTowards(shownZoom, distance, dt * 6f) : distance;
-            var wanted = Mathf.Min(allowed, shownZoom);
-            shownDistance = wanted < shownDistance || dt <= 0f ? wanted : Mathf.MoveTowards(shownDistance, wanted, dt * 6f);
-            var position = pivot + rotation * Vector3.back * shownDistance;
-            if (position.y < 0.12f) position.y = 0.12f;
+
+            // Pull in first: lift only when the close pose at the current lift still cannot clear, the smallest lift that does.
+            var atRest = Solve(hero, 0f, shownZoom, pad, out _, out _);
+            var wantLift = 0f;
+            if (atRest < Mathf.Min(CloseDistance, shownZoom))
+            {
+                wantLift = MaxLift;
+                for (var lift = 5f; lift <= MaxLift; lift += 5f)
+                    if (Solve(hero, lift, shownZoom, pad, out _, out _) >= Mathf.Min(CloseDistance, shownZoom))
+                    {
+                        wantLift = lift;
+                        break;
+                    }
+            }
+
+            // Hysteresis: a lift is dropped only once the pose without it clears with room to spare, so a stationary
+            // corner does not flip between candidates.
+            if (wantLift < targetLift && atRest < Mathf.Min(CloseDistance * 1.25f, shownZoom)) wantLift = targetLift;
+            targetLift = wantLift;
+            if (dt <= 0f) shownLift = targetLift;
+            else if (targetLift > shownLift) shownLift = Mathf.MoveTowards(shownLift, targetLift, LiftDegreesPerSecond * dt);
+            else shownLift += (targetLift - shownLift) * (1f - Mathf.Exp(-dt / ReleaseSeconds));
+
+            var allowed = Solve(hero, shownLift, shownZoom, pad, out var pivot, out var rotation);
+            Vector3 position;
+            if (allowed < 0f)
+            {
+                // Tight-space fallback: no clear pivot at all (inside overlapping blockers). Hold the last clear pose.
+                FallbackFrames++;
+                if (hasLast)
+                {
+                    position = lastPosition;
+                    rotation = lastRotation;
+                    pivot = lastPivot;
+                }
+                else
+                {
+                    // No clear pose ever: inside the hero's own head, looking along the orbit (only the hero can be clipped).
+                    pivot = position = hero + PivotHeight * 0.7f;
+                }
+            }
+            else
+            {
+                // Inward at once for safety; outward with time-based damping so the view does not pump.
+                if (allowed < shownDistance || dt <= 0f) shownDistance = allowed;
+                else shownDistance += (allowed - shownDistance) * (1f - Mathf.Exp(-dt / ReleaseSeconds));
+                shownDistance = Mathf.Min(shownDistance, allowed);
+                position = pivot + rotation * Vector3.back * shownDistance;
+                if (!Obstacles.PoseClear(pivot, position, rotation, c))
+                {
+                    shownDistance = Mathf.Max(0f, allowed - HeroCameraObstacles.Margin);
+                    position = pivot + rotation * Vector3.back * shownDistance;
+                }
+            }
+
+            lastPivot = pivot;
+            lastPosition = position;
+            lastRotation = rotation;
+            hasLast = true;
             if (transition > 0f)
             {
                 transition = Mathf.Max(0f, transition - dt);
                 var t = Mathf.SmoothStep(0f, 1f, 1f - transition / TransitionSeconds);
-                transform.SetPositionAndRotation(Vector3.Lerp(fromPosition, position, t), Quaternion.Slerp(fromRotation, rotation, t));
-                return;
+                var p = Vector3.Lerp(fromPosition, position, t);
+                var r = Quaternion.Slerp(fromRotation, rotation, t);
+                if (transition > 0f && (Obstacles.Blocked(p, HeroCameraObstacles.Margin) || !NearPlaneClear(p, r, c)))
+                {
+                    transition = 0f; // the eased path would enter a blocker: cut to the validated pose instead
+                    TransitionCuts++;
+                }
+                else
+                {
+                    transform.SetPositionAndRotation(p, r);
+                    return;
+                }
             }
 
             transform.SetPositionAndRotation(position, rotation);
         }
 
-        /// <summary>Distance along the ray from the pivot before it meets a building, forest or rock volume (grid query).</summary>
-        static float ClearDistance(RunSimulation sim, Vector3 from, Vector3 direction, float max)
+        bool NearPlaneClear(Vector3 position, Quaternion rotation, Camera c)
         {
-            const float step = 0.05f, margin = 0.15f;
-            for (var t = step; t <= max; t += step)
-            {
-                var p = from + direction * t;
-                if (p.y < ObstacleHeight(sim, p.x + direction.x * margin, p.z + direction.z * margin) + margin)
-                    return Mathf.Max(0.2f, t - margin);
-            }
-
-            return max;
+            var near = c.nearClipPlane;
+            var hh = near * Mathf.Tan(c.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            var hw = hh * c.aspect;
+            for (var i = 0; i < 4; i++)
+                if (Obstacles.Blocked(position + rotation * new Vector3((i & 1) == 0 ? -hw : hw, (i & 2) == 0 ? -hh : hh, near), HeroCameraObstacles.Margin))
+                    return false;
+            return true;
         }
 
-        /// <summary>Approximate height of what stands on the cell at this point (0 for open ground or off the board).</summary>
-        public static float ObstacleHeight(RunSimulation sim, float x, float z)
-        {
-            if (sim == null || !GridCoordinates.TryWorldToGrid(x, z, out var cell)) return 0f;
-            var b = sim.Grid.GetOccupant(cell);
-            if (b != null)
-                switch (b.Kind)
-                {
-                    // Scaled with the real-size models (plan 014).
-                    case BuildingKind.Keep: return 4.6f;
-                    case BuildingKind.Tower: return 1.85f;
-                    case BuildingKind.Watchtower: return 1.9f;
-                    case BuildingKind.House: return 1.35f;
-                    case BuildingKind.RepairStation: return 1.8f;
-                    case BuildingKind.Cannon: return 0.55f;
-                    case BuildingKind.Wall: return 0.75f;
-                    case BuildingKind.Farm: return 0.5f;
-                    default: return 1f;
-                }
-
-            var terrain = sim.Config.Terrain;
-            if (terrain == null) return 0f;
-            switch (terrain.Cells[cell.Z * GridCoordinates.Size + cell.X])
-            {
-                case TerrainType.Forest: return 5.2f; // real-height trees (plan 014)
-                case TerrainType.Rock: return 0.5f; // the boulder models are low
-                default: return 0f;
-            }
-        }
+        /// <summary>Whether the pose shown now is clear of every blocker (tests; transitions validate their own path).</summary>
+        public bool ShownPoseClear() => !hasLast || Obstacles.PoseClear(lastPivot, transform.position, transform.rotation, Camera);
     }
 }

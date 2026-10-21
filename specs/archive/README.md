@@ -10,3 +10,4 @@ Historical milestone specs, kept unchanged for reference. They are **not** curre
 | 004-agent-playtest-improvements.md | Playtest-driven improvements to the MVP |
 | 005-release-rules.md | Frozen `release-rules-1` contract, before consolidation into 002-game-rules |
 | 006-third-person-hero.md | Hero and switchable views feature spec with the owner's decisions; implemented and merged into 002-game-rules section 17 |
+| 007-third-person-production-slice.md | `release-rules-4` production-slice hero (motor, contact melee, camera safety, animation, sound) v0.1; implemented and merged into 002-game-rules section 18; owner quality review pending |

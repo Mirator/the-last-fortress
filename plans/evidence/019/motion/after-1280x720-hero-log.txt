@@ -1,0 +1,606 @@
+rules=release-rules-4 reach=0,2 speed=42 radius=72 meadow seed 7: generated (attempt 0)
+000 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,11,500 cam=10,62,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+001 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,11,500 cam=10,61,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+002 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f1 paused=False shown=10,500,11,500 cam=10,60,0,41,11,06 phase=-1,000 pending=False gait=0,23 foot=0
+003 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f1 paused=False shown=10,500,11,500 cam=10,59,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+004 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f1 paused=False shown=10,500,11,500 cam=10,57,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+005 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f1 paused=False shown=10,500,11,500 cam=10,56,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+006 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f2 paused=False shown=10,500,11,500 cam=10,55,0,41,11,06 phase=-1,000 pending=False gait=0,23 foot=0
+007 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f2 paused=False shown=10,500,11,500 cam=10,54,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+008 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f2 paused=False shown=10,500,11,500 cam=10,53,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+009 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f2 paused=False shown=10,500,11,500 cam=10,52,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+010 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f3 paused=False shown=10,500,11,500 cam=10,51,0,41,11,06 phase=-1,000 pending=False gait=0,23 foot=0
+011 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f3 paused=False shown=10,500,11,500 cam=10,49,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+012 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f3 paused=False shown=10,500,11,500 cam=10,48,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+013 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f3 paused=False shown=10,500,11,500 cam=10,47,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+014 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f4 paused=False shown=10,500,11,500 cam=10,46,0,41,11,06 phase=-1,000 pending=False gait=0,23 foot=0
+015 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f4 paused=False shown=10,500,11,500 cam=10,45,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+016 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f4 paused=False shown=10,500,11,500 cam=10,44,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+017 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f5 paused=False shown=10,500,11,500 cam=10,42,0,41,11,06 phase=-1,000 pending=False gait=0,23 foot=0
+018 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f5 paused=False shown=10,500,11,500 cam=10,41,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+019 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f5 paused=False shown=10,500,11,500 cam=10,40,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+020 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f5 paused=False shown=10,500,11,500 cam=10,39,0,41,11,06 phase=-1,000 pending=False gait=0,00 foot=0
+021 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f6 paused=False shown=10,500,11,500 cam=10,37,0,41,11,06 phase=-1,000 pending=False gait=0,23 foot=0
+022 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f6 paused=False shown=10,500,11,500 cam=10,36,0,41,11,07 phase=-1,000 pending=False gait=0,00 foot=0
+023 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f6 paused=False shown=10,500,11,500 cam=10,35,0,41,11,07 phase=-1,000 pending=False gait=0,00 foot=0
+024 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f6 paused=False shown=10,500,11,500 cam=10,33,0,41,11,07 phase=-1,000 pending=False gait=0,00 foot=0
+025 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f7 paused=False shown=10,500,11,500 cam=10,32,0,41,11,07 phase=-1,000 pending=False gait=0,23 foot=0
+026 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f7 paused=False shown=10,500,11,500 cam=10,31,0,41,11,07 phase=-1,000 pending=False gait=0,00 foot=0
+027 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f7 paused=False shown=10,500,11,500 cam=10,29,0,41,11,07 phase=-1,000 pending=False gait=0,00 foot=0
+028 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f7 paused=False shown=10,500,11,500 cam=10,28,0,42,11,07 phase=-1,000 pending=False gait=0,00 foot=0
+029 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f8 paused=False shown=10,500,11,500 cam=10,26,0,42,11,07 phase=-1,000 pending=False gait=0,23 foot=0
+030 start Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,508 cam=10,62,0,41,11,06 phase=-1,000 pending=False gait=0,47 foot=0
+031 start Day tick=0 hero=12600,13814 v=0,14 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,519 cam=10,62,0,41,11,07 phase=-1,000 pending=False gait=0,70 foot=1
+032 start Day tick=0 hero=12600,13842 v=0,28 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,535 cam=10,62,0,41,11,08 phase=-1,000 pending=False gait=0,93 foot=1
+033 start Day tick=0 hero=12600,13842 v=0,28 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,558 cam=10,62,0,42,11,09 phase=-1,000 pending=False gait=0,91 foot=1
+034 start Day tick=0 hero=12600,13884 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,582 cam=10,62,0,42,11,10 phase=-1,000 pending=False gait=0,91 foot=1
+035 start Day tick=0 hero=12600,13926 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,605 cam=10,62,0,42,11,11 phase=-1,000 pending=False gait=0,91 foot=2
+036 start Day tick=0 hero=12600,13926 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,628 cam=10,62,0,43,11,12 phase=-1,000 pending=False gait=0,91 foot=2
+037 start Day tick=0 hero=12600,13968 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,652 cam=10,62,0,43,11,13 phase=-1,000 pending=False gait=0,91 foot=2
+038 start Day tick=0 hero=12600,14010 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,675 cam=10,62,0,44,11,13 phase=-1,000 pending=False gait=0,91 foot=2
+039 start Day tick=0 hero=12600,14010 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,698 cam=10,62,0,44,11,13 phase=-1,000 pending=False gait=0,91 foot=2
+040 start Day tick=0 hero=12600,14052 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,722 cam=10,62,0,45,11,14 phase=-1,000 pending=False gait=0,91 foot=2
+041 start Day tick=0 hero=12600,14094 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,745 cam=10,62,0,45,11,14 phase=-1,000 pending=False gait=0,91 foot=2
+042 start Day tick=0 hero=12600,14094 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,768 cam=10,62,0,46,11,14 phase=-1,000 pending=False gait=0,91 foot=2
+043 start Day tick=0 hero=12600,14136 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,792 cam=10,62,0,46,11,14 phase=-1,000 pending=False gait=0,91 foot=3
+044 start Day tick=0 hero=12600,14178 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,815 cam=10,62,0,47,11,14 phase=-1,000 pending=False gait=0,91 foot=3
+045 start Day tick=0 hero=12600,14178 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,838 cam=10,62,0,47,11,15 phase=-1,000 pending=False gait=0,91 foot=3
+046 start Day tick=0 hero=12600,14220 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,862 cam=10,62,0,48,11,15 phase=-1,000 pending=False gait=0,91 foot=3
+047 start Day tick=0 hero=12600,14262 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,885 cam=10,62,0,48,11,15 phase=-1,000 pending=False gait=0,91 foot=3
+048 start Day tick=0 hero=12600,14262 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,908 cam=10,62,0,49,11,15 phase=-1,000 pending=False gait=0,91 foot=3
+049 start Day tick=0 hero=12600,14304 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,932 cam=10,62,0,50,11,15 phase=-1,000 pending=False gait=0,91 foot=3
+050 start Day tick=0 hero=12600,14346 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,955 cam=10,62,0,50,11,15 phase=-1,000 pending=False gait=0,91 foot=4
+051 start Day tick=0 hero=12600,14346 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,978 cam=10,62,0,51,11,15 phase=-1,000 pending=False gait=0,91 foot=4
+052 start Day tick=0 hero=12600,14388 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,12,002 cam=10,62,0,51,11,15 phase=-1,000 pending=False gait=0,91 foot=4
+053 start Day tick=0 hero=12600,14430 v=0,42 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,12,025 cam=10,62,0,52,11,15 phase=-1,000 pending=False gait=0,91 foot=4
+054 stop Day tick=0 hero=12600,14430 v=0,42 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,037 cam=10,62,0,52,11,14 phase=-1,000 pending=False gait=0,68 foot=4
+055 stop Day tick=0 hero=12600,14451 v=0,21 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,53,11,13 phase=-1,000 pending=False gait=0,45 foot=4
+056 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,53,11,12 phase=-1,000 pending=False gait=0,21 foot=4
+057 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,53,11,11 phase=-1,000 pending=False gait=0,00 foot=4
+058 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,53,11,10 phase=-1,000 pending=False gait=0,00 foot=4
+059 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,54,11,10 phase=-1,000 pending=False gait=0,00 foot=4
+060 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,54,11,09 phase=-1,000 pending=False gait=0,00 foot=4
+061 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,54,11,09 phase=-1,000 pending=False gait=0,00 foot=4
+062 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,54,11,09 phase=-1,000 pending=False gait=0,00 foot=4
+063 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,54,11,08 phase=-1,000 pending=False gait=0,00 foot=4
+064 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,54,11,08 phase=-1,000 pending=False gait=0,00 foot=4
+065 stop Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,043 cam=10,62,0,54,11,08 phase=-1,000 pending=False gait=0,00 foot=4
+066 backpedal Day tick=0 hero=12600,14451 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,12,035 cam=10,62,0,54,11,07 phase=-1,000 pending=False gait=0,23 foot=4
+067 backpedal Day tick=0 hero=12600,14437 v=0,-14 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,12,023 cam=10,62,0,54,11,06 phase=-1,000 pending=False gait=0,46 foot=4
+068 backpedal Day tick=0 hero=12600,14409 v=0,-28 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,12,008 cam=10,62,0,54,11,06 phase=-1,000 pending=False gait=0,61 foot=4
+069 backpedal Day tick=0 hero=12600,14409 v=0,-28 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,984 cam=10,62,0,53,11,06 phase=-1,000 pending=False gait=0,84 foot=5
+070 backpedal Day tick=0 hero=12600,14367 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,961 cam=10,62,0,53,11,06 phase=-1,000 pending=False gait=0,91 foot=5
+071 backpedal Day tick=0 hero=12600,14325 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,938 cam=10,62,0,52,11,06 phase=-1,000 pending=False gait=0,91 foot=5
+072 backpedal Day tick=0 hero=12600,14325 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,914 cam=10,62,0,51,11,06 phase=-1,000 pending=False gait=0,91 foot=5
+073 backpedal Day tick=0 hero=12600,14283 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,891 cam=10,62,0,51,11,06 phase=-1,000 pending=False gait=0,91 foot=5
+074 backpedal Day tick=0 hero=12600,14241 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,868 cam=10,62,0,50,11,06 phase=-1,000 pending=False gait=0,91 foot=5
+075 backpedal Day tick=0 hero=12600,14241 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,844 cam=10,62,0,50,11,06 phase=-1,000 pending=False gait=0,91 foot=6
+076 backpedal Day tick=0 hero=12600,14199 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,821 cam=10,62,0,49,11,06 phase=-1,000 pending=False gait=0,91 foot=6
+077 backpedal Day tick=0 hero=12600,14157 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,798 cam=10,62,0,48,11,06 phase=-1,000 pending=False gait=0,91 foot=6
+078 backpedal Day tick=0 hero=12600,14157 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,774 cam=10,62,0,48,11,06 phase=-1,000 pending=False gait=0,91 foot=6
+079 backpedal Day tick=0 hero=12600,14115 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,751 cam=10,62,0,47,11,06 phase=-1,000 pending=False gait=0,91 foot=6
+080 backpedal Day tick=0 hero=12600,14073 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,728 cam=10,62,0,47,11,06 phase=-1,000 pending=False gait=0,91 foot=6
+081 backpedal Day tick=0 hero=12600,14073 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,704 cam=10,62,0,46,11,06 phase=-1,000 pending=False gait=0,91 foot=6
+082 backpedal Day tick=0 hero=12600,14031 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,681 cam=10,62,0,46,11,06 phase=-1,000 pending=False gait=0,91 foot=6
+083 backpedal Day tick=0 hero=12600,13989 v=0,-42 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,658 cam=10,62,0,45,11,06 phase=-1,000 pending=False gait=0,91 foot=7
+084 strafe-right Day tick=0 hero=12600,13989 v=0,-42 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,505,11,639 cam=10,63,0,45,11,06 phase=-1,000 pending=False gait=0,74 foot=7
+085 strafe-right Day tick=0 hero=12609,13956 v=9,-33 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,513,11,623 cam=10,63,0,44,11,06 phase=-1,000 pending=False gait=0,69 foot=7
+086 strafe-right Day tick=0 hero=12627,13932 v=18,-24 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,523,11,610 cam=10,64,0,44,11,06 phase=-1,000 pending=False gait=0,65 foot=7
+087 strafe-right Day tick=0 hero=12627,13932 v=18,-24 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,538,11,602 cam=10,66,0,44,11,06 phase=-1,000 pending=False gait=0,67 foot=7
+088 strafe-right Day tick=0 hero=12654,13917 v=27,-15 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,555,11,596 cam=10,68,0,43,11,06 phase=-1,000 pending=False gait=0,72 foot=7
+089 strafe-right Day tick=0 hero=12690,13911 v=36,-6 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,575,11,593 cam=10,70,0,43,11,06 phase=-1,000 pending=False gait=0,79 foot=7
+090 strafe-right Day tick=0 hero=12690,13911 v=36,-6 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,598,11,593 cam=10,72,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=7
+091 strafe-right Day tick=0 hero=12732,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,622,11,593 cam=10,74,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=8
+092 strafe-right Day tick=0 hero=12774,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,645,11,593 cam=10,77,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=8
+093 strafe-right Day tick=0 hero=12774,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,668,11,593 cam=10,79,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=8
+094 strafe-right Day tick=0 hero=12816,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,692,11,593 cam=10,81,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=8
+095 strafe-right Day tick=0 hero=12858,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,715,11,593 cam=10,84,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=8
+096 strafe-right Day tick=0 hero=12858,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,738,11,593 cam=10,86,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=8
+097 strafe-right Day tick=0 hero=12900,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,762,11,593 cam=10,88,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=8
+098 strafe-right Day tick=0 hero=12942,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,785,11,593 cam=10,91,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=9
+099 strafe-right Day tick=0 hero=12942,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,808,11,593 cam=10,93,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=9
+100 strafe-right Day tick=0 hero=12984,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,832,11,593 cam=10,95,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=9
+101 strafe-right Day tick=0 hero=13026,13911 v=42,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,855,11,593 cam=10,98,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=9
+102 strafe-left Day tick=0 hero=13026,13911 v=42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,871,11,593 cam=10,99,0,43,11,06 phase=-1,000 pending=False gait=0,68 foot=9
+103 strafe-left Day tick=0 hero=13054,13911 v=28,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,882,11,593 cam=11,00,0,43,11,06 phase=-1,000 pending=False gait=0,46 foot=9
+104 strafe-left Day tick=0 hero=13068,13911 v=14,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,890,11,593 cam=11,01,0,43,11,06 phase=-1,000 pending=False gait=0,30 foot=9
+105 strafe-left Day tick=0 hero=13068,13911 v=14,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,890,11,593 cam=11,01,0,43,11,06 phase=-1,000 pending=False gait=0,07 foot=9
+106 strafe-left Day tick=0 hero=13068,13911 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,886,11,593 cam=11,01,0,43,11,06 phase=-1,000 pending=False gait=0,15 foot=9
+107 strafe-left Day tick=0 hero=13054,13911 v=-14,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,878,11,593 cam=11,00,0,43,11,06 phase=-1,000 pending=False gait=0,30 foot=9
+108 strafe-left Day tick=0 hero=13054,13911 v=-14,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,863,11,593 cam=10,98,0,43,11,06 phase=-1,000 pending=False gait=0,54 foot=9
+109 strafe-left Day tick=0 hero=13026,13911 v=-28,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,843,11,593 cam=10,96,0,43,11,06 phase=-1,000 pending=False gait=0,76 foot=10
+110 strafe-left Day tick=0 hero=12984,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,820,11,593 cam=10,94,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=10
+111 strafe-left Day tick=0 hero=12984,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,797,11,593 cam=10,92,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=10
+112 strafe-left Day tick=0 hero=12942,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,773,11,593 cam=10,89,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=10
+113 strafe-left Day tick=0 hero=12900,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,750,11,593 cam=10,87,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=10
+114 strafe-left Day tick=0 hero=12900,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,727,11,593 cam=10,85,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=10
+115 strafe-left Day tick=0 hero=12858,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,703,11,593 cam=10,82,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=10
+116 strafe-left Day tick=0 hero=12816,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,680,11,593 cam=10,80,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=11
+117 strafe-left Day tick=0 hero=12816,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,657,11,593 cam=10,78,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=11
+118 strafe-left Day tick=0 hero=12774,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,633,11,593 cam=10,75,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=11
+119 strafe-left Day tick=0 hero=12732,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,610,11,593 cam=10,73,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=11
+120 strafe-left Day tick=0 hero=12732,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,587,11,593 cam=10,71,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=11
+121 strafe-left Day tick=0 hero=12690,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,563,11,593 cam=10,68,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=11
+122 strafe-left Day tick=0 hero=12648,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,540,11,593 cam=10,66,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=11
+123 strafe-left Day tick=0 hero=12648,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,517,11,593 cam=10,64,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=11
+124 strafe-left Day tick=0 hero=12606,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,493,11,593 cam=10,61,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=12
+125 strafe-left Day tick=0 hero=12564,13911 v=-42,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,470,11,593 cam=10,59,0,43,11,06 phase=-1,000 pending=False gait=0,91 foot=12
+126 turn-180 Day tick=0 hero=12564,13911 v=-42,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,452,11,598 cam=10,57,0,43,11,06 phase=-1,000 pending=False gait=0,74 foot=12
+127 turn-180 Day tick=0 hero=12533,13919 v=-31,8 hp=200 alive=True cmd=h3/64f3 paused=False shown=10,439,11,604 cam=10,42,0,43,11,06 phase=-1,000 pending=False gait=0,98 foot=12
+128 turn-180 Day tick=0 hero=12514,13934 v=-19,15 hp=200 alive=True cmd=h5/64f5 paused=False shown=10,428,11,612 cam=10,26,0,44,11,08 phase=-1,000 pending=False gait=0,98 foot=12
+129 turn-180 Day tick=0 hero=12514,13934 v=-19,15 hp=200 alive=True cmd=h8/64f8 paused=False shown=10,425,11,622 cam=10,11,0,44,11,13 phase=-1,000 pending=False gait=0,91 foot=12
+130 turn-180 Day tick=0 hero=12508,13949 v=-6,15 hp=200 alive=True cmd=h11/64f11 paused=False shown=10,425,11,629 cam=10,00,0,44,11,24 phase=-1,000 pending=False gait=0,77 foot=13
+131 turn-180 Day tick=0 hero=12515,13964 v=7,15 hp=200 alive=True cmd=h13/64f13 paused=False shown=10,429,11,637 cam=10,00,0,42,11,40 phase=-1,000 pending=False gait=0,82 foot=13
+132 turn-180 Day tick=0 hero=12515,13964 v=7,15 hp=200 alive=True cmd=h16/64f16 paused=False shown=10,440,11,642 cam=10,00,0,41,11,52 phase=-1,000 pending=False gait=0,97 foot=13
+133 turn-180 Day tick=0 hero=12532,13971 v=17,7 hp=200 alive=True cmd=h19/64f19 paused=False shown=10,451,11,642 cam=10,00,0,41,11,64 phase=-1,000 pending=False gait=0,94 foot=13
+134 turn-180 Day tick=0 hero=12557,13967 v=25,-4 hp=200 alive=True cmd=h21/64f21 paused=False shown=10,464,11,639 cam=10,02,0,41,11,76 phase=-1,000 pending=False gait=1,00 foot=14
+135 turn-180 Day tick=0 hero=12557,13967 v=25,-4 hp=200 alive=True cmd=h24/64f24 paused=False shown=10,479,11,630 cam=10,06,0,42,11,88 phase=-1,000 pending=False gait=1,00 foot=14
+136 turn-180 Day tick=0 hero=12580,13950 v=23,-17 hp=200 alive=True cmd=h27/64f27 paused=False shown=10,489,11,617 cam=10,10,0,44,12,05 phase=-1,000 pending=False gait=1,00 foot=14
+137 turn-180 Day tick=0 hero=12598,13921 v=18,-29 hp=200 alive=True cmd=h29/64f29 paused=False shown=10,498,11,601 cam=10,21,0,46,12,20 phase=-1,000 pending=False gait=1,00 foot=15
+138 turn-180 Day tick=0 hero=12598,13921 v=18,-29 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,503,11,581 cam=10,38,0,48,12,29 phase=-1,000 pending=False gait=1,00 foot=15
+139 turn-180 Day tick=0 hero=12606,13885 v=8,-36 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,559 cam=10,39,0,49,12,32 phase=-1,000 pending=False gait=0,85 foot=15
+140 turn-180 Day tick=0 hero=12606,13843 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,536 cam=10,39,0,50,12,34 phase=-1,000 pending=False gait=0,91 foot=15
+141 turn-180 Day tick=0 hero=12606,13843 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,513 cam=10,39,0,51,12,35 phase=-1,000 pending=False gait=0,91 foot=15
+142 turn-180 Day tick=0 hero=12606,13801 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,489 cam=10,39,0,52,12,35 phase=-1,000 pending=False gait=0,91 foot=15
+143 turn-180 Day tick=0 hero=12606,13759 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,466 cam=10,39,0,52,12,35 phase=-1,000 pending=False gait=0,91 foot=15
+144 turn-180 Day tick=0 hero=12606,13759 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,443 cam=10,39,0,52,12,34 phase=-1,000 pending=False gait=0,91 foot=16
+145 turn-180 Day tick=0 hero=12606,13717 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,419 cam=10,39,0,53,12,34 phase=-1,000 pending=False gait=0,91 foot=16
+146 turn-180 Day tick=0 hero=12606,13675 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,396 cam=10,39,0,53,12,32 phase=-1,000 pending=False gait=0,91 foot=16
+147 turn-180 Day tick=0 hero=12606,13675 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,373 cam=10,39,0,53,12,31 phase=-1,000 pending=False gait=0,91 foot=16
+148 turn-180 Day tick=0 hero=12606,13633 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,349 cam=10,39,0,53,12,29 phase=-1,000 pending=False gait=0,91 foot=16
+149 turn-180 Day tick=0 hero=12606,13591 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,505,11,326 cam=10,39,0,54,12,27 phase=-1,000 pending=False gait=0,91 foot=16
+150 diagonal-slide Day tick=0 hero=12606,13591 v=0,-42 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,498,11,305 cam=10,38,0,54,12,26 phase=-1,000 pending=False gait=0,85 foot=16
+151 diagonal-slide Day tick=0 hero=12594,13554 v=-12,-37 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,488,11,286 cam=10,37,0,54,12,24 phase=-1,000 pending=False gait=0,85 foot=17
+152 diagonal-slide Day tick=0 hero=12570,13522 v=-24,-32 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,475,11,268 cam=10,36,0,54,12,23 phase=-1,000 pending=False gait=0,87 foot=17
+153 diagonal-slide Day tick=0 hero=12570,13522 v=-24,-32 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,459,11,252 cam=10,34,0,54,12,21 phase=-1,000 pending=False gait=0,89 foot=17
+154 diagonal-slide Day tick=0 hero=12541,13493 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,443,11,236 cam=10,32,0,54,12,20 phase=-1,000 pending=False gait=0,89 foot=17
+155 diagonal-slide Day tick=0 hero=12512,13464 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,427,11,220 cam=10,31,0,54,12,18 phase=-1,000 pending=False gait=0,89 foot=17
+156 diagonal-slide Day tick=0 hero=12512,13464 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,411,11,204 cam=10,29,0,54,12,17 phase=-1,000 pending=False gait=0,89 foot=17
+157 diagonal-slide Day tick=0 hero=12483,13435 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,394,11,188 cam=10,27,0,54,12,15 phase=-1,000 pending=False gait=0,89 foot=17
+158 diagonal-slide Day tick=0 hero=12454,13406 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,378,11,172 cam=10,26,0,54,12,14 phase=-1,000 pending=False gait=0,89 foot=17
+159 diagonal-slide Day tick=0 hero=12454,13406 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,362,11,156 cam=10,24,0,54,12,12 phase=-1,000 pending=False gait=0,89 foot=18
+160 diagonal-slide Day tick=0 hero=12425,13377 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,346,11,139 cam=10,23,0,54,12,11 phase=-1,000 pending=False gait=0,89 foot=18
+161 diagonal-slide Day tick=0 hero=12396,13348 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,330,11,123 cam=10,21,0,54,12,09 phase=-1,000 pending=False gait=0,89 foot=18
+162 diagonal-slide Day tick=0 hero=12396,13348 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,314,11,107 cam=10,19,0,54,12,08 phase=-1,000 pending=False gait=0,89 foot=18
+163 diagonal-slide Day tick=0 hero=12367,13319 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,298,11,091 cam=10,18,0,54,12,06 phase=-1,000 pending=False gait=0,89 foot=18
+164 diagonal-slide Day tick=0 hero=12338,13290 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,282,11,075 cam=10,16,0,54,12,04 phase=-1,000 pending=False gait=0,89 foot=18
+165 diagonal-slide Day tick=0 hero=12338,13290 v=-29,-29 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,266,11,065 cam=10,15,0,54,12,03 phase=-1,000 pending=False gait=0,74 foot=18
+166 diagonal-slide Day tick=0 hero=12309,13272 v=-29,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,249,11,060 cam=10,13,0,54,12,03 phase=-1,000 pending=False gait=0,66 foot=18
+167 diagonal-slide Day tick=0 hero=12280,13272 v=-29,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,233,11,060 cam=10,11,0,54,12,03 phase=-1,000 pending=False gait=0,63 foot=19
+168 diagonal-slide Day tick=0 hero=12280,13272 v=-29,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,217,11,060 cam=10,10,0,54,12,03 phase=-1,000 pending=False gait=0,63 foot=19
+169 diagonal-slide Day tick=0 hero=12251,13272 v=-29,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,201,11,060 cam=10,08,0,54,12,03 phase=-1,000 pending=False gait=0,63 foot=19
+170 diagonal-slide Day tick=0 hero=12222,13272 v=-29,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,185,11,060 cam=10,07,0,54,12,03 phase=-1,000 pending=False gait=0,63 foot=19
+171 diagonal-slide Day tick=0 hero=12222,13272 v=-29,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,169,11,060 cam=10,05,0,54,12,03 phase=-1,000 pending=False gait=0,63 foot=19
+172 diagonal-slide Day tick=0 hero=12193,13272 v=-29,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,153,11,060 cam=10,03,0,54,12,03 phase=-1,000 pending=False gait=0,63 foot=19
+173 diagonal-slide Day tick=0 hero=12164,13272 v=-29,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,137,11,060 cam=10,02,0,54,12,03 phase=-1,000 pending=False gait=0,63 foot=19
+wall over the hero at (10,12): placed
+174 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,40 foot=19
+175 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,16 foot=19
+176 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+177 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+178 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+179 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+180 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+181 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+182 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+183 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+184 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+185 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47 phase=-1,000 pending=False gait=0,00 foot=19
+lane: hero 6,503,10,652
+186 engage Night tick=427 hero=7803,12782 v=0,0 hp=200 alive=True cmd=h37/64f37 paused=False shown=6,499,10,645 cam=6,84,0,54,11,56 enemy1=1,297 hp45 phase=-1,000 pending=False gait=0,23 foot=19
+187 engage Night tick=428 hero=7797,12770 v=-6,-12 hp=200 alive=True cmd=h37/64f37 paused=False shown=6,494,10,635 cam=6,83,0,54,11,55 enemy1=1,279 hp45 phase=-1,000 pending=False gait=0,47 foot=19
+188 engage Night tick=429 hero=7785,12746 v=-12,-24 hp=200 alive=True cmd=h37/64f37 paused=False shown=6,488,10,622 cam=6,82,0,54,11,54 enemy1=1,250 hp45 phase=-1,000 pending=False gait=0,58 foot=19
+189 engage Night tick=429 hero=7785,12746 v=-12,-24 hp=200 alive=True cmd=h37/64f37 paused=False shown=6,478,10,602 cam=6,80,0,54,11,53 enemy1=1,250 hp45 phase=-1,000 pending=False gait=0,82 foot=19
+190 engage Night tick=430 hero=7767,12710 v=-18,-36 hp=200 alive=True cmd=h37/64f37 paused=False shown=6,467,10,581 cam=6,79,0,54,11,50 enemy1=1,210 hp45 phase=-1,000 pending=False gait=0,89 foot=19
+191 engage Night tick=431 hero=7748,12673 v=-19,-37 hp=200 alive=True cmd=h37/64f37 paused=False shown=6,457,10,561 cam=6,77,0,54,11,49 enemy1=1,169 hp45 phase=-1,000 pending=False gait=0,91 foot=20
+192 engage Night tick=431 hero=7748,12673 v=-19,-37 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,448,10,540 cam=6,75,0,54,11,47 enemy1=1,169 hp45 phase=-1,000 pending=False gait=1,00 foot=20
+193 engage Night tick=432 hero=7732,12635 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,439,10,519 cam=6,74,0,54,11,45 enemy1=1,129 hp45 phase=-1,000 pending=False gait=0,90 foot=20
+194 engage Night tick=433 hero=7716,12597 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,430,10,498 cam=6,72,0,54,11,43 enemy1=1,088 hp45 phase=-1,000 pending=False gait=0,90 foot=20
+195 engage Night tick=433 hero=7716,12597 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,421,10,476 cam=6,70,0,54,11,41 enemy1=1,088 hp45 phase=-1,000 pending=False gait=0,90 foot=20
+196 engage Night tick=434 hero=7700,12559 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,412,10,455 cam=6,69,0,54,11,39 enemy1=1,048 hp45 phase=-1,000 pending=False gait=0,90 foot=20
+197 engage Night tick=435 hero=7684,12521 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,403,10,434 cam=6,67,0,54,11,37 enemy1=1,008 hp45 phase=-1,000 pending=False gait=0,90 foot=20
+198 engage Night tick=435 hero=7684,12521 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,394,10,413 cam=6,65,0,54,11,36 enemy1=1,008 hp45 phase=-1,000 pending=False gait=0,90 foot=21
+199 engage Night tick=436 hero=7668,12483 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,386,10,392 cam=6,64,0,54,11,34 enemy1=0,968 hp45 phase=-1,000 pending=False gait=0,90 foot=21
+200 engage Night tick=437 hero=7652,12445 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,377,10,371 cam=6,62,0,54,11,32 enemy1=0,928 hp45 phase=-1,000 pending=False gait=0,90 foot=21
+201 engage Night tick=437 hero=7652,12445 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,368,10,350 cam=6,59,0,54,11,30 enemy1=0,928 hp45 phase=-1,000 pending=False gait=0,90 foot=21
+202 engage Night tick=438 hero=7636,12407 v=-16,-38 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,359,10,329 cam=6,58,0,54,11,28 enemy1=0,889 hp45 phase=-1,000 pending=False gait=0,90 foot=21
+203 engage Night tick=439 hero=7624,12367 v=-12,-40 hp=200 alive=True cmd=h35/64f35 paused=False shown=6,353,10,306 cam=6,56,0,54,11,26 enemy1=0,849 hp45 phase=-1,000 pending=False gait=1,00 foot=21
+204 engage Night tick=439 hero=7624,12367 v=-12,-40 hp=200 alive=True cmd=h35/64f35 paused=False shown=6,347,10,284 cam=6,54,0,54,11,24 enemy1=0,849 hp45 phase=-1,000 pending=False gait=0,91 foot=21
+205 engage Night tick=440 hero=7612,12327 v=-12,-40 hp=200 alive=True cmd=h35/64f35 paused=False shown=6,340,10,261 cam=6,53,0,54,11,22 enemy1=0,810 hp45 phase=-1,000 pending=False gait=0,91 foot=22
+206 engage Night tick=441 hero=7600,12287 v=-12,-40 hp=200 alive=True cmd=h35/64f35 paused=False shown=6,333,10,239 cam=6,51,0,54,11,20 enemy1=0,771 hp45 phase=-1,000 pending=False gait=0,91 foot=22
+207 engage Night tick=441 hero=7600,12287 v=-12,-40 hp=200 alive=True cmd=h35/64f35 paused=False shown=6,327,10,217 cam=6,49,0,54,11,18 enemy1=0,771 hp45 phase=-1,000 pending=False gait=0,91 foot=22
+208 engage Night tick=442 hero=7588,12247 v=-12,-40 hp=200 alive=True cmd=h35/64f35 paused=False shown=6,320,10,195 cam=6,48,0,54,11,16 enemy1=0,732 hp45 phase=-1,000 pending=False gait=0,91 foot=22
+209 engage Night tick=443 hero=7576,12207 v=-12,-40 hp=200 alive=True cmd=h35/64f35 paused=False shown=6,313,10,173 cam=6,45,0,54,11,14 enemy1=0,693 hp45 phase=-1,000 pending=False gait=0,91 foot=22
+210 engage Night tick=443 hero=7576,12207 v=-12,-40 hp=200 alive=True cmd=h34/64f34 paused=False shown=6,309,10,150 cam=6,43,0,54,11,12 enemy1=0,693 hp45 phase=-1,000 pending=False gait=1,00 foot=22
+211 engage Night tick=444 hero=7568,12166 v=-8,-41 hp=200 alive=True cmd=h34/64f34 paused=False shown=6,304,10,127 cam=6,42,0,54,11,10 enemy1=0,655 hp45 phase=-1,000 pending=False gait=0,91 foot=22
+212 engage Night tick=445 hero=7560,12125 v=-8,-41 hp=200 alive=True cmd=h34/64f34 paused=False shown=6,300,10,104 cam=6,40,0,54,11,08 enemy1=0,617 hp45 phase=-1,000 pending=False gait=0,91 foot=22
+213 engage Night tick=445 hero=7560,12125 v=-8,-41 hp=200 alive=True cmd=h34/64f34 paused=False shown=6,296,10,081 cam=6,37,0,54,11,06 enemy1=0,617 hp45 phase=-1,000 pending=False gait=0,91 foot=23
+214 engage Night tick=446 hero=7552,12084 v=-8,-41 hp=200 alive=True cmd=h34/64f34 paused=False shown=6,291,10,059 cam=6,37,0,54,11,03 enemy1=0,579 hp45 phase=-1,000 pending=False gait=0,91 foot=23
+215 engage Night tick=447 hero=7544,12043 v=-8,-41 hp=200 alive=True cmd=h34/64f34 paused=False shown=6,287,10,036 cam=6,34,0,54,11,01 enemy1=0,542 hp45 phase=-1,000 pending=False gait=0,91 foot=23
+216 engage Night tick=447 hero=7544,12043 v=-8,-41 hp=200 alive=True cmd=h34/64f34 paused=False shown=6,282,10,013 cam=6,31,0,54,10,99 enemy1=0,542 hp45 phase=-1,000 pending=False gait=0,91 foot=23
+217 engage Night tick=448 hero=7536,12002 v=-8,-41 hp=200 alive=True cmd=h34/64f34 paused=False shown=6,278,9,990 cam=6,31,0,54,10,97 enemy1=0,505 hp45 phase=-1,000 pending=False gait=0,91 foot=23
+218 engage Night tick=449 hero=7532,11961 v=-4,-41 hp=200 alive=True cmd=h33/64f33 paused=False shown=6,277,9,968 cam=6,27,0,54,10,95 enemy1=0,469 hp45 phase=-1,000 pending=False gait=1,00 foot=23
+219 engage Night tick=449 hero=7532,11961 v=-4,-41 hp=200 alive=True cmd=h33/64f33 paused=False shown=6,274,9,945 cam=6,24,0,54,10,92 enemy1=0,469 hp45 phase=-1,000 pending=False gait=0,90 foot=23
+220 engage Night tick=450 hero=7528,11920 v=-4,-41 hp=200 alive=True cmd=h33/64f33 paused=False shown=6,272,9,922 cam=6,24,0,54,10,90 enemy1=0,434 hp45 phase=-1,000 pending=False gait=0,90 foot=24
+221 engage Night tick=451 hero=7524,11879 v=-4,-41 hp=200 alive=True cmd=h33/64f33 paused=False shown=6,270,9,899 cam=6,20,0,54,10,87 enemy1=0,399 hp45 phase=-1,000 pending=False gait=0,90 foot=24
+222 engage Night tick=451 hero=7524,11879 v=-4,-41 hp=200 alive=True cmd=h32/64f32 paused=False shown=6,270,9,876 cam=6,16,0,54,10,85 enemy1=0,399 hp45 phase=-1,000 pending=False gait=1,00 foot=24
+223 engage Night tick=452 hero=7524,11837 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=6,270,9,853 cam=6,16,0,54,10,82 enemy1=0,364 hp45 phase=-1,000 pending=False gait=0,91 foot=24
+224 engage Night tick=453 hero=7524,11795 v=0,-42 hp=200 alive=True cmd=h32/64f32 paused=False shown=6,270,9,829 cam=6,12,0,54,10,80 enemy1=0,330 hp45 phase=-1,000 pending=False gait=0,91 foot=24
+225 engage Night tick=453 hero=7524,11795 v=0,-42 hp=200 alive=True cmd=h31/64f31 paused=False shown=6,272,9,806 cam=6,08,0,54,10,76 enemy1=0,330 hp45 phase=-1,000 pending=False gait=1,00 foot=24
+226 engage Night tick=454 hero=7528,11754 v=4,-41 hp=200 alive=True cmd=h31/64f31 paused=False shown=6,274,9,784 cam=6,08,0,54,10,74 enemy1=0,297 hp35 phase=-1,000 pending=False gait=0,90 foot=24
+227 engage Night tick=455 hero=7532,11713 v=4,-41 hp=200 alive=True cmd=h31/64f31 paused=False shown=6,277,9,761 cam=6,04,0,54,10,71 enemy1=0,265 hp35 phase=-1,000 pending=False gait=0,90 foot=25
+228 engage Night tick=455 hero=7532,11713 v=4,-41 hp=200 alive=True cmd=h30/64f30 paused=False shown=6,281,9,738 cam=5,99,0,54,10,67 enemy1=0,265 hp35 phase=-1,000 pending=False gait=1,00 foot=25
+229 engage Night tick=456 hero=7540,11672 v=8,-41 hp=200 alive=True cmd=h30/64f30 paused=False shown=6,286,9,715 cam=5,99,0,54,10,65 enemy1=0,234 hp35 phase=-1,000 pending=False gait=0,91 foot=25
+230 engage Night tick=457 hero=7548,11631 v=8,-41 hp=200 alive=True cmd=h30/64f30 paused=False shown=6,290,9,693 cam=5,94,0,54,10,60 enemy1=0,203 hp35 phase=-1,000 pending=False gait=0,91 foot=25
+231 engage Night tick=457 hero=7548,11631 v=8,-41 hp=200 alive=True cmd=h29/64f29 paused=False shown=6,297,9,670 cam=5,87,0,54,10,55 enemy1=0,203 hp35 phase=-1,000 pending=False gait=1,00 foot=25
+232 engage Night tick=458 hero=7560,11591 v=12,-40 hp=200 alive=True cmd=h29/64f29 paused=False shown=6,303,9,648 cam=5,88,0,54,10,53 enemy1=0,174 hp35 phase=-1,000 pending=False gait=0,91 foot=25
+233 engage Night tick=459 hero=7576,11553 v=16,-38 hp=200 alive=True cmd=h28/64!f28 paused=False shown=6,313,9,628 cam=5,81,0,54,10,47 enemy1=0,146 hp35 phase=0,000 pending=True gait=1,00 foot=25
+234 engage Night tick=459 hero=7576,11553 v=16,-38 hp=200 alive=True cmd=h-1/64!f27 paused=False shown=6,318,9,617 cam=5,74,0,54,10,40 enemy1=0,146 hp35 phase=0,222 pending=True gait=0,77 foot=25
+235 engage Night tick=460 hero=7584,11534 v=8,-19 hp=200 alive=True cmd=h-1/64!f27 paused=False shown=6,320,9,612 cam=5,74,0,54,10,40 enemy1=0,137 hp35 phase=0,444 pending=True gait=0,53 foot=26
+236 engage Night tick=461 hero=7584,11534 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,320,9,612 cam=5,66,0,54,10,33 enemy1=0,147 hp35 phase=0,667 pending=True gait=0,30 foot=26
+237 engage Night tick=461 hero=7584,11534 v=0,0 hp=200 alive=True cmd=h-1/64!f25 paused=False shown=6,320,9,612 cam=5,60,0,54,10,27 enemy1=0,147 hp35 phase=0,889 pending=True gait=0,07 foot=26
+238 engage Night tick=462 hero=7584,11534 v=0,0 hp=200 alive=True cmd=h-1/64!f25 paused=False shown=6,320,9,612 cam=5,60,0,54,10,27 enemy1=0,157 hp25 phase=1,028 pending=False gait=0,00 foot=26
+239 engage Night tick=463 hero=7593,11525 v=9,-9 hp=200 alive=True cmd=h24/64!f24 paused=False shown=6,328,9,604 cam=5,56,0,54,10,21 enemy1=0,157 hp25 phase=1,083 pending=False gait=0,23 foot=26
+240 engage Night tick=463 hero=7593,11525 v=9,-9 hp=200 alive=True cmd=h23/64!f23 paused=False shown=6,336,9,597 cam=5,53,0,54,10,15 enemy1=0,157 hp25 phase=1,139 pending=False gait=0,45 foot=26
+241 engage Night tick=464 hero=7609,11512 v=16,-13 hp=200 alive=True cmd=h23/64!f23 paused=False shown=6,345,9,590 cam=5,54,0,54,10,14 enemy1=0,151 hp25 phase=1,194 pending=False gait=0,45 foot=26
+242 engage Night tick=465 hero=7625,11499 v=16,-13 hp=200 alive=True cmd=h23/64!f23 paused=False shown=6,354,9,583 cam=5,52,0,54,10,09 enemy1=0,146 hp25 phase=1,250 pending=False gait=0,45 foot=26
+243 engage Night tick=465 hero=7625,11499 v=16,-13 hp=200 alive=True cmd=h-1/64!f22 paused=False shown=6,354,9,583 cam=5,49,0,54,10,03 enemy1=0,146 hp25 phase=1,306 pending=False gait=0,22 foot=26
+244 engage Night tick=466 hero=7625,11499 v=0,0 hp=200 alive=True cmd=h-1/64!f22 paused=False shown=6,354,9,583 cam=5,49,0,54,10,03 enemy1=0,159 hp25 phase=1,361 pending=False gait=0,45 foot=26
+245 engage Night tick=467 hero=7636,11492 v=11,-7 hp=200 alive=True cmd=h22/64!f22 paused=False shown=6,363,9,577 cam=5,47,0,54,9,98 enemy1=0,157 hp25 phase=1,417 pending=False gait=0,68 foot=27
+246 engage Night tick=467 hero=7636,11492 v=11,-7 hp=200 alive=True cmd=h21/64!f21 paused=False shown=6,373,9,572 cam=5,47,0,54,9,94 enemy1=0,157 hp25 phase=1,472 pending=False gait=0,67 foot=27
+247 engage Night tick=468 hero=7654,11483 v=18,-9 hp=200 alive=True cmd=h21/64!f21 paused=False shown=6,383,9,567 cam=5,48,0,54,9,94 enemy1=0,140 hp25 phase=1,528 pending=False gait=0,44 foot=27
+248 engage Night tick=469 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp25 phase=1,583 pending=False gait=0,22 foot=27
+249 engage Night tick=469 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp25 phase=1,639 pending=False gait=0,00 foot=27
+250 engage Night tick=470 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp25 phase=1,694 pending=False gait=0,00 foot=27
+251 engage Night tick=471 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp25 phase=1,750 pending=False gait=0,00 foot=27
+252 engage Night tick=471 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp25 phase=1,806 pending=False gait=0,00 foot=27
+253 engage Night tick=472 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp15 phase=1,861 pending=False gait=0,00 foot=27
+254 engage Night tick=473 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp15 phase=1,917 pending=False gait=0,00 foot=27
+255 engage Night tick=473 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp15 phase=1,972 pending=False gait=0,00 foot=27
+256 engage Night tick=474 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp15 phase=0,111 pending=True gait=0,00 foot=27
+257 engage Night tick=475 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp15 phase=0,333 pending=True gait=0,00 foot=27
+258 engage Night tick=475 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp15 phase=0,556 pending=True gait=0,00 foot=27
+259 engage Night tick=476 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp15 phase=0,778 pending=True gait=0,00 foot=27
+260 engage Night tick=477 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,000 pending=False gait=0,00 foot=27
+261 swing Night tick=477 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,056 pending=False gait=0,00 foot=27
+262 swing Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+263 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+264 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+265 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+266 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+267 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+268 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+269 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+270 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+271 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+272 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+273 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+274 paused Night tick=478 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=True shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,111 pending=False gait=0,00 foot=27
+275 resume Night tick=479 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,167 pending=False gait=0,00 foot=27
+276 resume Night tick=479 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,222 pending=False gait=0,00 foot=27
+277 resume Night tick=480 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,278 pending=False gait=0,00 foot=27
+278 resume Night tick=481 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,333 pending=False gait=0,00 foot=27
+279 resume Night tick=481 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,389 pending=False gait=0,00 foot=27
+280 resume Night tick=482 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,444 pending=False gait=0,00 foot=27
+281 resume Night tick=483 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,500 pending=False gait=0,00 foot=27
+282 resume Night tick=483 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,556 pending=False gait=0,00 foot=27
+283 resume Night tick=484 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,611 pending=False gait=0,00 foot=27
+284 resume Night tick=485 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,667 pending=False gait=0,00 foot=27
+285 resume Night tick=485 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,722 pending=False gait=0,00 foot=27
+286 resume Night tick=486 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,778 pending=False gait=0,00 foot=27
+287 resume Night tick=487 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,833 pending=False gait=0,00 foot=27
+288 resume Night tick=487 hero=7654,11483 v=0,0 hp=200 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,889 pending=False gait=0,00 foot=27
+289 resume Night tick=488 hero=7654,11483 v=0,0 hp=190 alive=True cmd=h-1/64!f21 paused=False shown=6,378,9,569 cam=5,48,0,54,9,94 enemy1=0,140 hp5 phase=1,944 pending=False gait=0,00 foot=27
+290 strafe-attack Night tick=489 hero=7648,11471 v=-6,-12 hp=190 alive=True cmd=h37/64!f21 paused=False shown=6,373,9,559 cam=5,47,0,54,9,93 enemy1=0,140 hp5 phase=0,000 pending=True gait=0,23 foot=27
+291 strafe-attack Night tick=489 hero=7648,11471 v=-6,-12 hp=190 alive=True cmd=h36/64!f20 paused=False shown=6,369,9,549 cam=5,44,0,54,9,85 enemy1=0,140 hp5 phase=0,222 pending=True gait=0,45 foot=27
+292 strafe-attack Night tick=490 hero=7640,11452 v=-8,-19 hp=190 alive=True cmd=h36/64!f20 paused=False shown=6,364,9,538 cam=5,43,0,54,9,84 enemy2=0,124 hp45 phase=0,444 pending=True gait=0,45 foot=27
+293 strafe-attack Night tick=491 hero=7632,11447 v=-8,-5 hp=190 alive=True cmd=h60/64!f44 paused=False shown=6,360,9,539 cam=7,23,0,54,9,99 enemy2=0,103 hp45 phase=0,667 pending=True gait=0,22 foot=27
+294 strafe-attack Night tick=491 hero=7632,11447 v=-8,-5 hp=190 alive=True cmd=h60/64!f44 paused=False shown=6,356,9,544 cam=7,21,0,54,10,02 enemy2=0,103 hp45 phase=0,889 pending=True gait=0,26 foot=27
+295 strafe-attack Night tick=492 hero=7624,11456 v=-8,9 hp=190 alive=True cmd=h60/64!f44 paused=False shown=6,351,9,552 cam=7,20,0,54,10,03 enemy2=0,087 hp45 phase=1,028 pending=False gait=0,35 foot=28
+296 strafe-attack Night tick=493 hero=7613,11473 v=-11,17 hp=190 alive=True cmd=h58/64!f42 paused=False shown=6,344,9,561 cam=7,10,0,54,10,18 enemy2=0,078 hp45 phase=1,083 pending=False gait=0,44 foot=28
+297 strafe-attack Night tick=493 hero=7613,11473 v=-11,17 hp=190 alive=True cmd=h55/64!f39 paused=False shown=6,335,9,568 cam=6,85,0,54,10,40 enemy2=0,078 hp45 phase=1,139 pending=False gait=0,45 foot=28
+298 strafe-attack Night tick=494 hero=7597,11486 v=-16,13 hp=190 alive=True cmd=h55/64!f39 paused=False shown=6,326,9,575 cam=6,84,0,54,10,41 enemy2=0,075 hp45 phase=1,194 pending=False gait=0,45 foot=28
+299 strafe-attack Night tick=495 hero=7577,11492 v=-20,6 hp=190 alive=True cmd=h51/64!f35 paused=False shown=6,314,9,577 cam=6,47,0,54,10,54 enemy2=0,077 hp45 phase=1,250 pending=False gait=0,48 foot=28
+300 strafe-attack Night tick=495 hero=7577,11492 v=-20,6 hp=190 alive=True cmd=h47/64!f31 paused=False shown=6,303,9,576 cam=6,05,0,54,10,52 enemy2=0,077 hp45 phase=1,306 pending=False gait=0,44 foot=28
+301 strafe-attack Night tick=496 hero=7557,11490 v=-20,-2 hp=190 alive=True cmd=h47/64!f31 paused=False shown=6,292,9,574 cam=6,04,0,54,10,52 enemy2=0,086 hp45 phase=1,361 pending=False gait=0,67 foot=29
+302 strafe-attack Night tick=497 hero=7539,11481 v=-18,-9 hp=190 alive=True cmd=h43/64!f27 paused=False shown=6,283,9,568 cam=5,70,0,54,10,35 enemy2=0,099 hp45 phase=1,417 pending=False gait=0,90 foot=29
+303 strafe-attack Night tick=497 hero=7539,11481 v=-18,-9 hp=190 alive=True cmd=h40/64!f24 paused=False shown=6,275,9,560 cam=5,48,0,54,10,13 enemy2=0,099 hp45 phase=1,472 pending=False gait=0,93 foot=29
+304 strafe-attack Night tick=498 hero=7525,11467 v=-14,-14 hp=190 alive=True cmd=h40/64!f24 paused=False shown=6,267,9,552 cam=5,48,0,54,10,13 enemy2=0,114 hp45 phase=1,528 pending=False gait=0,70 foot=29
+305 strafe-attack Night tick=499 hero=7516,11449 v=-9,-18 hp=190 alive=True cmd=h37/64!f21 paused=False shown=6,263,9,541 cam=5,36,0,54,9,91 enemy2=0,128 hp45 phase=1,583 pending=False gait=0,93 foot=30
+306 strafe-attack Night tick=499 hero=7516,11449 v=-9,-18 hp=190 alive=True cmd=h35/64!f19 paused=False shown=6,260,9,530 cam=5,30,0,54,9,72 enemy2=0,128 hp45 phase=1,639 pending=False gait=0,92 foot=30
+307 strafe-attack Night tick=500 hero=7510,11429 v=-6,-20 hp=190 alive=True cmd=h35/64!f19 paused=False shown=6,257,9,519 cam=5,30,0,54,9,71 enemy2=0,144 hp45 phase=1,694 pending=False gait=0,69 foot=30
+308 strafe-attack Night tick=501 hero=7506,11409 v=-4,-20 hp=190 alive=True cmd=h34/64!f18 paused=False shown=6,255,9,508 cam=5,28,0,54,9,55 enemy2=0,160 hp45 phase=1,750 pending=False gait=0,67 foot=30
+309 strafe-attack Night tick=501 hero=7506,11409 v=-4,-20 hp=190 alive=True cmd=h32/64!f16 paused=False shown=6,255,9,496 cam=5,28,0,54,9,42 enemy2=0,160 hp45 phase=1,806 pending=False gait=0,91 foot=31
+310 strafe-attack Night tick=502 hero=7506,11388 v=0,-21 hp=190 alive=True cmd=h32/64!f16 paused=False shown=6,255,9,484 cam=5,28,0,54,9,41 enemy2=0,175 hp45 phase=1,861 pending=False gait=0,67 foot=31
+311 strafe-attack Night tick=503 hero=7508,11368 v=2,-20 hp=190 alive=True cmd=h31/64!f15 paused=False shown=6,257,9,473 cam=5,29,0,54,9,30 enemy2=0,190 hp45 phase=1,917 pending=False gait=0,66 foot=31
+312 strafe-attack Night tick=503 hero=7508,11368 v=2,-20 hp=190 alive=True cmd=h31/64!f15 paused=False shown=6,258,9,455 cam=5,31,0,54,9,20 enemy2=0,190 hp45 phase=1,972 pending=False gait=0,72 foot=31
+313 strafe-attack Night tick=504 hero=7511,11335 v=3,-33 hp=190 alive=True cmd=h31/64!f15 paused=False shown=6,260,9,440 cam=5,32,0,54,9,19 enemy2=0,208 hp45 phase=0,111 pending=True gait=0,58 foot=31
+314 strafe-attack Night tick=505 hero=7517,11315 v=6,-20 hp=190 alive=True cmd=h29/64!f13 paused=False shown=6,264,9,429 cam=5,36,0,54,9,06 enemy2=0,222 hp45 phase=0,333 pending=True gait=0,47 foot=31
+315 strafe-attack Night tick=505 hero=7517,11315 v=6,-20 hp=190 alive=True cmd=h29/64!f13 paused=False shown=6,268,9,418 cam=5,39,0,54,9,00 enemy2=0,222 hp45 phase=0,556 pending=True gait=0,45 foot=31
+316 strafe-attack Night tick=506 hero=7523,11295 v=6,-20 hp=190 alive=True cmd=h29/64!f13 paused=False shown=6,271,9,407 cam=5,39,0,54,8,98 enemy2=0,238 hp45 phase=0,778 pending=True gait=0,45 foot=32
+317 strafe-attack Night tick=507 hero=7531,11276 v=8,-19 hp=190 alive=True cmd=h28/64!f12 paused=False shown=6,276,9,397 cam=5,42,0,54,8,93 enemy2=0,251 hp45 phase=1,000 pending=False gait=0,45 foot=32
+318 strafe-attack Night tick=507 hero=7531,11276 v=8,-19 hp=190 alive=True cmd=h28/64!f12 paused=False shown=6,280,9,386 cam=5,45,0,54,8,88 enemy2=0,251 hp45 phase=1,056 pending=False gait=0,45 foot=32
+319 strafe-attack Night tick=508 hero=7539,11257 v=8,-19 hp=190 alive=True cmd=h28/64!f12 paused=False shown=6,285,9,376 cam=5,45,0,54,8,87 enemy2=0,266 hp45 phase=1,111 pending=False gait=0,45 foot=32
+320 backpedal-attack Night tick=509 hero=7534,11243 v=-5,-14 hp=190 alive=True cmd=h43/64!f11 paused=False shown=6,278,9,369 cam=5,46,0,54,8,83 enemy2=0,288 hp35 phase=1,167 pending=False gait=0,35 foot=32
+321 backpedal-attack Night tick=509 hero=7534,11243 v=-5,-14 hp=190 alive=True cmd=h43/64!f11 paused=False shown=6,268,9,364 cam=5,46,0,54,8,82 enemy2=0,288 hp35 phase=1,222 pending=False gait=0,44 foot=32
+322 backpedal-attack Night tick=510 hero=7516,11234 v=-18,-9 hp=190 alive=True cmd=h43/64!f11 paused=False shown=6,258,9,359 cam=5,45,0,54,8,81 enemy2=0,318 hp35 phase=1,278 pending=False gait=0,44 foot=32
+323 backpedal-attack Night tick=511 hero=7498,11225 v=-18,-9 hp=190 alive=True cmd=h43/64!f11 paused=False shown=6,248,9,354 cam=5,43,0,54,8,82 enemy3=0,319 hp45 phase=1,333 pending=False gait=0,44 foot=32
+324 backpedal-attack Night tick=511 hero=7498,11225 v=-18,-9 hp=190 alive=True cmd=h21/64!f53 paused=False shown=6,246,9,349 cam=7,16,0,54,9,01 enemy3=0,319 hp45 phase=1,389 pending=False gait=0,67 foot=33
+325 backpedal-attack Night tick=512 hero=7494,11216 v=-4,-9 hp=190 alive=True cmd=h21/64!f53 paused=False shown=6,248,9,344 cam=7,17,0,54,9,01 enemy3=0,306 hp45 phase=1,444 pending=False gait=0,71 foot=33
+326 backpedal-attack Night tick=513 hero=7504,11207 v=10,-9 hp=190 alive=True cmd=h21/64!f53 paused=False shown=6,253,9,339 cam=7,15,0,54,8,96 enemy3=0,304 hp45 phase=1,500 pending=False gait=0,79 foot=33
+327 backpedal-attack Night tick=513 hero=7504,11207 v=10,-9 hp=190 alive=True cmd=h22/64!f54 paused=False shown=6,263,9,333 cam=7,15,0,54,8,92 enemy3=0,304 hp45 phase=1,556 pending=False gait=0,94 foot=34
+328 backpedal-attack Night tick=514 hero=7521,11196 v=17,-11 hp=190 alive=True cmd=h22/64!f54 paused=False shown=6,272,9,327 cam=7,16,0,54,8,92 enemy3=0,309 hp45 phase=1,611 pending=False gait=0,94 foot=34
+329 backpedal-attack Night tick=515 hero=7538,11185 v=17,-11 hp=190 alive=True cmd=h22/64!f54 paused=False shown=6,282,9,321 cam=7,16,0,54,8,89 enemy3=0,313 hp45 phase=1,667 pending=False gait=0,94 foot=34
+330 backpedal-attack Night tick=515 hero=7538,11185 v=17,-11 hp=190 alive=True cmd=h22/64!f54 paused=False shown=6,291,9,315 cam=7,16,0,54,8,86 enemy3=0,313 hp45 phase=1,722 pending=False gait=0,94 foot=35
+331 backpedal-attack Night tick=516 hero=7555,11174 v=17,-11 hp=190 alive=True cmd=h22/64!f54 paused=False shown=6,301,9,309 cam=7,16,0,54,8,85 enemy3=0,318 hp45 phase=1,778 pending=False gait=0,94 foot=35
+332 backpedal-attack Night tick=517 hero=7572,11163 v=17,-11 hp=190 alive=True cmd=h22/64!f54 paused=False shown=6,310,9,303 cam=7,16,0,54,8,82 enemy3=0,323 hp45 phase=1,833 pending=False gait=0,71 foot=35
+333 backpedal-attack Night tick=517 hero=7572,11163 v=17,-11 hp=190 alive=True cmd=h23/64!f55 paused=False shown=6,319,9,295 cam=7,16,0,54,8,80 enemy3=0,323 hp45 phase=1,889 pending=False gait=0,68 foot=35
+334 backpedal-attack Night tick=518 hero=7588,11150 v=16,-13 hp=190 alive=True cmd=h23/64!f55 paused=False shown=6,331,9,286 cam=7,17,0,54,8,79 enemy3=0,328 hp45 phase=1,944 pending=False gait=0,59 foot=36
+335 backpedal-attack Night tick=519 hero=7614,11129 v=26,-21 hp=190 alive=True cmd=h23/64!f55 paused=False shown=6,345,9,274 cam=7,17,0,54,8,75 enemy3=0,344 hp45 phase=0,000 pending=True gait=0,73 foot=36
+336 backpedal-attack Night tick=519 hero=7614,11129 v=26,-21 hp=190 alive=True cmd=h23/64!f55 paused=False shown=6,354,9,267 cam=7,17,0,54,8,72 enemy3=0,344 hp45 phase=0,222 pending=True gait=0,49 foot=36
+337 backpedal-attack Night tick=520 hero=7630,11116 v=16,-13 hp=190 alive=True cmd=h23/64!f55 paused=False shown=6,363,9,260 cam=7,17,0,54,8,71 enemy3=0,350 hp45 phase=0,444 pending=True gait=0,45 foot=36
+338 backpedal-attack Night tick=521 hero=7644,11102 v=14,-14 hp=190 alive=True cmd=h24/64!f56 paused=False shown=6,370,9,252 cam=7,17,0,54,8,68 enemy3=0,356 hp45 phase=0,667 pending=True gait=0,42 foot=36
+339 backpedal-attack Night tick=521 hero=7644,11102 v=14,-14 hp=190 alive=True cmd=h24/64!f56 paused=False shown=6,378,9,244 cam=7,16,0,54,8,65 enemy3=0,356 hp45 phase=0,889 pending=True gait=0,43 foot=36
+340 return Night tick=522 hero=7649,11097 v=5,-5 hp=190 alive=True cmd=h56/64f56 paused=False shown=6,373,9,249 cam=7,15,0,54,8,66 enemy3=0,351 hp45 phase=1,028 pending=False gait=0,26 foot=36
+341 return Night tick=523 hero=7645,11101 v=-4,4 hp=190 alive=True cmd=h56/64f56 paused=False shown=6,371,9,251 cam=7,13,0,54,8,64 enemy3=0,336 hp45 phase=1,083 pending=False gait=0,12 foot=36
+342 return Night tick=523 hero=7645,11101 v=-4,4 hp=190 alive=True cmd=h56/64f56 paused=False shown=6,364,9,258 cam=7,10,0,54,8,62 enemy3=0,336 hp45 phase=1,139 pending=False gait=0,36 foot=36
+343 return Night tick=524 hero=7632,11114 v=-13,13 hp=190 alive=True cmd=h56/64f56 paused=False shown=6,356,9,266 cam=7,10,0,54,8,63 enemy3=0,311 hp45 phase=1,194 pending=False gait=0,42 foot=37
+344 return Night tick=525 hero=7619,11130 v=-13,16 hp=190 alive=True cmd=h57/64f57 paused=False shown=6,349,9,275 cam=7,06,0,54,8,61 enemy3=0,285 hp45 phase=1,250 pending=False gait=0,46 foot=37
+345 return Night tick=525 hero=7619,11130 v=-13,16 hp=190 alive=True cmd=h57/64f57 paused=False shown=6,342,9,284 cam=7,03,0,54,8,59 enemy3=0,285 hp45 phase=1,306 pending=False gait=0,45 foot=37
+346 return Night tick=526 hero=7606,11146 v=-13,16 hp=190 alive=True cmd=h57/64f57 paused=False shown=6,335,9,293 cam=7,02,0,54,8,60 enemy3=0,258 hp45 phase=1,361 pending=False gait=0,68 foot=37
+347 return Night tick=527 hero=7595,11163 v=-11,17 hp=190 alive=True cmd=h58/64f58 paused=False shown=6,329,9,303 cam=6,98,0,54,8,58 enemy3=0,233 hp45 phase=1,417 pending=False gait=0,67 foot=37
+348 return Night tick=527 hero=7595,11163 v=-11,17 hp=190 alive=True cmd=h58/64f58 paused=False shown=6,323,9,312 cam=6,94,0,54,8,55 enemy3=0,233 hp45 phase=1,472 pending=False gait=0,44 foot=37
+349 return Night tick=528 hero=7584,11180 v=-11,17 hp=190 alive=True cmd=h58/64f58 paused=False shown=6,317,9,321 cam=6,93,0,54,8,56 enemy3=0,209 hp45 phase=1,528 pending=False gait=0,44 foot=38
+350 return Night tick=529 hero=7575,11198 v=-9,18 hp=190 alive=True cmd=h59/64f59 paused=False shown=6,313,9,332 cam=6,88,0,54,8,54 enemy3=0,185 hp45 phase=1,583 pending=False gait=0,67 foot=38
+351 return Night tick=529 hero=7575,11198 v=-9,18 hp=190 alive=True cmd=h60/64!f60 paused=False shown=6,308,9,342 cam=6,82,0,54,8,51 enemy3=0,185 hp45 phase=1,639 pending=False gait=0,68 foot=38
+352 return Night tick=530 hero=7567,11217 v=-8,19 hp=190 alive=True cmd=h60/64!f60 paused=False shown=6,304,9,353 cam=6,82,0,54,8,52 enemy3=0,162 hp45 phase=1,694 pending=False gait=0,45 foot=38
+353 return Night tick=531 hero=7559,11236 v=-8,19 hp=190 alive=True cmd=h60/64!f60 paused=False shown=6,299,9,363 cam=6,75,0,54,8,49 enemy3=0,141 hp45 phase=1,750 pending=False gait=0,45 foot=38
+354 return Night tick=531 hero=7559,11236 v=-8,19 hp=190 alive=True cmd=h-1/64!f62 paused=False shown=6,299,9,363 cam=6,65,0,54,8,45 enemy3=0,141 hp45 phase=1,806 pending=False gait=0,47 foot=38
+355 return Night tick=532 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f62 paused=False shown=6,299,9,363 cam=6,65,0,54,8,45 enemy3=0,138 hp45 phase=1,861 pending=False gait=0,24 foot=38
+356 return Night tick=533 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f63 paused=False shown=6,299,9,363 cam=6,55,0,54,8,42 enemy3=0,137 hp45 phase=1,917 pending=False gait=0,23 foot=38
+357 return Night tick=533 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f0 paused=False shown=6,299,9,363 cam=6,45,0,54,8,40 enemy3=0,137 hp45 phase=1,972 pending=False gait=0,23 foot=38
+358 return Night tick=534 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f0 paused=False shown=6,299,9,363 cam=6,45,0,54,8,40 enemy3=0,137 hp45 phase=0,111 pending=True gait=0,00 foot=38
+359 return Night tick=535 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f1 paused=False shown=6,299,9,363 cam=6,34,0,54,8,39 enemy3=0,139 hp45 phase=0,333 pending=True gait=0,00 foot=38
+360 return Night tick=535 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f2 paused=False shown=6,299,9,363 cam=6,24,0,54,8,39 enemy3=0,139 hp45 phase=0,556 pending=True gait=0,00 foot=38
+361 return Night tick=536 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f2 paused=False shown=6,299,9,363 cam=6,24,0,54,8,39 enemy3=0,143 hp45 phase=0,778 pending=True gait=0,00 foot=38
+362 return Night tick=537 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f3 paused=False shown=6,299,9,363 cam=6,14,0,54,8,40 enemy3=0,148 hp35 phase=1,000 pending=False gait=0,00 foot=38
+363 return Night tick=537 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f4 paused=False shown=6,299,9,363 cam=6,04,0,54,8,42 enemy3=0,148 hp35 phase=1,056 pending=False gait=0,00 foot=38
+364 return Night tick=538 hero=7559,11236 v=0,0 hp=190 alive=True cmd=h-1/64!f4 paused=False shown=6,299,9,363 cam=6,04,0,54,8,42 enemy3=0,154 hp35 phase=1,111 pending=False gait=0,00 foot=38
+365 return Night tick=539 hero=7565,11248 v=6,12 hp=190 alive=True cmd=h5/64!f5 paused=False shown=6,304,9,373 cam=5,96,0,54,8,46 enemy3=0,150 hp35 phase=1,167 pending=False gait=0,23 foot=38
+366 return Night tick=539 hero=7565,11248 v=6,12 hp=190 alive=True cmd=h6/64!f6 paused=False shown=6,310,9,383 cam=5,89,0,54,8,50 enemy3=0,150 hp35 phase=1,222 pending=False gait=0,44 foot=38
+367 return Night tick=540 hero=7576,11265 v=11,17 hp=190 alive=True cmd=h6/64!f6 paused=False shown=6,316,9,392 cam=5,90,0,54,8,51 enemy3=0,142 hp35 phase=1,278 pending=False gait=0,44 foot=38
+368 return Night tick=541 hero=7576,11265 v=0,0 hp=190 alive=True cmd=h-1/64!f7 paused=False shown=6,313,9,388 cam=5,82,0,54,8,55 enemy3=0,152 hp35 phase=1,333 pending=False gait=0,22 foot=38
+369 return Night tick=541 hero=7576,11265 v=0,0 hp=190 alive=True cmd=h7/64!f7 paused=False shown=6,318,9,393 cam=5,76,0,54,8,59 enemy3=0,152 hp35 phase=1,389 pending=False gait=0,45 foot=38
+370 fall Night tick=596 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,77,0,54,11,54 enemy3=1,205 hp35 phase=-1,000 pending=False gait=0,69 foot=39
+371 fall Night tick=597 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,76,0,54,11,55 enemy3=1,200 hp35 phase=-1,000 pending=False gait=0,50 foot=39
+372 fall Night tick=597 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,75,0,54,11,55 enemy3=1,200 hp35 phase=-1,000 pending=False gait=0,50 foot=39
+373 fall Night tick=598 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,75,0,54,11,55 enemy3=1,194 hp35 phase=-1,000 pending=False gait=0,50 foot=39
+374 fall Night tick=599 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,74,0,54,11,55 enemy3=1,188 hp35 phase=-1,000 pending=False gait=0,50 foot=39
+375 fall Night tick=599 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,73,0,54,11,56 enemy3=1,188 hp35 phase=-1,000 pending=False gait=0,50 foot=39
+376 fall Night tick=600 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,73,0,54,11,56 enemy3=1,183 hp25 phase=-1,000 pending=False gait=0,50 foot=39
+377 fall Night tick=601 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,71,0,54,11,56 enemy3=1,178 hp25 phase=-1,000 pending=False gait=0,50 foot=39
+378 fall Night tick=601 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,70,0,54,11,56 enemy3=1,178 hp25 phase=-1,000 pending=False gait=0,50 foot=39
+379 fall Night tick=602 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f36 paused=False shown=7,486,10,608 cam=7,70,0,54,11,56 enemy3=1,173 hp25 phase=-1,000 pending=False gait=0,27 foot=39
+380 fall Night tick=603 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,69,0,54,11,56 enemy3=1,168 hp25 phase=-1,000 pending=False gait=0,23 foot=39
+381 fall Night tick=603 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,68,0,54,11,57 enemy3=1,168 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+382 fall Night tick=604 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,68,0,54,11,57 enemy3=1,163 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+383 fall Night tick=605 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,67,0,54,11,57 enemy3=1,159 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+384 fall Night tick=605 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,66,0,54,11,57 enemy3=1,159 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+385 fall Night tick=606 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,66,0,54,11,57 enemy3=1,154 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+386 fall Night tick=607 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,64,0,54,11,57 enemy3=1,150 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+387 fall Night tick=607 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,63,0,54,11,57 enemy3=1,150 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+388 fall Night tick=608 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,63,0,54,11,57 enemy3=1,146 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+389 fall Night tick=609 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,62,0,54,11,58 enemy3=1,143 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+390 fall Night tick=609 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,61,0,54,11,58 enemy3=1,143 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+391 fall Night tick=610 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f35 paused=False shown=7,486,10,608 cam=7,61,0,54,11,58 enemy3=1,139 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+392 fall Night tick=611 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,60,0,54,11,58 enemy3=1,136 hp25 phase=-1,000 pending=False gait=0,23 foot=39
+393 fall Night tick=611 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,58,0,54,11,58 enemy3=1,136 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+394 fall Night tick=612 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,58,0,54,11,58 enemy3=1,132 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+395 fall Night tick=613 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,57,0,54,11,58 enemy3=1,129 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+396 fall Night tick=613 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,56,0,54,11,58 enemy3=1,129 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+397 fall Night tick=614 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,56,0,54,11,58 enemy3=1,126 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+398 fall Night tick=615 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,55,0,54,11,58 enemy3=1,124 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+399 fall Night tick=615 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,53,0,54,11,58 enemy3=1,124 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+400 fall Night tick=616 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,53,0,54,11,58 enemy3=1,121 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+401 fall Night tick=617 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f34 paused=False shown=7,486,10,608 cam=7,52,0,54,11,58 enemy3=1,119 hp25 phase=-1,000 pending=False gait=0,00 foot=39
+402 fall Night tick=617 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,51,0,54,11,58 enemy3=1,119 hp25 phase=-1,000 pending=False gait=0,23 foot=39
+403 fall Night tick=618 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,51,0,54,11,58 enemy3=1,117 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+404 fall Night tick=619 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,49,0,54,11,59 enemy3=1,115 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+405 fall Night tick=619 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,48,0,54,11,59 enemy3=1,115 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+406 fall Night tick=620 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,48,0,54,11,59 enemy3=1,114 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+407 fall Night tick=621 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,47,0,54,11,59 enemy3=1,112 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+408 fall Night tick=621 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,45,0,54,11,58 enemy3=1,112 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+409 fall Night tick=622 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,45,0,54,11,58 enemy3=1,111 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+410 fall Night tick=623 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,44,0,54,11,58 enemy3=1,110 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+411 fall Night tick=623 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,43,0,54,11,58 enemy3=1,110 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+412 fall Night tick=624 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,43,0,54,11,58 enemy3=1,109 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+413 fall Night tick=625 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f33 paused=False shown=7,486,10,608 cam=7,41,0,54,11,58 enemy3=1,108 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+414 fall Night tick=625 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,40,0,54,11,58 enemy3=1,108 hp15 phase=-1,000 pending=False gait=0,23 foot=39
+415 fall Night tick=626 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,40,0,54,11,58 enemy3=1,108 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+416 fall Night tick=627 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,39,0,54,11,58 enemy3=1,108 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+417 fall Night tick=627 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,38,0,54,11,58 enemy3=1,108 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+418 fall Night tick=628 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,38,0,54,11,58 enemy3=1,108 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+419 fall Night tick=629 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,36,0,54,11,58 enemy3=1,103 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+420 fall Night tick=629 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,103 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+421 fall Night tick=630 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,088 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+422 fall Night tick=631 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,073 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+423 fall Night tick=631 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,073 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+424 fall Night tick=632 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,058 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+425 fall Night tick=633 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,043 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+426 fall Night tick=633 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,043 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+427 fall Night tick=634 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,028 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+428 fall Night tick=635 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,013 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+429 fall Night tick=635 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=1,013 hp15 phase=-1,000 pending=False gait=0,00 foot=39
+430 fall Night tick=636 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,998 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+431 fall Night tick=637 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,983 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+432 fall Night tick=637 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,983 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+433 fall Night tick=638 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,968 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+434 fall Night tick=639 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,953 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+435 fall Night tick=639 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,953 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+436 fall Night tick=640 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,938 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+437 fall Night tick=641 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,923 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+438 fall Night tick=641 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,923 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+439 fall Night tick=642 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,908 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+440 fall Night tick=643 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,893 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+441 fall Night tick=643 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,893 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+442 fall Night tick=644 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,878 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+443 fall Night tick=645 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,863 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+444 fall Night tick=645 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,863 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+445 fall Night tick=646 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,848 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+446 fall Night tick=647 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,833 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+447 fall Night tick=647 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,833 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+448 fall Night tick=648 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,818 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+449 fall Night tick=649 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,803 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+450 fall Night tick=649 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,803 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+451 fall Night tick=650 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,788 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+452 fall Night tick=651 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,773 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+453 fall Night tick=651 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,773 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+454 fall Night tick=652 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,758 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+455 fall Night tick=653 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,743 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+456 fall Night tick=653 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 enemy3=0,743 hp5 phase=-1,000 pending=False gait=0,00 foot=39
+457 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+458 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+459 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+460 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+461 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+462 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+463 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+464 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+465 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+466 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+467 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+468 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+469 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+470 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+471 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+472 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+473 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+474 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+475 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+476 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+477 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+478 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+479 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+480 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+481 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+482 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+483 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+484 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+485 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+486 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+487 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+488 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+489 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+490 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+491 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+492 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+493 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+494 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+495 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+496 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+497 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+498 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+499 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+500 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+501 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+502 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+503 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+504 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+505 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+506 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+507 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+508 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+509 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+510 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+511 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+512 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+513 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+514 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+515 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+516 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+517 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+518 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+519 fall Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+520 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+521 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+522 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+523 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+524 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+525 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+526 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+527 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+528 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+529 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+530 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+531 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+532 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+533 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+534 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+535 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+536 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+537 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+538 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+539 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+540 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+541 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+542 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+543 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+544 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+545 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+546 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+547 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+548 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+549 down Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+550 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+551 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+552 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+553 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+554 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+555 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+556 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+557 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+558 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+559 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+560 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+561 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+562 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+563 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+564 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+565 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+566 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+567 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+568 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+569 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+570 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+571 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+572 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+573 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+574 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+575 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+576 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+577 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+578 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+579 rise Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+580 strategic Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+581 strategic Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+582 strategic Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+583 strategic Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+584 strategic Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+585 strategic Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+586 strategic Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+587 strategic Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+588 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+589 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+590 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+591 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+592 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+593 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+594 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+595 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+596 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+597 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+598 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+599 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+600 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+601 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39
+602 enter Reward tick=654 hero=8983,12729 v=0,0 hp=1 alive=True cmd=h-1/64f32 paused=False shown=7,486,10,608 cam=7,35,0,54,11,58 phase=-1,000 pending=False gait=0,00 foot=39

@@ -53,16 +53,28 @@ namespace TheLastFortress
 
         public bool HasHp => Kind != BuildingKind.SpikeTrap;
 
-        /// <summary>Square footprint edge length. Fixed by the rules, not tuning: Farm, Cannon and Repair Station are 2 x 2, everything else 1 x 1.</summary>
-        public int FootprintSize => FootprintSizeOf(Kind);
+        /// <summary>
+        /// A rules version's own footprint edge for this kind (release-rules-4: the Cannon is 1 x 1, owner 2026-10-21);
+        /// 0 keeps the rule default of <see cref="FootprintSizeOf"/>.
+        /// </summary>
+        public int SizeOverride;
+
+        /// <summary>Square footprint edge length. Fixed by the rules, not tuning: Farm, Cannon and Repair Station are 2 x 2 (the Cannon 1 x 1 under release-rules-4), everything else 1 x 1.</summary>
+        public int FootprintSize => SizeOverride > 0 ? SizeOverride : FootprintSizeOf(Kind);
 
         public static int FootprintSizeOf(BuildingKind kind) =>
             kind == BuildingKind.Farm || kind == BuildingKind.Cannon || kind == BuildingKind.RepairStation ? 2 : 1;
 
-        /// <summary>Footprint cells from the lowest (x,z) anchor, in offset order (0,0),(1,0),(0,1),(1,1).</summary>
-        public static GridPos[] FootprintCells(BuildingKind kind, GridPos anchor)
+        /// <summary>This definition's footprint cells from the anchor (honours <see cref="SizeOverride"/>).</summary>
+        public GridPos[] Footprint(GridPos anchor) => FootprintCells(FootprintSize, anchor);
+
+        public BuildingDefinition Copy() => (BuildingDefinition)MemberwiseClone();
+
+        /// <summary>Footprint cells from the lowest (x,z) anchor, in offset order (0,0),(1,0),(0,1),(1,1), at the rule default size.</summary>
+        public static GridPos[] FootprintCells(BuildingKind kind, GridPos anchor) => FootprintCells(FootprintSizeOf(kind), anchor);
+
+        public static GridPos[] FootprintCells(int size, GridPos anchor)
         {
-            var size = FootprintSizeOf(kind);
             var cells = new GridPos[size * size];
             var i = 0;
             for (var dz = 0; dz < size; dz++)
@@ -173,6 +185,16 @@ namespace TheLastFortress
         };
 
         /// <summary>A copy of this tuning set whose enemy definitions are replaced by <paramref name="map"/> (buildings shared).</summary>
+        /// <summary>release-rules-4 (owner, 2026-10-21): the same definitions with a 1 x 1 Cannon; costs and stats unchanged.</summary>
+        public PrototypeDefinitions WithCompactCannon()
+        {
+            var d = (PrototypeDefinitions)MemberwiseClone();
+            if (Cannon == null) return d;
+            d.Cannon = Cannon.Copy();
+            d.Cannon.SizeOverride = 1;
+            return d;
+        }
+
         public PrototypeDefinitions WithEnemies(Func<EnemyDefinition, EnemyDefinition> map)
         {
             var d = (PrototypeDefinitions)MemberwiseClone();

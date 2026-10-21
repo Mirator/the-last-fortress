@@ -73,6 +73,13 @@ namespace TheLastFortress.Editor
             if (content.wallShapePrefabs == null || content.wallShapePrefabs.Length != 6) errors.Add($"{content.name}.wallShapePrefabs: expected 6 connected Wall shapes.");
             if (Prefab(() => content.heroPrefab) == null) errors.Add($"{content.name}.heroPrefab: missing (run The Last Fortress > Art > Import and Assign Hero).");
             else if (content.heroPrefab.GetComponent<CharacterRig>() == null) errors.Add($"{content.name}.heroPrefab: no CharacterRig.");
+            // Plan 019: the release-rules-4 hero needs its own articulated adapter (elbows, wrists, ankles).
+            if (Prefab(() => content.contactHeroPrefab) == null) errors.Add($"{content.name}.contactHeroPrefab: missing (run The Last Fortress > Art > Import and Assign Release-Rules-4 Hero).");
+            else if (!(content.contactHeroPrefab.GetComponent<HeroAnimationRig>() is HeroAnimationRig heroRig) || !heroRig.Complete)
+                errors.Add($"{content.name}.contactHeroPrefab: no complete HeroAnimationRig.");
+
+            if (Prefab(() => content.compactCannonPrefab) == null) errors.Add($"{content.name}.compactCannonPrefab: missing (run The Last Fortress > Art > Import and Assign Release-Rules-4 Cannon).");
+            else if (content.compactCannonPrefab.transform.Find("Muzzle") == null) errors.Add($"{content.name}.compactCannonPrefab: no Muzzle part.");
 
             var seen = new HashSet<string>();
             foreach (var id in PerkRules.ReleaseIds)

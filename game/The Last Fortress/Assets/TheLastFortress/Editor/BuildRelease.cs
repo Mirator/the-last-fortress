@@ -22,11 +22,15 @@ namespace TheLastFortress.Editor
         public static void BuildWindows()
         {
             ReleaseContentValidation.ValidateAll(); // throws on any content error
-            Directory.CreateDirectory(OutputDirectory);
+            // -releaseOutput <dir> (plan 019 tooling): build elsewhere, e.g. while the normal build is being played.
+            var args = Environment.GetCommandLineArgs();
+            var at = Array.IndexOf(args, "-releaseOutput");
+            var outputDirectory = at >= 0 && at + 1 < args.Length ? args[at + 1] : OutputDirectory;
+            Directory.CreateDirectory(outputDirectory);
             var options = new BuildPlayerOptions
             {
                 scenes = new[] { ReleaseSetup.ScenePath },
-                locationPathName = ExecutablePath,
+                locationPathName = Path.Combine(outputDirectory, "TheLastFortress.exe"),
                 target = BuildTarget.StandaloneWindows64,
                 targetGroup = BuildTargetGroup.Standalone,
                 options = BuildOptions.None,
@@ -50,10 +54,10 @@ namespace TheLastFortress.Editor
             foreach (var msg in step.messages)
                 if (msg.type == LogType.Error || msg.type == LogType.Exception)
                     sb.AppendLine($"error: [{step.name}] {msg.content}");
-            File.WriteAllText(Path.Combine(OutputDirectory, "build-report.txt"), sb.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "build-report.txt"), sb.ToString());
 
             if (summary.result != BuildResult.Succeeded)
-                throw new UnityEditor.Build.BuildFailedException($"Release build {summary.result} with {summary.totalErrors} errors; see {OutputDirectory}/build-report.txt");
+                throw new UnityEditor.Build.BuildFailedException($"Release build {summary.result} with {summary.totalErrors} errors; see {outputDirectory}/build-report.txt");
             Debug.Log($"Release build succeeded: {summary.outputPath} ({summary.totalSize} bytes, {summary.totalTime})");
         }
     }

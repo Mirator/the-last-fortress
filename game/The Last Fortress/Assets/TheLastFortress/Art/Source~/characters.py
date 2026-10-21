@@ -84,7 +84,7 @@ GRIP_Y = 0.03  # hands are held a little forward of the body (fraction of height
 class Body:
     """Joint positions for a figure of height h (1.0 = 0.56 tall) and width w, with optional forward lean (degrees)."""
 
-    def __init__(self, h, w):
+    def __init__(self, h, w, arm_len=0.15):
         self.h, self.w = h, w
         self.ankle = 0.035 * h
         self.knee = 0.115 * h
@@ -97,11 +97,12 @@ class Body:
         self.head = 0.475 * h
         self.leg_x = 0.05 * w
         self.arm_x = 0.108 * w
-        self.hand = self.shoulder - 0.15 * h
+        self.hand = self.shoulder - arm_len * h
 
 
-def legs(r, hips_o, b, cloth, boot, rng, trousers=None, armour=None):
-    """Thigh (LegL/LegR, from the hip joint) and shin with boot (ShinL/ShinR, from the knee)."""
+def legs(r, hips_o, b, cloth, boot, rng, trousers=None, armour=None, articulated=False):
+    """Thigh (LegL/LegR, from the hip joint) and shin with boot (ShinL/ShinR, from the knee). Articulated (plan 019, hero
+    only): the foot below the ankle is its own part (FootL/FootR, from the ankle) so it can stay flat on the ground."""
     h, w = b.h, b.w
     for s, leg_name, shin_name in ((-1, "LegL", "ShinL"), (1, "LegR", "ShinR")):
         x = s * b.leg_x
@@ -111,34 +112,50 @@ def legs(r, hips_o, b, cloth, boot, rng, trousers=None, armour=None):
         leg_o = thigh.build(hips_o, (x, 0, b.hip_joint))
         shin = Part(shin_name)
         limb(shin, (x, 0.004, b.knee), (x, 0, b.ankle + 0.02 * h), 0.024 * w, 0.019 * w, armour or trousers or cloth, 8, 0.9)
+        foot = Part("Foot" + leg_name[-1]) if articulated else shin
         # boot: shaft, rounded foot with toe, sole and a turned-down cuff
-        limb(shin, (x, 0, b.ankle + 0.035 * h), (x, 0, 0.012), 0.024 * w, 0.026 * w, boot, 8)
-        blob(shin, (x, 0.022 * w, 0.018 * h), (0.025 * w, 0.042 * w, 0.019 * h), boot, 2)
-        shin.add(box_bm((0.05 * w, 0.085 * w, 0.008), 0.003), TIMBER_DARK, trs((x, 0.016 * w, 0.0)))
+        if articulated:
+            limb(shin, (x, 0, b.ankle + 0.035 * h), (x, 0, b.ankle), 0.024 * w, 0.025 * w, boot, 8)
+            limb(foot, (x, 0, b.ankle + 0.004 * h), (x, 0, 0.012), 0.025 * w, 0.026 * w, boot, 8)
+        else:
+            limb(shin, (x, 0, b.ankle + 0.035 * h), (x, 0, 0.012), 0.024 * w, 0.026 * w, boot, 8)
+        blob(foot, (x, 0.022 * w, 0.018 * h), (0.025 * w, 0.042 * w, 0.019 * h), boot, 2)
+        foot.add(box_bm((0.05 * w, 0.085 * w, 0.008), 0.003), TIMBER_DARK, trs((x, 0.016 * w, 0.0)))
         limb(shin, (x, 0, b.ankle + 0.038 * h), (x, 0, b.ankle + 0.05 * h), 0.03 * w, 0.028 * w, boot, 8)
-        shin.build(leg_o, (x, 0.004, b.knee))
+        shin_o = shin.build(leg_o, (x, 0.004, b.knee))
+        if articulated:
+            foot.build(shin_o, (x, 0, b.ankle))
 
 
-def arm(r, torso_o, b, s, sleeve, hand_mat, bracer=None, pauldron=None, bare_forearm=False, forearm_mat=None):
-    """One arm: shoulder ball, upper arm, a slightly bent forearm and a closed hand around the grip point."""
+def arm(r, torso_o, b, s, sleeve, hand_mat, bracer=None, pauldron=None, bare_forearm=False, forearm_mat=None, articulated=False):
+    """One arm: shoulder ball, upper arm, a slightly bent forearm and a closed hand around the grip point. Articulated
+    (plan 019, hero only): the forearm (ForearmL/R, from the elbow) and the fist (HandL/R, from the wrist) are their own
+    parts, so the elbow bends and the wrist turns the held sword and shield."""
     h, w = b.h, b.w
     x = s * b.arm_x
-    a = Part("ArmR" if s > 0 else "ArmL")
+    side = "R" if s > 0 else "L"
+    a = Part("Arm" + side)
+    fore = Part("Forearm" + side) if articulated else a
+    fist = Part("Hand" + side) if articulated else a
     sh = Vector((x, 0, b.shoulder))
-    elbow = Vector((x + s * 0.008 * w, -0.006, b.shoulder - 0.08 * h))
+    elbow = Vector((x + s * 0.008 * w, -0.006, b.shoulder - (0.08 if not articulated else 0.53 * (b.shoulder - b.hand) / h) * h))
     wrist = Vector((x + s * 0.002 * w, GRIP_Y * h, b.hand + 0.018 * h))
     blob(a, sh + Vector((0, 0, -0.006)), (0.03 * w, 0.03 * w, 0.032 * h), sleeve, 1)
     limb(a, sh, elbow, 0.025 * w, 0.021 * w, sleeve, 8)
-    blob(a, elbow, (0.021 * w, 0.021 * w, 0.02 * h), sleeve, 1)
-    limb(a, elbow, wrist, 0.021 * w, 0.017 * w, forearm_mat or sleeve, 8)
+    blob(fore if articulated else a, elbow, (0.021 * w, 0.021 * w, 0.02 * h), sleeve, 1)
+    limb(fore, elbow, wrist, 0.021 * w, 0.017 * w, forearm_mat or sleeve, 8)
     if bracer:
-        limb(a, elbow.lerp(wrist, 0.35), elbow.lerp(wrist, 0.95), 0.022 * w, 0.02 * w, bracer, 8)
+        limb(fore, elbow.lerp(wrist, 0.35), elbow.lerp(wrist, 0.95), 0.022 * w, 0.02 * w, bracer, 8)
     if pauldron:
         blob(a, sh + Vector((s * 0.006, 0, 0.012 * h)), (0.042 * w, 0.038 * w, 0.026 * h), pauldron, 1)
     # hand: a rounded fist with a thumb, wrapped around the grip
-    blob(a, (x, GRIP_Y * h, b.hand), (0.021 * w, 0.023 * w, 0.025 * h), hand_mat, 1)
-    blob(a, (x - s * 0.013 * w, (GRIP_Y + 0.01) * h, b.hand + 0.008 * h), (0.009, 0.013, 0.009), hand_mat, 1)
-    return a.build(torso_o, sh)
+    blob(fist, (x, GRIP_Y * h, b.hand), (0.021 * w, 0.023 * w, 0.025 * h), hand_mat, 1)
+    blob(fist, (x - s * 0.013 * w, (GRIP_Y + 0.01) * h, b.hand + 0.008 * h), (0.009, 0.013, 0.009), hand_mat, 1)
+    upper = a.build(torso_o, sh)
+    if not articulated:
+        return upper
+    fore_o = fore.build(upper, elbow)
+    return fist.build(fore_o, wrist)
 
 
 def weapon_part(r, arm_o, b, build, angle):
@@ -153,7 +170,8 @@ def weapon_part(r, arm_o, b, build, angle):
 
 def figure(name, *, h=1.0, w=1.0, lean=0.0, cloth, leather=ENEMY_LEATHER, skin=ENEMY_LEATHER, boot=TIMBER_DARK,
            head=None, weapon=None, weapon_angle=-50, offhand=None, torso_extra=None, top_extra=None, trousers=None,
-           leg_armour=None, pauldron=None, bracer=TIMBER_DARK, bare_forearm=False, belt=TIMBER_DARK, glove=None, seed=1):
+           leg_armour=None, pauldron=None, bracer=TIMBER_DARK, bare_forearm=False, belt=TIMBER_DARK, glove=None, seed=1,
+           articulated=False, arm_len=0.15):
     """
     One articulated figure. head(part, body) builds headgear and face on the Head part; weapon(part, grip, h, w) the held
     weapon; offhand(part, body) adds to the left arm (shield, bow hand); torso_extra(part, body) adds to the torso (cape,
@@ -161,7 +179,7 @@ def figure(name, *, h=1.0, w=1.0, lean=0.0, cloth, leather=ENEMY_LEATHER, skin=E
     """
     rng = random.Random(seed)
     r = root(name)
-    b = Body(h, w)
+    b = Body(h, w, arm_len)
     # Hips: pelvis, belt with buckle and pouch, front and back skirt flaps
     hp = Part("Hips")
     limb(hp, (0, 0, b.hip - 0.04 * h), (0, 0, b.waist), 0.072 * w, 0.068 * w, trousers or leather, 10, 0.72)
@@ -171,7 +189,7 @@ def figure(name, *, h=1.0, w=1.0, lean=0.0, cloth, leather=ENEMY_LEATHER, skin=E
     panel(hp, (0, 0.05 * w, b.waist - 0.01 * h), (0, 0.062 * w, b.knee + 0.045 * h), 0.085 * w, 0.012, cloth, 1.2)
     panel(hp, (0, -0.05 * w, b.waist - 0.01 * h), (0, -0.064 * w, b.knee + 0.04 * h), 0.09 * w, 0.012, cloth, 1.2)
     hips_o = hp.build(r, (0, 0, b.hip))
-    legs(r, hips_o, b, leather, boot, rng, trousers, leg_armour)
+    legs(r, hips_o, b, leather, boot, rng, trousers, leg_armour, articulated)
 
     # Torso: a tapered barrel from waist to shoulders, a rounded top, a tabard over the chest, collar
     tp = Part("Torso")
@@ -193,8 +211,8 @@ def figure(name, *, h=1.0, w=1.0, lean=0.0, cloth, leather=ENEMY_LEATHER, skin=E
 
     hand = glove or (skin if bare_forearm else leather)
     forearm = skin if bare_forearm else None
-    left = arm(r, torso_o, b, -1, leather, hand, bracer, pauldron, bare_forearm, forearm)
-    right = arm(r, torso_o, b, 1, leather, hand, bracer, pauldron, bare_forearm, forearm)
+    left = arm(r, torso_o, b, -1, leather, hand, bracer, pauldron, bare_forearm, forearm, articulated)
+    right = arm(r, torso_o, b, 1, leather, hand, bracer, pauldron, bare_forearm, forearm, articulated)
     if offhand:
         oh = Part("OffHand")
         offhand(oh, b)
@@ -363,6 +381,17 @@ def sword(p, grip, h, w):
     return -45
 
 
+def arming_sword(p, grip, h, w):
+    """Plan 019 hero: the same straight sword with a 0.28 h blade (about 0.75 m at true scale), so the tip reaches the
+    0.2-tile contact distance at full extension without stretching the arm."""
+    limb(p, grip - Vector((0, 0, 0.035)), grip + Vector((0, 0, 0.03)), 0.01, 0.01, TIMBER_DARK, 6)
+    blob(p, grip - Vector((0, 0, 0.04)), (0.014, 0.014, 0.014), IRON, 1)  # pommel
+    p.add(box_bm((0.075, 0.014, 0.012), 0.003), IRON, trs(grip + Vector((0, 0, 0.03))))  # crossguard
+    p.add(box_bm((0.02, 0.005, 0.28 * h), 0.0015, taper=0.55), IRON, trs(grip + Vector((0, 0, 0.042))))  # blade
+    p.add(box_bm((0.005, 0.0065, 0.2 * h), 0.0), TIMBER_DARK, trs(grip + Vector((0, 0, 0.05))))  # fuller
+    return -45
+
+
 def stone_fist(p, grip, h, w):
     rng = random.Random(5)
     jitter_blob(p, grip - Vector((0, 0, 0.06)), (0.075, 0.075, 0.07), GOLEM_STONE, rng, 0.22)
@@ -484,6 +513,10 @@ def bomber_top(r, b):
 HERO = dict(h=1.06, w=1.05, cloth=PLAYER_CLOTH, leather=PLAYER_CLOTH, skin=SKIN, boot=TIMBER_DARK, head=kettle_hat, weapon=sword,
             weapon_angle=-45, offhand=round_shield, torso_extra=hero_cape, trousers=TIMBER_DARK, pauldron=None, bracer=IRON,
             belt=TIMBER_DARK, glove=TIMBER_DARK, seed=8)
+
+# Plan 019 (release-rules-4 hero): the same hero with elbows, wrists and ankles, human arm length (0.18 h, was 0.15) and
+# the longer arming sword. Built only by models_hero_v4.py into ArtHeroV4.fbx; ArtHero.fbx stays the legacy figure.
+HERO_V4 = dict(HERO, weapon=arming_sword, articulated=True, arm_len=0.18)
 
 
 def cast():

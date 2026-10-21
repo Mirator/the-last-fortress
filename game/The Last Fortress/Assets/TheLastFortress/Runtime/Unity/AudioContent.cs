@@ -28,6 +28,13 @@ namespace TheLastFortress
         FuseLit,
         BomberBlast,
         CommanderArrival,
+
+        // Plan 019: the release-rules-4 hero's own sounds (played in the world near the hero camera).
+        HeroSwing,
+        HeroImpact,
+        HeroHurt,
+        HeroDown,
+        Footstep,
     }
 
     /// <summary>
@@ -60,6 +67,13 @@ namespace TheLastFortress
         public AudioClip fuseLit;
         public AudioClip bomberBlast;
         public AudioClip commanderArrival;
+
+        [Header("Release-rules-4 hero (variants picked in turn)")]
+        public AudioClip[] heroSwings;
+        public AudioClip[] heroImpacts;
+        public AudioClip heroHurt;
+        public AudioClip heroDown;
+        public AudioClip[] footsteps;
 
         [Header("Phases")]
         public AudioClip nightStart;
@@ -103,6 +117,11 @@ namespace TheLastFortress
                 case SoundId.FuseLit: return fuseLit;
                 case SoundId.BomberBlast: return bomberBlast;
                 case SoundId.CommanderArrival: return commanderArrival;
+                case SoundId.HeroSwing: return Pick(heroSwings, variant);
+                case SoundId.HeroImpact: return Pick(heroImpacts, variant);
+                case SoundId.HeroHurt: return heroHurt;
+                case SoundId.HeroDown: return heroDown;
+                case SoundId.Footstep: return Pick(footsteps, variant);
                 default: return null;
             }
         }

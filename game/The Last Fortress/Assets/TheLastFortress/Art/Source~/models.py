@@ -344,9 +344,12 @@ def wall(shape):
 
 # ---------------------------------------------------------------- Archer Tower
 
-def archer(parent, at):
-    """Player archer on the platform (pivot at the feet, facing +Y): Body turns to aim, Bow draws on each shot."""
-    T = Matrix.Translation(at)  # authored at the feet, placed on the platform (it used to stand on the ground)
+def archer(parent, at, reach=0.0, step=0.0):
+    """Player archer on the platform (facing +Y): Body turns to aim, Bow draws on each shot. The pivot is `at`; the figure
+    stands `reach` ahead of it and `step` above it, so turning to aim walks it along the parapet (owner, 2026-10-21: the
+    archer was hidden behind the parapet from the ground)."""
+    feet = Vector(at) + Vector((0, reach, step))
+    T = Matrix.Translation(feet)  # authored at the feet, placed on the platform (it used to stand on the ground)
     body = Part("Archer")
     body.add_scaled(T, cyl_bm(0.045, 0.1, 8, radius_top=0.05), PLAYER_CLOTH, trs((0, 0, 0)))
     body.add_scaled(T, cyl_bm(0.05, 0.075, 8, radius_top=0.035), PLAYER_CLOTH, trs((0, 0, 0.1)))
@@ -361,7 +364,7 @@ def archer(parent, at):
         bow.add_scaled(T, box_bm((0.012, 0.014, 0.05), 0.003), TIMBER_DARK, trs((0.045 + math.cos(a) * 0.06 - 0.06, 0.06, 0.16 + math.sin(a) * 0.12), (0, -math.degrees(a), 0)))
     bow.add_scaled(T, box_bm((0.003, 0.003, 0.22), 0.0), "ArtString", trs((0.0, 0.06, 0.05)))
     bow.add_scaled(T, box_bm((0.025, 0.06, 0.02), 0.004), PLAYER_CLOTH, trs((0.03, 0.03, 0.14)))  # forward arm
-    bow.build(o, (Vector(at) + Vector((0.02, 0.0, 0.15))))
+    bow.build(o, feet + Vector((0.02, 0.0, 0.15)))
     return o
 
 
@@ -398,11 +401,13 @@ def tower():
     deck = z1 + 0.025
     for side in range(4):
         rot = Matrix.Rotation(math.radians(90 * side), 3, "Z")
-        for k in range(-2, 3):
+        for k in range(-2, 3):  # a 0.8 m parapet (was 1.1 m, which hid the archer from the ground)
             c = rot @ Vector((k * 0.13, -0.335, deck))
-            p.add(box_bm((0.115, 0.018, 0.13), 0.003), TIMBER, trs(c, (0, 0, 90 * side)), grain=(0, 0, 1))
-        c = rot @ Vector((0, -0.335, deck + 0.13))
+            p.add(box_bm((0.115, 0.018, 0.1), 0.003), TIMBER, trs(c, (0, 0, 90 * side)), grain=(0, 0, 1))
+        c = rot @ Vector((0, -0.335, deck + 0.1))
         p.add(box_bm((0.7, 0.024, 0.018), 0.003), TIMBER_DARK, trs(c, (0, 0, 90 * side)), grain=(1, 0, 0))
+        c = rot @ Vector((0, -0.265, deck))  # the firing step the archer walks along
+        p.add(box_bm((0.62, 0.12, 0.05), 0.004), TIMBER_DARK, trs(c, (0, 0, 90 * side)), grain=(1, 0, 0))
     for cx, cy in corners:
         p.add(box_bm((0.03, 0.03, 0.29), 0.004), TIMBER_DARK, trs((cx * 0.32, cy * 0.32, deck)), grain=(0, 0, 1))
     p.add(box_bm((0.78, 0.78, 0.02), 0.005), TIMBER_DARK, trs((0, 0, deck + 0.285)))
@@ -419,11 +424,16 @@ def tower():
     tip = wall_torch(p, (0.335, -0.335, deck + 0.04), (0.7, -0.7))
     p.build(r)
     empty("Torch", tip, r)
-    archer(r, (0, 0.05, deck))
+    archer(r, (0, 0, deck), reach=0.22, step=0.05)
     export("ArtArcherTower")
 
 
 if __name__ == "__main__":
+    only = sys.argv[sys.argv.index("--") + 2:] if "--" in sys.argv else []
+    if only:  # e.g. -- <output folder> tower: regenerate only the named models
+        for name in only:
+            globals()[name]()
+        sys.exit(0)
     keep()
     for s in WALL_SHAPES:
         wall(s)

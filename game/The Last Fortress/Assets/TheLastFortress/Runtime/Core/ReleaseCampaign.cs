@@ -22,25 +22,38 @@ namespace TheLastFortress
         /// </summary>
         public const string RulesV3 = "release-rules-3";
 
-        /// <summary>Rules version of new release runs.</summary>
-        public const string RulesVersion = RulesV3;
+        /// <summary>
+        /// release-rules-3 enemies, economy, maps and waves with the third-person production-slice hero (specs/003): an
+        /// accelerating motor with a 0.48 m body, and a wind-up/contact/recovery attack at physical reach.
+        /// </summary>
+        public const string RulesV4 = "release-rules-4";
 
-        public static bool IsReleaseRules(string rulesVersion) => rulesVersion == RulesV1 || rulesVersion == RulesV2 || rulesVersion == RulesV3;
+        /// <summary>Rules version of new release runs (release-rules-4 since plan 019).</summary>
+        public const string RulesVersion = RulesV4;
+
+        public static bool IsReleaseRules(string rulesVersion) =>
+            rulesVersion == RulesV1 || rulesVersion == RulesV2 || rulesVersion == RulesV3 || rulesVersion == RulesV4;
 
         /// <summary>Whether this rules version has the player hero (release-rules-2 and later).</summary>
-        public static bool HasHero(string rulesVersion) => rulesVersion == RulesV2 || rulesVersion == RulesV3;
+        public static bool HasHero(string rulesVersion) => rulesVersion == RulesV2 || rulesVersion == RulesV3 || rulesVersion == RulesV4;
+
+        /// <summary>Whether this rules version plays release-rules-3 enemies (walking speeds, their HP; release-rules-4 inherits them).</summary>
+        public static bool WalkingEnemies(string rulesVersion) => rulesVersion == RulesV3 || rulesVersion == RulesV4;
 
         /// <summary>
-        /// Hero movement in 1/1200 tile per step: 1.5 tiles/s in release-rules-2; 0.8 (about 6.4 m/s, a run) in release-rules-3,
-        /// faster than a Runner so the hero can catch one and reach a lane in about 11 s (plan 015 review).
+        /// Hero top speed in 1/1200 tile per step: 1.5 tiles/s in release-rules-2; 0.8 (about 6.4 m/s, a run) in release-rules-3,
+        /// faster than a Runner so the hero can catch one and reach a lane in about 11 s (plan 015 review); 0.7 in release-rules-4.
         /// </summary>
-        public static int HeroMoveUnits(string rulesVersion) => rulesVersion == RulesV3 ? 48 : HeroRules.MoveUnitsPerStep;
+        public static int HeroMoveUnits(string rulesVersion) => HeroProfile.For(rulesVersion)?.MaxSpeedUnits ?? HeroRules.MoveUnitsPerStep;
 
         /// <summary>
         /// release-rules-3 (plan 015): a Bomber lights its fuse at the first solid building it walks up to, not only at its
-        /// route's attack cell. At walking speed almost none reached the attack cell alive.
+        /// route's attack cell. At walking speed almost none reached the attack cell alive. release-rules-4 inherits it.
         /// </summary>
-        public static bool BombersLightOnContact(string rulesVersion) => rulesVersion == RulesV3;
+        public static bool BombersLightOnContact(string rulesVersion) => WalkingEnemies(rulesVersion);
+
+        /// <summary>release-rules-4 definitions: release-rules-3 enemies and a 1 x 1 Cannon (owner, 2026-10-21).</summary>
+        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => Walking(defs).WithCompactCannon();
 
         /// <summary>release-rules-3 enemy HP against release-rules-2 [P]; Brute and Raider Archer have their own values below.</summary>
         public const double WalkingHpScale = 1.5;

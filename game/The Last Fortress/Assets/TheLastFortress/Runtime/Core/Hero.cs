@@ -20,20 +20,40 @@ namespace TheLastFortress
         /// <summary>Facing 0..63 (0 = north/+Z, clockwise in 5.625 degree steps).</summary>
         public readonly byte Facing;
 
+        /// <summary>
+        /// Move heading 0..63 (0 = north/+Z, clockwise in 5.625 degree steps), or -1: what the release-rules-4 motor reads.
+        /// A command made with the 16-heading constructor promotes exactly (heading x 4).
+        /// </summary>
+        public readonly sbyte Heading64;
+
+        /// <summary>A 16-heading command (every caller before release-rules-4); its meaning is unchanged.</summary>
         public HeroCommand(int heading, bool attack, int facing)
         {
             Controlled = true;
             Heading = (sbyte)(heading < 0 ? -1 : heading & 15);
+            Heading64 = (sbyte)(Heading < 0 ? -1 : Heading * 4);
             Attack = attack;
             Facing = (byte)(facing & 63);
         }
 
+        HeroCommand(int heading64, bool attack, int facing, bool fine)
+        {
+            Controlled = true;
+            Heading64 = (sbyte)(heading64 < 0 ? -1 : heading64 & 63);
+            Heading = (sbyte)(Heading64 < 0 ? -1 : (Heading64 + 2) / 4 % 16); // nearest 16-heading, for legacy rules and views
+            Attack = attack;
+            Facing = (byte)(facing & 63);
+        }
+
+        /// <summary>A 64-heading command (release-rules-4 input). Under legacy rules it moves along the nearest of 16 headings.</summary>
+        public static HeroCommand Fine(int heading64, bool attack, int facing) => new HeroCommand(heading64, attack, facing, true);
+
         public static readonly HeroCommand None = default;
 
-        public bool Equals(HeroCommand o) => Controlled == o.Controlled && Heading == o.Heading && Attack == o.Attack && Facing == o.Facing;
+        public bool Equals(HeroCommand o) => Controlled == o.Controlled && Heading64 == o.Heading64 && Heading == o.Heading && Attack == o.Attack && Facing == o.Facing;
         public override bool Equals(object obj) => obj is HeroCommand o && Equals(o);
-        public override int GetHashCode() => (Controlled ? 1 : 0) | (Heading + 1) << 1 | (Attack ? 1 : 0) << 6 | Facing << 7;
-        public override string ToString() => Controlled ? $"h{Heading}{(Attack ? "!" : "")}f{Facing}" : "-";
+        public override int GetHashCode() => (Controlled ? 1 : 0) | (Heading64 + 1) << 1 | (Attack ? 1 : 0) << 8 | Facing << 9;
+        public override string ToString() => Controlled ? $"h{Heading64}/64{(Attack ? "!" : "")}f{Facing}" : "-";
     }
 
     /// <summary>
@@ -50,6 +70,22 @@ namespace TheLastFortress
         /// <summary>Movement per step in 1/1200 tile (by rules version: <see cref="ReleaseCampaign.HeroMoveUnits"/>).</summary>
         public int MoveUnits = HeroRules.MoveUnitsPerStep;
 
+        /// <summary>Tuning and geometry of this run's rules version.</summary>
+        public HeroProfile Profile = HeroProfile.V2;
+
+        /// <summary>release-rules-4 motor velocity in 1/1200 tile per step (always zero under legacy rules).</summary>
+        public int VelX, VelZ;
+
+        /// <summary>
+        /// release-rules-4 accepted attack (specs/003 section 4): accepted on <see cref="AttackStartTick"/> with the aim
+        /// committed then, contact due on <see cref="ContactTick"/>; <see cref="AttackPending"/> until that contact resolves.
+        /// The next acceptance waits for <see cref="SwingReadyTick"/>.
+        /// </summary>
+        public bool AttackPending;
+
+        public long AttackStartTick = -1, ContactTick = -1;
+        public int AttackFacing;
+
         /// <summary>Facing 0..63 (see <see cref="HeroCommand.Facing"/>).</summary>
         public int Facing;
 
@@ -64,6 +100,16 @@ namespace TheLastFortress
         public GridPos Cell => new GridPos(Floor(UnitsX), Floor(UnitsZ));
 
         static int Floor(int units) => units >= 0 ? units / HeroRules.UnitsPerTile : (units - HeroRules.UnitsPerTile + 1) / HeroRules.UnitsPerTile;
+
+        /// <summary>Whether an accepted release-rules-4 attack is running on this tick (wind-up through recovery).</summary>
+        public bool Attacking(long tick) => Profile.ContactPhase && AttackStartTick >= 0 && tick >= AttackStartTick && tick < SwingReadyTick;
+
+        /// <summary>Drops an unlanded attack and its recovery (death, dawn, Night start, reset, relocation).</summary>
+        public void ClearAttack()
+        {
+            AttackPending = false;
+            AttackStartTick = ContactTick = -1;
+        }
 
         public void PlaceAt(GridPos cell)
         {

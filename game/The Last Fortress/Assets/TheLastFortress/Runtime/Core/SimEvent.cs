@@ -57,6 +57,13 @@ namespace TheLastFortress
 
         /// <summary>The hero's swing struck this enemy (target enemy; positions = the enemy), before its damage applies.</summary>
         HeroHit,
+
+        // Plan 019 (release-rules-4). Under it HeroAttacked marks the accepted attack (the wind-up starts; nothing is hit yet).
+        /// <summary>
+        /// An accepted release-rules-4 attack reached contact (target = number of enemies struck, 0 for a miss; From = hero
+        /// at contact, To = the tip of its reach along the committed facing). The HeroHit events of its victims follow.
+        /// </summary>
+        HeroContact,
     }
 
     /// <summary>Notification for presentation adapters. Simulation state stays authoritative.</summary>

@@ -803,7 +803,7 @@ namespace TheLastFortress
                 Set(saveFailedText, $"{persistence.LastError}\n\nNothing after your last successful save is stored yet. Gameplay is paused until the save succeeds; " +
                                     "quitting now keeps the previous checkpoint." + (game.ExitAfterSave ? " The game exits only after Retry succeeds." : ""));
             if (pending) foreach (var b in rewardButtons) b.interactable = false;
-            else foreach (var b in rewardButtons) b.interactable = true;
+            else foreach (var b in rewardButtons) b.interactable = !RewardLocked;
 
             if (showGuideButton.gameObject.activeSelf != (hasRunNow && game.Onboarding != null)) showGuideButton.gameObject.SetActive(hasRunNow && game.Onboarding != null);
 

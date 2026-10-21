@@ -51,7 +51,7 @@ Music moves between calm day themes and tense night combat. Sound effects make c
 
 Candidates, none committed until a feature spec exists:
 
-- A player-controlled hero with a switchable third-person view: implemented (game rules section 17); hero progression is a later candidate.
+- A player-controlled hero with a switchable third-person view: implemented (game rules sections 17-18); hero progression is a later candidate.
 - Soldiers and Barracks with simple orders (Hold, Move, Attack Target).
 - More biomes and maps, a larger board, flying enemies, more bosses, building upgrade tiers, difficulty modes, challenges and daily seeds.
 - Meta-progression that unlocks strategic options, not large unconditional stat increases; a skilled player wins with the starting set.

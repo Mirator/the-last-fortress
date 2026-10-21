@@ -30,6 +30,7 @@ namespace TheLastFortress
             var setIndex = System.Array.IndexOf(args, "-capture-set");
             captureSet = setIndex >= 0 && setIndex + 1 < args.Length ? args[setIndex + 1] : null;
             Application.runInBackground = true; // an unfocused window must keep rendering
+            game.FocusGateEnabled = false; // and keep playing: captures run unattended
             Directory.CreateDirectory(dir);
             StartCoroutine(Run());
         }
@@ -93,6 +94,27 @@ namespace TheLastFortress
             if (game.IsRelease && (captureSet == "motion" || captureSet == "fx"))
             {
                 yield return RunMotionFrames(captureSet == "fx");
+                Application.Quit();
+                yield break;
+            }
+
+            if (game.IsRelease && captureSet == "hero-motion")
+            {
+                yield return RunHeroMotion();
+                Application.Quit();
+                yield break;
+            }
+
+            if (game.IsRelease && captureSet == "fire")
+            {
+                yield return RunFire();
+                Application.Quit();
+                yield break;
+            }
+
+            if (game.IsRelease && captureSet == "hero-camera")
+            {
+                yield return RunHeroCamera();
                 Application.Quit();
                 yield break;
             }
@@ -1055,6 +1077,329 @@ namespace TheLastFortress
             }
 
             File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-motion-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set hero-motion (release build, plan 019): consecutive hero-view frames at a fixed 1/30 s with the same
+        /// scripted camera-relative input under any rules version, so before/after hero motion can be compared as clips. Day:
+        /// the camera behind the hero over the Keep, start, stop, backpedal, strafes into Walls, a moving 180 degree turn, a
+        /// diagonal slide and a building placed over the hero. Night: approach and attack a Grunt, a pause during the swing,
+        /// strafe and backpedal while holding attack, a fall and the rise after respawn, and leaving and re-entering the
+        /// view. A per-frame log records the authoritative hero state. Writes into the save folder like the other sets.
+        /// </summary>
+        IEnumerator RunHeroMotion()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            var west = MvpCampaign.West;
+            var wave = new WavePlan("hero-motion", new[]
+            {
+                new SpawnEntry(0, west, 0, EnemyKind.Grunt), new SpawnEntry(40, west, 0, EnemyKind.Grunt), new SpawnEntry(80, west, 0, EnemyKind.Grunt),
+            }, new[] { west });
+            var calm = new WavePlan("calm", new SpawnEntry[0], new[] { west });
+            var definitions = game.NewRunDefinitions;
+            var startingGold = definitions.StartingGold;
+            definitions.StartingGold = 1000; // read once by the constructor; restored right after
+            var setup = new RunSimulation(new RunConfig
+            {
+                Definitions = definitions, Seed = 7, Terrain = MapProfiles.Generate(MapProfiles.Meadow, 7),
+                Campaign = new CampaignConfig
+                {
+                    Label = ReleaseCampaign.Label, Nights = new[] { wave, calm }, OffersRewards = true, RulesVersion = ReleaseCampaign.RulesVersion,
+                    CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
+                },
+            });
+            definitions.StartingGold = startingGold;
+            foreach (var (kind, x, z) in Plan011Layout) setup.TryPlace(kind, new GridPos(x, z), out _);
+            ContinueSaved(setup, log);
+            var sim = game.Sim;
+            var hero = sim.Hero;
+            var fine = hero.Profile.ContactPhase;
+            log.AppendLine($"rules={sim.Campaign.RulesVersion} reach={hero.Profile.SwingReach} speed={hero.Profile.MaxSpeedUnits} radius={hero.Profile.RadiusUnits} {sim.Config.Terrain.Describe()}");
+            game.SetHeroView(true);
+            game.HeroRig.SkipTransition();
+            game.HeroRig.SetOrbit(0f, 14f);
+            game.ExternalViewClock = true;
+            var frame = 0;
+            const float dt = 1f / 30f;
+
+            IEnumerator Frames(string label, int count, System.Func<int, (Vector2 move, bool attack, float? yaw)> input, System.Func<bool> stop = null)
+            {
+                for (var i = 0; i < count && (stop == null || !stop()); i++)
+                {
+                    var (move, attack, yaw) = input(i);
+                    if (yaw.HasValue) game.HeroRig.SetOrbit(yaw.Value, game.HeroRig.Pitch);
+                    var command = PlayerController.SteerCommand(move, game.HeroRig.Yaw, attack, fine);
+                    game.Player.HeroInputOverride = command;
+                    yield return null; // the player samples the override in Update
+                    if (game.HeroViewActive)
+                    {
+                        if (sim.State == RunState.Day) sim.AdvanceDay(dt, command);
+                        else sim.Advance(dt, command);
+                    }
+                    else if (sim.State == RunState.Night) sim.Advance(dt);
+
+                    game.SyncViews(dt);
+                    yield return new WaitForEndOfFrame();
+                    CaptureOffscreen(Path.Combine(dir, $"{Screen.width}x{Screen.height}-hero-{frame:000}.png"));
+                    var near = NearestEnemyTo(hero, out var d);
+                    log.AppendLine($"{frame:000} {label} {sim.State} tick={sim.Tick} hero={hero.UnitsX},{hero.UnitsZ} v={hero.VelX},{hero.VelZ} hp={hero.Hp} alive={hero.Alive} " +
+                                   $"cmd={command} paused={sim.Paused} shown={game.HeroView.ShownPosition.x:0.000},{game.HeroView.ShownPosition.z:0.000} " +
+                                   $"cam={game.HeroRig.transform.position.x:0.00},{game.HeroRig.transform.position.y:0.00},{game.HeroRig.transform.position.z:0.00}" +
+                                   (near != null ? $" enemy{near.Id}={d:0.000} hp{near.Hp}" : "") +
+                                   (fine ? $" phase={game.HeroView.ShownAttackPhase:0.000} pending={hero.AttackPending}" +
+                                           (game.HeroView.AnimationRig != null ? $" gait={game.HeroView.AnimationRig.Gait:0.00} foot={game.HeroView.AnimationRig.FootfallCount}" : "") : ""));
+                    frame++;
+                }
+            }
+
+            (Vector2, bool, float?) Hold(Vector2 move, bool attack = false, float? yaw = null) => (move, attack, yaw);
+
+            // Day.
+            yield return Frames("obstruct-keep", 30, i => Hold(Vector2.zero, false, i * 1.5f)); // camera over the Keep behind the hero
+            yield return Frames("start", 24, i => Hold(Vector2.up, false, 0f));
+            yield return Frames("stop", 12, i => Hold(Vector2.zero));
+            yield return Frames("backpedal", 18, i => Hold(Vector2.down));
+            yield return Frames("strafe-right", 18, i => Hold(Vector2.right));
+            yield return Frames("strafe-left", 24, i => Hold(Vector2.left));
+            yield return Frames("turn-180", 24, i => Hold(Vector2.up, false, Mathf.Min(180f, i * 15f)));
+            yield return Frames("diagonal-slide", 24, i => Hold(new Vector2(1f, 1f)));
+            sim.TryPlace(BuildingKind.Wall, hero.Cell, out var placed);
+            log.AppendLine($"wall over the hero at {hero.Cell}: {(placed != null ? "placed" : "rejected")}");
+            yield return Frames("relocated", 12, i => Hold(Vector2.zero));
+
+            // To the West lane, unrecorded: just off the (6,10) centre, where the first Grunt engages.
+            foreach (var (tx, tz) in new[] { (10.5, 13.5), (6.5, 13.5), (6.5, 10.62) })
+                for (var i = 0; i < 1200; i++)
+                {
+                    double dx = tx - hero.X, dz = tz - hero.Z;
+                    if (dx * dx + dz * dz < 0.03 * 0.03) break;
+                    var h = HeroRules.FacingToward(dx, dz);
+                    sim.AdvanceDay(0.05, fine ? HeroCommand.Fine(dx * dx + dz * dz < 0.06 * 0.06 ? -1 : h, false, h) : new HeroCommand((h + 2) / 4 % 16, false, h));
+                }
+
+            log.AppendLine($"lane: hero {hero.X:0.000},{hero.Z:0.000}");
+            game.StartNight();
+            for (var i = 0; i < 3000 && sim.State == RunState.Night; i++)
+            {
+                if (NearestEnemyTo(hero, out var d) != null && d < 1.3) break;
+                sim.Step(fine ? HeroCommand.Fine(-1, false, 48) : new HeroCommand(-1, false, 48));
+            }
+
+            game.SyncViews(0f);
+            float Aim()
+            {
+                var e = NearestEnemyTo(hero, out _);
+                return e == null ? game.HeroRig.Yaw : Mathf.Atan2((float)(e.X - hero.X), (float)(e.Z - hero.Z)) * Mathf.Rad2Deg;
+            }
+
+            bool InReach(double scale)
+            {
+                var e = NearestEnemyTo(hero, out var d);
+                return e != null && d <= hero.Profile.SwingReach * scale;
+            }
+
+            yield return Frames("engage", 75, i => Hold(InReach(0.75) ? Vector2.zero : Vector2.up, InReach(1.0), Aim()));
+            yield return Frames("swing", 2, i => Hold(Vector2.zero, true, Aim()));
+            sim.SetPaused(true);
+            yield return Frames("paused", 12, i => Hold(Vector2.zero, true));
+            sim.SetPaused(false);
+            yield return Frames("resume", 15, i => Hold(Vector2.zero, true, Aim()));
+            yield return Frames("strafe-attack", 30, i => Hold(Vector2.right, true, Aim()));
+            yield return Frames("backpedal-attack", 20, i => Hold(Vector2.down, true, Aim()));
+            yield return Frames("return", 30, i => Hold(InReach(0.75) ? Vector2.zero : Vector2.up, InReach(1.0), Aim()));
+            // Unrecorded: back onto the lane just off the (7,10) centre, ahead of the remaining Grunts, which engage there.
+            for (var i = 0; i < 600 && hero.Alive && sim.State == RunState.Night; i++)
+            {
+                double dx = 7.5 - hero.X, dz = 10.62 - hero.Z;
+                if (dx * dx + dz * dz < 0.03 * 0.03) break;
+                var h = HeroRules.FacingToward(dx, dz);
+                sim.Step(fine ? HeroCommand.Fine(dx * dx + dz * dz < 0.06 * 0.06 ? -1 : h, false, h) : new HeroCommand((h + 2) / 4 % 16, false, h));
+            }
+
+            game.SyncViews(0f);
+            hero.Hp = 1; // capture fixture only: the next enemy hit fells the hero
+            yield return Frames("fall", 150, i => Hold(Vector2.zero, false, Aim()), () => !hero.Alive);
+            yield return Frames("down", 30, i => Hold(Vector2.zero));
+            for (var i = 0; i < 260 && !hero.Alive && sim.State == RunState.Night; i++) sim.Step();
+            yield return Frames("rise", 30, i => Hold(Vector2.zero));
+            game.SetHeroView(false);
+            yield return Frames("strategic", 8, i => Hold(Vector2.zero));
+            game.SetHeroView(true); // the entry transition, not skipped
+            yield return Frames("enter", 15, i => Hold(Vector2.zero));
+            game.Player.HeroInputOverride = null;
+            game.ExternalViewClock = false;
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-hero-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set hero-camera (release build, plan 019): the hero camera against obstacles, 1/30 s frames: orbiting
+        /// behind the hero over the Keep at the field-of-view and distance extremes, pressed into a Wall corner, beside a
+        /// forest cell, and the eased entry from the strategic view there. Logs the shown distance, lift and fallbacks.
+        /// </summary>
+        IEnumerator RunHeroCamera()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            game.SetMapProfile(MapProfiles.Meadow);
+            game.NewRun(7, false);
+            var sim = game.Sim;
+            var hero = sim.Hero;
+            var fine = hero.Profile.ContactPhase;
+            var startingGold = sim.Gold;
+            foreach (var (kind, x, z) in Plan011Layout) sim.TryPlace(kind, new GridPos(x, z), out _);
+            log.AppendLine($"rules={sim.Campaign.RulesVersion} gold {startingGold} -> {sim.Gold} {sim.Config.Terrain.Describe()}");
+            game.SetHeroView(true);
+            game.HeroRig.SkipTransition();
+            game.ExternalViewClock = true;
+            var frame = 0;
+            const float dt = 1f / 30f;
+
+            IEnumerator Frames(string label, int count, System.Func<int, float> yaw)
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    game.HeroRig.SetOrbit(yaw(i), 16f);
+                    game.Player.HeroInputOverride = PlayerController.SteerCommand(Vector2.zero, game.HeroRig.Yaw, false, fine);
+                    yield return null;
+                    game.SyncViews(dt);
+                    yield return new WaitForEndOfFrame();
+                    CaptureOffscreen(Path.Combine(dir, $"{Screen.width}x{Screen.height}-camera-{frame:000}.png"));
+                    var rig = game.HeroRig;
+                    log.AppendLine($"{frame:000} {label} fov={rig.FieldOfView:0} zoom={rig.Distance:0.00} shown={rig.ShownDistance:0.000} lift={rig.ShownLift:0.0} " +
+                                   $"clear={rig.ShownPoseClear()} fallback={rig.FallbackFrames} cuts={rig.TransitionCuts} transition={rig.InTransition}");
+                    frame++;
+                }
+            }
+
+            void WalkTo(double tx, double tz)
+            {
+                for (var i = 0; i < 1200; i++)
+                {
+                    double dx = tx - hero.X, dz = tz - hero.Z;
+                    if (dx * dx + dz * dz < 0.03 * 0.03) break;
+                    var h = HeroRules.FacingToward(dx, dz);
+                    sim.AdvanceDay(0.05, fine ? HeroCommand.Fine(dx * dx + dz * dz < 0.06 * 0.06 ? -1 : h, false, h) : new HeroCommand((h + 2) / 4 % 16, false, h));
+                }
+
+                game.SyncViews(0f);
+            }
+
+            foreach (var (fov, zoom) in new[] { (50f, 2.2f), (90f, 0.5f), (90f, 2.2f) })
+            {
+                game.HeroRig.FieldOfView = fov;
+                game.HeroRig.SetDefaultDistance(zoom);
+                yield return Frames($"keep-fov{fov:0}-zoom{zoom:0.0}", 48, i => -60f + i * 2.5f); // sweeps across the Keep behind
+            }
+
+            game.HeroRig.FieldOfView = 60f;
+            game.HeroRig.SetDefaultDistance(1f);
+            // Pressed into the outside corner of the Wall at (9,12): from the spawn cell north-west.
+            for (var i = 0; i < 40; i++) sim.AdvanceDay(0.05, fine ? HeroCommand.Fine(56, false, 56) : new HeroCommand(14, false, 56));
+            game.SyncViews(0f);
+            yield return Frames("wall-corner", 60, i => 90f + i * 3f);
+
+            // Beside the forest cell nearest the Keep, the trees behind the camera.
+            GridPos? forest = null;
+            var best = int.MaxValue;
+            for (var i = 0; i < sim.Config.Terrain.Cells.Length; i++)
+            {
+                if (sim.Config.Terrain.Cells[i] != TerrainType.Forest) continue;
+                var c = new GridPos(i % GridCoordinates.Size, i / GridCoordinates.Size);
+                var d = c.ManhattanDistance(GridState.KeepCell);
+                if (d < best) (best, forest) = (d, c);
+            }
+
+            if (forest.HasValue)
+            {
+                var f = forest.Value;
+                var toKeep = new Vector2(GridState.KeepCell.X - f.X, GridState.KeepCell.Z - f.Z);
+                var side = Mathf.Abs(toKeep.x) >= Mathf.Abs(toKeep.y) ? new Vector2(Mathf.Sign(toKeep.x), 0f) : new Vector2(0f, Mathf.Sign(toKeep.y));
+                WalkTo(f.X + 0.5 + side.x * 0.6, f.Z + 0.5 + side.y * 0.6);
+                var away = Mathf.Atan2(side.x, side.y) * Mathf.Rad2Deg; // facing away from the trees: they are behind the camera
+                log.AppendLine($"forest {f}: hero {hero.X:0.00},{hero.Z:0.00}");
+                yield return Frames("forest", 60, i => away - 45f + i * 1.5f);
+                game.SetHeroView(false);
+                game.SyncViews(0f);
+                game.SetHeroView(true); // the eased entry next to the trees
+                yield return Frames("enter", 15, i => game.HeroRig.Yaw);
+            }
+
+            game.Player.HeroInputOverride = null;
+            game.ExternalViewClock = false;
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-camera-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set fire (release build, 2026-10-21): burning enemies (Flaming Arrows) close up at Night, through the hero
+        /// camera and the strategic camera, a few frames apart so flames read as motion. Capture fixture only: the enemies are
+        /// set burning for the whole capture without taking burn damage.
+        /// </summary>
+        IEnumerator RunFire()
+        {
+            game.QuitApplication = () => { };
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            var west = MvpCampaign.West;
+            var wave = new WavePlan("fire", new[]
+            {
+                new SpawnEntry(0, west, 0, EnemyKind.Grunt), new SpawnEntry(10, west, 0, EnemyKind.Brute), new SpawnEntry(20, west, 0, EnemyKind.Grunt),
+            }, new[] { west });
+            var setup = new RunSimulation(new RunConfig
+            {
+                Definitions = game.NewRunDefinitions, Seed = 7, Terrain = TerrainMap.Flat(),
+                Campaign = new CampaignConfig
+                {
+                    Label = ReleaseCampaign.Label, Nights = new[] { wave, new WavePlan("calm", new SpawnEntry[0], new[] { west }) }, OffersRewards = true,
+                    RulesVersion = ReleaseCampaign.RulesVersion, CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
+                },
+            });
+            ContinueSaved(setup, new StringBuilder());
+            var sim = game.Sim;
+            game.StartNight();
+            for (var i = 0; i < 260 && sim.State == RunState.Night; i++) sim.Step(); // the three walk in to about x = 4
+            foreach (var e in sim.Enemies)
+            {
+                e.Burning = true;
+                e.BurnNextTick = e.BurnExpiryTick = long.MaxValue;
+            }
+
+            game.ExternalViewClock = true;
+            IEnumerator Frames(string name, int count)
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    sim.Advance(1.0 / 30.0);
+                    foreach (var e in sim.Enemies) e.BurnNextTick = e.BurnExpiryTick = long.MaxValue;
+                    game.SyncViews(1f / 30f);
+                    yield return new WaitForEndOfFrame();
+                    if (i % 6 == 5) CaptureOffscreen(Path.Combine(dir, $"{Screen.width}x{Screen.height}-fire-{name}-{i / 6}.png"));
+                }
+            }
+
+            var lead = sim.Enemies.Count > 0 ? sim.Enemies[0] : null;
+            var focus = lead != null ? new Vector3((float)lead.X, 0f, (float)lead.Z) : new Vector3(4f, 0f, 10.5f);
+            game.CameraRig.SetView(focus, 2.5f);
+            yield return Frames("strategic", 24);
+            if (lead != null && sim.Hero != null)
+            {
+                // Capture fixture only: the hero stands just east of the burning group, looking at it.
+                sim.Hero.UnitsX = sim.Hero.PrevUnitsX = (int)System.Math.Round((lead.X + 0.7) * HeroRules.UnitsPerTile);
+                sim.Hero.UnitsZ = sim.Hero.PrevUnitsZ = (int)System.Math.Round(lead.Z * HeroRules.UnitsPerTile);
+            }
+
+            game.SetHeroView(true);
+            game.HeroRig.SkipTransition();
+            game.HeroRig.SetOrbit(270f, 8f);
+            game.HeroRig.SetDefaultDistance(0.6f);
+            game.Player.HeroInputOverride = HeroCommand.Fine(-1, false, 48);
+            yield return Frames("hero", 24);
+            game.Player.HeroInputOverride = null;
+            game.ExternalViewClock = false;
         }
 
         IEnumerator RunPlan007()

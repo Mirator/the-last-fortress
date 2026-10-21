@@ -36,6 +36,19 @@ MonoBehaviour:
   fuseLit: {fileID: 8300000, guid: bafa4c5570799a343bdcd3e050bed4bb, type: 3}
   bomberBlast: {fileID: 8300000, guid: c9915000c9243f144ae7b87aa097a4bb, type: 3}
   commanderArrival: {fileID: 8300000, guid: 67357a3126f2b0b44835c9bd2cbf3a5b, type: 3}
+  heroSwings:
+  - {fileID: 8300000, guid: 2ddc3ff7063b5f2489aec168bcb989da, type: 3}
+  - {fileID: 8300000, guid: 3d611f26fde71624e879850be9614e5d, type: 3}
+  heroImpacts:
+  - {fileID: 8300000, guid: 1825e86b2a2d142488edb7fd3403f753, type: 3}
+  - {fileID: 8300000, guid: d7f845e6d31b6b14eba3960f91e532dc, type: 3}
+  heroHurt: {fileID: 8300000, guid: ded5f67f91c16444a9eb852a1b50c5a4, type: 3}
+  heroDown: {fileID: 8300000, guid: a70d8f2a7d928b24e92b7c24370090b8, type: 3}
+  footsteps:
+  - {fileID: 8300000, guid: fce24e44463329447b087b19d6593226, type: 3}
+  - {fileID: 8300000, guid: 2d48286aa7f9c8b4cb8cd65f0592f6f3, type: 3}
+  - {fileID: 8300000, guid: 1dd59a7fd878a344ebcb5c5466b458af, type: 3}
+  - {fileID: 8300000, guid: 169ee496972f02645a382c67f0d41e02, type: 3}
   nightStart: {fileID: 8300000, guid: 6609b984df7737c49a42b3898f14dd45, type: 3}
   dawn: {fileID: 8300000, guid: 85625e85901a24a41b5138e37038655b, type: 3}
   golemArrival: {fileID: 8300000, guid: 0d2b108db022f2b47ad7c5149d7aeb29, type: 3}

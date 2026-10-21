@@ -177,16 +177,28 @@ namespace TheLastFortress.Tests
                 target = e;
             }
 
+            var contact = hero.Profile.ContactPhase;
             if (target != null)
             {
                 double dx = target.X - hero.X, dz = target.Z - hero.Z;
                 var facing = HeroRules.FacingToward(dx, dz);
-                var heading = best <= 0.45 * 0.45 ? -1 : HeadingToward(dx, dz);
-                return new HeroCommand(heading, true, facing);
+                if (!contact)
+                {
+                    var heading = best <= 0.45 * 0.45 ? -1 : HeadingToward(dx, dz);
+                    return new HeroCommand(heading, true, facing);
+                }
+
+                // release-rules-4: close to three quarters of the reach (the motor brakes within about 0.02 tile), and press
+                // attack only within reach, so an accepted swing can land at its contact three steps later.
+                var reach = hero.Profile.SwingReach;
+                var stop = best <= reach * 0.75 * (reach * 0.75);
+                return HeroCommand.Fine(stop ? -1 : facing, best <= reach * reach, facing);
             }
 
             var home = sim.HeroSpawnCell(GridState.KeepCell);
             double hx = home.X + 0.5 - hero.X, hz = home.Z + 0.5 - hero.Z;
+            if (contact)
+                return hx * hx + hz * hz < 0.2 * 0.2 ? HeroCommand.Fine(-1, false, hero.Facing) : HeroCommand.Fine(HeroRules.FacingToward(hx, hz), false, HeroRules.FacingToward(hx, hz));
             return hx * hx + hz * hz < 0.2 * 0.2 ? new HeroCommand(-1, false, hero.Facing) : new HeroCommand(HeadingToward(hx, hz), false, HeroRules.FacingToward(hx, hz));
         }
 
@@ -198,13 +210,19 @@ namespace TheLastFortress.Tests
         /// turned about the Keep, so the Keep ring stays intact while terrain-side items may land a cell off (or be skipped).
         /// Under <c>release-rules-2</c> the hero follows <paramref name="hero"/>; <paramref name="build"/> false buys nothing.
         /// </summary>
+        /// <summary>Plan 019 hero evidence collected over one scripted run.</summary>
+        public sealed class HeroLog
+        {
+            public int Deaths, Contacts, Misses, KeepDamage;
+        }
+
         public static RunSimulation Play(Policy policy, uint seed, StringBuilder log, int symmetry = 0, string rules = ReleaseCampaign.RulesV1,
-            HeroScript hero = HeroScript.Idle, bool build = true)
+            HeroScript hero = HeroScript.Idle, bool build = true, HeroLog heroLog = null)
         {
             var sim = new RunSimulation(new RunConfig
             {
                 // Each rules version plays with its own profile's definitions (release-rules-3: walking speeds, more HP).
-                Definitions = rules == ReleaseCampaign.RulesV3 ? ReleaseCampaign.Walking(ReleaseDefinitions.CreateDefault()) : ReleaseDefinitions.CreateDefault(),
+                Definitions = rules == ReleaseCampaign.RulesV4 ? ReleaseCampaign.Contact(ReleaseDefinitions.CreateDefault()) : ReleaseCampaign.WalkingEnemies(rules) ? ReleaseCampaign.Walking(ReleaseDefinitions.CreateDefault()) : ReleaseDefinitions.CreateDefault(),
                 Seed = seed, Terrain = MapProfiles.Generate(policy.Map, seed, symmetry), Campaign = ReleaseCampaign.Create(seed, policy.Map, symmetry, rules),
             });
             log.AppendLine($"## {policy.Name} on {sim.Config.Terrain.Describe()} ({rules}{(sim.HasHero ? $", hero {hero}" : "")}{(build ? "" : ", no construction")})");
@@ -242,7 +260,17 @@ namespace TheLastFortress.Tests
                     sim.DrainEvents(batch);
                     fuses += batch.Count(e => e.Type == SimEventType.FuseLit);
                     blasts += batch.Count(e => e.Type == SimEventType.BomberDetonated);
+                    if (heroLog == null) continue;
+                    foreach (var e in batch)
+                        if (e.Type == SimEventType.HeroDowned) heroLog.Deaths++;
+                        else if (e.Type == SimEventType.HeroContact)
+                        {
+                            heroLog.Contacts++;
+                            if (e.TargetId == 0) heroLog.Misses++;
+                        }
                 }
+
+                if (heroLog != null) heroLog.KeepDamage += sim.LastNight.KeepDamage;
 
                 combat += sim.NightElapsedSeconds;
                 var recap = sim.LastNight;
@@ -262,10 +290,12 @@ namespace TheLastFortress.Tests
         }
 
         /// <summary>
-        /// Plan 012 balance guard (specs/003 section 6), run under the current rules (release-rules-3 since plan 015). Asserted:
-        /// a hero with no construction loses every seed by Night 3.
-        /// Logged: the same approaches under release-rules-1 (control), with an idle hero and with an active hero, and the
-        /// hero's share of kills on Nights 6-12. Balance is provisional and not frozen here. Log: TestResults/012/hero-policy-runs.txt.
+        /// Plan 012 balance guard, extended by plan 019 (specs/003 section 8) to compare release-rules-3 with release-rules-4 on
+        /// the same seeds 1-8 and the three approaches, with an idle hero, an active hero and a hero without construction.
+        /// Asserted: a hero with no construction loses every seed by Night 3 under both. Logged: release-rules-1 (control),
+        /// wins, Keep damage, hero deaths, the hero's share of kills on Nights 6-12 and, for release-rules-4, contacts and
+        /// misses (a script swinging out of reach would show as misses). Balance is provisional and not frozen here.
+        /// Log: TestResults/019/hero-policy-runs.txt.
         /// </summary>
         [Test]
         public void AHeroAloneCannotHoldTheFortressAndItsEffectIsLogged()
@@ -275,40 +305,51 @@ namespace TheLastFortress.Tests
             var failures = new List<string>();
             foreach (var policy in new[] { KillZone, Corridor, Economy })
             {
-                int matches = 0, nights = 0;
-                double share = 0, peak = 0;
-                for (uint seed = 1; seed <= 8; seed++)
+                var controls = new Dictionary<uint, RunSimulation>();
+                foreach (var rules in new[] { ReleaseCampaign.RulesV3, ReleaseCampaign.RulesV4 })
                 {
-                    var symmetry = MapProfiles.SymmetryFor(seed);
-                    var control = Play(policy, seed, log, symmetry);
-                    var idle = Play(policy, seed, log, symmetry, ReleaseCampaign.RulesVersion, HeroScript.Idle);
-                    var activeLog = new StringBuilder();
-                    var active = Play(policy, seed, activeLog, symmetry, ReleaseCampaign.RulesVersion, HeroScript.Active);
-                    log.Append(activeLog);
-                    if ((control.State, control.NightNumber) == (idle.State, idle.NightNumber)) matches++;
-                    foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(activeLog.ToString(), @"Night (\d+): \S+ .*killed (\d+) \(hero (\d+)\)"))
+                    int matches = 0, nights = 0, idleWins = 0, activeWins = 0, aloneMax = 0;
+                    double share = 0, peak = 0;
+                    var idleLog = new HeroLog();
+                    var activeLog = new HeroLog();
+                    for (uint seed = 1; seed <= 8; seed++)
                     {
-                        int night = int.Parse(m.Groups[1].Value), killed = int.Parse(m.Groups[2].Value), hero = int.Parse(m.Groups[3].Value);
-                        if (night < 6 || killed == 0) continue;
-                        share += (double)hero / killed;
-                        peak = Math.Max(peak, (double)hero / killed);
-                        nights++;
+                        var symmetry = MapProfiles.SymmetryFor(seed);
+                        if (!controls.TryGetValue(seed, out var control)) controls[seed] = control = Play(policy, seed, log, symmetry);
+                        var idle = Play(policy, seed, log, symmetry, rules, HeroScript.Idle, heroLog: idleLog);
+                        var activeText = new StringBuilder();
+                        var active = Play(policy, seed, activeText, symmetry, rules, HeroScript.Active, heroLog: activeLog);
+                        log.Append(activeText);
+                        if ((control.State, control.NightNumber) == (idle.State, idle.NightNumber)) matches++;
+                        if (idle.State == RunState.Victory) idleWins++;
+                        if (active.State == RunState.Victory) activeWins++;
+                        foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(activeText.ToString(), @"Night (\d+): \S+ .*killed (\d+) \(hero (\d+)\)"))
+                        {
+                            int night = int.Parse(m.Groups[1].Value), killed = int.Parse(m.Groups[2].Value), hero = int.Parse(m.Groups[3].Value);
+                            if (night < 6 || killed == 0) continue;
+                            share += (double)hero / killed;
+                            peak = Math.Max(peak, (double)hero / killed);
+                            nights++;
+                        }
+
+                        summary.Add($"{policy.Name} {rules} seed {seed}: control {control.State}@{control.NightNumber}; idle hero {idle.State}@{idle.NightNumber} " +
+                                    $"(hero {idle.Stats.HeroKills}/{idle.Stats.EnemiesDefeated}); active hero {active.State}@{active.NightNumber} (hero {active.Stats.HeroKills}/{active.Stats.EnemiesDefeated})");
+
+                        var alone = Play(policy, seed, log, symmetry, rules, HeroScript.Active, build: false);
+                        aloneMax = Math.Max(aloneMax, alone.NightNumber);
+                        if (alone.State != RunState.Defeat || alone.NightNumber > 3) failures.Add($"{rules} {policy.Map} seed {seed}: hero alone reached night {alone.NightNumber} ({alone.State})");
                     }
 
-                    summary.Add($"{policy.Name} seed {seed}: control {control.State}@{control.NightNumber}; idle hero {idle.State}@{idle.NightNumber} " +
-                                $"(hero {idle.Stats.HeroKills}/{idle.Stats.EnemiesDefeated}); active hero {active.State}@{active.NightNumber} (hero {active.Stats.HeroKills}/{active.Stats.EnemiesDefeated})");
-
-                    var alone = Play(policy, seed, log, symmetry, ReleaseCampaign.RulesVersion, HeroScript.Active, build: false);
-                    summary.Add($"  hero alone on {policy.Map}: {alone.State} on night {alone.NightNumber}");
-                    if (alone.State != RunState.Defeat || alone.NightNumber > 3) failures.Add($"{policy.Map} seed {seed}: hero alone reached night {alone.NightNumber} ({alone.State})");
+                    summary.Add($"{policy.Name} {rules}: wins idle {idleWins}/8, active {activeWins}/8; idle matches control on {matches}/8; " +
+                                $"active share of kills on Nights 6-12 average {share / Math.Max(1, nights):P0}, peak {peak:P0}; Keep damage idle {idleLog.KeepDamage}, active {activeLog.KeepDamage}; " +
+                                $"hero deaths idle {idleLog.Deaths}, active {activeLog.Deaths}; contacts (misses) idle {idleLog.Contacts} ({idleLog.Misses}), active {activeLog.Contacts} ({activeLog.Misses}); " +
+                                $"hero alone falls by night {aloneMax}");
                 }
-
-                summary.Add($"{policy.Name}: idle hero matches control on {matches}/8; active hero share of kills on Nights 6-12: average {share / Math.Max(1, nights):P0}, peak {peak:P0}");
             }
 
-            log.Insert(0, "# Plan 012 hero policy runs (seeds' own orientations)\n" + string.Join("\n", summary) + "\n\n");
-            Directory.CreateDirectory(Path.Combine("TestResults", "012"));
-            File.WriteAllText(Path.Combine("TestResults", "012", "hero-policy-runs.txt"), log.ToString());
+            log.Insert(0, "# Plan 019 hero policy runs, release-rules-3 vs release-rules-4 (seeds' own orientations)\n" + string.Join("\n", summary) + "\n\n");
+            Directory.CreateDirectory(Path.Combine("TestResults", "019"));
+            File.WriteAllText(Path.Combine("TestResults", "019", "hero-policy-runs.txt"), log.ToString());
             TestContext.WriteLine(string.Join(Environment.NewLine, summary));
             CollectionAssert.IsEmpty(failures, "a hero without buildings must lose by Night 3");
         }

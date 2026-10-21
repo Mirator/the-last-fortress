@@ -44,6 +44,7 @@ namespace TheLastFortress.Editor
                 foreach (var r in go.GetComponentsInChildren<MeshRenderer>()) r.shadowCastingMode = ShadowCastingMode.Off; // a floor plate
             });
             var cannon = Variant("ArtCannon");
+            var cannonField = Variant("ArtCannonField");
             var watchtower = Variant("ArtWatchtower");
             var repair = Variant("ArtRepairStation");
             var walls = new GameObject[6];
@@ -81,7 +82,11 @@ namespace TheLastFortress.Editor
                 content.raiderArcherPrefab = enemy["RaiderArcher"];
                 content.bomberPrefab = enemy["Bomber"];
                 content.commanderPrefab = enemy["SiegeCommander"];
-                if (path == ReleaseSetup.ContentPath) content.heroPrefab = hero;
+                if (path == ReleaseSetup.ContentPath)
+                {
+                    content.heroPrefab = hero;
+                    content.compactCannonPrefab = cannonField;
+                }
                 EditorUtility.SetDirty(content);
             }
 
@@ -237,6 +242,64 @@ namespace TheLastFortress.Editor
             Debug.Log("Hero imported and assigned to the release content.");
         }
 
+        /// <summary>
+        /// Imports only the release-rules-4 1 x 1 Cannon (Art/Source~/models_ext.py cannon_field: a field gun on a timber
+        /// turntable, with its gunner) and assigns it to the release content's compactCannonPrefab, and re-imports the Archer
+        /// Tower (owner, 2026-10-21: its archer visible over the parapet); every other asset stays untouched.
+        /// Batch: -executeMethod TheLastFortress.Editor.ArtSetup.RunCompactCannon
+        /// </summary>
+        [MenuItem("The Last Fortress/Art/Import and Assign Release-Rules-4 Cannon")]
+        public static void RunCompactCannon()
+        {
+            PrototypeSetup.EnsureFolder(Prefabs);
+            AssetDatabase.Refresh();
+            var mats = CreateMaterials();
+            ConfigureModels(mats, $"{Models}/ArtCannonField.fbx");
+            ConfigureModels(mats, $"{Models}/ArtArcherTower.fbx");
+            var cannon = Variant("ArtCannonField");
+            Variant("ArtArcherTower"); // the archer on a firing step behind a lower parapet; same prefab path, so every content keeps it
+            var content = AssetDatabase.LoadAssetAtPath<PrototypeContent>(ReleaseSetup.ContentPath);
+            if (content == null) throw new FileNotFoundException("Release content missing; run the release setup first.");
+            content.compactCannonPrefab = cannon;
+            EditorUtility.SetDirty(content);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Release-rules-4 Cannon imported and assigned to the release content.");
+        }
+
+        /// <summary>
+        /// Plan 019: imports only the release-rules-4 hero (Art/Source~/models_hero_v4.py: elbows, wrists, ankles) as its
+        /// own prefab with <see cref="HeroAnimationRig"/> and assigns it to the release content's contactHeroPrefab. The
+        /// legacy hero, every enemy, model, prefab and material stay untouched.
+        /// Batch: -executeMethod TheLastFortress.Editor.ArtSetup.RunHeroV4
+        /// </summary>
+        [MenuItem("The Last Fortress/Art/Import and Assign Release-Rules-4 Hero")]
+        public static void RunHeroV4()
+        {
+            PrototypeSetup.EnsureFolder(Prefabs);
+            AssetDatabase.Refresh();
+            ConfigureModels(CreateMaterials(), $"{Models}/ArtHeroV4.fbx");
+            var hero = Variant("ArtHeroV4", AddHeroRig, HeroJoints);
+            var content = AssetDatabase.LoadAssetAtPath<PrototypeContent>(ReleaseSetup.ContentPath);
+            if (content == null) throw new FileNotFoundException("Release content missing; run the release setup first.");
+            content.contactHeroPrefab = hero;
+            EditorUtility.SetDirty(content);
+            // Its own sound families (Audio/Source~/synth.py hero_* and footstep_*), linked without touching other clips.
+            var audio = AssetDatabase.LoadAssetAtPath<AudioContent>(PresentationSetup.AudioContentPath);
+            if (audio != null)
+            {
+                AudioClip Clip(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>($"{PresentationSetup.ClipsPath}/{name}.wav");
+                audio.heroSwings = new[] { Clip("hero_swing_0"), Clip("hero_swing_1") };
+                audio.heroImpacts = new[] { Clip("hero_impact_0"), Clip("hero_impact_1") };
+                audio.heroHurt = Clip("hero_hurt");
+                audio.heroDown = Clip("hero_down");
+                audio.footsteps = new[] { Clip("footstep_0"), Clip("footstep_1"), Clip("footstep_2"), Clip("footstep_3") };
+                EditorUtility.SetDirty(audio);
+            }
+
+            AssetDatabase.SaveAssets();
+            Debug.Log("Release-rules-4 hero imported and assigned to the release content.");
+        }
+
         static void ConfigureModels(Dictionary<string, Material> mats, string only = null)
         {
             foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { Models }))
@@ -275,11 +338,18 @@ namespace TheLastFortress.Editor
             ["Bow"] = "Archer",
         };
 
+        /// <summary>The release-rules-4 hero's joints: the shared map plus forearms, hands and feet; weapon and shield in the hands.</summary>
+        static readonly Dictionary<string, string> HeroJoints = new Dictionary<string, string>(Joints)
+        {
+            ["ForearmL"] = "ArmL", ["ForearmR"] = "ArmR", ["HandL"] = "ForearmL", ["HandR"] = "ForearmR",
+            ["Weapon"] = "HandR", ["OffHand"] = "HandL", ["FootL"] = "ShinL", ["FootR"] = "ShinR",
+        };
+
         /// <summary>
         /// Prefab from a model, rebuilt on every run: unpacked so rig joints can be re-parented (meshes stay referenced from
         /// the FBX, so a re-export updates them), Torch.N empties renamed "Torch", the exporter's root empty dropped.
         /// </summary>
-        static GameObject Variant(string model, System.Action<GameObject> extra = null)
+        static GameObject Variant(string model, System.Action<GameObject> extra = null, Dictionary<string, string> joints = null)
         {
             var source = AssetDatabase.LoadAssetAtPath<GameObject>($"{Models}/{model}.fbx");
             if (source == null) throw new FileNotFoundException($"Art setup: {Models}/{model}.fbx missing; run Art/Source~/models.py in Blender first.");
@@ -288,7 +358,7 @@ namespace TheLastFortress.Editor
             instance.name = model;
             var parts = new Dictionary<string, Transform>();
             foreach (Transform t in instance.transform) parts[t.name] = t;
-            foreach (var (child, parent) in Joints)
+            foreach (var (child, parent) in joints ?? Joints)
                 if (parts.TryGetValue(child, out var c) && parts.TryGetValue(parent, out var p)) c.SetParent(p, true);
             foreach (var t in new List<Transform>(parts.Values))
                 if (t.childCount == 0 && t.GetComponent<MeshFilter>() == null && !t.name.StartsWith("Torch")) Object.DestroyImmediate(t.gameObject);
@@ -324,6 +394,30 @@ namespace TheLastFortress.Editor
             // head, arms, weapon and hips add many small shadow draws per enemy (100+ enemies) for no visible gain.
             foreach (var part in new[] { rig.head, rig.armL, rig.armR, rig.weapon, rig.hips, FindDeep(go.transform, "OffHand") })
                 if (part != null && part.TryGetComponent<MeshRenderer>(out var r)) r.shadowCastingMode = ShadowCastingMode.Off;
+        }
+
+        /// <summary>The release-rules-4 hero's adapter; every part casts a shadow (one figure, seen up close).</summary>
+        static void AddHeroRig(GameObject go)
+        {
+            var rig = go.AddComponent<HeroAnimationRig>();
+            rig.hips = FindDeep(go.transform, "Hips");
+            rig.torso = FindDeep(go.transform, "Torso");
+            rig.head = FindDeep(go.transform, "Head");
+            rig.armL = FindDeep(go.transform, "ArmL");
+            rig.armR = FindDeep(go.transform, "ArmR");
+            rig.forearmL = FindDeep(go.transform, "ForearmL");
+            rig.forearmR = FindDeep(go.transform, "ForearmR");
+            rig.handL = FindDeep(go.transform, "HandL");
+            rig.handR = FindDeep(go.transform, "HandR");
+            rig.weapon = FindDeep(go.transform, "Weapon");
+            rig.offHand = FindDeep(go.transform, "OffHand");
+            rig.legL = FindDeep(go.transform, "LegL");
+            rig.legR = FindDeep(go.transform, "LegR");
+            rig.shinL = FindDeep(go.transform, "ShinL");
+            rig.shinR = FindDeep(go.transform, "ShinR");
+            rig.footL = FindDeep(go.transform, "FootL");
+            rig.footR = FindDeep(go.transform, "FootR");
+            if (!rig.Complete) throw new InvalidDataException("ArtHeroV4: a joint is missing (expected forearms, hands and feet); re-export models_hero_v4.py.");
         }
 
         static Transform FindDeep(Transform t, string name)

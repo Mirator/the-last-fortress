@@ -131,7 +131,8 @@ namespace TheLastFortress
 
             heroFill.anchorMax = new Vector2(hero.Alive ? Mathf.Clamp01((float)hero.Hp / HeroRules.MaxHp) : 0f, 1);
             Set(heroHint, game.HeroViewActive
-                ? sim.State == RunState.Night ? "Click attack · Tab strategy · P pause" : "Tab strategy · Enter night · 1-8 build"
+                ? game.AwaitingRecapture ? "Click to take the mouse back · Tab strategy"
+                : sim.State == RunState.Night ? "Click attack · Tab strategy · P pause" : "Tab strategy · Enter night · 1-8 build"
                 : sim.State == RunState.Day ? "Guarding · Tab hero · Enter night" : "Guarding · Tab hero · H find");
             var menuPanel = canvasRect.Find("Gameplay/Menu");
             if (menuPanel != null && menuPanel.gameObject.activeSelf == game.HeroViewActive) menuPanel.gameObject.SetActive(!game.HeroViewActive);

@@ -1,0 +1,576 @@
+rules=release-rules-3 reach=0,6 speed=48 radius=360 meadow seed 7: generated (attempt 0)
+000 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,11,500 cam=10,62,0,37,11,26
+001 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,11,500 cam=10,61,0,38,11,26
+002 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f1 paused=False shown=10,500,11,500 cam=10,61,0,39,11,26
+003 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f1 paused=False shown=10,500,11,500 cam=10,60,0,40,11,26
+004 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f1 paused=False shown=10,500,11,500 cam=10,60,0,41,11,26
+005 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f1 paused=False shown=10,500,11,500 cam=10,58,0,45,11,22
+006 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f2 paused=False shown=10,500,11,500 cam=10,58,0,45,11,22
+007 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f2 paused=False shown=10,500,11,500 cam=10,57,0,45,11,22
+008 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f2 paused=False shown=10,500,11,500 cam=10,56,0,45,11,22
+009 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f2 paused=False shown=10,500,11,500 cam=10,56,0,45,11,22
+010 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f3 paused=False shown=10,500,11,500 cam=10,55,0,45,11,22
+011 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f3 paused=False shown=10,500,11,500 cam=10,54,0,45,11,21
+012 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f3 paused=False shown=10,500,11,500 cam=10,53,0,45,11,21
+013 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f3 paused=False shown=10,500,11,500 cam=10,53,0,45,11,21
+014 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f4 paused=False shown=10,500,11,500 cam=10,52,0,45,11,21
+015 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f4 paused=False shown=10,500,11,500 cam=10,51,0,45,11,21
+016 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f4 paused=False shown=10,500,11,500 cam=10,50,0,45,11,21
+017 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f5 paused=False shown=10,500,11,500 cam=10,50,0,45,11,21
+018 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f5 paused=False shown=10,500,11,500 cam=10,49,0,45,11,21
+019 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f5 paused=False shown=10,500,11,500 cam=10,48,0,45,11,21
+020 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f5 paused=False shown=10,500,11,500 cam=10,47,0,45,11,21
+021 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f6 paused=False shown=10,500,11,500 cam=10,47,0,45,11,21
+022 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f6 paused=False shown=10,500,11,500 cam=10,46,0,45,11,21
+023 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f6 paused=False shown=10,500,11,500 cam=10,45,0,45,11,22
+024 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f6 paused=False shown=10,500,11,500 cam=10,42,0,47,11,18
+025 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f7 paused=False shown=10,500,11,500 cam=10,41,0,47,11,18
+026 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f7 paused=False shown=10,500,11,500 cam=10,40,0,47,11,19
+027 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f7 paused=False shown=10,500,11,500 cam=10,39,0,47,11,19
+028 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f7 paused=False shown=10,500,11,500 cam=10,38,0,47,11,19
+029 obstruct-keep Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h-1/64f8 paused=False shown=10,500,11,500 cam=10,35,0,49,11,16
+030 start Day tick=0 hero=12600,13800 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,527 cam=10,62,0,47,11,22
+031 start Day tick=0 hero=12600,13848 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,553 cam=10,62,0,47,11,25
+032 start Day tick=0 hero=12600,13896 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,580 cam=10,62,0,49,11,23
+033 start Day tick=0 hero=12600,13896 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,607 cam=10,62,0,49,11,26
+034 start Day tick=0 hero=12600,13944 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,633 cam=10,62,0,52,11,24
+035 start Day tick=0 hero=12600,13992 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,660 cam=10,62,0,54,11,22
+036 start Day tick=0 hero=12600,13992 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,687 cam=10,62,0,54,11,25
+037 start Day tick=0 hero=12600,14040 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,713 cam=10,62,0,57,11,23
+038 start Day tick=0 hero=12600,14088 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,740 cam=10,62,0,55,11,25
+039 start Day tick=0 hero=12600,14088 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,767 cam=10,62,0,52,11,26
+040 start Day tick=0 hero=12600,14136 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,793 cam=10,62,0,52,11,24
+041 start Day tick=0 hero=12600,14184 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,820 cam=10,62,0,50,11,25
+042 start Day tick=0 hero=12600,14184 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,847 cam=10,62,0,47,11,27
+043 start Day tick=0 hero=12600,14232 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,873 cam=10,62,0,46,11,24
+044 start Day tick=0 hero=12600,14280 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,900 cam=10,62,0,46,11,27
+045 start Day tick=0 hero=12600,14280 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,927 cam=10,62,0,47,11,25
+046 start Day tick=0 hero=12600,14328 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,953 cam=10,62,0,47,11,27
+047 start Day tick=0 hero=12600,14376 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,11,980 cam=10,62,0,48,11,25
+048 start Day tick=0 hero=12600,14376 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,12,007 cam=10,62,0,48,11,28
+049 start Day tick=0 hero=12600,14424 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,12,033 cam=10,62,0,49,11,26
+050 start Day tick=0 hero=12600,14472 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,12,060 cam=10,62,0,49,11,28
+051 start Day tick=0 hero=12600,14472 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,12,087 cam=10,62,0,54,11,12
+052 start Day tick=0 hero=12600,14520 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,12,113 cam=10,62,0,54,11,14
+053 start Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+054 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+055 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+056 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+057 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+058 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+059 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+060 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+061 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+062 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+063 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+064 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+065 stop Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h-1/64f0 paused=False shown=10,500,12,140 cam=10,62,0,54,11,17
+066 backpedal Day tick=0 hero=12600,14568 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,12,113 cam=10,62,0,54,11,14
+067 backpedal Day tick=0 hero=12600,14520 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,12,087 cam=10,62,0,54,11,12
+068 backpedal Day tick=0 hero=12600,14472 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,12,060 cam=10,62,0,49,11,28
+069 backpedal Day tick=0 hero=12600,14472 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,12,033 cam=10,62,0,49,11,26
+070 backpedal Day tick=0 hero=12600,14424 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,12,007 cam=10,62,0,48,11,28
+071 backpedal Day tick=0 hero=12600,14376 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,980 cam=10,62,0,48,11,25
+072 backpedal Day tick=0 hero=12600,14376 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,953 cam=10,62,0,47,11,27
+073 backpedal Day tick=0 hero=12600,14328 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,927 cam=10,62,0,47,11,25
+074 backpedal Day tick=0 hero=12600,14280 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,900 cam=10,62,0,46,11,27
+075 backpedal Day tick=0 hero=12600,14280 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,873 cam=10,62,0,46,11,24
+076 backpedal Day tick=0 hero=12600,14232 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,847 cam=10,62,0,45,11,26
+077 backpedal Day tick=0 hero=12600,14184 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,820 cam=10,62,0,43,11,29
+078 backpedal Day tick=0 hero=12600,14184 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,793 cam=10,62,0,43,11,26
+079 backpedal Day tick=0 hero=12600,14136 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,767 cam=10,62,0,44,11,29
+080 backpedal Day tick=0 hero=12600,14088 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,740 cam=10,62,0,46,11,27
+081 backpedal Day tick=0 hero=12600,14088 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,713 cam=10,62,0,48,11,25
+082 backpedal Day tick=0 hero=12600,14040 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,687 cam=10,62,0,50,11,23
+083 backpedal Day tick=0 hero=12600,13992 v=0,0 hp=200 alive=True cmd=h32/64f0 paused=False shown=10,500,11,660 cam=10,62,0,50,11,26
+084 strafe-right Day tick=0 hero=12600,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,527,11,660 cam=10,65,0,54,11,22
+085 strafe-right Day tick=0 hero=12648,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,553,11,660 cam=10,67,0,54,11,22
+086 strafe-right Day tick=0 hero=12696,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,580,11,660 cam=10,70,0,54,11,22
+087 strafe-right Day tick=0 hero=12696,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,607,11,660 cam=10,73,0,54,11,22
+088 strafe-right Day tick=0 hero=12744,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,633,11,660 cam=10,75,0,54,11,22
+089 strafe-right Day tick=0 hero=12792,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,660,11,660 cam=10,78,0,54,11,22
+090 strafe-right Day tick=0 hero=12792,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,687,11,660 cam=10,81,0,54,11,22
+091 strafe-right Day tick=0 hero=12840,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,713,11,660 cam=10,83,0,54,11,22
+092 strafe-right Day tick=0 hero=12888,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,740,11,660 cam=10,86,0,54,11,22
+093 strafe-right Day tick=0 hero=12888,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,767,11,660 cam=10,89,0,54,11,22
+094 strafe-right Day tick=0 hero=12936,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,793,11,660 cam=10,91,0,54,11,22
+095 strafe-right Day tick=0 hero=12984,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,820,11,660 cam=10,94,0,54,11,22
+096 strafe-right Day tick=0 hero=12984,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,847,11,660 cam=10,97,0,54,11,22
+097 strafe-right Day tick=0 hero=13032,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,873,11,660 cam=10,99,0,54,11,22
+098 strafe-right Day tick=0 hero=13080,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,900,11,660 cam=11,02,0,61,11,03
+099 strafe-right Day tick=0 hero=13080,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,927,11,660 cam=11,05,0,67,10,84
+100 strafe-right Day tick=0 hero=13128,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,953,11,660 cam=11,07,0,67,10,73
+101 strafe-right Day tick=0 hero=13176,13992 v=0,0 hp=200 alive=True cmd=h16/64f0 paused=False shown=10,980,11,660 cam=11,10,0,63,10,71
+102 strafe-left Day tick=0 hero=13176,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,953,11,660 cam=11,07,0,58,10,70
+103 strafe-left Day tick=0 hero=13128,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,927,11,660 cam=11,05,0,54,10,69
+104 strafe-left Day tick=0 hero=13080,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,900,11,660 cam=11,02,0,54,10,69
+105 strafe-left Day tick=0 hero=13080,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,873,11,660 cam=10,99,0,41,11,28
+106 strafe-left Day tick=0 hero=13032,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,847,11,660 cam=10,97,0,43,11,28
+107 strafe-left Day tick=0 hero=12984,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,820,11,660 cam=10,94,0,46,11,24
+108 strafe-left Day tick=0 hero=12984,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,793,11,660 cam=10,91,0,48,11,25
+109 strafe-left Day tick=0 hero=12936,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,767,11,660 cam=10,89,0,50,11,26
+110 strafe-left Day tick=0 hero=12888,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,740,11,660 cam=10,86,0,54,11,22
+111 strafe-left Day tick=0 hero=12888,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,713,11,660 cam=10,83,0,54,11,22
+112 strafe-left Day tick=0 hero=12840,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,687,11,660 cam=10,81,0,54,11,22
+113 strafe-left Day tick=0 hero=12792,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,660,11,660 cam=10,78,0,54,11,22
+114 strafe-left Day tick=0 hero=12792,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,633,11,660 cam=10,75,0,54,11,22
+115 strafe-left Day tick=0 hero=12744,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,607,11,660 cam=10,73,0,54,11,22
+116 strafe-left Day tick=0 hero=12696,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,580,11,660 cam=10,70,0,54,11,22
+117 strafe-left Day tick=0 hero=12696,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,553,11,660 cam=10,67,0,54,11,22
+118 strafe-left Day tick=0 hero=12648,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,527,11,660 cam=10,65,0,54,11,22
+119 strafe-left Day tick=0 hero=12600,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,500,11,660 cam=10,62,0,54,11,22
+120 strafe-left Day tick=0 hero=12600,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,473,11,660 cam=10,59,0,54,11,22
+121 strafe-left Day tick=0 hero=12552,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,447,11,660 cam=10,57,0,54,11,22
+122 strafe-left Day tick=0 hero=12504,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,420,11,660 cam=10,54,0,54,11,22
+123 strafe-left Day tick=0 hero=12504,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,393,11,660 cam=10,51,0,54,11,22
+124 strafe-left Day tick=0 hero=12456,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,367,11,660 cam=10,49,0,54,11,22
+125 strafe-left Day tick=0 hero=12408,13992 v=0,0 hp=200 alive=True cmd=h48/64f0 paused=False shown=10,340,11,660 cam=10,46,0,54,11,22
+126 turn-180 Day tick=0 hero=12408,13992 v=0,0 hp=200 alive=True cmd=h0/64f0 paused=False shown=10,340,11,687 cam=10,46,0,54,11,25
+127 turn-180 Day tick=0 hero=12426,14036 v=0,0 hp=200 alive=True cmd=h4/64f3 paused=False shown=10,360,11,709 cam=10,35,0,57,11,21
+128 turn-180 Day tick=0 hero=12444,14080 v=0,0 hp=200 alive=True cmd=h4/64f5 paused=False shown=10,370,11,733 cam=10,21,0,57,11,21
+129 turn-180 Day tick=0 hero=12444,14080 v=0,0 hp=200 alive=True cmd=h8/64f8 paused=False shown=10,388,11,752 cam=10,16,0,54,11,36
+130 turn-180 Day tick=0 hero=12488,14098 v=0,0 hp=200 alive=True cmd=h12/64f11 paused=False shown=10,419,11,753 cam=10,21,0,47,11,50
+131 turn-180 Day tick=0 hero=12532,14116 v=0,0 hp=200 alive=True cmd=h12/64f13 paused=False shown=10,443,11,763 cam=10,22,0,45,11,58
+132 turn-180 Day tick=0 hero=12532,14116 v=0,0 hp=200 alive=True cmd=h16/64f16 paused=False shown=10,470,11,763 cam=10,25,0,42,11,64
+133 turn-180 Day tick=0 hero=12576,14098 v=0,0 hp=200 alive=True cmd=h20/64f19 paused=False shown=10,493,11,743 cam=10,25,0,42,11,68
+134 turn-180 Day tick=0 hero=12620,14080 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=10,517,11,733 cam=10,19,0,47,11,78
+135 turn-180 Day tick=0 hero=12620,14080 v=0,0 hp=200 alive=True cmd=h24/64f24 paused=False shown=10,535,11,715 cam=10,17,0,52,11,91
+136 turn-180 Day tick=0 hero=12638,14036 v=0,0 hp=200 alive=True cmd=h28/64f27 paused=False shown=10,537,11,684 cam=10,14,0,59,12,13
+137 turn-180 Day tick=0 hero=12656,13992 v=0,0 hp=200 alive=True cmd=h28/64f29 paused=False shown=10,547,11,660 cam=10,23,0,65,12,38
+138 turn-180 Day tick=0 hero=12656,13992 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,633 cam=10,43,0,67,12,56
+139 turn-180 Day tick=0 hero=12656,13944 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,607 cam=10,43,0,63,12,55
+140 turn-180 Day tick=0 hero=12656,13896 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,580 cam=10,43,0,58,12,54
+141 turn-180 Day tick=0 hero=12656,13896 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,553 cam=10,43,0,54,12,52
+142 turn-180 Day tick=0 hero=12656,13848 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,527 cam=10,43,0,54,12,50
+143 turn-180 Day tick=0 hero=12656,13800 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,500 cam=10,43,0,54,12,47
+144 turn-180 Day tick=0 hero=12656,13800 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,473 cam=10,43,0,54,12,44
+145 turn-180 Day tick=0 hero=12656,13752 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,447 cam=10,43,0,54,12,42
+146 turn-180 Day tick=0 hero=12656,13704 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,420 cam=10,43,0,54,12,39
+147 turn-180 Day tick=0 hero=12656,13704 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,393 cam=10,43,0,54,12,36
+148 turn-180 Day tick=0 hero=12656,13656 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,367 cam=10,43,0,54,12,34
+149 turn-180 Day tick=0 hero=12656,13608 v=0,0 hp=200 alive=True cmd=h32/64f32 paused=False shown=10,547,11,340 cam=10,43,0,54,12,31
+150 diagonal-slide Day tick=0 hero=12656,13608 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,528,11,322 cam=10,41,0,54,12,29
+151 diagonal-slide Day tick=0 hero=12623,13575 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,510,11,303 cam=10,39,0,54,12,27
+152 diagonal-slide Day tick=0 hero=12590,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,492,11,300 cam=10,37,0,54,12,27
+153 diagonal-slide Day tick=0 hero=12590,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,473,11,300 cam=10,35,0,54,12,27
+154 diagonal-slide Day tick=0 hero=12557,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,455,11,300 cam=10,34,0,54,12,27
+155 diagonal-slide Day tick=0 hero=12524,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,437,11,300 cam=10,32,0,54,12,27
+156 diagonal-slide Day tick=0 hero=12524,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,418,11,300 cam=10,30,0,54,12,27
+157 diagonal-slide Day tick=0 hero=12491,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,400,11,300 cam=10,28,0,54,12,27
+158 diagonal-slide Day tick=0 hero=12458,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,382,11,300 cam=10,26,0,54,12,27
+159 diagonal-slide Day tick=0 hero=12458,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,363,11,300 cam=10,24,0,54,12,27
+160 diagonal-slide Day tick=0 hero=12425,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,345,11,300 cam=10,23,0,54,12,27
+161 diagonal-slide Day tick=0 hero=12392,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,327,11,300 cam=10,21,0,54,12,27
+162 diagonal-slide Day tick=0 hero=12392,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,308,11,300 cam=10,19,0,54,12,27
+163 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+164 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+165 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+166 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+167 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+168 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+169 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+170 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+171 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+172 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+173 diagonal-slide Day tick=0 hero=12360,13560 v=0,0 hp=200 alive=True cmd=h40/64f32 paused=False shown=10,300,11,300 cam=10,18,0,54,12,27
+wall over the hero at (10,12): placed
+174 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+175 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+176 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+177 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+178 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+179 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+180 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+181 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+182 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+183 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+184 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+185 relocated Day tick=0 hero=12600,15000 v=0,0 hp=200 alive=True cmd=h-1/64f32 paused=False shown=10,500,12,500 cam=10,38,0,54,13,47
+lane: hero 6,500,10,620
+186 engage Night tick=423 hero=7800,12744 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,490,10,596 cam=6,88,0,54,11,49 enemy1=1,297 hp45
+187 engage Night tick=424 hero=7782,12700 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,480,10,571 cam=6,87,0,54,11,47 enemy1=1,251 hp45
+188 engage Night tick=425 hero=7764,12656 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,470,10,547 cam=6,85,0,54,11,45 enemy1=1,204 hp45
+189 engage Night tick=425 hero=7764,12656 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,460,10,523 cam=6,84,0,54,11,43 enemy1=1,204 hp45
+190 engage Night tick=426 hero=7746,12612 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,450,10,498 cam=6,83,0,54,11,40 enemy1=1,157 hp45
+191 engage Night tick=427 hero=7728,12568 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,440,10,473 cam=6,81,0,54,11,38 enemy1=1,111 hp45
+192 engage Night tick=427 hero=7728,12568 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,430,10,449 cam=6,79,0,54,11,36 enemy1=1,111 hp45
+193 engage Night tick=428 hero=7710,12524 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,420,10,424 cam=6,78,0,54,11,33 enemy1=1,064 hp45
+194 engage Night tick=429 hero=7692,12480 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,410,10,400 cam=6,76,0,54,11,31 enemy1=1,018 hp45
+195 engage Night tick=429 hero=7692,12480 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,400,10,376 cam=6,75,0,54,11,29 enemy1=1,018 hp45
+196 engage Night tick=430 hero=7674,12436 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,390,10,351 cam=6,74,0,54,11,26 enemy1=0,971 hp45
+197 engage Night tick=431 hero=7656,12392 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,380,10,327 cam=6,72,0,54,11,24 enemy1=0,925 hp45
+198 engage Night tick=431 hero=7656,12392 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,370,10,303 cam=6,70,0,54,11,22 enemy1=0,925 hp45
+199 engage Night tick=432 hero=7638,12348 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,360,10,278 cam=6,69,0,54,11,20 enemy1=0,879 hp45
+200 engage Night tick=433 hero=7620,12304 v=0,0 hp=200 alive=True cmd=h36/64f37 paused=False shown=6,350,10,253 cam=6,67,0,54,11,18 enemy1=0,833 hp45
+201 engage Night tick=433 hero=7620,12304 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,340,10,229 cam=6,65,0,54,11,16 enemy1=0,833 hp45
+202 engage Night tick=434 hero=7602,12260 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,330,10,204 cam=6,64,0,54,11,13 enemy1=0,787 hp45
+203 engage Night tick=435 hero=7584,12216 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,320,10,180 cam=6,61,0,54,11,11 enemy1=0,741 hp45
+204 engage Night tick=435 hero=7584,12216 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,310,10,156 cam=6,59,0,54,11,09 enemy1=0,741 hp45
+205 engage Night tick=436 hero=7566,12172 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,300,10,131 cam=6,58,0,54,11,07 enemy1=0,696 hp45
+206 engage Night tick=437 hero=7548,12128 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,290,10,107 cam=6,55,0,54,11,05 enemy1=0,651 hp45
+207 engage Night tick=437 hero=7548,12128 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,280,10,083 cam=6,52,0,54,11,03 enemy1=0,651 hp45
+208 engage Night tick=438 hero=7530,12084 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,270,10,058 cam=6,51,0,54,11,01 enemy1=0,606 hp45
+209 engage Night tick=439 hero=7512,12040 v=0,0 hp=200 alive=True cmd=h36/64f36 paused=False shown=6,260,10,033 cam=6,48,0,54,10,99 enemy1=0,561 hp45
+210 engage Night tick=439 hero=7512,12040 v=0,0 hp=200 alive=True cmd=h36/64!f35 paused=False shown=6,250,10,009 cam=6,44,0,54,10,97 enemy1=0,561 hp45
+211 engage Night tick=440 hero=7494,11996 v=0,0 hp=200 alive=True cmd=h36/64!f35 paused=False shown=6,240,9,984 cam=6,43,0,54,10,94 enemy1=0,517 hp35
+212 engage Night tick=441 hero=7476,11952 v=0,0 hp=200 alive=True cmd=h36/64!f35 paused=False shown=6,230,9,960 cam=6,39,0,54,10,93 enemy1=0,474 hp35
+213 engage Night tick=441 hero=7476,11952 v=0,0 hp=200 alive=True cmd=h36/64!f34 paused=False shown=6,220,9,936 cam=6,34,0,54,10,91 enemy1=0,474 hp35
+214 engage Night tick=442 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h36/64!f34 paused=False shown=6,210,9,911 cam=6,33,0,54,10,88 enemy1=0,432 hp35
+215 engage Night tick=443 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f34 paused=False shown=6,215,9,923 cam=6,29,0,54,10,90 enemy1=0,429 hp35
+216 engage Night tick=443 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f34 paused=False shown=6,215,9,923 cam=6,25,0,54,10,90 enemy1=0,429 hp35
+217 engage Night tick=444 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f34 paused=False shown=6,215,9,923 cam=6,25,0,54,10,90 enemy1=0,427 hp35
+218 engage Night tick=445 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f33 paused=False shown=6,215,9,923 cam=6,22,0,54,10,90 enemy1=0,425 hp35
+219 engage Night tick=445 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f33 paused=False shown=6,215,9,923 cam=6,19,0,54,10,90 enemy1=0,425 hp35
+220 engage Night tick=446 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f33 paused=False shown=6,215,9,923 cam=6,19,0,54,10,90 enemy1=0,424 hp35
+221 engage Night tick=447 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f33 paused=False shown=6,215,9,923 cam=6,15,0,54,10,90 enemy1=0,423 hp35
+222 engage Night tick=447 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f32 paused=False shown=6,215,9,923 cam=6,12,0,54,10,90 enemy1=0,423 hp35
+223 engage Night tick=448 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f32 paused=False shown=6,215,9,923 cam=6,12,0,54,10,90 enemy1=0,423 hp35
+224 engage Night tick=449 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f32 paused=False shown=6,215,9,923 cam=6,08,0,54,10,89 enemy1=0,424 hp35
+225 engage Night tick=449 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f32 paused=False shown=6,215,9,923 cam=6,05,0,54,10,89 enemy1=0,424 hp35
+226 engage Night tick=450 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f32 paused=False shown=6,215,9,923 cam=6,05,0,54,10,89 enemy1=0,425 hp35
+227 engage Night tick=451 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f31 paused=False shown=6,215,9,923 cam=6,02,0,54,10,88 enemy1=0,426 hp35
+228 engage Night tick=451 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f31 paused=False shown=6,215,9,923 cam=5,98,0,54,10,87 enemy1=0,426 hp35
+229 engage Night tick=452 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f31 paused=False shown=6,215,9,923 cam=5,98,0,54,10,87 enemy1=0,428 hp35
+230 engage Night tick=453 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f30 paused=False shown=6,215,9,923 cam=5,95,0,54,10,86 enemy1=0,431 hp35
+231 engage Night tick=453 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f30 paused=False shown=6,215,9,923 cam=5,92,0,54,10,85 enemy1=0,431 hp35
+232 engage Night tick=454 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f30 paused=False shown=6,215,9,923 cam=5,92,0,54,10,85 enemy1=0,434 hp25
+233 engage Night tick=455 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f30 paused=False shown=6,215,9,923 cam=5,89,0,54,10,84 enemy1=0,437 hp15
+234 engage Night tick=455 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f29 paused=False shown=6,215,9,923 cam=5,85,0,54,10,83 enemy1=0,437 hp15
+235 engage Night tick=456 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f29 paused=False shown=6,215,9,923 cam=5,85,0,54,10,83 enemy1=0,441 hp15
+236 engage Night tick=457 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f29 paused=False shown=6,215,9,923 cam=5,83,0,54,10,82 enemy1=0,446 hp15
+237 engage Night tick=457 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f29 paused=False shown=6,215,9,923 cam=5,80,0,54,10,81 enemy1=0,446 hp15
+238 engage Night tick=458 hero=7458,11908 v=0,0 hp=200 alive=True cmd=h-1/64!f29 paused=False shown=6,215,9,923 cam=5,80,0,54,10,81 enemy1=0,451 hp15
+239 engage Night tick=459 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h28/64!f28 paused=False shown=6,230,9,887 cam=5,78,0,54,10,76 enemy1=0,417 hp15
+240 engage Night tick=459 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f28 paused=False shown=6,230,9,887 cam=5,76,0,54,10,74 enemy1=0,417 hp15
+241 engage Night tick=460 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f28 paused=False shown=6,230,9,887 cam=5,76,0,54,10,74 enemy1=0,422 hp15
+242 engage Night tick=461 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f28 paused=False shown=6,230,9,887 cam=5,73,0,54,10,73 enemy1=0,429 hp15
+243 engage Night tick=461 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f27 paused=False shown=6,230,9,887 cam=5,70,0,54,10,71 enemy1=0,429 hp15
+244 engage Night tick=462 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f27 paused=False shown=6,230,9,887 cam=5,70,0,54,10,71 enemy1=0,435 hp15
+245 engage Night tick=463 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f27 paused=False shown=6,230,9,887 cam=5,68,0,54,10,69 enemy1=0,442 hp15
+246 engage Night tick=463 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f27 paused=False shown=6,230,9,887 cam=5,65,0,54,10,68 enemy1=0,442 hp15
+247 engage Night tick=464 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f27 paused=False shown=6,230,9,887 cam=5,65,0,54,10,68 enemy1=0,450 hp15
+248 engage Night tick=465 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h-1/64!f27 paused=False shown=6,230,9,887 cam=5,63,0,54,10,66 enemy1=0,458 hp15
+249 engage Night tick=465 hero=7476,11864 v=0,0 hp=200 alive=True cmd=h28/64!f26 paused=False shown=6,240,9,863 cam=5,62,0,54,10,62 enemy1=0,458 hp15
+250 engage Night tick=466 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h28/64!f26 paused=False shown=6,250,9,838 cam=5,63,0,54,10,59 enemy1=0,427 hp15
+251 engage Night tick=467 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,59,0,54,10,58 enemy1=0,433 hp15
+252 engage Night tick=467 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,58,0,54,10,56 enemy1=0,433 hp15
+253 engage Night tick=468 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,58,0,54,10,56 enemy1=0,433 hp15
+254 engage Night tick=469 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,58,0,54,10,56 enemy1=0,433 hp15
+255 engage Night tick=469 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,58,0,54,10,56 enemy1=0,433 hp15
+256 engage Night tick=470 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,58,0,54,10,56 enemy1=0,433 hp5
+257 engage Night tick=471 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,58,0,54,10,56 enemy1=0,433 hp5
+258 engage Night tick=471 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,58,0,54,10,56 enemy1=0,433 hp5
+259 engage Night tick=472 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f26 paused=False shown=6,245,9,850 cam=5,58,0,54,10,56 enemy2=0,439 hp45
+260 engage Night tick=473 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f39 paused=False shown=6,245,9,850 cam=6,74,0,54,10,70 enemy2=0,430 hp45
+261 swing Night tick=473 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=False shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,430 hp45
+262 swing Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=False shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+263 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+264 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+265 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+266 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+267 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+268 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+269 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+270 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+271 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+272 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+273 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+274 paused Night tick=474 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=True shown=6,245,9,850 cam=6,71,0,54,10,71 enemy2=0,422 hp45
+275 resume Night tick=475 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=False shown=6,245,9,850 cam=6,69,0,54,10,72 enemy2=0,413 hp45
+276 resume Night tick=475 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=False shown=6,245,9,850 cam=6,66,0,54,10,74 enemy2=0,413 hp45
+277 resume Night tick=476 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f38 paused=False shown=6,245,9,850 cam=6,66,0,54,10,74 enemy2=0,406 hp45
+278 resume Night tick=477 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f37 paused=False shown=6,245,9,850 cam=6,63,0,54,10,75 enemy2=0,398 hp45
+279 resume Night tick=477 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f37 paused=False shown=6,245,9,850 cam=6,60,0,54,10,76 enemy2=0,398 hp45
+280 resume Night tick=478 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f37 paused=False shown=6,245,9,850 cam=6,60,0,54,10,76 enemy2=0,391 hp45
+281 resume Night tick=479 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f37 paused=False shown=6,245,9,850 cam=6,57,0,54,10,77 enemy2=0,385 hp45
+282 resume Night tick=479 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f36 paused=False shown=6,245,9,850 cam=6,54,0,54,10,78 enemy2=0,385 hp45
+283 resume Night tick=480 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f36 paused=False shown=6,245,9,850 cam=6,54,0,54,10,78 enemy2=0,379 hp45
+284 resume Night tick=481 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f36 paused=False shown=6,245,9,850 cam=6,51,0,54,10,79 enemy2=0,373 hp45
+285 resume Night tick=481 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f36 paused=False shown=6,245,9,850 cam=6,47,0,54,10,80 enemy2=0,373 hp45
+286 resume Night tick=482 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f36 paused=False shown=6,245,9,850 cam=6,47,0,54,10,80 enemy2=0,368 hp45
+287 resume Night tick=483 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f35 paused=False shown=6,245,9,850 cam=6,43,0,54,10,81 enemy2=0,364 hp45
+288 resume Night tick=483 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f35 paused=False shown=6,245,9,850 cam=6,40,0,54,10,82 enemy2=0,364 hp45
+289 resume Night tick=484 hero=7494,11820 v=0,0 hp=200 alive=True cmd=h-1/64!f35 paused=False shown=6,245,9,850 cam=6,40,0,54,10,82 enemy2=0,360 hp45
+290 strafe-attack Night tick=485 hero=7450,11838 v=0,0 hp=200 alive=True cmd=h52/64!f34 paused=False shown=6,208,9,865 cam=6,32,0,54,10,84 enemy2=0,367 hp35
+291 strafe-attack Night tick=485 hero=7450,11838 v=0,0 hp=200 alive=True cmd=h48/64!f33 paused=False shown=6,182,9,865 cam=6,15,0,54,10,84 enemy2=0,367 hp35
+292 strafe-attack Night tick=486 hero=7402,11838 v=0,0 hp=200 alive=True cmd=h48/64!f33 paused=False shown=6,155,9,865 cam=6,12,0,54,10,84 enemy2=0,366 hp35
+293 strafe-attack Night tick=487 hero=7354,11838 v=0,0 hp=200 alive=True cmd=h48/64!f31 paused=False shown=6,128,9,865 cam=5,95,0,54,10,83 enemy2=0,373 hp35
+294 strafe-attack Night tick=487 hero=7354,11838 v=0,0 hp=200 alive=True cmd=h48/64!f30 paused=False shown=6,102,9,865 cam=5,78,0,54,10,79 enemy2=0,373 hp35
+295 strafe-attack Night tick=488 hero=7306,11838 v=0,0 hp=200 alive=True cmd=h48/64!f30 paused=False shown=6,075,9,865 cam=5,76,0,54,10,79 enemy2=0,388 hp35
+296 strafe-attack Night tick=489 hero=7262,11820 v=0,0 hp=200 alive=True cmd=h44/64!f28 paused=False shown=6,052,9,850 cam=5,61,0,54,10,72 enemy2=0,395 hp35
+297 strafe-attack Night tick=489 hero=7262,11820 v=0,0 hp=200 alive=True cmd=h44/64!f27 paused=False shown=6,028,9,840 cam=5,47,0,54,10,64 enemy2=0,395 hp35
+298 strafe-attack Night tick=490 hero=7218,11802 v=0,0 hp=200 alive=True cmd=h44/64!f27 paused=False shown=6,003,9,830 cam=5,45,0,54,10,63 enemy2=0,409 hp35
+299 strafe-attack Night tick=491 hero=7174,11784 v=0,0 hp=200 alive=True cmd=h44/64!f26 paused=False shown=5,978,9,820 cam=5,32,0,54,10,55 enemy2=0,430 hp35
+300 strafe-attack Night tick=491 hero=7174,11784 v=0,0 hp=200 alive=True cmd=h40/64!f25 paused=False shown=5,960,9,802 cam=5,22,0,54,10,44 enemy2=0,430 hp35
+301 strafe-attack Night tick=492 hero=7141,11751 v=0,0 hp=200 alive=True cmd=h40/64!f25 paused=False shown=5,942,9,783 cam=5,20,0,54,10,43 enemy3=0,399 hp45
+302 strafe-attack Night tick=493 hero=7108,11784 v=0,0 hp=200 alive=True cmd=h56/64!f40 paused=False shown=5,923,9,820 cam=6,49,0,54,10,61 enemy3=0,393 hp45
+303 strafe-attack Night tick=493 hero=7108,11784 v=0,0 hp=200 alive=True cmd=h56/64!f38 paused=False shown=5,905,9,838 cam=6,37,0,54,10,70 enemy3=0,393 hp45
+304 strafe-attack Night tick=494 hero=7075,11817 v=0,0 hp=200 alive=True cmd=h56/64!f38 paused=False shown=5,887,9,857 cam=6,35,0,54,10,72 enemy3=0,394 hp45
+305 strafe-attack Night tick=495 hero=7031,11835 v=0,0 hp=200 alive=True cmd=h52/64!f37 paused=False shown=5,859,9,863 cam=6,21,0,54,10,77 enemy3=0,387 hp45
+306 strafe-attack Night tick=495 hero=7031,11835 v=0,0 hp=200 alive=True cmd=h52/64!f36 paused=False shown=5,835,9,873 cam=6,06,0,54,10,82 enemy3=0,387 hp45
+307 strafe-attack Night tick=496 hero=6987,11853 v=0,0 hp=200 alive=True cmd=h52/64!f36 paused=False shown=5,810,9,883 cam=6,03,0,54,10,83 enemy3=0,386 hp45
+308 strafe-attack Night tick=497 hero=6943,11871 v=0,0 hp=200 alive=True cmd=h52/64!f34 paused=False shown=5,786,9,893 cam=5,88,0,54,10,87 enemy3=0,394 hp45
+309 strafe-attack Night tick=497 hero=6943,11871 v=0,0 hp=200 alive=True cmd=h48/64!f33 paused=False shown=5,759,9,893 cam=5,72,0,54,10,87 enemy3=0,394 hp45
+310 strafe-attack Night tick=498 hero=6895,11871 v=0,0 hp=200 alive=True cmd=h48/64!f33 paused=False shown=5,733,9,893 cam=5,69,0,54,10,87 enemy3=0,393 hp45
+311 strafe-attack Night tick=499 hero=6847,11871 v=0,0 hp=200 alive=True cmd=h48/64!f31 paused=False shown=5,706,9,893 cam=5,53,0,54,10,85 enemy3=0,400 hp45
+312 strafe-attack Night tick=499 hero=6847,11871 v=0,0 hp=200 alive=True cmd=h48/64!f30 paused=False shown=5,679,9,893 cam=5,37,0,54,10,82 enemy3=0,400 hp45
+313 strafe-attack Night tick=500 hero=6799,11871 v=0,0 hp=200 alive=True cmd=h48/64!f30 paused=False shown=5,653,9,893 cam=5,34,0,54,10,82 enemy3=0,415 hp35
+314 strafe-attack Night tick=501 hero=6755,11853 v=0,0 hp=200 alive=True cmd=h44/64!f29 paused=False shown=5,629,9,878 cam=5,20,0,54,10,76 enemy3=0,421 hp35
+315 strafe-attack Night tick=501 hero=6755,11853 v=0,0 hp=200 alive=True cmd=h44/64!f27 paused=False shown=5,605,9,868 cam=5,07,0,54,10,69 enemy3=0,421 hp35
+316 strafe-attack Night tick=502 hero=6711,11835 v=0,0 hp=200 alive=True cmd=h44/64!f27 paused=False shown=5,580,9,858 cam=5,04,0,54,10,68 enemy3=0,433 hp35
+317 strafe-attack Night tick=503 hero=6667,11817 v=0,0 hp=200 alive=True cmd=h44/64!f26 paused=False shown=5,556,9,848 cam=4,92,0,54,10,59 enemy3=0,452 hp35
+318 strafe-attack Night tick=503 hero=6667,11817 v=0,0 hp=200 alive=True cmd=h40/64!f25 paused=False shown=5,538,9,829 cam=4,82,0,54,10,50 enemy3=0,452 hp35
+319 strafe-attack Night tick=504 hero=6634,11784 v=0,0 hp=200 alive=True cmd=h40/64!f25 paused=False shown=5,519,9,811 cam=4,81,0,54,10,48 enemy3=0,461 hp35
+320 backpedal-attack Night tick=505 hero=6601,11817 v=0,0 hp=200 alive=True cmd=h56/64!f24 paused=False shown=5,501,9,848 cam=4,72,0,54,10,43 enemy3=0,511 hp35
+321 backpedal-attack Night tick=505 hero=6601,11817 v=0,0 hp=200 alive=True cmd=h56/64!f24 paused=False shown=5,483,9,866 cam=4,69,0,54,10,44 enemy3=0,511 hp35
+322 backpedal-attack Night tick=506 hero=6568,11850 v=0,0 hp=200 alive=True cmd=h56/64!f24 paused=False shown=5,464,9,884 cam=4,67,0,54,10,46 enemy3=0,561 hp35
+323 backpedal-attack Night tick=507 hero=6535,11883 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,446,9,903 cam=4,64,0,54,10,46 enemy3=0,611 hp35
+324 backpedal-attack Night tick=507 hero=6535,11883 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,428,9,921 cam=4,62,0,54,10,47 enemy3=0,611 hp35
+325 backpedal-attack Night tick=508 hero=6502,11916 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,409,9,939 cam=4,60,0,54,10,49 enemy3=0,661 hp35
+326 backpedal-attack Night tick=509 hero=6469,11949 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,391,9,958 cam=4,58,0,54,10,50 enemy3=0,711 hp35
+327 backpedal-attack Night tick=509 hero=6469,11949 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,373,9,976 cam=4,55,0,54,10,51 enemy3=0,711 hp35
+328 backpedal-attack Night tick=510 hero=6436,11982 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,354,9,994 cam=4,53,0,54,10,53 enemy3=0,761 hp35
+329 backpedal-attack Night tick=511 hero=6403,12015 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,336,10,013 cam=4,51,0,54,10,54 enemy3=0,811 hp35
+330 backpedal-attack Night tick=511 hero=6403,12015 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,318,10,031 cam=4,49,0,54,10,55 enemy3=0,811 hp35
+331 backpedal-attack Night tick=512 hero=6370,12048 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,299,10,049 cam=4,47,0,54,10,57 enemy3=0,862 hp35
+332 backpedal-attack Night tick=513 hero=6337,12081 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,281,10,068 cam=4,45,0,54,10,58 enemy3=0,912 hp35
+333 backpedal-attack Night tick=513 hero=6337,12081 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,263,10,086 cam=4,43,0,54,10,60 enemy3=0,912 hp35
+334 backpedal-attack Night tick=514 hero=6304,12114 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,244,10,104 cam=4,41,0,54,10,61 enemy3=0,963 hp35
+335 backpedal-attack Night tick=515 hero=6271,12147 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,226,10,123 cam=4,39,0,54,10,63 enemy3=1,013 hp35
+336 backpedal-attack Night tick=515 hero=6271,12147 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,208,10,141 cam=4,37,0,54,10,64 enemy3=1,013 hp35
+337 backpedal-attack Night tick=516 hero=6238,12180 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,189,10,159 cam=4,35,0,54,10,66 enemy3=1,063 hp35
+338 backpedal-attack Night tick=517 hero=6205,12213 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,171,10,178 cam=4,33,0,54,10,68 enemy3=1,114 hp35
+339 backpedal-attack Night tick=517 hero=6205,12213 v=0,0 hp=200 alive=True cmd=h56/64!f23 paused=False shown=5,153,10,196 cam=4,31,0,54,10,69 enemy3=1,114 hp35
+340 return Night tick=518 hero=6238,12180 v=0,0 hp=200 alive=True cmd=h24/64f23 paused=False shown=5,208,10,141 cam=4,36,0,54,10,64 enemy3=1,087 hp35
+341 return Night tick=519 hero=6271,12147 v=0,0 hp=200 alive=True cmd=h24/64f23 paused=False shown=5,226,10,123 cam=4,38,0,54,10,61 enemy3=1,061 hp35
+342 return Night tick=519 hero=6271,12147 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,244,10,104 cam=4,39,0,54,10,58 enemy3=1,061 hp35
+343 return Night tick=520 hero=6304,12114 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,263,10,086 cam=4,41,0,54,10,56 enemy3=1,035 hp35
+344 return Night tick=521 hero=6337,12081 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,281,10,068 cam=4,42,0,54,10,53 enemy3=1,009 hp35
+345 return Night tick=521 hero=6337,12081 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,299,10,049 cam=4,43,0,54,10,50 enemy3=1,009 hp35
+346 return Night tick=522 hero=6370,12048 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,318,10,031 cam=4,45,0,54,10,48 enemy3=0,983 hp35
+347 return Night tick=523 hero=6403,12015 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,336,10,013 cam=4,46,0,54,10,45 enemy3=0,958 hp35
+348 return Night tick=523 hero=6403,12015 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,354,9,994 cam=4,47,0,54,10,41 enemy3=0,958 hp35
+349 return Night tick=524 hero=6436,11982 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,373,9,976 cam=4,49,0,54,10,39 enemy3=0,933 hp35
+350 return Night tick=525 hero=6469,11949 v=0,0 hp=200 alive=True cmd=h24/64f22 paused=False shown=5,391,9,958 cam=4,50,0,54,10,36 enemy3=0,908 hp35
+351 return Night tick=525 hero=6469,11949 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,415,9,948 cam=4,52,0,54,10,33 enemy3=0,908 hp35
+352 return Night tick=526 hero=6513,11931 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,440,9,938 cam=4,54,0,54,10,32 enemy3=0,882 hp35
+353 return Night tick=527 hero=6557,11913 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,464,9,928 cam=4,56,0,54,10,31 enemy3=0,855 hp35
+354 return Night tick=527 hero=6557,11913 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,488,9,918 cam=4,59,0,54,10,30 enemy3=0,855 hp35
+355 return Night tick=528 hero=6601,11895 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,513,9,908 cam=4,61,0,54,10,29 enemy3=0,829 hp35
+356 return Night tick=529 hero=6645,11877 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,538,9,898 cam=4,64,0,54,10,28 enemy3=0,803 hp35
+357 return Night tick=529 hero=6645,11877 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,562,9,888 cam=4,66,0,54,10,26 enemy3=0,803 hp35
+358 return Night tick=530 hero=6689,11859 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,587,9,878 cam=4,68,0,54,10,25 enemy3=0,777 hp35
+359 return Night tick=531 hero=6733,11841 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,611,9,868 cam=4,71,0,54,10,24 enemy3=0,750 hp35
+360 return Night tick=531 hero=6733,11841 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,635,9,858 cam=4,73,0,54,10,23 enemy3=0,750 hp35
+361 return Night tick=532 hero=6777,11823 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,660,9,848 cam=4,76,0,54,10,22 enemy3=0,724 hp35
+362 return Night tick=533 hero=6821,11805 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,684,9,838 cam=4,78,0,54,10,21 enemy3=0,698 hp35
+363 return Night tick=533 hero=6821,11805 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,708,9,828 cam=4,80,0,54,10,19 enemy3=0,698 hp35
+364 return Night tick=534 hero=6865,11787 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,733,9,818 cam=4,83,0,54,10,18 enemy3=0,672 hp35
+365 return Night tick=535 hero=6909,11769 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,758,9,808 cam=4,85,0,54,10,17 enemy3=0,645 hp35
+366 return Night tick=535 hero=6909,11769 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,782,9,798 cam=4,87,0,54,10,15 enemy3=0,645 hp35
+367 return Night tick=536 hero=6953,11751 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,807,9,788 cam=4,90,0,54,10,14 enemy3=0,619 hp35
+368 return Night tick=537 hero=6997,11733 v=0,0 hp=200 alive=True cmd=h20/64f21 paused=False shown=5,831,9,778 cam=4,92,0,54,10,13 enemy3=0,593 hp35
+369 return Night tick=537 hero=6997,11733 v=0,0 hp=200 alive=True cmd=h20/64!f21 paused=False shown=5,855,9,768 cam=4,94,0,54,10,12 enemy3=0,593 hp35
+370 fall Night tick=538 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f21 paused=False shown=5,831,9,778 cam=4,92,0,54,10,13 enemy3=0,606 hp35
+371 fall Night tick=539 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f21 paused=False shown=5,831,9,778 cam=4,91,0,54,10,11 enemy3=0,620 hp35
+372 fall Night tick=539 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f21 paused=False shown=5,831,9,778 cam=4,91,0,54,10,10 enemy3=0,620 hp35
+373 fall Night tick=540 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f21 paused=False shown=5,831,9,778 cam=4,91,0,54,10,10 enemy3=0,633 hp35
+374 fall Night tick=541 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f21 paused=False shown=5,831,9,778 cam=4,91,0,54,10,09 enemy3=0,647 hp35
+375 fall Night tick=541 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f21 paused=False shown=5,831,9,778 cam=4,90,0,54,10,09 enemy3=0,647 hp35
+376 fall Night tick=542 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f21 paused=False shown=5,831,9,778 cam=4,90,0,54,10,09 enemy3=0,660 hp35
+377 fall Night tick=543 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,90,0,54,10,08 enemy3=0,674 hp35
+378 fall Night tick=543 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,90,0,54,10,07 enemy3=0,674 hp35
+379 fall Night tick=544 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,90,0,54,10,07 enemy3=0,688 hp35
+380 fall Night tick=545 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,89,0,54,10,06 enemy3=0,701 hp35
+381 fall Night tick=545 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,89,0,54,10,05 enemy3=0,701 hp35
+382 fall Night tick=546 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,89,0,54,10,05 enemy3=0,715 hp35
+383 fall Night tick=547 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,89,0,54,10,04 enemy3=0,729 hp35
+384 fall Night tick=547 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,89,0,54,10,04 enemy3=0,729 hp35
+385 fall Night tick=548 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,89,0,54,10,04 enemy3=0,743 hp35
+386 fall Night tick=549 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,89,0,54,10,03 enemy3=0,757 hp35
+387 fall Night tick=549 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,88,0,54,10,02 enemy3=0,757 hp35
+388 fall Night tick=550 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,88,0,54,10,02 enemy3=0,771 hp35
+389 fall Night tick=551 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,88,0,54,10,01 enemy3=0,785 hp35
+390 fall Night tick=551 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,88,0,54,10,01 enemy3=0,785 hp35
+391 fall Night tick=552 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,88,0,54,10,01 enemy3=0,799 hp35
+392 fall Night tick=553 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,88,0,54,10,00 enemy3=0,813 hp35
+393 fall Night tick=553 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,88,0,54,10,00 enemy3=0,813 hp35
+394 fall Night tick=554 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f20 paused=False shown=5,831,9,778 cam=4,88,0,54,10,00 enemy3=0,827 hp35
+395 fall Night tick=555 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,88,0,54,9,99 enemy3=0,841 hp35
+396 fall Night tick=555 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,88,0,54,9,98 enemy3=0,841 hp35
+397 fall Night tick=556 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,88,0,54,9,98 enemy3=0,855 hp35
+398 fall Night tick=557 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,98 enemy3=0,870 hp35
+399 fall Night tick=557 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,97 enemy3=0,870 hp35
+400 fall Night tick=558 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,97 enemy3=0,884 hp35
+401 fall Night tick=559 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,97 enemy3=0,898 hp35
+402 fall Night tick=559 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,96 enemy3=0,898 hp35
+403 fall Night tick=560 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,96 enemy3=0,912 hp35
+404 fall Night tick=561 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,96 enemy3=0,927 hp35
+405 fall Night tick=561 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,95 enemy3=0,927 hp35
+406 fall Night tick=562 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,95 enemy3=0,941 hp35
+407 fall Night tick=563 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,95 enemy3=0,955 hp35
+408 fall Night tick=563 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,94 enemy3=0,955 hp35
+409 fall Night tick=564 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,94 enemy3=0,970 hp35
+410 fall Night tick=565 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,94 enemy3=0,984 hp35
+411 fall Night tick=565 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,94 enemy3=0,984 hp35
+412 fall Night tick=566 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,94 enemy3=0,999 hp35
+413 fall Night tick=567 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,87,0,54,9,93 enemy3=1,013 hp25
+414 fall Night tick=567 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,93 enemy3=1,013 hp25
+415 fall Night tick=568 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,93 enemy3=1,027 hp25
+416 fall Night tick=569 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,92 enemy3=1,042 hp25
+417 fall Night tick=569 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,92 enemy3=1,042 hp25
+418 fall Night tick=570 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,92 enemy3=1,056 hp25
+419 fall Night tick=571 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,92 enemy3=1,071 hp25
+420 fall Night tick=571 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,91 enemy3=1,071 hp25
+421 fall Night tick=572 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,91 enemy3=1,085 hp25
+422 fall Night tick=573 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,91 enemy3=1,100 hp25
+423 fall Night tick=573 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,91 enemy3=1,100 hp25
+424 fall Night tick=574 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,91 enemy3=1,114 hp25
+425 fall Night tick=575 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,90 enemy3=1,129 hp25
+426 fall Night tick=575 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,90 enemy3=1,129 hp25
+427 fall Night tick=576 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f19 paused=False shown=5,831,9,778 cam=4,86,0,54,9,90 enemy3=1,143 hp25
+428 fall Night tick=577 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,90 enemy3=1,158 hp25
+429 fall Night tick=577 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,89 enemy3=1,158 hp25
+430 fall Night tick=578 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,89 enemy3=1,172 hp25
+431 fall Night tick=579 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,89 enemy3=1,187 hp25
+432 fall Night tick=579 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,89 enemy3=1,187 hp25
+433 fall Night tick=580 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,89 enemy3=1,202 hp25
+434 fall Night tick=581 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,88 enemy3=1,216 hp25
+435 fall Night tick=581 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,88 enemy3=1,216 hp25
+436 fall Night tick=582 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,88 enemy3=1,231 hp25
+437 fall Night tick=583 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,88 enemy3=1,245 hp25
+438 fall Night tick=583 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,88 enemy3=1,245 hp25
+439 fall Night tick=584 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,88 enemy3=1,260 hp25
+440 fall Night tick=585 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,87 enemy3=1,275 hp15
+441 fall Night tick=585 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,87 enemy3=1,275 hp15
+442 fall Night tick=586 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,87 enemy3=1,289 hp15
+443 fall Night tick=587 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,87 enemy3=1,304 hp15
+444 fall Night tick=587 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,87 enemy3=1,304 hp15
+445 fall Night tick=588 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,87 enemy3=1,319 hp15
+446 fall Night tick=589 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,86 enemy3=1,333 hp15
+447 fall Night tick=589 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,86 enemy3=1,333 hp15
+448 fall Night tick=590 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,86 enemy3=1,348 hp15
+449 fall Night tick=591 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,86 enemy3=1,363 hp15
+450 fall Night tick=591 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,86 enemy3=1,363 hp15
+451 fall Night tick=592 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,86 enemy3=1,377 hp15
+452 fall Night tick=593 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,86 enemy3=1,392 hp15
+453 fall Night tick=593 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,85 enemy3=1,392 hp15
+454 fall Night tick=594 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,85 enemy3=1,407 hp15
+455 fall Night tick=595 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,85 enemy3=1,422 hp15
+456 fall Night tick=595 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,85 enemy3=1,422 hp15
+457 fall Night tick=596 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,85 enemy3=1,436 hp15
+458 fall Night tick=597 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,85 enemy3=1,451 hp15
+459 fall Night tick=597 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,85 enemy3=1,451 hp15
+460 fall Night tick=598 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,85 enemy3=1,466 hp15
+461 fall Night tick=599 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,84 enemy3=1,480 hp15
+462 fall Night tick=599 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,84 enemy3=1,480 hp15
+463 fall Night tick=600 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,84 enemy3=1,495 hp15
+464 fall Night tick=601 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,84 enemy3=1,510 hp15
+465 fall Night tick=601 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,84 enemy3=1,510 hp15
+466 fall Night tick=602 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,86,0,54,9,84 enemy3=1,525 hp15
+467 fall Night tick=603 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,84 enemy3=1,539 hp5
+468 fall Night tick=603 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,539 hp5
+469 fall Night tick=604 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,554 hp5
+470 fall Night tick=605 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,569 hp5
+471 fall Night tick=605 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,569 hp5
+472 fall Night tick=606 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,584 hp5
+473 fall Night tick=607 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,598 hp5
+474 fall Night tick=607 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,598 hp5
+475 fall Night tick=608 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,613 hp5
+476 fall Night tick=609 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,83 enemy3=1,628 hp5
+477 fall Night tick=609 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,82 enemy3=1,628 hp5
+478 fall Night tick=610 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,82 enemy3=1,643 hp5
+479 fall Night tick=611 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,82 enemy3=1,658 hp5
+480 fall Night tick=611 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,82 enemy3=1,658 hp5
+481 fall Night tick=612 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,82 enemy3=1,672 hp5
+482 fall Night tick=613 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,82 enemy3=1,687 hp5
+483 fall Night tick=613 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,82 enemy3=1,687 hp5
+484 fall Night tick=614 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,82 enemy3=1,690 hp5
+485 fall Night tick=615 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,81 enemy3=1,688 hp5
+486 fall Night tick=615 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,80 enemy3=1,688 hp5
+487 fall Night tick=616 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f18 paused=False shown=5,831,9,778 cam=4,85,0,54,9,80 enemy3=1,686 hp5
+488 fall Night tick=617 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,80 enemy3=1,684 hp5
+489 fall Night tick=617 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79 enemy3=1,684 hp5
+490 down Night tick=618 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79 enemy3=1,682 hp5
+491 down Night tick=619 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79 enemy3=1,680 hp5
+492 down Night tick=619 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79 enemy3=1,680 hp5
+493 down Night tick=620 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79 enemy3=1,679 hp5
+494 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+495 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+496 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+497 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+498 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+499 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+500 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+501 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+502 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+503 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+504 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+505 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+506 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+507 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+508 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+509 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+510 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+511 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+512 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+513 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+514 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+515 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+516 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+517 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+518 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+519 down Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+520 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+521 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+522 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+523 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+524 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+525 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+526 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+527 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+528 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+529 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+530 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+531 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+532 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+533 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+534 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+535 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+536 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+537 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+538 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+539 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+540 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+541 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+542 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+543 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+544 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+545 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+546 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+547 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+548 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+549 rise Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+550 strategic Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+551 strategic Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+552 strategic Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+553 strategic Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+554 strategic Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+555 strategic Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+556 strategic Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+557 strategic Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+558 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+559 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+560 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+561 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+562 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+563 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+564 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+565 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+566 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+567 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+568 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+569 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+570 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+571 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79
+572 enter Reward tick=621 hero=6997,11733 v=0,0 hp=1 alive=True cmd=h-1/64f17 paused=False shown=5,831,9,778 cam=4,85,0,54,9,79

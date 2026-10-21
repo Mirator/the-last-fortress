@@ -48,10 +48,52 @@ namespace TheLastFortress
         public const float FigureScale = 0.27f;
 
         /// <summary>The camera currently rendering the board (screen-space anchors project with it).</summary>
-        public Camera ActiveCamera => HeroViewActive ? HeroRig.Camera : cameraRig.Camera;
+        public Camera ActiveCamera => HeroViewActive || exitingHeroView ? HeroRig.Camera : cameraRig.Camera;
 
-        /// <summary>The hero view captures the mouse while play is live (not in menus, dialogs or the Reward screen).</summary>
-        public bool CursorLocked => HeroViewActive && !Suspended && Sim != null && (Sim.State == RunState.Day || Sim.State == RunState.Night);
+        /// <summary>
+        /// The hero view captures the mouse while play is live (not in menus, dialogs or the Reward screen) and, after focus
+        /// loss or a menu, only once the player has clicked to recapture it (specs/003 section 6).
+        /// </summary>
+        public bool CursorLocked => HeroViewActive && !Suspended && !AwaitingRecapture && Sim != null && (Sim.State == RunState.Day || Sim.State == RunState.Night);
+
+        /// <summary>
+        /// The window lost focus (specs/003 section 6): advancement and the presentation clock stop through this gate, the
+        /// cursor is freed and unaccepted input dropped. The player's own Night pause is never touched.
+        /// </summary>
+        public bool FocusSuspended { get; private set; }
+
+        /// <summary>The hero view waits for a click to capture the cursor again; that click is consumed (it never attacks).</summary>
+        public bool AwaitingRecapture { get; private set; }
+
+        /// <summary>Off for unattended captures, which run in the background on purpose (turning it off lifts any focus suspension).</summary>
+        public bool FocusGateEnabled
+        {
+            get => focusGateEnabled;
+            set
+            {
+                focusGateEnabled = value;
+                if (value) return;
+                FocusSuspended = false;
+                AwaitingRecapture = false;
+            }
+        }
+
+        bool focusGateEnabled = true;
+
+        void OnApplicationFocus(bool focused)
+        {
+            if (!Application.isBatchMode) SetApplicationFocus(focused); // a batch run has no window focus to follow
+        }
+
+        /// <summary>Applies a window focus change (Unity's focus message; tests call it directly).</summary>
+        public void SetApplicationFocus(bool focused)
+        {
+            if (!FocusGateEnabled) return;
+            FocusSuspended = !focused;
+            if (focused) return;
+            Player?.ClearHeroInput();
+            if (HeroViewActive) AwaitingRecapture = true;
+        }
 
         public WorldView World { get; private set; }
         public RouteOverlay Overlay { get; private set; }
@@ -165,7 +207,7 @@ namespace TheLastFortress
         public bool ExitAfterSave { get; private set; }
 
         /// <summary>Combat and input are suspended by the menu or a guard dialog.</summary>
-        public bool Suspended => MenuOpen || PendingConfirm != null;
+        public bool Suspended => MenuOpen || PendingConfirm != null || FocusSuspended;
 
         /// <summary>The launch/title menu: no run is active behind it.</summary>
         public bool TitleScreen => MenuOpen && (Persistence == null || !Persistence.HasRun);
@@ -187,11 +229,12 @@ namespace TheLastFortress
             if (IsRelease)
             {
                 var baseDefinitions = content.releaseDefinitions.ToDefinitions();
-                var release = RulesProfile.TwelveNightsWalking(baseDefinitions); // release-rules-3: people walk at true scale
+                var release = RulesProfile.TwelveNightsContact(baseDefinitions); // release-rules-4: the production-slice hero (plan 019)
+                var walking = RulesProfile.TwelveNightsWalking(baseDefinitions); // release-rules-3 saves keep their hero
                 var heroRun = RulesProfile.TwelveNightsHero(baseDefinitions); // release-rules-2 saves keep their speeds
                 var beforeHero = RulesProfile.TwelveNights(baseDefinitions); // release-rules-1 saves continue without a hero
                 var legacy = RulesProfile.SixNights(content.mvpDefinitions != null ? content.mvpDefinitions.ToDefinitions() : MvpDefinitions.CreateDefault());
-                Catalog = new RulesCatalog(release, heroRun, beforeHero, legacy);
+                Catalog = new RulesCatalog(release, walking, heroRun, beforeHero, legacy);
                 Definitions = release.Definitions;
                 PurchasableKinds = RulesProfile.ReleaseKinds;
             }
@@ -320,6 +363,13 @@ namespace TheLastFortress
                 else EnterNormalMode();
             }
 
+            if (!HeroViewActive) AwaitingRecapture = false;
+            else if (AwaitingRecapture && !Suspended && Player.Mouse != null && Player.Mouse.leftButton.wasPressedThisFrame)
+            {
+                AwaitingRecapture = false; // this click only recaptures the cursor
+                Player.ConsumeNextClick();
+            }
+
             if (!Suspended) Player.Tick(dt);
             else if (cameraRig.IsDragging) cameraRig.CancelDrag(); // a menu or dialog never keeps a drag (or its cursor)
             if (AutoAdvance) AdvanceSimulation(dt);
@@ -379,22 +429,40 @@ namespace TheLastFortress
         /// Tab: switches between the strategic and the hero view (specs/003 3.1). Only for a run with a hero, in Day or
         /// Night, outside menus. Entering sets Night speed to 1x without touching pause. Returns whether the view changed.
         /// </summary>
-        public bool SetHeroView(bool on)
+        public bool SetHeroView(bool on) => SetHeroView(on, false);
+
+        /// <param name="smooth">Leaving: ease the hero camera out to the strategic framing first (Tab, 1-8). Run boundaries cut.</param>
+        public bool SetHeroView(bool on, bool smooth)
         {
+            if (!on && !smooth && exitingHeroView) FinishHeroExit();
             if (on == HeroViewActive) return false;
             if (on && (HeroRig == null || Sim?.Hero == null || Suspended || TitleScreen || !(Sim.State == RunState.Day || Sim.State == RunState.Night)))
                 return false;
             HeroViewActive = on;
+            Player.ClearHeroInput(); // no tap crosses a view switch
             if (on)
             {
                 speedBeforeHeroView = GameSpeed;
                 GameSpeed = 1; // the lock never resumes a paused night (SetGameSpeed would)
                 Player.CancelTool();
                 cameraRig.CancelDrag();
-                HeroRig.BeginFrom(cameraRig.transform, CameraRig.Yaw, cameraRig.Size, cameraRig.Focus);
+                if (exitingHeroView)
+                {
+                    exitingHeroView = false; // turned back mid-exit: ease in from where the camera is
+                    HeroRig.BeginFromCurrent();
+                }
+                else HeroRig.BeginFrom(cameraRig.transform, CameraRig.Yaw, cameraRig.Size, cameraRig.Focus);
             }
 
             else GameSpeed = speedBeforeHeroView; // the strategic speed returns (never resumes a pause either)
+
+            if (!on && smooth && HeroRig != null)
+            {
+                // Input is strategic at once; the hero camera keeps rendering while it eases out, then the views swap.
+                exitingHeroView = true;
+                HeroRig.BeginExit();
+                return true;
+            }
 
             cameraRig.Camera.enabled = !on;
             HeroRig.Camera.enabled = on;
@@ -404,6 +472,20 @@ namespace TheLastFortress
         }
 
         Vector3? fixedHeroCamera;
+        int heroFootfalls;
+        bool exitingHeroView;
+
+        /// <summary>The eased exit from the hero view is running (the hero camera still renders).</summary>
+        public bool ExitingHeroView => exitingHeroView;
+
+        void FinishHeroExit()
+        {
+            exitingHeroView = false;
+            cameraRig.Camera.enabled = true;
+            HeroRig.Camera.enabled = false;
+            if (cameraRig.TryGetComponent<AudioListener>(out var strategicEars)) strategicEars.enabled = true;
+            HeroRig.GetComponent<AudioListener>().enabled = false;
+        }
         int speedBeforeHeroView = 1;
 
         /// <summary>
@@ -440,16 +522,31 @@ namespace TheLastFortress
             var overlayShown = !TitleScreen && !HeroViewActive;
             if (Overlay.gameObject.activeSelf != overlayShown) Overlay.gameObject.SetActive(overlayShown);
             World.CharacterScale = FigureScale; // the same in both views
+            World.HeroCameraShown = HeroViewActive || exitingHeroView || fixedHeroCamera.HasValue;
             World.Sync(Sim, frameEvents, fxDt);
             if (HeroView != null)
             {
                 var steering = HeroViewActive && !CombatFrozen && (Sim.State == RunState.Day || Sim.State == RunState.Night);
-                HeroView.Sync(Sim, frameEvents, fxDt, steering ? Player.HeroInput : (HeroCommand?)null, !HeroViewActive && !TitleScreen, World.CharacterScale);
+                HeroView.Sync(Sim, frameEvents, fxDt, steering ? Player.HeroInput : (HeroCommand?)null, !HeroViewActive && !TitleScreen, World.CharacterScale,
+                    HeroViewActive ? HeroRig.Yaw : (float?)null);
+                if (HeroViewActive || exitingHeroView || fixedHeroCamera.HasValue) HeroRig.Obstacles.Refresh(World); // read-only blockers from what is drawn
                 if (HeroViewActive) HeroRig.Follow(HeroView.ShownPosition, Sim, dt);
+                else if (exitingHeroView && HeroRig.FollowExit(cameraRig.transform, cameraRig.Size, cameraRig.Focus, dt)) FinishHeroExit();
                 else if (fixedHeroCamera.HasValue) HeroRig.Follow(fixedHeroCamera.Value, Sim, dt);
-                Sky.Sync(World.NightBlend, HeroViewActive || fixedHeroCamera.HasValue, HeroRig.Camera);
-                if (HeroViewActive || fixedHeroCamera.HasValue) World.DrawGrass(HeroRig.Camera, Sim); // true-scale grass, hero view only
+                HeroView.SetHiddenFromCamera(HeroViewActive && HeroRig.ShownDistance < 0.12f && !HeroRig.InTransition);
+                var heroCameraShown = HeroViewActive || exitingHeroView || fixedHeroCamera.HasValue;
+                Sky.Sync(World.NightBlend, heroCameraShown, HeroRig.Camera);
+                if (heroCameraShown) World.DrawGrass(HeroRig.Camera, Sim); // true-scale grass, hero camera only
                 if (World.StrategicBackground.HasValue) cameraRig.Camera.backgroundColor = World.StrategicBackground.Value;
+            }
+
+            if (Audio != null)
+            {
+                Audio.HeroListener = HeroViewActive;
+                // Footfalls where the shown release-rules-4 hero plants a foot, heard from the hero camera only.
+                var feet = HeroView != null && HeroView.AnimationRig != null ? HeroView.AnimationRig.FootfallCount : 0;
+                if (HeroViewActive && feet > heroFootfalls && fxDt > 0f) Audio.Footfall(HeroView.AnimationRig.LastFootfall);
+                heroFootfalls = feet;
             }
 
             Audio?.Consume(Sim, frameEvents, fxDt, dt, CombatFrozen, Suspended, TitleScreen);
@@ -565,7 +662,12 @@ namespace TheLastFortress
         {
             Persistence?.Detach();
             MenuOpen = false;
-            CreateRun(new RunConfig { Definitions = NewRunDefinitions, Wave = IsMvp ? WavePlan.CreateMvpStressWave() : WavePlan.CreateStressWave(), StressMode = true });
+            CreateRun(new RunConfig
+            {
+                Definitions = NewRunDefinitions, Wave = IsMvp ? WavePlan.CreateMvpStressWave() : WavePlan.CreateStressWave(), StressMode = true,
+                // -stress-hero (plan 019): the release hero of new runs stands in the fixture, so its cost is measured.
+                StressHeroRules = IsRelease && HasArg(Environment.GetCommandLineArgs(), "-stress-hero") ? ReleaseCampaign.RulesVersion : null,
+            });
         }
 
         void CreateRun(RunConfig config)
@@ -577,6 +679,7 @@ namespace TheLastFortress
         void LoadRun(RunSimulation sim)
         {
             SetHeroView(false); // every new, loaded or restarted run starts in the strategic view
+            HeroRig?.ResetOrbit(); // and its first hero view starts from the strategic yaw
             Sim = sim;
             Definitions = sim.Definitions; // a loaded legacy save plays with its own profile's definitions
             observedState = sim.State;
@@ -674,6 +777,8 @@ namespace TheLastFortress
             if (!IsMvp) return;
             MenuOpen = true;
             Player.CancelTool();
+            Player.ClearHeroInput();
+            if (HeroViewActive) AwaitingRecapture = true; // back from the menu, a click recaptures the cursor (consumed)
             if (!Persistence.HasRun) cameraRig.SetView(TitleFocus, TitleSize);
             var slot = Persistence.Store.LatestSlot();
             LatestSave = slot >= 0 ? Persistence.Store.Read(slot, Catalog) : new SaveLoad { Status = SaveStatus.None };

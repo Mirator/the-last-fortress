@@ -45,11 +45,19 @@ namespace TheLastFortress
             PerkPool = PerkRules.ReleaseIds, PurchasableKinds = ReleaseKinds,
         };
 
-        /// <summary>Twelve nights with the hero at real-scale speeds (release-rules-3): every new release run.</summary>
+        /// <summary>Twelve nights with the hero at real-scale speeds (release-rules-3).</summary>
         public static RulesProfile TwelveNightsWalking(PrototypeDefinitions defs) => new RulesProfile
         {
             RulesVersion = ReleaseCampaign.RulesV3, CampaignId = ReleaseCampaign.CampaignId, Label = ReleaseCampaign.Label,
             ContentVersion = ReleaseCampaign.ContentVersion, Schema = RunCheckpoint.CurrentSchema, Definitions = ReleaseCampaign.Walking(defs),
+            PerkPool = PerkRules.ReleaseIds, PurchasableKinds = ReleaseKinds,
+        };
+
+        /// <summary>Twelve nights with release-rules-3 enemies and the production-slice hero (release-rules-4, specs/003): every new release run.</summary>
+        public static RulesProfile TwelveNightsContact(PrototypeDefinitions defs) => new RulesProfile
+        {
+            RulesVersion = ReleaseCampaign.RulesV4, CampaignId = ReleaseCampaign.CampaignId, Label = ReleaseCampaign.Label,
+            ContentVersion = ReleaseCampaign.ContentVersion, Schema = RunCheckpoint.CurrentSchema, Definitions = ReleaseCampaign.Contact(defs),
             PerkPool = PerkRules.ReleaseIds, PurchasableKinds = ReleaseKinds,
         };
 
