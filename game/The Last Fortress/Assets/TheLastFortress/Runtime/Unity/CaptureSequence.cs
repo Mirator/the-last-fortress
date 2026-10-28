@@ -126,6 +126,13 @@ namespace TheLastFortress
                 yield break;
             }
 
+            if (game.IsRelease && captureSet == "fullrun")
+            {
+                yield return RunFullRun();
+                Application.Quit();
+                yield break;
+            }
+
             if (game.IsRelease && captureSet == "023")
             {
                 yield return RunPlan023();
@@ -874,6 +881,194 @@ namespace TheLastFortress
         /// 10.5; the Day board at 4.5 and 10.5; the 100-enemy stress fixture at 5.5 and 10.5. Explicit sizes, so the frames
         /// match across builds whatever the default zoom is.
         /// </summary>
+        /// <summary>
+        /// Plan 026 (-capture-set fullrun): a whole twelve-night release run on Crossing seed 2, played by the recorded
+        /// kill-zone script (Day builds, Keep repairs, perk order) with the active hero script, filmed at every Day, Night
+        /// start, mid-night and Reward, so a capture review covers the late game. Mirrors ReleasePolicyTests.KillZone and
+        /// ActiveHeroCommand, which are not in the player build. A script, not a player: it shows the screens, not the fun.
+        /// </summary>
+        IEnumerator RunFullRun()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            const uint seed = 2;
+            game.SetMapProfile(MapProfiles.Crossing);
+            game.NewRun(seed, false);
+            yield return null;
+            var symmetry = MapProfiles.SymmetryFor(seed);
+            var defense = new ScriptQueue(FullRunDefense, symmetry);
+            var economy = new ScriptQueue(FullRunEconomy, symmetry);
+            log.AppendLine($"full run: {game.Sim.Config.Terrain.Describe()} rules={game.Sim.Campaign.RulesVersion}");
+
+            IEnumerator Framed()
+            {
+                var until = Time.realtimeSinceStartup + 3f;
+                while (game.CameraRig.Easing && Time.realtimeSinceStartup < until) yield return null;
+            }
+
+            void StepNight(double untilSeconds)
+            {
+                for (var i = 0; i < 60000 && game.Sim.State == RunState.Night && game.Sim.NightElapsedSeconds < untilSeconds; i++)
+                {
+                    game.Sim.Step(ActiveHeroCommand(game.Sim));
+                    game.SyncViews((float)PrototypeDefinitions.StepSeconds);
+                }
+            }
+
+            for (var day = 1; day <= game.Sim.TotalNights && !game.Sim.IsTerminal; day++)
+            {
+                var sim = game.Sim;
+                var bought = new System.Collections.Generic.List<string>();
+                var minimum = FullRunMinDefense[Mathf.Min(day, FullRunMinDefense.Length) - 1];
+                defense.Buy(sim, bought, minimum);
+                if (day <= 6 && (defense.Bought >= minimum || defense.Exhausted)) economy.Buy(sim, bought);
+                defense.Buy(sim, bought);
+                sim.RepairQuote(sim.Keep, out var restored, out var cost);
+                if (restored > 0 && (sim.Keep.Hp * 4 < sim.Keep.MaxHp || (sim.Keep.Hp * 4 < sim.Keep.MaxHp * 3 && restored == sim.Keep.MaxHp - sim.Keep.Hp && cost * 2 <= sim.Gold)))
+                {
+                    sim.TryRepair(sim.Keep);
+                    bought.Add($"repair Keep +{restored}");
+                }
+
+                log.AppendLine($"Day {day}: gold left {sim.Gold}; {string.Join("; ", bought)}");
+                game.SyncViews();
+                game.CameraRig.ResetView();
+                yield return Shot($"full-{day:00}-a-day");
+                game.CameraRig.ShowWholeBoard();
+                yield return Shot($"full-{day:00}-b-day-board");
+                if (!game.StartNight())
+                {
+                    log.AppendLine($"night {day} did not start: {string.Join("; ", sim.Diagnostics)}");
+                    break;
+                }
+
+                yield return Framed();
+                log.AppendLine($"  framing: focus={game.CameraRig.Focus:F2} size={game.CameraRig.Size:F2}");
+                StepNight(8.0);
+                yield return Shot($"full-{day:00}-c-night-8s");
+                StepNight(25.0);
+                yield return Shot($"full-{day:00}-d-night-25s");
+                if (day % 3 == 0 && game.Sim.State == RunState.Night) yield return HeroShot($"full-{day:00}-e-night-hero", game.HeroRig.Yaw, 12f);
+                StepNight(double.MaxValue);
+                var recap = game.Sim.LastNight;
+                log.AppendLine($"  Night {day}: {game.Sim.State} {game.Sim.NightElapsedSeconds:0.0}s; Keep -{recap.KeepDamage} ({game.Sim.Keep.Hp}/{game.Sim.Keep.MaxHp}); " +
+                               $"lost {recap.BuildingsLost}; killed {recap.EnemiesDefeated} (hero {recap.HeroKills})");
+                if (game.Sim.State != RunState.Reward) continue;
+                yield return Shot($"full-{day:00}-f-reward");
+                var offer = game.Sim.CurrentOffer;
+                var pick = FullRunPerks.FirstOrDefault(id => offer.PerkIds.Contains(id)) ?? offer.PerkIds[0];
+                game.ChoosePerk(offer.OfferId, pick);
+                log.AppendLine($"  Reward {string.Join(",", offer.PerkIds)} -> {pick}");
+                yield return null;
+            }
+
+            game.CameraRig.ResetView();
+            yield return Shot($"full-13-outcome-{game.Sim.State}");
+            log.AppendLine($"Result: {game.Sim.State}; nights {game.Sim.Stats.NightsCleared}/12; defeated {game.Sim.Stats.EnemiesDefeated}; " +
+                           $"bought {game.Sim.Stats.BuildingsPurchased}; perks [{string.Join(",", game.Sim.OwnedPerks)}]");
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-fullrun-log.txt"), log.ToString());
+        }
+
+        static readonly string[] FullRunDefense =
+        {
+            "Tower 9 9", "Tower 11 11", "Tower 9 11", "Tower 11 9", "Wall 9 10", "Wall 11 10", "Wall 10 9", "Wall 10 11",
+            "Tower 8 10", "Tower 12 10",
+            "Cannon 7 7", "Watchtower 9 8", "Cannon 12 6", "Watchtower 11 8", "Cannon 7 12", "Watchtower 8 11",
+            "Cannon 13 11", "Watchtower 12 11", "Tower 10 8", "Tower 10 12",
+            "RepairStation 6 9", "Cannon 4 9", "Cannon 15 9", "Cannon 9 15", "Cannon 9 4",
+            "Tower 7 10", "Tower 13 10", "Tower 10 7", "Tower 10 13", "Tower 6 11", "Tower 14 9",
+        };
+
+        static readonly string[] FullRunEconomy = { "House 12 8", "House 8 12", "House 13 8", "Farm 12 13", "House 7 12", "Farm 6 13", "House 13 7", "Farm 15 7" };
+
+        static readonly int[] FullRunMinDefense = { 4, 4, 6, 7, 11, 13, 16, 17, 20, 23, 26, 29 };
+
+        static readonly string[] FullRunPerks =
+        {
+            PerkRules.CounterBattery, PerkRules.Shrapnel, PerkRules.HeavyShot, PerkRules.Sharpshooters, PerkRules.SignalFires,
+            PerkRules.Overwatch, PerkRules.FortressHeart, PerkRules.Gatehouse, PerkRules.BlastShields, PerkRules.ExpandedVision,
+            PerkRules.FlamingArrows, PerkRules.ReinforcedTimber, PerkRules.HardenedRoofs, PerkRules.ThriftyConstruction,
+            PerkRules.WarBonds, PerkRules.FocusedFire, PerkRules.LastStand, PerkRules.EfficientFarming, PerkRules.MarketSquare,
+            PerkRules.Recycling, PerkRules.BarbedDefenses, PerkRules.KillZone, PerkRules.SpikedCorridor, PerkRules.FieldEngineers,
+        };
+
+        /// <summary>A scripted build list, turned about the Keep to the board's symmetry; buys in order while affordable.</summary>
+        sealed class ScriptQueue
+        {
+            readonly string[] items;
+            int next;
+            public int Bought;
+
+            public ScriptQueue(string[] items, int symmetry) => this.items = items.Select(i => TurnAboutKeep(i, symmetry)).ToArray();
+
+            public bool Exhausted => next >= items.Length;
+
+            public void Buy(RunSimulation sim, System.Collections.Generic.List<string> log, int limit = int.MaxValue)
+            {
+                while (next < items.Length && Bought < limit)
+                {
+                    var p = items[next].Split(' ');
+                    var kind = (BuildingKind)System.Enum.Parse(typeof(BuildingKind), p[0]);
+                    var r = sim.TryPlace(kind, new GridPos(int.Parse(p[1]), int.Parse(p[2])), out _);
+                    if (r == PlacementRejection.InsufficientGold) return;
+                    log.Add(r == PlacementRejection.None ? items[next] : $"{items[next]} SKIP {r}");
+                    if (r == PlacementRejection.None) Bought++;
+                    next++;
+                }
+            }
+
+            static string TurnAboutKeep(string item, int s)
+            {
+                if (s == 0) return item;
+                var p = item.Split(' ');
+                var kind = (BuildingKind)System.Enum.Parse(typeof(BuildingKind), p[0]);
+                var k = GridState.KeepCell;
+                var cells = BuildingDefinition.FootprintCells(kind, new GridPos(int.Parse(p[1]), int.Parse(p[2]))).Select(c =>
+                {
+                    int dx = c.X - k.X, dz = c.Z - k.Z;
+                    if (s >= 4) dx = -dx;
+                    for (var i = 0; i < (s & 3); i++) (dx, dz) = (-dz, dx);
+                    return new GridPos(k.X + dx, k.Z + dz);
+                }).ToList();
+                return $"{p[0]} {cells.Min(c => c.X)} {cells.Min(c => c.Z)}";
+            }
+        }
+
+        /// <summary>The active hero script: chase and hit the nearest enemy within 6 tiles of the Keep, else return to spawn.</summary>
+        static HeroCommand ActiveHeroCommand(RunSimulation sim)
+        {
+            var hero = sim.Hero;
+            if (hero == null || !hero.Alive) return HeroCommand.None;
+            Enemy target = null;
+            var best = double.MaxValue;
+            foreach (var e in sim.Enemies)
+            {
+                if (!e.Alive) continue;
+                double kx = e.X - (GridState.KeepCell.X + 0.5), kz = e.Z - (GridState.KeepCell.Z + 0.5);
+                if (kx * kx + kz * kz > 36.0) continue;
+                double dx = e.X - hero.X, dz = e.Z - hero.Z;
+                var d = dx * dx + dz * dz;
+                if (d >= best) continue;
+                best = d;
+                target = e;
+            }
+
+            if (target != null)
+            {
+                var facing = HeroRules.FacingToward(target.X - hero.X, target.Z - hero.Z);
+                var reach = hero.Profile.SwingReach;
+                var stop = best <= reach * 0.75 * (reach * 0.75);
+                return HeroCommand.Fine(stop ? -1 : facing, best <= reach * reach, facing);
+            }
+
+            var home = sim.HeroSpawnCell(GridState.KeepCell);
+            double hx = home.X + 0.5 - hero.X, hz = home.Z + 0.5 - hero.Z;
+            var toward = HeroRules.FacingToward(hx, hz);
+            return hx * hx + hz * hz < 0.04 ? HeroCommand.Fine(-1, false, hero.Facing) : HeroCommand.Fine(toward, false, toward);
+        }
+
         IEnumerator RunPlan023()
         {
             var log = new StringBuilder();
