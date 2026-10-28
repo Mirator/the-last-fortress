@@ -982,9 +982,29 @@ namespace TheLastFortress
             observedState = RunState.Night;
             nightStartedAt = Time.unscaledTime;
             Player.CancelTool();
+            // Spec 010: show the Keep, every entry used tonight and its road mouth (enemies walk in from there); at once when
+            // the hero view takes over.
+            nightFrame.Clear();
+            var keep = Prims.CellCenter(GridState.KeepCell, 0f);
+            nightFrame.Add(keep);
+            foreach (var entry in Sim.Wave.EntryCells)
+            {
+                var at = Prims.CellCenter(entry, 0f);
+                var away = at - keep;
+                var outward = Mathf.Abs(away.x) >= Mathf.Abs(away.z) ? new Vector3(Mathf.Sign(away.x), 0f, 0f) : new Vector3(0f, 0f, Mathf.Sign(away.z));
+                nightFrame.Add(at);
+                nightFrame.Add(at + outward * NightFrameRoad);
+            }
+
+            cameraRig.FrameNight(nightFrame, !Settings.heroViewAtNight);
             if (Settings.heroViewAtNight) SetHeroView(true);
             return true;
         }
+
+        readonly List<Vector3> nightFrame = new List<Vector3>();
+
+        /// <summary>Spec 010: how far beyond each entry, along its road, the Night framing reaches [P].</summary>
+        const float NightFrameRoad = 1.5f;
 
         public void TogglePause() => Sim.TogglePause();
 

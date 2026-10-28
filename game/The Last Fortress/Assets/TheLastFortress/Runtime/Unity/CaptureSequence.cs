@@ -881,6 +881,22 @@ namespace TheLastFortress
             game.AutoAdvance = false;
             game.SkipOnboarding();
 
+            // Plan 025 (spec 010): Night start frames the Keep and tonight's entries (Night 1 of seed 7: the North only).
+            IEnumerator NightFraming()
+            {
+                var until = Time.realtimeSinceStartup + 3f;
+                while (game.CameraRig.Easing && Time.realtimeSinceStartup < until) yield return null;
+                log.AppendLine($"framing: focus={game.CameraRig.Focus:F2} size={game.CameraRig.Size:F2} easing={game.CameraRig.Easing}");
+            }
+
+            game.NewRun(7, false);
+            yield return null;
+            game.CameraRig.ResetView();
+            game.StartNight();
+            yield return NightFraming();
+            StepUntil(() => game.Sim.AliveEnemyCount >= 3, 600);
+            yield return Shot("025-night1-start");
+
             var spawns = new System.Collections.Generic.List<SpawnEntry>();
             var mix = new[] { EnemyKind.Grunt, EnemyKind.Grunt, EnemyKind.Runner, EnemyKind.Grunt, EnemyKind.Archer, EnemyKind.Brute, EnemyKind.Bomber, EnemyKind.Grunt };
             for (var i = 0; i < 40; i++) spawns.Add(new SpawnEntry(i * 3, i % 2 == 0 ? MvpCampaign.West : MvpCampaign.East, i % 2, mix[i % mix.Length]));
@@ -891,8 +907,9 @@ namespace TheLastFortress
             game.CameraRig.SetView(CameraRig.DefaultFocus, 10.5f);
             yield return Shot("023-board-day-10.5");
             game.StartNight();
-            for (var i = 0; i < 60; i++) yield return null;
+            yield return NightFraming();
             log.AppendLine($"dense: {StepUntil(() => game.Sim.AliveEnemyCount >= 24, 2400)} alive={game.Sim.AliveEnemyCount}");
+            yield return Shot("025-dense-night-start");
             foreach (var size in new[] { 4.0f, 4.5f, 5.5f, 10.5f })
             {
                 game.CameraRig.SetView(CameraRig.DefaultFocus, size);

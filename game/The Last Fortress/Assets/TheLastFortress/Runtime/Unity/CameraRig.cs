@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -70,9 +71,60 @@ namespace TheLastFortress
 
         public void SetView(Vector3 newFocus, float newSize)
         {
+            easing = false; // an explicit view (Reset Camera, Z, H, scripts) ends a Night framing
             focus = newFocus;
             size = Mathf.Clamp(newSize, MinSize, MaxSize);
             Apply();
+        }
+
+        /// <summary>Spec 010: the safe area's margins (fractions of the screen) and the ease time of the Night framing [P].</summary>
+        const float FrameMarginY = 0.18f, FrameMarginX = 0.10f, FrameSeconds = 0.6f;
+
+        bool easing;
+        float easeT, easeFromSize, easeToSize;
+        Vector3 easeFromFocus, easeToFocus;
+
+        /// <summary>True while a Night framing eases (player camera input or an explicit view ends it).</summary>
+        public bool Easing => easing;
+
+        /// <summary>
+        /// Spec 010: the closest view, no closer than the default and no further than the whole board, that shows every
+        /// ground point inside the safe area clear of the HUD bars; eased over <see cref="FrameSeconds"/> or set at once.
+        /// </summary>
+        public void FrameNight(IReadOnlyList<Vector3> points, bool eased)
+        {
+            if (points.Count == 0) return;
+            var rotation = Quaternion.Euler(Pitch, Yaw, 0f);
+            Vector3 right = rotation * Vector3.right, up = rotation * Vector3.up;
+            float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue, maxY = float.MinValue;
+            foreach (var p in points)
+            {
+                float x = Vector3.Dot(p, right), y = Vector3.Dot(p, up);
+                minX = Mathf.Min(minX, x);
+                maxX = Mathf.Max(maxX, x);
+                minY = Mathf.Min(minY, y);
+                maxY = Mathf.Max(maxY, y);
+            }
+
+            // A ground point projects to (right, up) = (its right component, its horizontal forward component x sin pitch).
+            var forward = Quaternion.Euler(0f, Yaw, 0f) * Vector3.forward;
+            var newFocus = right * ((minX + maxX) * 0.5f) + forward * ((minY + maxY) * 0.5f / Mathf.Sin(Pitch * Mathf.Deg2Rad));
+            newFocus.y = 0f;
+            var halfY = (maxY - minY) * 0.5f / (1f - 2f * FrameMarginY);
+            var halfX = (maxX - minX) * 0.5f / (1f - 2f * FrameMarginX) / Mathf.Max(0.1f, Camera.aspect);
+            var newSize = Mathf.Clamp(Mathf.Max(halfY, halfX), DefaultSize, MaxSize);
+            if (!eased)
+            {
+                SetView(newFocus, newSize);
+                return;
+            }
+
+            easeFromFocus = focus;
+            easeFromSize = size;
+            easeToFocus = newFocus;
+            easeToSize = newSize;
+            easeT = 0f;
+            easing = true;
         }
 
         public bool TryScreenToWorld(Vector2 screen, out Vector3 world)
@@ -87,6 +139,8 @@ namespace TheLastFortress
         /// <summary>WASD/arrows pan, wheel zooms. Uses unscaled real time so it works while paused.</summary>
         public void Tick(Keyboard keyboard, Mouse mouse, bool pointerOverUi, float dt)
         {
+            var playerFocus = focus;
+            var playerSize = size;
             var move = Vector2.zero;
             if (keyboard != null)
             {
@@ -138,6 +192,19 @@ namespace TheLastFortress
             {
                 var scroll = mouse.scroll.ReadValue().y;
                 if (Mathf.Abs(scroll) > 0.01f) size = Mathf.Clamp(size - Mathf.Sign(scroll) * 0.8f * Sensitivity, MinSize, MaxSize);
+            }
+
+            if (easing)
+            {
+                if (focus != playerFocus || size != playerSize) easing = false; // the player took the camera: keep their view
+                else
+                {
+                    easeT = Mathf.Min(1f, easeT + dt / FrameSeconds);
+                    var t = Mathf.SmoothStep(0f, 1f, easeT);
+                    focus = Vector3.Lerp(easeFromFocus, easeToFocus, t);
+                    size = Mathf.Lerp(easeFromSize, easeToSize, t);
+                    easing = easeT < 1f;
+                }
             }
 
             shake = Mathf.MoveTowards(shake, 0f, dt * 0.8f);

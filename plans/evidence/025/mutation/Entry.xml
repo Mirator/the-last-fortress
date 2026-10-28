@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-28 17:29:19Z" end-time="2026-10-28 17:29:21Z" duration="1,7340277">
+  <test-suite type="TestSuite" id="1036" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="25" result="Failed" site="Child" start-time="2026-10-28 17:29:19Z" end-time="2026-10-28 17:29:21Z" duration="1.734028" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1030" name="TheLastFortress.PlayMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.PlayMode.Tests.dll" runstate="Runnable" testcasecount="25" result="Failed" site="Child" start-time="2026-10-28 17:29:19Z" end-time="2026-10-28 17:29:21Z" duration="1.725764" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="57692" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1031" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="25" result="Failed" site="Child" start-time="2026-10-28 17:29:19Z" end-time="2026-10-28 17:29:21Z" duration="1.723839" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1032" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="25" result="Failed" site="Child" start-time="2026-10-28 17:29:19Z" end-time="2026-10-28 17:29:21Z" duration="1.722632" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1021" name="ReleaseSceneTests" fullname="TheLastFortress.Tests.ReleaseSceneTests" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" testcasecount="8" result="Failed" site="Child" start-time="2026-10-28 17:29:19Z" end-time="2026-10-28 17:29:21Z" duration="1.720366" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1025" name="EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep" fullname="TheLastFortress.Tests.ReleaseSceneTests.EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep" methodname="EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="1323589535" result="Failed" start-time="2026-10-28 17:29:19Z" end-time="2026-10-28 17:29:21Z" duration="1.703589" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  (0.50, 0.00, 10.50) framed at (0.00, 0.07, 34.58), outside the safe area
+  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at TheLastFortress.Tests.ReleaseSceneTests.<EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep>g__AssertInSafeArea|14_0 (System.Collections.Generic.IEnumerable`1[T] points, TheLastFortress.Tests.ReleaseSceneTests+<>c__DisplayClass14_0& ) [0x00022] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\PlayMode\ReleaseSceneTests.cs:251
+at TheLastFortress.Tests.ReleaseSceneTests+<EntryMarkersStandAtTonightsEntriesAndChevronsFlowTowardTheKeep>d__14.MoveNext () [0x003ec] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\PlayMode\ReleaseSceneTests.cs:261
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@aebcb98460c6\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[New run: meadow seed 7: generated (attempt 0)
+<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\PlayMode-20261028-182921.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

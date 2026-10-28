@@ -235,6 +235,36 @@ namespace TheLastFortress.Tests
             Assert.IsTrue(game.StartNight());
             yield return null;
             Assert.AreEqual((entries.Count, 0), (game.Overlay.VisibleEntryCount, game.Overlay.VisibleChevronCount), "entry markers stay at Night; route chevrons are a Day preview");
+
+            // Spec 010: Night start eases the strategic camera out until the Keep and tonight's entries clear the HUD bars.
+            var rig = game.CameraRig;
+            Assert.IsTrue(rig.Easing, "Start Night eases to the framing");
+            var until = Time.realtimeSinceStartup + 3f; // the ease runs on real time (0.6 s)
+            while (rig.Easing && Time.realtimeSinceStartup < until) yield return null;
+            Assert.IsFalse(rig.Easing, "the framing finished within 3 s");
+            Assert.Greater(Vector3.Distance(rig.Focus, CameraRig.DefaultFocus), 1f, "the entry is off the default view, so the camera moved");
+            void AssertInSafeArea(System.Collections.Generic.IEnumerable<Vector3> points)
+            {
+                foreach (var p in points)
+                {
+                    var v = rig.Camera.WorldToViewportPoint(p);
+                    Assert.IsTrue(v.x > 0.099f && v.x < 0.901f && v.y > 0.179f && v.y < 0.821f, $"{p} framed at {v}, outside the safe area");
+                }
+            }
+
+            var framed = new System.Collections.Generic.List<Vector3> { keep };
+            foreach (var entry in entries) framed.Add(Prims.CellCenter(entry));
+            AssertInSafeArea(framed);
+            var twoSided = new[] { keep, Prims.CellCenter(new GridPos(0, 10)), Prims.CellCenter(new GridPos(20, 10)) }; // West and East
+            rig.FrameNight(twoSided, false);
+            Assert.Greater(rig.Size, CameraRig.DefaultSize, "two opposite entries need a wider view");
+            AssertInSafeArea(twoSided);
+
+            rig.FrameNight(new[] { keep, new Vector3(20.5f, 0f, 20.5f) }, true);
+            yield return null;
+            rig.ResetView(); // Reset Camera during an ease wins
+            for (var i = 0; i < 40; i++) yield return null;
+            Assert.AreEqual((CameraRig.DefaultFocus, CameraRig.DefaultSize, false), (rig.Focus, rig.Size, rig.Easing), "Reset Camera ends the framing");
         }
 
         /// <summary>
