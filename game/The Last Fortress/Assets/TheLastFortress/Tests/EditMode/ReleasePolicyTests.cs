@@ -154,6 +154,59 @@ namespace TheLastFortress.Tests
 
             /// <summary>"Fight nearest": walks to the nearest enemy within <see cref="ActiveHeroLeash"/> of the Keep and attacks.</summary>
             Active,
+
+            /// <summary>Plan 022 exploit probe: fights like <see cref="Active"/>, but after every contact runs off across the nearest Spike Trap.</summary>
+            Kite,
+        }
+
+        /// <summary>The kiting script's memory: the last contact it reacted to and the retreat in progress.</summary>
+        sealed class KiteState
+        {
+            public long LastContact = -1;
+            public int RetreatSteps, RetreatFacing;
+        }
+
+        /// <summary>
+        /// Plan 022: after each resolved contact, retreat for a fixed 40 steps (about 1.3 tiles, inside the 1.5 leash) toward
+        /// and past the Spike Trap nearest the struck enemy (within 3 tiles), else straight away from it; then fight again. The
+        /// retreat never waits for the enemy, so the script behaves the same whether or not the enemy may chase.
+        /// </summary>
+        static HeroCommand KiteHeroCommand(RunSimulation sim, KiteState state)
+        {
+            var hero = sim.Hero;
+            if (hero == null || !hero.Alive) return HeroCommand.None;
+            if (hero.ContactTick >= 0 && hero.ContactTick != state.LastContact && !hero.AttackPending)
+            {
+                state.LastContact = hero.ContactTick;
+                Enemy struck = null;
+                var best = double.MaxValue;
+                foreach (var e in sim.Enemies)
+                {
+                    if (!e.Alive) continue;
+                    var d = (e.X - hero.X) * (e.X - hero.X) + (e.Z - hero.Z) * (e.Z - hero.Z);
+                    if (d < best) (best, struck) = (d, e);
+                }
+
+                if (struck != null)
+                {
+                    double dx = hero.X - struck.X, dz = hero.Z - struck.Z, trapBest = 9.0;
+                    for (var x = 0; x < GridCoordinates.Size; x++)
+                    for (var z = 0; z < GridCoordinates.Size; z++)
+                    {
+                        if (!sim.Grid.HasTrap(new GridPos(x, z))) continue;
+                        double tx = x + 0.5 - struck.X, tz = z + 0.5 - struck.Z, t = tx * tx + tz * tz;
+                        if (t >= trapBest || t < 1e-9) continue;
+                        (trapBest, dx, dz) = (t, tx, tz);
+                    }
+
+                    state.RetreatFacing = HeroRules.FacingToward(dx, dz);
+                    state.RetreatSteps = 40;
+                }
+            }
+
+            if (state.RetreatSteps <= 0) return ActiveHeroCommand(sim);
+            state.RetreatSteps--;
+            return HeroCommand.Fine(state.RetreatFacing, false, state.RetreatFacing);
         }
 
         public const double ActiveHeroLeash = 6.0;
@@ -214,6 +267,12 @@ namespace TheLastFortress.Tests
         public sealed class HeroLog
         {
             public int Deaths, Contacts, Misses, KeepDamage;
+
+            /// <summary>Plan 022: chases started and Spike Trap hits while off the route, per enemy ID; enemy steps on and off the route.</summary>
+            public readonly Dictionary<int, int> Chases = new Dictionary<int, int>(), OffRouteTraps = new Dictionary<int, int>();
+
+            public readonly HashSet<int> Chasing = new HashSet<int>(), OffRoute = new HashSet<int>();
+            public long EnemySteps, OffRouteSteps;
         }
 
         public static RunSimulation Play(Policy policy, uint seed, StringBuilder log, int symmetry = 0, string rules = ReleaseCampaign.RulesV1,
@@ -230,6 +289,7 @@ namespace TheLastFortress.Tests
             var economy = new Queue(policy.Economy.Select(i => TurnAboutKeep(i, symmetry)).ToArray());
             var combat = 0.0;
             var (fuses, blasts, batch) = (0, 0, new List<SimEvent>()); // Bomber role check (plan 015 review)
+            var kite = hero == HeroScript.Kite ? new KiteState() : null;
             for (var day = 1; day <= sim.TotalNights && !sim.IsTerminal; day++)
             {
                 var bought = new List<string>();
@@ -255,12 +315,36 @@ namespace TheLastFortress.Tests
                 while (sim.State == RunState.Night)
                 {
                     Assert.Less(++steps, 60000, $"{policy.Name} seed {seed}: night {day} exceeded the step bound");
-                    sim.Step(sim.HasHero && hero == HeroScript.Active ? ActiveHeroCommand(sim) : HeroCommand.None);
+                    sim.Step(!sim.HasHero ? HeroCommand.None : hero == HeroScript.Active ? ActiveHeroCommand(sim) : kite != null ? KiteHeroCommand(sim, kite) : HeroCommand.None);
                     batch.Clear();
                     sim.DrainEvents(batch);
                     fuses += batch.Count(e => e.Type == SimEventType.FuseLit);
                     blasts += batch.Count(e => e.Type == SimEventType.BomberDetonated);
                     if (heroLog == null) continue;
+                    foreach (var t in batch)
+                    {
+                        if (t.Type != SimEventType.TrapTriggered) continue;
+                        // A trap may kill its victim, which is then already removed: use its state at the end of the last step.
+                        var victim = sim.Enemies.FirstOrDefault(x => x.Id == t.TargetId);
+                        if (victim != null ? victim.Pursuing || victim.Returning : heroLog.OffRoute.Contains(t.TargetId))
+                            heroLog.OffRouteTraps[t.TargetId] = heroLog.OffRouteTraps.TryGetValue(t.TargetId, out var n) ? n + 1 : 1;
+                    }
+
+                    heroLog.OffRoute.Clear();
+                    foreach (var e in sim.Enemies)
+                    {
+                        if (!e.Alive) continue;
+                        heroLog.EnemySteps++;
+                        if (e.Pursuing || e.Returning)
+                        {
+                            heroLog.OffRouteSteps++;
+                            heroLog.OffRoute.Add(e.Id);
+                        }
+
+                        if (!e.Pursuing) heroLog.Chasing.Remove(e.Id);
+                        else if (heroLog.Chasing.Add(e.Id)) heroLog.Chases[e.Id] = heroLog.Chases.TryGetValue(e.Id, out var n) ? n + 1 : 1;
+                    }
+
                     foreach (var e in batch)
                         if (e.Type == SimEventType.HeroDowned) heroLog.Deaths++;
                         else if (e.Type == SimEventType.HeroContact)
@@ -352,6 +436,33 @@ namespace TheLastFortress.Tests
             File.WriteAllText(Path.Combine("TestResults", "019", "hero-policy-runs.txt"), log.ToString());
             TestContext.WriteLine(string.Join(Environment.NewLine, summary));
             CollectionAssert.IsEmpty(failures, "a hero without buildings must lose by Night 3");
+        }
+
+        /// <summary>
+        /// Plan 022 exploit probe (specs/008 section 7): the corridor approach (Spike Traps along row 10) on release-rules-4,
+        /// seeds 1-8 on their own orientations, with a hero that kites enemies across traps. Logs chases per enemy, Spike Trap
+        /// hits while off the route, and the share of enemy steps spent off the route. Evidence only: nothing is asserted.
+        /// Log: TestResults/022/kite-runs.txt.
+        /// </summary>
+        [Test]
+        public void KitingEnemiesAcrossTrapsIsLogged()
+        {
+            var log = new StringBuilder();
+            var summary = new List<string>();
+            foreach (var seed in Enumerable.Range(1, 8).Select(s => (uint)s))
+            {
+                var heroLog = new HeroLog();
+                var sim = Play(Corridor, seed, log, MapProfiles.SymmetryFor(seed), ReleaseCampaign.RulesV4, HeroScript.Kite, heroLog: heroLog);
+                summary.Add($"seed {seed}: {sim.State}@{sim.NightNumber}; chases {heroLog.Chases.Values.Sum()} by {heroLog.Chases.Count} enemies, " +
+                            $"most by one enemy {(heroLog.Chases.Count == 0 ? 0 : heroLog.Chases.Values.Max())}; off-route trap hits {heroLog.OffRouteTraps.Values.Sum()}, " +
+                            $"most on one enemy {(heroLog.OffRouteTraps.Count == 0 ? 0 : heroLog.OffRouteTraps.Values.Max())}; enemy steps off route " +
+                            $"{(double)heroLog.OffRouteSteps / Math.Max(1, heroLog.EnemySteps):P1}; hero kills {sim.Stats.HeroKills}/{sim.Stats.EnemiesDefeated}");
+            }
+
+            log.Insert(0, "# Plan 022 kiting hero, corridor, release-rules-4 (seeds' own orientations)\n" + string.Join("\n", summary) + "\n\n");
+            Directory.CreateDirectory(Path.Combine("TestResults", "022"));
+            File.WriteAllText(Path.Combine("TestResults", "022", "kite-runs.txt"), log.ToString());
+            TestContext.WriteLine(string.Join(Environment.NewLine, summary));
         }
 
         /// <summary>"Kind x z" with its footprint turned about the Keep cell (mirror first, then quarter turns, as the map).</summary>

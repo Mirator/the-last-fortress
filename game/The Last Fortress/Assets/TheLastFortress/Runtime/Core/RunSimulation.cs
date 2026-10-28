@@ -2086,10 +2086,12 @@ namespace TheLastFortress
         /// <summary>
         /// release-rules-4 threat at a cell-centre decision point: a Grunt, Runner or Brute struck by the hero (even one
         /// hitting a building), or one not attacking a building with the hero within the start distance and its cooldown
-        /// over, starts a bounded chase when nothing solid lies between them. Bombers, bosses and archers never chase.
+        /// over, starts a bounded chase when nothing solid lies between them. One chase per enemy (and so per night); after
+        /// it the enemy only fights back in place. Bombers, bosses and archers never chase.
         /// </summary>
         bool StartsPursuit(Enemy e, bool freshStep)
         {
+            if (e.Chased) return FightsBackInPlace(e, freshStep);
             var p = hero.Profile;
             if (!hero.Alive || e.Definition.IsRanged || e.Definition.IsBomber || e.Definition.IsBoss) return false;
             var provoked = Tick < e.ProvokedUntilTick;
@@ -2099,12 +2101,53 @@ namespace TheLastFortress
             e.CarryUnits = 0;
             if (!freshStep) return true; // as for buildings: the chase starts on the next simulation step
             e.Pursuing = true;
+            e.Chased = true;
             e.PursueUntilTick = Tick + p.PursuitTicks;
             e.ProvokedUntilTick = 0;
             e.TargetBuildingId = -1;
             e.TargetsHero = false;
             e.OffUnitsX = (int)Math.Round(e.X * HeroRules.UnitsPerTile);
             e.OffUnitsZ = (int)Math.Round(e.Z * HeroRules.UnitsPerTile);
+            return true;
+        }
+
+        /// <summary>
+        /// release-rules-4, after an enemy's one chase: it never leaves its route for the hero again, but attacks the hero
+        /// in place while the hero is within its hit reach. It starts where it would otherwise move on (never at its route
+        /// end) or, struck within the provocation time, also at its route end or while attacking a building. A building it
+        /// turned from is resumed with the same attack timing, so a hit already due lands at once.
+        /// </summary>
+        bool FightsBackInPlace(Enemy e, bool freshStep)
+        {
+            var p = hero.Profile;
+            var inReach = hero.Alive && HeroDistanceSq(e) <= p.EnemyHitReach * p.EnemyHitReach + 1e-9;
+            if (e.TargetsHero)
+            {
+                if (inReach)
+                {
+                    e.CarryUnits = 0;
+                    return true;
+                }
+
+                e.TargetsHero = false;
+            }
+
+            if (e.ResumeBuildingId >= 0)
+            {
+                if (GetBuilding(e.ResumeBuildingId)?.IsAlive ?? false) e.TargetBuildingId = e.ResumeBuildingId; // its timing is kept
+                e.ResumeBuildingId = -1;
+                return false;
+            }
+
+            if (!inReach || e.Definition.IsRanged || e.Definition.IsBomber || e.Definition.IsBoss) return false;
+            if (Tick >= e.ProvokedUntilTick && (e.TargetBuildingId >= 0 || e.RouteIndex >= e.Route.ReachableEndIndex)) return false;
+            e.CarryUnits = 0;
+            if (!freshStep) return true; // as for buildings: the target is taken on the next simulation step
+            if (e.TargetBuildingId >= 0) e.ResumeBuildingId = e.TargetBuildingId;
+            else e.AttackDueTick = Tick + e.AttackTicks;
+            e.TargetBuildingId = -1;
+            e.TargetsHero = true;
+            e.ProvokedUntilTick = 0;
             return true;
         }
 
@@ -2313,8 +2356,8 @@ namespace TheLastFortress
                     .Append(e.TargetBuildingId).Append(e.TargetsHero ? "+hero" : "").Append(" due=").Append(e.AttackDueTick)
                     .Append(" burn=").Append(e.Burning).Append(':').Append(e.BurnNextTick).Append(':').Append(e.BurnExpiryTick)
                     .Append(e.FuseLit ? $" fuse={e.DetonateTick}" : "")
-                    .Append(e.Pursuing || e.Returning || e.PursueCooldownTick > 0 || e.ProvokedUntilTick > 0
-                        ? $" chase={(e.Pursuing ? "p" : e.Returning ? "r" : "-")}:{e.PursueUntilTick}:{e.PursueCooldownTick}:{e.ProvokedUntilTick}:{e.OffUnitsX},{e.OffUnitsZ}" : "")
+                    .Append(e.Pursuing || e.Returning || e.Chased || e.PursueCooldownTick > 0 || e.ProvokedUntilTick > 0
+                        ? $" chase={(e.Pursuing ? "p" : e.Returning ? "r" : "-")}{(e.Chased ? "!" : "")}:{e.PursueUntilTick}:{e.PursueCooldownTick}:{e.ProvokedUntilTick}:{e.OffUnitsX},{e.OffUnitsZ}:{e.ResumeBuildingId}" : "")
                     .AppendLine();
             return sb.ToString();
         }

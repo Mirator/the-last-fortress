@@ -54,7 +54,8 @@ namespace TheLastFortress
         /// release-rules-4 threat (bounded pursuit): Grunts, Runners and Brutes within <see cref="PursuitStart"/> tiles at a
         /// decision point (or struck by the hero) leave their route and chase for at most <see cref="PursuitTicks"/> steps
         /// while the hero stays within <see cref="PursuitLeash"/>; then they walk back to their cell centre and replan, and
-        /// do not start another proximity chase for <see cref="PursuitCooldownTicks"/>. 0 disables (legacy rules).
+        /// do not start another proximity chase for <see cref="PursuitCooldownTicks"/> (no effect while each enemy may chase
+        /// only once a night; kept for a larger budget). 0 disables (legacy rules).
         /// </summary>
         public double PursuitStart { get; private set; }
 
@@ -133,14 +134,15 @@ namespace TheLastFortress
         /// release-rules-4 (game rules section 18) [P values]: a 0.48 m body (72 units), 0.7 tiles/s top speed reached in
         /// three steps and stopped in two, half speed while attacking; 10 damage at 0.225 tile in a 100 degree arc (and any
         /// enemy within 0.1 whatever the aim), contact three steps after acceptance, every 15 steps; melee enemies hit within
-        /// 0.20 and chase the hero briefly (start 1.0, leash 1.5, 4 s, 2 s cooldown; struck: turn within 2 s).
+        /// 0.225, the hero's own reach (specs/008 D2), and chase the hero once a night (start 1.0, leash 1.5, 4 s; struck:
+        /// turn within 2 s), then fight back in place.
         /// </summary>
         public static readonly HeroProfile V4 = new HeroProfile
         {
             ContactPhase = true, RadiusUnits = 72, MaxSpeedUnits = 42, AccelUnits = 14, BrakeUnits = 21, AttackSpeedPercent = 50,
             SwingDamage = 10, SwingIntervalTicks = 15, WindUpTicks = 3, SwingReach = 0.225, TouchReach = 0.1,
             SwingHalfArcCos = 0.6427876096865394, // cos 50 degrees, written out: no runtime trigonometry in the rules
-            EngageRange = 0.2, StickyRange = 0.35, EnemyHitReach = 0.2,
+            EngageRange = 0.2, StickyRange = 0.35, EnemyHitReach = 0.225,
             PursuitStart = 1.0, PursuitLeash = 1.5, PursuitTicks = 80, PursuitCooldownTicks = 40, ProvokeTicks = 40,
         };
 

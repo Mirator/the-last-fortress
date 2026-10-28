@@ -151,6 +151,15 @@ namespace TheLastFortress
         /// </summary>
         public bool Pursuing, Returning;
 
+        /// <summary>
+        /// release-rules-4: this enemy has used its one chase (it lives a single night, so the budget is per night); from
+        /// then on it only fights the hero in place. While it does so having turned from a building, that building is
+        /// <see cref="ResumeBuildingId"/>, resumed with the same attack timing.
+        /// </summary>
+        public bool Chased;
+
+        public int ResumeBuildingId = -1;
+
         public long PursueUntilTick, PursueCooldownTick, ProvokedUntilTick;
         public int OffUnitsX, OffUnitsZ;
 

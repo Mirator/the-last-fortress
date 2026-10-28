@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-28 08:53:54Z" end-time="2026-10-28 08:53:55Z" duration="1,1764824">
+  <test-suite type="TestSuite" id="1000" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="129" result="Passed" start-time="2026-10-28 08:53:54Z" end-time="2026-10-28 08:53:55Z" duration="1.176482" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1160" name="TheLastFortress.EditMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.EditMode.Tests.dll" runstate="Runnable" testcasecount="129" result="Passed" start-time="2026-10-28 08:53:54Z" end-time="2026-10-28 08:53:55Z" duration="1.167548" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="30524" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1161" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="129" result="Passed" start-time="2026-10-28 08:53:54Z" end-time="2026-10-28 08:53:55Z" duration="1.164854" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1162" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="129" result="Passed" start-time="2026-10-28 08:53:54Z" end-time="2026-10-28 08:53:55Z" duration="1.162526" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1117" name="ReleasePolicyTests" fullname="TheLastFortress.Tests.ReleasePolicyTests" classname="TheLastFortress.Tests.ReleasePolicyTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-28 08:53:54Z" end-time="2026-10-28 08:53:55Z" duration="1.158598" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1119" name="KitingEnemiesAcrossTrapsIsLogged" fullname="TheLastFortress.Tests.ReleasePolicyTests.KitingEnemiesAcrossTrapsIsLogged" methodname="KitingEnemiesAcrossTrapsIsLogged" classname="TheLastFortress.Tests.ReleasePolicyTests" runstate="Runnable" seed="373728768" result="Passed" start-time="2026-10-28 08:53:54Z" end-time="2026-10-28 08:53:55Z" duration="1.143934" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[seed 1: Defeat@12; chases 76 by 61 enemies, most by one enemy 3; off-route trap hits 5, most on one enemy 1; enemy steps off route 2,4 %; hero kills 15/539
+seed 2: Defeat@11; chases 52 by 42 enemies, most by one enemy 3; off-route trap hits 5, most on one enemy 2; enemy steps off route 1,6 %; hero kills 9/444
+seed 3: Victory@12; chases 48 by 44 enemies, most by one enemy 2; off-route trap hits 1, most on one enemy 1; enemy steps off route 1,4 %; hero kills 8/543
+seed 4: Defeat@9; chases 26 by 20 enemies, most by one enemy 2; off-route trap hits 2, most on one enemy 1; enemy steps off route 1,2 %; hero kills 11/272
+seed 5: Victory@12; chases 32 by 30 enemies, most by one enemy 2; off-route trap hits 4, most on one enemy 1; enemy steps off route 0,9 %; hero kills 15/543
+seed 6: Defeat@9; chases 34 by 25 enemies, most by one enemy 7; off-route trap hits 2, most on one enemy 1; enemy steps off route 1,8 %; hero kills 9/274
+seed 7: Defeat@7; chases 36 by 32 enemies, most by one enemy 2; off-route trap hits 5, most on one enemy 1; enemy steps off route 2,6 %; hero kills 11/178
+seed 8: Victory@12; chases 43 by 40 enemies, most by one enemy 2; off-route trap hits 2, most on one enemy 1; enemy steps off route 1,4 %; hero kills 15/543
+<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\EditMode-20261028-095355.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

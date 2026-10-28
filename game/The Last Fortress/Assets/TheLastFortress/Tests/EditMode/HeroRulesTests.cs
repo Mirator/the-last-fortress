@@ -499,10 +499,11 @@ namespace TheLastFortress.Tests
         /// <summary>
         /// Threat (release-rules-4): an enemy touching the hero is struck even behind its aim; struck, the Grunt leaves the
         /// Keep to chase the hero, gives up once the hero is beyond the leash, walks back to its cell centre and takes its
-        /// route to the Keep again.
+        /// route to the Keep again. Struck again (specs/008), it does not chase a second time: it turns on the hero where it
+        /// stands while the hero is within its hit reach, then resumes the Keep with the same attack timing.
         /// </summary>
         [Test]
-        public void ATouchingEnemyIsStruckThenChasesTheHeroBrieflyAndReturnsToItsRoute()
+        public void AStruckEnemyChasesTheHeroOnceThenOnlyFightsBackInPlace()
         {
             var sim = NewContactRun();
             Assert.IsTrue(sim.StartNight());
@@ -521,6 +522,25 @@ namespace TheLastFortress.Tests
             StepWith(sim, () => Still, () => !grunt.Returning, 200);
             Assert.AreEqual((grunt.Cell.X + 0.5, grunt.Cell.Z + 0.5), (grunt.X, grunt.Z), "back on a cell centre");
             StepWith(sim, () => Still, () => grunt.TargetBuildingId == sim.Keep.Id, 1000);
+
+            GridCoordinates.TileCenter(grunt.Cell, out var gx, out var gz);
+            var (ux, uz) = ((int)System.Math.Round(gx * 1200), (int)System.Math.Round(gz * 1200));
+            PlaceHero(hero, ux, uz + 96); // touching again, inside its hit reach
+            sim.Step(HeroCommand.Fine(-1, true, 0));
+            for (var i = 0; i < hero.Profile.WindUpTicks; i++) sim.Step(Still);
+            StepWith(sim, () => Still, () => grunt.TargetsHero, 5);
+            Assert.IsFalse(grunt.Pursuing || grunt.Returning, "its one chase is used: it fights where it stands");
+            Assert.AreEqual((gx, gz), (grunt.X, grunt.Z));
+
+            PlaceHero(hero, ux, uz + 300); // 0.25 tile: beyond its 0.225 hit reach, so it lets go at once
+            var due = grunt.AttackDueTick;
+            var keepHp = sim.Keep.Hp;
+            Assert.Less(due, sim.Tick + grunt.AttackTicks - 1, "scenario: the kept timing must differ from a restarted interval");
+            sim.Step(Still);
+            Assert.IsFalse(grunt.TargetsHero, "no hold beyond its hit reach");
+            Assert.AreEqual(sim.Keep.Id, grunt.TargetBuildingId, "back on the Keep");
+            Assert.AreEqual(sim.Keep.Hp < keepHp ? due + grunt.AttackTicks : due, grunt.AttackDueTick, "the attack timing is kept, not restarted");
+            StepWith(sim, () => Still, () => sim.Keep.Hp < keepHp, (int)System.Math.Max(1, due - sim.Tick + 1));
         }
 
         /// <summary>
