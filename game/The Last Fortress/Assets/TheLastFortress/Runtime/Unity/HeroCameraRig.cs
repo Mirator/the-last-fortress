@@ -188,7 +188,8 @@ namespace TheLastFortress
 
         /// <summary>
         /// The pivot for an orbit rotation: the shoulder, or nearer the head when the shoulder is inside a blocker (a wall the
-        /// hero stands against), or lower under an overhang. Null when none is clear.
+        /// hero stands against), or lower under an overhang; each stepped off a blocker surface it is too close to (at most
+        /// <see cref="MaxPivotStep"/>). Null when none is clear.
         /// </summary>
         Vector3? Pivot(Vector3 hero, Quaternion rotation, float pad)
         {
@@ -196,15 +197,21 @@ namespace TheLastFortress
             foreach (var (height, shoulder) in new[] { (1f, ShoulderOffset), (1f, 0f), (0.8f, 0f), (0.6f, 0f) })
             {
                 var p = hero + PivotHeight * height + rotation * Vector3.right * shoulder;
+                if (Obstacles.Blocked(p, pad) && !Obstacles.StepOut(p, pad, MaxPivotStep, out p)) continue;
                 var toPivot = p - head;
                 var length = toPivot.magnitude;
-                if (Obstacles.Blocked(p, pad)) continue;
                 if (length > 1e-4f && Obstacles.FreeDistance(head, toPivot / length, length, 0f) < length - 1e-4f) continue;
                 return p;
             }
 
             return null;
         }
+
+        /// <summary>
+        /// Farthest a pivot steps sideways off a blocker: the hero touches a drawn Wall or Tower 0.06 tile from its box,
+        /// inside the near-plane padding (about 0.064 at FOV 60), and a corner can need a step from two surfaces.
+        /// </summary>
+        const float MaxPivotStep = 0.1f;
 
         /// <summary>The clear distance behind the pivot at one lift, the pivot and rotation used (distance -1: no clear pivot).</summary>
         float Solve(Vector3 hero, float lift, float wanted, float pad, out Vector3 pivot, out Quaternion rotation)

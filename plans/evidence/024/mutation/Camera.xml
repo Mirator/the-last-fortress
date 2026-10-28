@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-28 15:55:07Z" end-time="2026-10-28 15:55:08Z" duration="1,2360402">
+  <test-suite type="TestSuite" id="1036" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="25" result="Failed" site="Child" start-time="2026-10-28 15:55:07Z" end-time="2026-10-28 15:55:08Z" duration="1.236040" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1030" name="TheLastFortress.PlayMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.PlayMode.Tests.dll" runstate="Runnable" testcasecount="25" result="Failed" site="Child" start-time="2026-10-28 15:55:07Z" end-time="2026-10-28 15:55:08Z" duration="1.228731" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="53716" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1031" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="25" result="Failed" site="Child" start-time="2026-10-28 15:55:07Z" end-time="2026-10-28 15:55:08Z" duration="1.227755" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1032" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="25" result="Failed" site="Child" start-time="2026-10-28 15:55:07Z" end-time="2026-10-28 15:55:08Z" duration="1.226932" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1021" name="ReleaseSceneTests" fullname="TheLastFortress.Tests.ReleaseSceneTests" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" testcasecount="8" result="Failed" site="Child" start-time="2026-10-28 15:55:07Z" end-time="2026-10-28 15:55:08Z" duration="1.225422" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1028" name="TheHeroCameraKeepsItsNearPlaneOutOfBuildingsAndSettles" fullname="TheLastFortress.Tests.ReleaseSceneTests.TheHeroCameraKeepsItsNearPlaneOutOfBuildingsAndSettles" methodname="TheHeroCameraKeepsItsNearPlaneOutOfBuildingsAndSettles" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="1005463144" result="Failed" start-time="2026-10-28 15:55:07Z" end-time="2026-10-28 15:55:08Z" duration="1.212559" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  against the Tower the camera fell back to a held or in-head pose
+  Expected: 0
+  But was:  20
+]]></message>
+                <stack-trace><![CDATA[at TheLastFortress.Tests.ReleaseSceneTests+<TheHeroCameraKeepsItsNearPlaneOutOfBuildingsAndSettles>d__17.MoveNext () [0x00442] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\PlayMode\ReleaseSceneTests.cs:423
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@aebcb98460c6\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[New run: ravine seed 14: generated (attempt 0)
+<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\PlayMode-20261028-165508.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

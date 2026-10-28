@@ -54,6 +54,34 @@ namespace TheLastFortress
         }
 
         /// <summary>
+        /// Moves a point sideways (X and Z) out of every blocker it lies within <paramref name="pad"/> of, the shortest way
+        /// out of each box. False when that is not clear or needs more than <paramref name="maxStep"/>: a hero pressed against
+        /// a drawn Wall or Tower stands closer to it than the near-plane padding, so its pivot steps off the surface.
+        /// </summary>
+        public bool StepOut(Vector3 p, float pad, float maxStep, out Vector3 clear)
+        {
+            clear = p;
+            for (var pass = 0; pass < 4; pass++)
+            {
+                var moved = false;
+                foreach (var b in boxes)
+                {
+                    var e = b.extents + Vector3.one * pad;
+                    var d = clear - b.center;
+                    if (Mathf.Abs(d.x) >= e.x || Mathf.Abs(d.y) >= e.y || Mathf.Abs(d.z) >= e.z) continue;
+                    float inX = e.x - Mathf.Abs(d.x), inZ = e.z - Mathf.Abs(d.z);
+                    if (inX <= inZ) clear.x += (d.x < 0f ? -1f : 1f) * (inX + 1e-4f);
+                    else clear.z += (d.z < 0f ? -1f : 1f) * (inZ + 1e-4f);
+                    moved = true;
+                }
+
+                if (!moved) break;
+            }
+
+            return new Vector2(clear.x - p.x, clear.z - p.z).magnitude <= maxStep && !Blocked(clear, pad);
+        }
+
+        /// <summary>
         /// Distance along <paramref name="dir"/> (unit) from <paramref name="from"/> to the first padded blocker or the
         /// padded ground, at most <paramref name="max"/>; 0 when the start itself is blocked.
         /// </summary>

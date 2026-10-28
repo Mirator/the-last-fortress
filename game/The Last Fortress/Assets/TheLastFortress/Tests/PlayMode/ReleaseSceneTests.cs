@@ -403,6 +403,27 @@ namespace TheLastFortress.Tests
                 Assert.LessOrEqual(turns, 1, $"fov {fov}, distance {distance}: the distance pumps");
             }
 
+            // The hero pressed against a drawn Tower (hero collision allows 0.06 tile from its box, inside the near-plane
+            // padding), looking at it: the pivot steps off the surface and the camera stays behind the hero instead of falling
+            // back to the hero's head (found in the 2026-10-28 captures).
+            game.HeroRig.FieldOfView = 60f;
+            game.HeroRig.SetDefaultDistance(1f);
+            Building tower = null;
+            foreach (var cell in new[] { new GridPos(8, 7), new GridPos(12, 7), new GridPos(8, 13), new GridPos(12, 13) })
+                if (game.Sim.TryPlace(BuildingKind.Tower, cell, out tower) == PlacementRejection.None) break;
+            Assert.IsNotNull(tower, "a Tower was placed");
+            GridCoordinates.TileCenter(tower.Cell, out var tx, out var tz);
+            var hero = game.Sim.Hero;
+            hero.UnitsX = hero.PrevUnitsX = (int)System.Math.Round((tx + 0.49) * HeroRules.UnitsPerTile); // touching its east side
+            hero.UnitsZ = hero.PrevUnitsZ = (int)System.Math.Round(tz * HeroRules.UnitsPerTile);
+            game.HeroRig.SkipTransition();
+            game.HeroRig.SetOrbit(270f, 10f); // looking west at the Tower, the camera out east
+            var fallbacks = game.HeroRig.FallbackFrames;
+            for (var i = 0; i < 20; i++) game.SyncViews(1f / 30f);
+            Assert.AreEqual(fallbacks, game.HeroRig.FallbackFrames, "against the Tower the camera fell back to a held or in-head pose");
+            Assert.IsTrue(game.HeroRig.ShownPoseClear(), "against the Tower: the near plane entered a blocker");
+            Assert.Greater(game.HeroRig.ShownDistance, 0.2f, "against the Tower the camera stays behind the hero");
+
             yield return Press(Key.Tab);
             Assert.IsFalse(game.HeroViewActive);
             yield return Press(Key.Tab); // eased entry, not skipped
@@ -415,7 +436,7 @@ namespace TheLastFortress.Tests
             }
 
             Assert.IsFalse(game.HeroRig.InTransition, "the entry finished within 0.35 s");
-            Assert.AreEqual(0f, game.HeroRig.Yaw, 1e-3f, "the orbit is kept within the run");
+            Assert.AreEqual(270f, game.HeroRig.Yaw, 1e-3f, "the orbit is kept within the run");
         }
 
         /// <summary>
