@@ -1,0 +1,21 @@
+diff --git a/game/The Last Fortress/Assets/TheLastFortress/Tests/EditMode/ReleasePolicyTests.cs b/game/The Last Fortress/Assets/TheLastFortress/Tests/EditMode/ReleasePolicyTests.cs
+index 7328010..f4d0140 100644
+--- a/game/The Last Fortress/Assets/TheLastFortress/Tests/EditMode/ReleasePolicyTests.cs	
++++ b/game/The Last Fortress/Assets/TheLastFortress/Tests/EditMode/ReleasePolicyTests.cs	
+@@ -209,6 +209,8 @@ namespace TheLastFortress.Tests
+             return HeroCommand.Fine(state.RetreatFacing, false, state.RetreatFacing);
+         }
+ 
++        public static Action<RunSimulation, List<SimEvent>> StepProbe; // PROBE (temporary)
++
+         public const double ActiveHeroLeash = 6.0;
+ 
+         /// <summary>The active script's command for this step: chase and hit the nearest enemy near the Keep, else return to spawn.</summary>
+@@ -318,6 +320,7 @@ namespace TheLastFortress.Tests
+                     sim.Step(!sim.HasHero ? HeroCommand.None : hero == HeroScript.Active ? ActiveHeroCommand(sim) : kite != null ? KiteHeroCommand(sim, kite) : HeroCommand.None);
+                     batch.Clear();
+                     sim.DrainEvents(batch);
++                    StepProbe?.Invoke(sim, batch); // PROBE (temporary)
+                     fuses += batch.Count(e => e.Type == SimEventType.FuseLit);
+                     blasts += batch.Count(e => e.Type == SimEventType.BomberDetonated);
+                     if (heroLog == null) continue;

@@ -62,6 +62,11 @@ namespace TheLastFortress
         public Button SpeedButton(int i) => speedButtons[i];
 
         readonly Button[] speedButtons = new Button[4];
+
+        /// <summary>Spec 012: "Call early +N" above the speed buttons while a call is possible.</summary>
+        public Button CallEarlyButton { get; private set; }
+
+        Text callEarlyLabel;
         readonly Text[] speedLabels = new Text[4];
         public Button MenuRestartButton { get; private set; }
         public Button ResetCameraButton { get; private set; }
@@ -182,6 +187,10 @@ namespace TheLastFortress
                     speedButtons[i] = MakeButton(speed, i == 0 ? "II" : $"{PrototypeBootstrap.GameSpeeds[i - 1]}×", Vector2.zero, new Vector2(i * 77f, 0), new Vector2(69, 56),
                         () => { if (index == 0) game.Sim.SetPaused(true); else game.SetGameSpeed(PrototypeBootstrap.GameSpeeds[index - 1]); }, out speedLabels[i]);
                 }
+
+                CallEarlyButton = MakeButton(root, "CALL EARLY", new Vector2(1, 0), new Vector2(-24, 204), new Vector2(300, 52), () => game.CallEarly(), out callEarlyLabel);
+                callEarlyLabel.fontSize = 22;
+                CallEarlyButton.gameObject.SetActive(false);
             }
 
             // Bottom-left: selection
@@ -433,6 +442,13 @@ namespace TheLastFortress
         void RefreshSpeed(RunSimulation sim)
         {
             if (speedButtons[0] == null) return;
+            if (CallEarlyButton != null)
+            {
+                var call = sim.CanCallEarly && !game.TitleScreen && !game.MenuOpen;
+                if (CallEarlyButton.gameObject.activeSelf != call) CallEarlyButton.gameObject.SetActive(call);
+                if (call) Set(callEarlyLabel, $"CALL EARLY  +{sim.EarlyCallGoldNow} gold  (C)");
+            }
+
             var row = speedButtons[0].transform.parent.gameObject;
             var show = (sim.State == RunState.Day || sim.State == RunState.Night) && !sim.StressMode && !game.TitleScreen;
             if (row.activeSelf != show) row.SetActive(show);
@@ -662,7 +678,7 @@ namespace TheLastFortress
         static string IncomeLine(RunSimulation sim)
         {
             var received = sim.State == RunState.Day && sim.NightNumber > 1 && sim.LastPaidDay == sim.NightNumber && sim.LastIncome.Total > 0
-                ? $"\nReceived +{sim.LastIncome.Total} at dawn" : "";
+                ? $"\nReceived +{sim.LastIncome.Total} at dawn{(sim.LastIncome.EarlyCall > 0 ? $" (early call +{sim.LastIncome.EarlyCall})" : "")}" : "";
             if (sim.NightNumber >= sim.TotalNights) return "No income after the last night" + received;
             return $"Income +{sim.IncomeForecast().Total} per day" + received;
         }

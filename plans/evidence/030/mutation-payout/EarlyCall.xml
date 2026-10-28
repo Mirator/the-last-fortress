@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Failed(Child)" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-28 20:00:57Z" end-time="2026-10-28 20:00:57Z" duration="0,0861829">
+  <test-suite type="TestSuite" id="1000" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="131" result="Failed" site="Child" start-time="2026-10-28 20:00:57Z" end-time="2026-10-28 20:00:57Z" duration="0.086183" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1163" name="TheLastFortress.EditMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.EditMode.Tests.dll" runstate="Runnable" testcasecount="131" result="Failed" site="Child" start-time="2026-10-28 20:00:57Z" end-time="2026-10-28 20:00:57Z" duration="0.077866" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="59568" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1164" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="131" result="Failed" site="Child" start-time="2026-10-28 20:00:57Z" end-time="2026-10-28 20:00:57Z" duration="0.076138" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1165" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="131" result="Failed" site="Child" start-time="2026-10-28 20:00:57Z" end-time="2026-10-28 20:00:57Z" duration="0.074577" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1133" name="EarlyCallTests" fullname="TheLastFortress.Tests.EarlyCallTests" classname="TheLastFortress.Tests.EarlyCallTests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2026-10-28 20:00:57Z" end-time="2026-10-28 20:00:57Z" duration="0.070889" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1135" name="LegacyRulesCannotCallEarly" fullname="TheLastFortress.Tests.EarlyCallTests.LegacyRulesCannotCallEarly" methodname="LegacyRulesCannotCallEarly" classname="TheLastFortress.Tests.EarlyCallTests" runstate="Runnable" seed="1810075562" result="Passed" start-time="2026-10-28 20:00:57Z" end-time="2026-10-28 20:00:57Z" duration="0.032787" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1134" name="PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn" fullname="TheLastFortress.Tests.EarlyCallTests.PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn" methodname="PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn" classname="TheLastFortress.Tests.EarlyCallTests" runstate="Runnable" seed="1879290537" result="Failed" start-time="2026-10-28 20:00:57Z" end-time="2026-10-28 20:00:57Z" duration="0.023476" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  paid at the next dawn as its own line
+  Expected: 3
+  But was:  0
+]]></message>
+                <stack-trace><![CDATA[at TheLastFortress.Tests.EarlyCallTests.PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn () [0x001aa] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\EditMode\ReleaseRulesTests.cs:289
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\EditMode-20261028-210057.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

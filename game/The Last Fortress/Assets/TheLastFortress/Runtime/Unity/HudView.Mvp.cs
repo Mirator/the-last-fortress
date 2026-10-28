@@ -353,6 +353,7 @@ namespace TheLastFortress
                 "WASD / arrow keys  pan · mouse wheel  zoom · Reset Camera  back to the Keep · Z  the whole board\n" +
                 "Space or PAUSE  pause and resume the night (inspection still works)\n" +
                 "F or II / 1× / 2× / 3×  night speed (picking a speed also resumes)\n" +
+                "C or CALL EARLY  send the rest of tonight's enemies 4x sooner for gold at dawn (once a night)\n" +
                 (game.IsRelease ? "Tab  hero view: WASD move · mouse look · click swing · Space jump · P pause · Enter start night · H find hero\n" : "") +
                 "Menu  save and quit by day, settings, credits";
             showGuideButton = MakeButton(hp, "Show guide", new Vector2(0.5f, 0), new Vector2(-160, 30), new Vector2(280, 60), () =>
@@ -523,7 +524,8 @@ namespace TheLastFortress
             var keep = r.KeepDamage > 0 ? $"Keep -{r.KeepDamage} HP" : "Keep unharmed";
             var lost = r.BuildingsLost == 0 ? "no buildings lost" : r.BuildingsLost == 1 ? "1 building lost" : $"{r.BuildingsLost} buildings lost";
             var hero = r.HeroKills > 0 ? $" (hero {r.HeroKills})" : "";
-            return $"{r.EnemiesDefeated} {(r.EnemiesDefeated == 1 ? "enemy" : "enemies")} defeated{hero} · {keep} · {lost}";
+            var called = r.EarlyCallGold > 0 ? $" · called early: +{r.EarlyCallGold} gold at dawn" : "";
+            return $"{r.EnemiesDefeated} {(r.EnemiesDefeated == 1 ? "enemy" : "enemies")} defeated{hero} · {keep} · {lost}{called}";
         }
 
         static string SummaryText(RunSimulation sim)

@@ -1013,6 +1013,14 @@ namespace TheLastFortress
 
         public void TogglePause() => Sim.TogglePause();
 
+        /// <summary>Spec 012: calls the rest of tonight's enemies early for gold at the next dawn (C or the HUD button).</summary>
+        public bool CallEarly()
+        {
+            if (Suspended || !Sim.CallEarly()) return false; // allowed while paused (spec 012)
+            Audio?.Play(SoundId.UiConfirm);
+            return true;
+        }
+
         public void SellSelected()
         {
             if (Player.Selected == null) return;

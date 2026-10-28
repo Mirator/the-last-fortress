@@ -107,6 +107,7 @@ namespace TheLastFortress
             if (keyboard != null && keyboard.tabKey.wasPressedThisFrame && game.SetHeroView(true)) return;
             if (keyboard != null && EnterPressed(keyboard) && sim.State == RunState.Day && game.IsMvp) game.StartNight();
             if (keyboard != null && keyboard.pKey.wasPressedThisFrame && sim.State == RunState.Night) game.TogglePause();
+            if (keyboard != null && keyboard.cKey.wasPressedThisFrame && sim.State == RunState.Night) game.CallEarly();
             if (keyboard != null && keyboard.hKey.wasPressedThisFrame) game.CenterCameraOnHero();
             if (keyboard != null && keyboard.zKey.wasPressedThisFrame) game.CameraRig.ShowWholeBoard();
             if (HoverOverride.HasValue) HoverCell = HoverOverride;
@@ -178,6 +179,7 @@ namespace TheLastFortress
                 // Space jumps here (presentation only); P pauses; Enter starts the night from Day without leaving the view.
                 if (keyboard.spaceKey.wasPressedThisFrame) game.HeroView.Jump();
                 if (keyboard.pKey.wasPressedThisFrame && sim.State == RunState.Night) game.TogglePause();
+                if (keyboard.cKey.wasPressedThisFrame && sim.State == RunState.Night) game.CallEarly();
                 if (EnterPressed(keyboard) && sim.State == RunState.Day) game.StartNight();
             }
 

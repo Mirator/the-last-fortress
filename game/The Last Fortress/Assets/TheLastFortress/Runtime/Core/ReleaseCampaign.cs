@@ -98,6 +98,19 @@ namespace TheLastFortress
 
         static readonly GridPos W = MvpCampaign.West, E = MvpCampaign.East, N = MvpCampaign.North, S = MvpCampaign.South;
 
+        /// <summary>Spec 012: release-rules-4 bosses spawn at 15 s (shorter boss tails); older profiles keep 30 s.</summary>
+        public const double BossSecondsV4 = 15.0;
+
+        /// <summary>The authored nights for a rules version (only the boss time differs between versions).</summary>
+        public static Recipe[] Table(string rulesVersion)
+        {
+            var table = Table();
+            if (rulesVersion == RulesV4)
+                foreach (var r in table)
+                    r.BossSeconds = BossSecondsV4;
+            return table;
+        }
+
         public static Recipe[] Table() => new[]
         {
             new Recipe { Grunts = 10, Entries = new[] { W }, CadenceSeconds = 1.5 },
@@ -123,7 +136,7 @@ namespace TheLastFortress
 
         /// <summary>The recipes' entries are written for the profiles' own layout; they turn with the map's symmetry.</summary>
         public static CampaignConfig Create(uint seed, string mapProfile, int symmetry, string rulesVersion = RulesVersion) =>
-            Create(seed, mapProfile, Table(), symmetry, rulesVersion);
+            Create(seed, mapProfile, Table(rulesVersion), symmetry, rulesVersion);
 
         public static CampaignConfig Create(uint seed, string mapProfile, IReadOnlyList<Recipe> table, int symmetry = 0, string rulesVersion = RulesVersion)
         {

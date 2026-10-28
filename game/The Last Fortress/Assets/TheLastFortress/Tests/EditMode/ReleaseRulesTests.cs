@@ -240,6 +240,68 @@ namespace TheLastFortress.Tests
     }
 
     /// <summary>Plan 008 G1: profile-tagged saves, legacy six-night continuation and rejection of unknown profiles.</summary>
+    /// <summary>Spec 012: calling a night early compresses its pending spawns and pays whole seconds saved at the next dawn.</summary>
+    public class EarlyCallTests
+    {
+        static RunSimulation Campaign(string rules, params WavePlan[] nights)
+        {
+            var sim = new RunSimulation(new RunConfig
+            {
+                Definitions = ReleaseCampaign.Contact(ReleaseDefinitions.CreateDefault()), Seed = 5, Terrain = TerrainMap.Flat(),
+                Campaign = new CampaignConfig
+                {
+                    Label = ReleaseCampaign.Label, Nights = nights, OffersRewards = true, RulesVersion = rules,
+                    CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
+                },
+            });
+            foreach (var c in new[] { new GridPos(3, 9), new GridPos(3, 11), new GridPos(5, 9), new GridPos(5, 11) })
+                Assert.AreEqual(PlacementRejection.None, sim.TryPlace(BuildingKind.Tower, c, out _), $"Tower at {c}");
+            return sim;
+        }
+
+        static WavePlan Grunts(params long[] ticks) =>
+            new WavePlan("w", ticks.Select(t => new SpawnEntry(t, MvpCampaign.West, 0, EnemyKind.Grunt)).ToArray(), new[] { MvpCampaign.West });
+
+        [Test]
+        public void PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn()
+        {
+            // Called at tick 10: 30 -> 10 + ceil(20/4) = 15, 61 -> 10 + ceil(51/4) = 23 (floor would give 22),
+            // 106 -> 10 + ceil(96/4) = 34; the last spawn moves 72 ticks = 3.6 s earlier: 3 gold (rounding would give 4).
+            var sim = Campaign(ReleaseCampaign.RulesV4, Grunts(0, 30, 61, 106), Grunts(0));
+            Assert.IsTrue(sim.StartNight());
+            for (var i = 0; i < 10; i++) sim.Step();
+            Drain(sim); // the tick-0 spawn and the first steps
+            Assert.AreEqual(3, sim.EarlyCallGoldNow, "the button shows the bonus before the call");
+            Assert.IsTrue(sim.CallEarly());
+            Assert.IsFalse(sim.CallEarly(), "once per night");
+            var spawned = new List<long>();
+            for (var i = 0; i < 4000 && sim.State == RunState.Night; i++)
+            {
+                sim.Step();
+                spawned.AddRange(Drain(sim).Where(e => e.Type == SimEventType.EnemySpawned).Select(e => e.Tick));
+            }
+
+            CollectionAssert.AreEqual(new long[] { 15, 23, 34 }, spawned, "compressed spawn ticks");
+            Assert.AreEqual(RunState.Reward, sim.State, "the Towers cleared the night");
+            Assert.AreEqual(0, sim.IncomeForecast().EarlyCall, "never part of a forecast");
+            var dayGold = sim.Gold;
+            Assert.IsTrue(sim.ChoosePerk(sim.CurrentOffer.OfferId, sim.CurrentOffer.PerkIds[0]));
+            Assert.AreEqual(3, sim.LastIncome.EarlyCall, "paid at the next dawn as its own line");
+            Assert.AreEqual(sim.LastIncome.Total, sim.Gold - dayGold, "and included in the dawn payment");
+
+            Assert.IsTrue(sim.StartNight());
+            Assert.IsFalse(sim.CanCallEarly, "nothing pending: the only spawn was released at the start");
+        }
+
+        [Test]
+        public void LegacyRulesCannotCallEarly()
+        {
+            var sim = Campaign(ReleaseCampaign.RulesV3, Grunts(0, 30, 61, 106), Grunts(0));
+            Assert.IsTrue(sim.StartNight());
+            Assert.IsFalse(sim.CallEarly());
+        }
+    }
+
     public class ReleaseSaveTests
     {
         static readonly RulesCatalog ReleaseBuild = new RulesCatalog(RulesProfile.TwelveNightsContact(ReleaseDefinitions.CreateDefault()), RulesProfile.TwelveNightsWalking(ReleaseDefinitions.CreateDefault()),
@@ -371,6 +433,13 @@ namespace TheLastFortress.Tests
                         (spawns.Count(s => s.Kind == EnemyKind.Grunt), spawns.Count(s => s.Kind == EnemyKind.Runner), spawns.Count(s => s.Kind == EnemyKind.Brute),
                             spawns.Count(s => s.Kind == EnemyKind.Bomber), spawns.Count(s => s.Kind == EnemyKind.Archer)), $"seed {seed} night {n + 1}");
                     Assert.AreEqual(r.Boss, spawns.Where(s => EnemyDefinition.IsBossKind(s.Kind)).Select(s => (EnemyKind?)s.Kind).SingleOrDefault());
+                    // Spec 012: release-rules-4 bosses come at 15 s, older profiles keep 30 s.
+                    if (r.Boss.HasValue)
+                    {
+                        Assert.AreEqual(PrototypeDefinitions.ToTicks(ReleaseCampaign.BossSecondsV4), spawns.Single(s => EnemyDefinition.IsBossKind(s.Kind)).Tick, $"seed {seed} night {n + 1}");
+                        Assert.AreEqual(PrototypeDefinitions.ToTicks(30.0), ReleaseCampaign.Create(seed, MapProfiles.Meadow, ReleaseCampaign.RulesV3).Nights[n].Spawns
+                            .Single(s => EnemyDefinition.IsBossKind(s.Kind)).Tick, "legacy profiles keep 30 s");
+                    }
                 }
 
                 rotations.Add(string.Join(",", campaign.Nights.Select(w => w.Spawns[0].EntryIndex)));

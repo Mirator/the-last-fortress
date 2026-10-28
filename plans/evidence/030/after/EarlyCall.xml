@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="4" result="Passed" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:58Z" duration="0,8703752">
+  <test-suite type="TestSuite" id="1000" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="131" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:58Z" duration="0.870375" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1163" name="TheLastFortress.EditMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.EditMode.Tests.dll" runstate="Runnable" testcasecount="131" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:58Z" duration="0.861395" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="58328" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1164" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="131" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:58Z" duration="0.859671" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1165" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="131" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:58Z" duration="0.858050" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1133" name="EarlyCallTests" fullname="TheLastFortress.Tests.EarlyCallTests" classname="TheLastFortress.Tests.EarlyCallTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:57Z" duration="0.066237" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1135" name="LegacyRulesCannotCallEarly" fullname="TheLastFortress.Tests.EarlyCallTests.LegacyRulesCannotCallEarly" methodname="LegacyRulesCannotCallEarly" classname="TheLastFortress.Tests.EarlyCallTests" runstate="Runnable" seed="438555426" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:57Z" duration="0.033916" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1134" name="PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn" fullname="TheLastFortress.Tests.EarlyCallTests.PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn" methodname="PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn" classname="TheLastFortress.Tests.EarlyCallTests" runstate="Runnable" seed="1294571026" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:57Z" duration="0.018753" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1141" name="ReleaseContentTests" fullname="TheLastFortress.Tests.ReleaseContentTests" classname="TheLastFortress.Tests.ReleaseContentTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:58Z" duration="0.784553" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1143" name="MapProfilesMeetTheirNamedConstraintsOnASeedCorpusAndFitTwoByTwoBuildings" fullname="TheLastFortress.Tests.ReleaseContentTests.MapProfilesMeetTheirNamedConstraintsOnASeedCorpusAndFitTwoByTwoBuildings" methodname="MapProfilesMeetTheirNamedConstraintsOnASeedCorpusAndFitTwoByTwoBuildings" classname="TheLastFortress.Tests.ReleaseContentTests" runstate="Runnable" seed="1968682298" result="Passed" start-time="2026-10-28 19:58:57Z" end-time="2026-10-28 19:58:58Z" duration="0.691097" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1142" name="TwelveNightsFollowTheTableWithSeededEntriesAndPreviewWhatSpawns" fullname="TheLastFortress.Tests.ReleaseContentTests.TwelveNightsFollowTheTableWithSeededEntriesAndPreviewWhatSpawns" methodname="TwelveNightsFollowTheTableWithSeededEntriesAndPreviewWhatSpawns" classname="TheLastFortress.Tests.ReleaseContentTests" runstate="Runnable" seed="2138778982" result="Passed" start-time="2026-10-28 19:58:58Z" end-time="2026-10-28 19:58:58Z" duration="0.092105" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\EditMode-20261028-205858.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

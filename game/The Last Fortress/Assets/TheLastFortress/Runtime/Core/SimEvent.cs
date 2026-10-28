@@ -64,6 +64,9 @@ namespace TheLastFortress
         /// at contact, To = the tip of its reach along the committed facing). The HeroHit events of its victims follow.
         /// </summary>
         HeroContact,
+
+        /// <summary>Spec 012: the player called the rest of tonight's spawns early (target = bonus gold paid at the next dawn).</summary>
+        EarlyCalled,
     }
 
     /// <summary>Notification for presentation adapters. Simulation state stays authoritative.</summary>

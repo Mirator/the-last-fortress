@@ -1,0 +1,61 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using NUnit.Framework;
+
+namespace TheLastFortress.Tests
+{
+    // PROBE (temporary, not committed): where night time goes in the recorded policy runs.
+    public class PacingProbe
+    {
+        [Test]
+        public void Measure()
+        {
+            var combat = new HashSet<SimEventType> { SimEventType.TowerShot, SimEventType.EnemyAttacked, SimEventType.EnemyKilled, SimEventType.TrapTriggered,
+                SimEventType.RangedShot, SimEventType.BuildingDamaged, SimEventType.HeroContact, SimEventType.SplashHit };
+            var outText = new StringBuilder("policy seed night dur first_combat_s quiet_pct longest_quiet_s last_spawn_s keep_dmg\n");
+            var quietWindow = 40; // steps = 2 s
+            foreach (var policy in new[] { ReleasePolicyTests.KillZone, ReleasePolicyTests.Corridor, ReleasePolicyTests.Economy })
+            foreach (var seed in new uint[] { 1, 2, 3, 4, 5 })
+            {
+                int lastNight = -1; long nightSteps = 0, lastCombat = -9999, quiet = 0, run = 0, longest = 0, firstCombat = -1; double lastSpawn = 0;
+                var rows = new List<string>();
+                void Flush(RunSimulation sim)
+                {
+                    if (lastNight < 0) return;
+                    rows.Add($"{policy.Name} {seed} {lastNight} {nightSteps * 0.05:0} {(firstCombat < 0 ? -1 : firstCombat * 0.05):0.0} {(nightSteps == 0 ? 0 : 100.0 * quiet / nightSteps):0} {longest * 0.05:0} {lastSpawn:0} {sim.LastNight?.KeepDamage}");
+                }
+
+                ReleasePolicyTests.StepProbe = (sim, batch) =>
+                {
+                    if (sim.NightNumber != lastNight)
+                    {
+                        lastNight = sim.NightNumber; nightSteps = 0; lastCombat = -9999; quiet = 0; run = 0; longest = 0; firstCombat = -1; lastSpawn = 0;
+                    }
+
+                    nightSteps++;
+                    if (batch.Any(e => combat.Contains(e.Type)))
+                    {
+                        lastCombat = nightSteps;
+                        if (firstCombat < 0) firstCombat = nightSteps;
+                    }
+
+                    if (batch.Any(e => e.Type == SimEventType.EnemySpawned)) lastSpawn = nightSteps * 0.05;
+                    if (nightSteps - lastCombat > quietWindow) { quiet++; run++; longest = System.Math.Max(longest, run); }
+                    else run = 0;
+                    if (sim.State != RunState.Night) Flush(sim);
+                };
+                var log = new StringBuilder();
+                ReleasePolicyTests.Play(policy, seed, log, MapProfiles.SymmetryFor(seed), ReleaseCampaign.RulesV4, ReleasePolicyTests.HeroScript.Active);
+                foreach (var r in rows) outText.AppendLine(r);
+                var res = log.ToString().Split('\n').FirstOrDefault(l => l.StartsWith("Result"));
+                outText.AppendLine("# " + res);
+            }
+
+            ReleasePolicyTests.StepProbe = null;
+            File.WriteAllText(Path.Combine(Path.GetTempPath(), "pacing-probe.txt"), outText.ToString());
+            TestContext.WriteLine(outText.ToString());
+        }
+    }
+}

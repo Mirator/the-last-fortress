@@ -5,7 +5,7 @@ What the game is and should become. Specs never refer to implementation plans; p
 | Spec | Role | Status (2026-10-28) |
 |---|---|---|
 | [001-vision.md](001-vision.md) | Vision, pillars, core loop, direction, risks, success criteria. No rules. | Living |
-| [002-game-rules.md](002-game-rules.md) | The complete current rules of the game (release profile with the hero, plus how the legacy profiles differ) | v1.13 (`release-rules-4`, 2026-10-28); implemented; the single source of current rules |
+| [002-game-rules.md](002-game-rules.md) | The complete current rules of the game (release profile with the hero, plus how the legacy profiles differ) | v1.14 (`release-rules-4`, 2026-10-28); implemented; the single source of current rules |
 | [archive/](archive/README.md) | Earlier milestone specs, kept as history | Not current; do not plan from them |
 
 How specs change:

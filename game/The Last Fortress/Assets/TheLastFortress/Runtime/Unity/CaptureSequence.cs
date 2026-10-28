@@ -932,7 +932,7 @@ namespace TheLastFortress
                     bought.Add($"repair Keep +{restored}");
                 }
 
-                log.AppendLine($"Day {day}: gold left {sim.Gold}; {string.Join("; ", bought)}");
+                log.AppendLine($"Day {day}: gold left {sim.Gold}; {string.Join("; ", bought)}" + (sim.LastIncome.EarlyCall > 0 ? $"; dawn early call +{sim.LastIncome.EarlyCall}" : ""));
                 game.SyncViews();
                 game.CameraRig.ResetView();
                 yield return Shot($"full-{day:00}-a-day");
@@ -954,6 +954,13 @@ namespace TheLastFortress
                 yield return Framed();
                 log.AppendLine($"  framing: focus={game.CameraRig.Focus:F2} size={game.CameraRig.Size:F2}");
                 StepNight(8.0);
+                if (day == 2)
+                {
+                    // Plan 030 (spec 012): the button before the call, then the call; the recap and dawn income show its gold.
+                    yield return Shot($"full-{day:00}-c0-call-early-button");
+                    log.AppendLine($"  call early: offered +{game.Sim.EarlyCallGoldNow}, called={game.CallEarly()}");
+                }
+
                 yield return Shot($"full-{day:00}-c-night-8s");
                 StepNight(25.0);
                 yield return Shot($"full-{day:00}-d-night-25s");

@@ -17,7 +17,10 @@ namespace TheLastFortress
         /// <summary>Conditional dawn bonus (War Bonds); never part of a Day forecast.</summary>
         public int Bonus;
 
-        public int Total => Keep + Houses + Farms + Bonus;
+        /// <summary>Spec 012: gold for calling the previous night early; its own dawn line, never part of a Day forecast.</summary>
+        public int EarlyCall;
+
+        public int Total => Keep + Houses + Farms + Bonus + EarlyCall;
     }
 
     /// <summary>Fixed MVP economy rules from specification 003. Pure functions over authoritative grid state.</summary>

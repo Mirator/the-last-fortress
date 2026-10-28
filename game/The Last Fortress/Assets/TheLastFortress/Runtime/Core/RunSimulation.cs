@@ -81,6 +81,9 @@ namespace TheLastFortress
 
         /// <summary>Enemies the hero killed this night (also in <see cref="EnemiesDefeated"/>).</summary>
         public int HeroKills;
+
+        /// <summary>Spec 012: gold earned by calling this night early, paid at the next dawn (0 when not called).</summary>
+        public int EarlyCallGold;
     }
 
     /// <summary>
@@ -226,6 +229,7 @@ namespace TheLastFortress
             Stats = new RunStats();
             LastNight = null;
             nextSpawnIndex = 0;
+            earlyCallTick = -1;
             nextBuildingId = 1;
             nextEnemyId = 1;
             accumulatorNs = 0;
@@ -619,6 +623,7 @@ namespace TheLastFortress
             }
 
             LastNight = new NightRecap { Night = NightNumber }; // before the time-zero spawn
+            earlyCallTick = -1;
             SetState(RunState.Night);
             ReleaseDueSpawns(); // the time-zero spawn appears on entering Night, before any movement step
             return true;
@@ -938,6 +943,7 @@ namespace TheLastFortress
             var income = IncomeForecast();
             if (HasPerk(PerkRules.WarBonds) && LastNight != null && LastNight.Night == day - 1 && LastNight.KeepDamage == 0)
                 income.Bonus = PerkRules.WarBondsGold;
+            if (LastNight != null && LastNight.Night == day - 1) income.EarlyCall = LastNight.EarlyCallGold;
             LastIncome = income;
             placement.Earn(LastIncome.Total);
             Stats.GoldEarned += LastIncome.Total;
@@ -998,12 +1004,60 @@ namespace TheLastFortress
             events.Clear();
         }
 
+        // ---------- early call (spec 012) ----------
+
+        /// <summary>Spawns not yet due when the player calls come this many times sooner, counted from the call.</summary>
+        public const int EarlyCallSpeedup = 4;
+
+        /// <summary>Bonus gold per whole second by which the night's last spawn moves earlier [P].</summary>
+        public const int EarlyCallGoldPerSecond = 1;
+
+        /// <summary>Tick of tonight's early call, or -1.</summary>
+        long earlyCallTick = -1;
+
+        public bool EarlyCalled => earlyCallTick >= 0;
+
+        /// <summary>When a stored spawn is due: unchanged before the call, then compressed toward the call tick.</summary>
+        long DueTick(SpawnEntry s)
+        {
+            if (earlyCallTick < 0 || s.Tick <= earlyCallTick) return s.Tick;
+            return earlyCallTick + (s.Tick - earlyCallTick + EarlyCallSpeedup - 1) / EarlyCallSpeedup;
+        }
+
+        /// <summary>release-rules-4 campaign Night with spawns still pending and no call yet (paused or not).</summary>
+        public bool CanCallEarly => State == RunState.Night && !StressMode && IsCampaign && config.Campaign.RulesVersion == ReleaseCampaign.RulesV4
+                                    && earlyCallTick < 0 && nextSpawnIndex < Wave.Spawns.Count;
+
+        /// <summary>Gold a call now would pay at the next dawn: whole seconds by which the last spawn would move earlier.</summary>
+        public int EarlyCallGoldNow
+        {
+            get
+            {
+                if (!CanCallEarly) return 0;
+                var last = Wave.Spawns[Wave.Spawns.Count - 1].Tick;
+                if (last <= Tick) return 0;
+                var compressed = Tick + (last - Tick + EarlyCallSpeedup - 1) / EarlyCallSpeedup;
+                return (int)((last - compressed) * PrototypeDefinitions.StepSeconds) * EarlyCallGoldPerSecond;
+            }
+        }
+
+        /// <summary>Spec 012: calls the rest of tonight's spawns early; the bonus is paid at the next dawn. Once per night.</summary>
+        public bool CallEarly()
+        {
+            if (!CanCallEarly) return false;
+            var gold = EarlyCallGoldNow;
+            earlyCallTick = Tick;
+            LastNight.EarlyCallGold = gold;
+            events.Add(new SimEvent(SimEventType.EarlyCalled, Tick, -1, gold)); // compressed spawns release in the next steps
+            return true;
+        }
+
         // ---------- step phases ----------
 
         void ReleaseDueSpawns()
         {
             // FIFO: a due spawn waits while the living cap is reached; pending spawns still block completion.
-            while (nextSpawnIndex < Wave.Spawns.Count && Wave.Spawns[nextSpawnIndex].Tick <= Tick
+            while (nextSpawnIndex < Wave.Spawns.Count && DueTick(Wave.Spawns[nextSpawnIndex]) <= Tick
                    && enemies.Count < MvpCampaign.MaxLiveEnemies)
             {
                 var s = Wave.Spawns[nextSpawnIndex++];
@@ -2327,7 +2381,7 @@ namespace TheLastFortress
             sb.Append("state=").Append(State).Append(" night=").Append(NightNumber).Append(" paid=").Append(LastPaidDay)
                 .Append(" paused=").Append(Paused).Append(" tick=").Append(Tick)
                 .Append(" acc=").Append(accumulatorNs).Append(" gold=").Append(Gold).Append(" rev=").Append(grid.Revision)
-                .Append(" nextSpawn=").Append(nextSpawnIndex).Append(" nextB=").Append(nextBuildingId)
+                .Append(" nextSpawn=").Append(nextSpawnIndex).Append(earlyCallTick >= 0 ? " called=" + earlyCallTick.ToString(inv) : "").Append(" nextB=").Append(nextBuildingId)
                 .Append(" nextE=").Append(nextEnemyId).Append(" diag=").Append(diagnostics.Count)
                 .Append(" rng=").Append(rewardRng.State).Append(" perks=").Append(string.Join(",", ownedPerks))
                 .Append(" offers=").Append(offerHistory.Count).Append(CurrentOffer != null ? "+current" : "")
