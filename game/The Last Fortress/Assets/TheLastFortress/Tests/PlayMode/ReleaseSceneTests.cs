@@ -425,8 +425,13 @@ namespace TheLastFortress.Tests
                     shown.Add(game.HeroRig.ShownDistance);
                 }
 
-                Assert.Greater(game.HeroRig.Obstacles.Boxes.Count, 0, "the drawn buildings are blockers");
-                if (distance > 1f) Assert.Less(game.HeroRig.ShownDistance, distance - 0.05f, "the Keep behind pulled the camera in");
+                Assert.Greater(game.HeroRig.Obstacles.Boxes.Count, 0, "the drawn trees and boulders are blockers");
+                if (distance > 1f)
+                {
+                    // Spec 013: the Keep behind the hero no longer pulls the camera in; it fades instead.
+                    Assert.GreaterOrEqual(game.HeroRig.ShownDistance, distance - 0.05f, "the Keep behind pulled the camera in");
+                    Assert.Greater(game.HeroFade.FadedCount, 0, "the Keep between the camera and the hero is not faded");
+                }
                 var turns = 0;
                 for (var i = 12; i < shown.Count; i++)
                     if (Mathf.Sign(shown[i] - shown[i - 1]) * Mathf.Sign(shown[i - 1] - shown[i - 2]) < 0f) turns++;
@@ -453,6 +458,10 @@ namespace TheLastFortress.Tests
             Assert.AreEqual(fallbacks, game.HeroRig.FallbackFrames, "against the Tower the camera fell back to a held or in-head pose");
             Assert.IsTrue(game.HeroRig.ShownPoseClear(), "against the Tower: the near plane entered a blocker");
             Assert.Greater(game.HeroRig.ShownDistance, 0.2f, "against the Tower the camera stays behind the hero");
+            game.HeroRig.SetOrbit(90f, 10f); // back to the Tower: the camera's line runs through it
+            for (var i = 0; i < 20; i++) game.SyncViews(1f / 30f);
+            Assert.Greater(game.HeroRig.ShownDistance, 0.9f, "with its back to the Tower the camera was pulled in");
+            Assert.Greater(game.HeroFade.FadedCount, 0, "the Tower behind the hero is not faded");
 
             // Spec 011: a Wall never pulls the camera in; the Wall in front of the camera fades instead of hiding the hero.
             Building wall = null;

@@ -279,15 +279,7 @@ namespace TheLastFortress
         public void CollectCameraBlockers(List<Bounds> into)
         {
             into.Clear();
-            foreach (var view in buildingViews.Values)
-            {
-                // Spec 011: Walls let the camera through (the Wall it is in or behind fades instead).
-                if (view.Root == null || view.Building.Kind == BuildingKind.Wall) continue;
-                view.Root.GetComponentsInChildren(false, blockerRenderers);
-                foreach (var r in blockerRenderers)
-                    if (!IsUnder(r.transform, view.HpBar) && !IsUnder(r.transform, view.Smoke) && !IsUnder(r.transform, view.Glow)) into.Add(r.bounds);
-            }
-
+            // Spec 013: no building pulls the camera in; the building it is in or looks through fades instead (spec 011).
             if (terrainRoot == null) return;
             foreach (Transform cell in terrainRoot.transform)
             {
