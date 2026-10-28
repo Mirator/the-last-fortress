@@ -14,9 +14,10 @@ namespace TheLastFortress
         public const float Yaw = 45f;
         public const float Pitch = 40f;
         public static readonly Vector3 DefaultFocus = new Vector3(10f, 0f, 10f);
-        // Plan 014: closer by default so true-scale figures (about 0.22 tile) read; zoom out for the whole board.
-        public const float DefaultSize = 5.5f;
-        const float MinSize = 2.5f, MaxSize = 14f, PanSpeed = 12f, Distance = 40f;
+        // Plan 014: closer by default so true-scale figures (about 0.22 tile) read; zoom out for the whole board. Plan 023
+        // (spec 009 D3): 4.5, and no further out than the whole board, beyond which there is only mist.
+        public const float DefaultSize = 4.5f;
+        const float MinSize = 2.5f, MaxSize = WholeBoardSize, PanSpeed = 12f, Distance = 40f;
 
         Camera cam;
         Vector3 focus = DefaultFocus;

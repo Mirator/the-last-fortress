@@ -126,6 +126,13 @@ namespace TheLastFortress
                 yield break;
             }
 
+            if (game.IsRelease && captureSet == "023")
+            {
+                yield return RunPlan023();
+                Application.Quit();
+                yield break;
+            }
+
             if (game.IsRelease && captureSet == "013")
             {
                 yield return RunPlan013();
@@ -331,7 +338,7 @@ namespace TheLastFortress
             for (uint seed = 0; seed < 10; seed++)
             {
                 game.NewRun(seed, flat: false);
-                game.CameraRig.SetView(CameraRig.DefaultFocus, 12.5f);
+                game.CameraRig.SetView(CameraRig.DefaultFocus, CameraRig.WholeBoardSize); // was 12.5 before plan 023 capped the zoom
                 yield return Shot($"seed-{seed:00}");
             }
 
@@ -858,6 +865,86 @@ namespace TheLastFortress
             yield return HeroShot("013-lineup-h", Mathf.Atan2(cx - (float)game.Sim.Hero.X, cz - (float)game.Sim.Hero.Z) * Mathf.Rad2Deg, 6f);
             game.Sim.SetPaused(false);
             File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-013-capture-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set 023 (release build): strategic readability before/after (spec 009). The dense mixed fight at half-heights
+        /// 4.0, 4.5, 5.5 and 10.5, later with the attackers at the Walls, once with figures drawn twice as large (option A, for
+        /// comparison only), and once through the hero camera (must look unchanged); every enemy kind side by side at 4.5 and
+        /// 10.5; the Day board at 4.5 and 10.5; the 100-enemy stress fixture at 5.5 and 10.5. Explicit sizes, so the frames
+        /// match across builds whatever the default zoom is.
+        /// </summary>
+        IEnumerator RunPlan023()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+
+            var spawns = new System.Collections.Generic.List<SpawnEntry>();
+            var mix = new[] { EnemyKind.Grunt, EnemyKind.Grunt, EnemyKind.Runner, EnemyKind.Grunt, EnemyKind.Archer, EnemyKind.Brute, EnemyKind.Bomber, EnemyKind.Grunt };
+            for (var i = 0; i < 40; i++) spawns.Add(new SpawnEntry(i * 3, i % 2 == 0 ? MvpCampaign.West : MvpCampaign.East, i % 2, mix[i % mix.Length]));
+            ContinueSaved(Plan013Setup(MapProfiles.Meadow, new WavePlan("dense", spawns, new[] { MvpCampaign.West, MvpCampaign.East }), true), log);
+            HeroWalk(1.2f, new HeroCommand(12, false, 48));
+            game.CameraRig.SetView(CameraRig.DefaultFocus, 4.5f);
+            yield return Shot("023-board-day-4.5");
+            game.CameraRig.SetView(CameraRig.DefaultFocus, 10.5f);
+            yield return Shot("023-board-day-10.5");
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null;
+            log.AppendLine($"dense: {StepUntil(() => game.Sim.AliveEnemyCount >= 24, 2400)} alive={game.Sim.AliveEnemyCount}");
+            foreach (var size in new[] { 4.0f, 4.5f, 5.5f, 10.5f })
+            {
+                game.CameraRig.SetView(CameraRig.DefaultFocus, size);
+                yield return Shot("023-dense-" + size.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture));
+            }
+
+            // Option A for comparison: every shown enemy drawn twice as large (presentation only, this frame only).
+            var enemies = GameObject.Find("Enemies");
+            if (enemies != null)
+            {
+                foreach (Transform t in enemies.transform) t.localScale *= 2f;
+                game.CameraRig.SetView(CameraRig.DefaultFocus, 4.5f);
+                yield return Shot("023-dense-4.5-optionA");
+                foreach (Transform t in enemies.transform) t.localScale /= 2f;
+            }
+
+            yield return HeroShot("023-dense-h-west", 270f, 10f);
+            game.Sim.SetPaused(false);
+            log.AppendLine($"walls: {StepUntil(() => game.Sim.Enemies.Count(e => e.Alive && e.TargetBuildingId >= 0) >= 8, 2400)} " +
+                           $"alive={game.Sim.AliveEnemyCount} at buildings={game.Sim.Enemies.Count(e => e.Alive && e.TargetBuildingId >= 0)}");
+            game.CameraRig.SetView(new Vector3(8f, 0f, 10f), 4.5f);
+            yield return Shot("023-walls-4.5");
+            game.CameraRig.SetView(CameraRig.DefaultFocus, 10.5f);
+            yield return Shot("023-walls-10.5");
+            game.Sim.SetPaused(false);
+
+            // Every enemy kind side by side, slowest first so the group arrives together.
+            var lineup = new[] { EnemyKind.SiegeCommander, EnemyKind.SiegeGolem, EnemyKind.Brute, EnemyKind.Archer, EnemyKind.Grunt, EnemyKind.Bomber, EnemyKind.Runner };
+            var lineupSpawns = new System.Collections.Generic.List<SpawnEntry>();
+            for (var i = 0; i < lineup.Length; i++) lineupSpawns.Add(new SpawnEntry(i * 22, MvpCampaign.West, 0, lineup[i]));
+            ContinueSaved(Plan013Setup(MapProfiles.Meadow, new WavePlan("lineup", lineupSpawns, new[] { MvpCampaign.West }), false), log);
+            game.StartNight();
+            for (var i = 0; i < 60; i++) yield return null;
+            log.AppendLine($"lineup: {StepUntil(() => game.Sim.Enemies.Count(e => e.Alive) == lineup.Length && game.Sim.Enemies.All(e => !e.Alive || e.X > 2.6), 1600)} " +
+                           string.Join(" ", game.Sim.Enemies.Where(e => e.Alive).Select(e => $"{e.Kind}@{e.X:0.0},{e.Z:0.0}")));
+            var cx = (float)game.Sim.Enemies.Where(e => e.Alive).DefaultIfEmpty().Average(e => e == null ? 4.0 : e.X);
+            var cz = (float)game.Sim.Enemies.Where(e => e.Alive).DefaultIfEmpty().Average(e => e == null ? 10.5 : e.Z);
+            game.CameraRig.SetView(new Vector3(cx, 0f, cz), 4.5f);
+            yield return Shot("023-lineup-4.5");
+            game.CameraRig.SetView(CameraRig.DefaultFocus, 10.5f);
+            yield return Shot("023-lineup-10.5");
+            game.Sim.SetPaused(false);
+
+            game.EnterStressMode();
+            game.AutoAdvance = true;
+            yield return new WaitForSeconds(6f);
+            log.AppendLine($"stress: alive={game.Sim.AliveEnemyCount}");
+            game.CameraRig.SetView(CameraRig.DefaultFocus, 5.5f);
+            yield return Shot("023-stress-5.5");
+            game.CameraRig.SetView(CameraRig.DefaultFocus, 10.5f);
+            yield return Shot("023-stress-10.5");
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-023-capture-log.txt"), log.ToString());
         }
 
         static readonly (BuildingKind kind, int x, int z)[] Plan013Row =

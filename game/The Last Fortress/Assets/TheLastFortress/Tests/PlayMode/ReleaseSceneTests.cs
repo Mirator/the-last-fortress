@@ -297,6 +297,7 @@ namespace TheLastFortress.Tests
             Assert.IsTrue(twin.StartNight());
             game.Hud.SpeedButton(3).onClick.Invoke();
             game.Player.HeroInputOverride = HeroCommand.None; // the same (absent) command in both views: only presentation differs
+            var markersSeen = new int[2]; // frames checked with enemies alive: strategic, hero camera
 
             for (var frame = 0; frame < 160 && game.Sim.State == RunState.Night; frame++)
             {
@@ -313,8 +314,13 @@ namespace TheLastFortress.Tests
                 var steps = game.AdvanceSimulation(0.1f);
                 for (var i = 0; i < steps; i++) twin.Step(HeroCommand.None);
                 game.SyncViews(0.1f);
+                // Spec 009: one class marker per living enemy while the strategic camera shows, none through the hero camera.
+                var heroCamera = game.World.HeroCameraShown;
+                Assert.AreEqual(heroCamera ? 0 : game.Sim.AliveEnemyCount, game.World.VisibleMarkerCount, $"class markers (hero camera {heroCamera}, frame {frame})");
+                if (game.Sim.AliveEnemyCount > 0) markersSeen[heroCamera ? 1 : 0]++;
             }
 
+            Assert.IsTrue(markersSeen[0] > 0 && markersSeen[1] > 0, $"markers checked with enemies alive in both views ({markersSeen[0]}/{markersSeen[1]})");
             Assert.AreEqual(Snapshot(twin), Snapshot(game.Sim), "toggling views changed the simulation");
 
             // A fresh Day (the undefended night above may have ended): the hero walks on its own Day clock.

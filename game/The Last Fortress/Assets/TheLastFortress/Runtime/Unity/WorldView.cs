@@ -129,6 +129,10 @@ namespace TheLastFortress
             public GameObject Fuse;
 
             public GameObject Aura;
+
+            /// <summary>Strategic class marker on the ground under the figure (spec 009); hidden in the hero view.</summary>
+            public GameObject Marker;
+
             public Vector3 LastPosition;
             public float GaitPhase;
             public float GaitAmount;
@@ -372,6 +376,9 @@ namespace TheLastFortress
 
         public int ActiveArrowCount => arrows.Count;
 
+        /// <summary>Class markers shown in the last sync (one per living enemy in the strategic view, none in the hero view).</summary>
+        public int VisibleMarkerCount { get; private set; }
+
         public IEnumerable<Vector3> ArrowTargets()
         {
             foreach (var a in arrows) yield return a.To;
@@ -405,6 +412,11 @@ namespace TheLastFortress
         GameObject buildGrid;
         Light keepLight;
         Material hpBack, hpFill, hpFillEnemy;
+
+        /// <summary>One on-top material for every class marker; shape and colour live in each kind's mesh (vertex colours).</summary>
+        Material markerMat;
+
+        readonly Dictionary<EnemyKind, Mesh> markerMeshes = new Dictionary<EnemyKind, Mesh>();
 
         readonly Dictionary<int, BuildingView> buildingViews = new Dictionary<int, BuildingView>();
         readonly Dictionary<int, EnemyView> enemyViews = new Dictionary<int, EnemyView>();
@@ -515,6 +527,8 @@ namespace TheLastFortress
             blastMat = Prims.Tinted(content.overlay, Palette.Amber.WithAlpha(0.32f)); // shows the area without hiding who is in it
             repairMat = Prims.Tinted(content.overlay, Palette.RouteCyan.WithAlpha(0.9f));
             auraMat = Prims.Tinted(content.overlay, Palette.WarningCoral.WithAlpha(0.16f));
+            markerMat = Prims.Tinted(content.overlayOnTop != null ? content.overlayOnTop : content.overlay, Color.white);
+            markerMat.renderQueue = 4001; // after the route lines (Overlay), so a marker is never cut by a line
             enemyArrowMat = Prims.Tinted(content.overlay, Palette.WarningCoral);
             particles = new FxParticles(fxRoot, content.overlay);
             for (var i = 0; i < 4; i++)
@@ -1241,6 +1255,7 @@ namespace TheLastFortress
         void SyncEnemies(RunSimulation sim, float dt)
         {
             var alpha = Mathf.Clamp01((float)sim.InterpolationAlpha);
+            var markers = 0;
             foreach (var e in sim.Enemies)
             {
                 if (!enemyViews.TryGetValue(e.Id, out var view))
@@ -1316,7 +1331,15 @@ namespace TheLastFortress
                 if (showBar) SetFill(view.HpFill, view.ShownFraction);
                 view.HpBar.transform.rotation = BarRotation;
                 // Strategic: half the old width over true-scale figures; hero view: constant on-screen size.
-                if (showBar) view.HpBar.transform.localScale = Vector3.one * BarScale(view.HpBar.transform.position, view.BarWidth, 0.5f);
+                if (showBar) view.HpBar.transform.localScale = Vector3.one * BarScale(view.HpBar.transform.position, view.BarWidth, 0.5f, true);
+                var classMarker = !HeroCameraShown;
+                if (view.Marker.activeSelf != classMarker) view.Marker.SetActive(classMarker);
+                if (classMarker)
+                {
+                    PlaceMarker(view);
+                    markers++;
+                }
+
                 var marker = e.Burning && !HeroCameraShown;
                 if (view.Burn.activeSelf != marker) view.Burn.SetActive(marker);
                 if (e.Burning) view.Burn.transform.localScale = BurnSize * (0.8f + 0.25f * Mathf.Sin(fxTime * 18f + e.Id));
@@ -1349,6 +1372,7 @@ namespace TheLastFortress
                 AnimateModel(view, pos, dt);
             }
 
+            VisibleMarkerCount = markers;
             scratch.Clear();
             foreach (var pair in enemyViews)
                 if (!pair.Value.Enemy.Alive || sim.GetEnemy(pair.Key) != pair.Value.Enemy)
@@ -1360,7 +1384,7 @@ namespace TheLastFortress
                 if (detonatedThisFrame.Contains(id) || !killDelay.TryGetValue(id, out var delay)) Destroy(v.Root);
                 else
                 {
-                    StartDying(v.Root, v.Model, false, delay, v.HpBar, v.Burn, v.Fuse, v.Aura);
+                    StartDying(v.Root, v.Model, false, delay, v.HpBar, v.Burn, v.Fuse, v.Aura, v.Marker);
                     var d = dying[dying.Count - 1];
                     d.Rig = v.Rig;
                     d.Id = id;
@@ -1628,12 +1652,21 @@ namespace TheLastFortress
                 aura.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             }
 
+            var classMarker = new GameObject("Marker");
+            classMarker.transform.SetParent(root.transform, false);
+            classMarker.transform.localPosition = new Vector3(0f, 0.02f, 0f);
+            classMarker.AddComponent<MeshFilter>().sharedMesh = MarkerMesh(e.Kind);
+            var markerRenderer = classMarker.AddComponent<MeshRenderer>();
+            markerRenderer.sharedMaterial = markerMat;
+            markerRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            markerRenderer.receiveShadows = false;
+
             GridCoordinates.TileCenter(e.Cell, out var sx, out var sz);
             // Bosses walk the lane centre; others get one of seven fixed offsets (by ID) so a column reads as several bodies.
             var offset = e.Definition.IsBoss ? Vector3.zero : new Vector3(((e.Id * 37) % 7 - 3) * 0.04f, 0f, ((e.Id * 53) % 7 - 3) * 0.04f);
             return new EnemyView
             {
-                Enemy = e, Root = root, Model = model, HpBar = bar, HpFill = fill, Burn = burn, Fuse = fuse, Aura = aura, Offset = offset,
+                Enemy = e, Root = root, Model = model, HpBar = bar, HpFill = fill, Burn = burn, Fuse = fuse, Aura = aura, Marker = classMarker, Offset = offset,
                 BurnAt = burn.transform.localPosition, FuseAt = fuse != null ? fuse.transform.localPosition : Vector3.zero,
                 LastPosition = new Vector3((float)sx, 0f, (float)sz), Height = height, Wick = model.Find("WickTip"), Torch = model.Find("TorchFlame"),
                 Rig = model.GetComponent<CharacterRig>(), BarWidth = (width + 0.04f) * root.transform.localScale.x,
@@ -1769,14 +1802,110 @@ namespace TheLastFortress
         /// on-screen width, about 5% of the view height, whatever the distance, so a damaged Wall next to the hero never puts a
         /// metres-wide slab across the fight. <paramref name="worldWidth"/> is the bar's world width at scale 1.
         /// </summary>
-        float BarScale(Vector3 at, float worldWidth, float strategic)
+        float BarScale(Vector3 at, float worldWidth, float strategic, bool keepOnZoomOut = false)
         {
+            // Enemy bars (spec 009): zoomed out past half-height 5.5 (the default before plan 023) they keep the on-screen size they have there.
+            if (barViewer != null && barViewer.orthographic && keepOnZoomOut) return strategic * Mathf.Max(1f, barViewer.orthographicSize / 5.5f);
             if (barViewer == null || barViewer.orthographic) return strategic;
             var distance = Vector3.Distance(barViewer.transform.position, at);
             return Mathf.Clamp(distance * 0.05f / Mathf.Max(0.01f, worldWidth), 0.02f, strategic);
         }
 
+        /// <summary>Marker size on screen in pixels, and its world diameter limits in tiles (spec 009 rule 3; provisional).</summary>
+        const float MarkerPixels = 18f, MarkerMinTiles = 0.18f, MarkerMaxTiles = 0.42f, BossMarkerFactor = 1.5f;
+
+        /// <summary>The strategic camera looks down at 40°, so ground shapes are drawn stretched along its view to read true on screen.</summary>
+        static readonly float MarkerStretch = 1f / Mathf.Sin(CameraRig.Pitch * Mathf.Deg2Rad);
+
+        static readonly Quaternion MarkerRotation = Quaternion.Euler(0f, CameraRig.Yaw, 0f);
+
+        /// <summary>
+        /// Keeps a class marker about <see cref="MarkerPixels"/> across on screen at any strategic zoom and resolution, never
+        /// smaller than the figure's feet and never so large that a column of enemies becomes one blob.
+        /// </summary>
+        void PlaceMarker(EnemyView view)
+        {
+            var cam = barViewer;
+            var size = cam != null && cam.orthographic ? cam.orthographicSize : CameraRig.DefaultSize;
+            var pixels = cam != null ? Mathf.Max(1, cam.pixelHeight) : Mathf.Max(1, Screen.height);
+            var d = Mathf.Clamp(MarkerPixels * 2f * size / pixels, MarkerMinTiles, MarkerMaxTiles);
+            if (view.Enemy.Definition.IsBoss) d *= BossMarkerFactor;
+            var t = view.Marker.transform;
+            t.rotation = MarkerRotation;
+            t.localScale = new Vector3(d, 1f, d * MarkerStretch) / Mathf.Max(0.01f, view.Root.transform.localScale.x);
+        }
+
+        /// <summary>Class shapes (spec 009 rule 2): told apart by shape alone; the fill colour supports it.</summary>
+        static (int sides, float turn, bool hollow, Color fill) MarkerShape(EnemyKind kind)
+        {
+            switch (kind)
+            {
+                case EnemyKind.Runner: return (3, 0f, false, Palette.Hex(0xF2DE4A)); // triangle, pointing up the screen
+                case EnemyKind.Brute: return (4, 45f, false, Palette.Hex(0xD24FC2)); // square
+                case EnemyKind.Archer: return (4, 0f, false, Palette.Hex(0x7FD15C)); // diamond
+                case EnemyKind.Bomber: return (24, 0f, true, Palette.Hex(0xF4F1EA)); // hollow ring
+                case EnemyKind.SiegeGolem: return (6, 0f, false, Palette.Hex(0xC9C3B8)); // hexagon
+                case EnemyKind.SiegeCommander: return (6, 0f, false, Palette.Hex(0xA27AF2)); // hexagon
+                default: return (24, 0f, false, Palette.Hex(0xD8343F)); // Grunt: disc
+            }
+        }
+
+        static readonly Color MarkerOutline = new Color(0.07f, 0.08f, 0.09f, 0.92f);
+
+        /// <summary>A flat shape of diameter 1 on the ground plane: a dark outline, then the class fill over it (vertex colours).</summary>
+        Mesh MarkerMesh(EnemyKind kind)
+        {
+            if (markerMeshes.TryGetValue(kind, out var cached)) return cached;
+            var (sides, turn, hollow, fill) = MarkerShape(kind);
+            var vertices = new List<Vector3>();
+            var colors = new List<Color>();
+            var triangles = new List<int>();
+            void Band(float inner, float outer, Color color)
+            {
+                var start = vertices.Count;
+                var linear = QualitySettings.activeColorSpace == ColorSpace.Linear ? color.linear : color; // the shader writes vertex colours as they are
+                for (var i = 0; i < sides; i++)
+                {
+                    var a = (turn + 90f + i * 360f / sides) * Mathf.Deg2Rad; // the first corner points up the screen (+Z)
+                    var dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                    vertices.Add(dir * inner);
+                    vertices.Add(dir * outer);
+                    colors.Add(linear);
+                    colors.Add(linear);
+                }
+
+                for (var i = 0; i < sides; i++)
+                {
+                    int a0 = start + i * 2, a1 = start + (i + 1) % sides * 2;
+                    triangles.AddRange(new[] { a0, a1, a0 + 1, a1, a1 + 1, a0 + 1 });
+                }
+            }
+
+            // Polygons are sized so their area is close to the disc's: no class reads larger than another.
+            var r = sides >= 12 ? 0.5f : sides == 3 ? 0.62f : sides == 4 ? 0.55f : 0.52f;
+            const float edge = 0.09f;
+            if (hollow)
+            {
+                Band(r - 0.22f - edge, r, MarkerOutline);
+                Band(r - 0.22f, r - edge, fill);
+            }
+            else
+            {
+                Band(0f, r, MarkerOutline);
+                Band(0f, r - edge * (sides == 3 ? 1.6f : 1f), fill);
+            }
+
+            var mesh = new Mesh { name = $"Marker{kind}" };
+            mesh.SetVertices(vertices);
+            mesh.SetColors(colors);
+            mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateBounds();
+            markerMeshes[kind] = mesh;
+            return mesh;
+        }
+
         /// <summary>Fastest enemy turn rate (Runner): a 90° corner in 0.125 s. Heavier kinds turn slower.</summary>
+
         public const float TurnDegreesPerSecond = 720f;
 
         /// <summary>Turn rate by weight: Runner 720, light 480, Brute 300, bosses 180 °/s.</summary>
