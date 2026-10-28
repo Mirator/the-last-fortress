@@ -167,7 +167,8 @@ namespace TheLastFortress
             // Day announcement under the status panel (the boss bar's slot, which only shows at Night): a new enemy
             // type or the final siege, read from the stored wave.
             announcePanel = Panel(root, "Announcement", new Vector2(0.5f, 1), new Vector2(0, -192), new Vector2(860, 64)).gameObject;
-            announcePanel.GetComponent<Image>().raycastTarget = false;
+            // A click shows the full briefing again after it collapsed (or collapses it); UI clicks never reach the world.
+            announcePanel.AddComponent<Button>().onClick.AddListener(() => announceExpanded = !announceExpanded);
             var stripe = Rect(announcePanel.transform, "Stripe", new Vector2(0, 0.5f), Vector2.zero, new Vector2(8, 64));
             stripe.anchorMin = new Vector2(0, 0);
             stripe.anchorMax = new Vector2(0, 1);
@@ -535,7 +536,7 @@ namespace TheLastFortress
             var tonight = sim.State == RunState.Defeat && sim.LastNight != null ? "\nThis night: " + RecapLine(sim.LastNight) : "";
             var heroKills = sim.HasHero ? $" (hero {s.HeroKills})" : "";
             return $"{head}{tonight}\n\nRun: nights cleared {s.NightsCleared} / {sim.TotalNights}\nEnemies defeated {s.EnemiesDefeated}{heroKills}\nBuildings purchased {s.BuildingsPurchased}\n" +
-                   $"Gold earned {s.GoldEarned} (starting 250 excluded)\nBuilding links active {current} · formed this run {s.SynergiesEver.Count}\nSeed {sim.Seed.ToString(CultureInfo.InvariantCulture)}";
+                   $"Gold earned {s.GoldEarned} (starting 250 excluded)\nSynergies active {current} · formed this run {s.SynergiesEver.Count}\nSeed {sim.Seed.ToString(CultureInfo.InvariantCulture)}";
         }
 
         /// <summary>
@@ -687,6 +688,9 @@ namespace TheLastFortress
                 var minY = game.HeroViewActive ? 300f : 170f; // the hero view keeps tags above the speed and night buttons
                 var topReserve = Mathf.Max(260f, topPanelsBottom + 30f); // stay clear of status, boss bar, announcement, banner and guide
                 var clamped = new Vector2(Mathf.Clamp(p.x, minX, size.x - minX), Mathf.Clamp(p.y, minY, size.y - topReserve));
+                // The resources panel (top left) grows with its perks list: a tag beside it stays below it.
+                if (clamped.x - halfWidth < resourcesRect.anchoredPosition.x + resourcesRect.sizeDelta.x + 10f)
+                    clamped.y = Mathf.Min(clamped.y, size.y + resourcesRect.anchoredPosition.y - resourcesRect.sizeDelta.y - 32f);
                 // Low on screen the corners hold the Hero panel (left) and the speed and night buttons (right): keep tags between.
                 if (clamped.y < 330f) clamped.x = Mathf.Clamp(clamped.x, 400f + halfWidth, size.x - 340f - halfWidth);
                 var hidden = g.x < 0f || g.x > size.x || g.y < minY || g.y > size.y - topReserve + 22f;
@@ -742,12 +746,34 @@ namespace TheLastFortress
             }
         }
 
+        /// <summary>The Day briefing shows in full this long, then collapses to its first line until clicked [P].</summary>
+        public const float AnnouncementFullSeconds = 12f;
+
+        RunSimulation announceSim;
+        int announceReset = -1, announceNight = -1;
+        float announceShownAt;
+        bool announceExpanded;
+
+        /// <summary>True while the Day briefing shows only its first line.</summary>
+        public bool AnnouncementCollapsed { get; private set; }
+
         void RefreshAnnouncements(RunSimulation sim)
         {
             var text = game.MenuOpen ? null : Announcement(sim);
             if (announcePanel.activeSelf != (text != null)) announcePanel.SetActive(text != null);
             if (text != null)
             {
+                // Full for the first seconds of each Day, then one line, so the briefing stops covering the board while building.
+                if (announceSim != sim || announceReset != sim.ResetCount || announceNight != sim.NightNumber)
+                {
+                    (announceSim, announceReset, announceNight) = (sim, sim.ResetCount, sim.NightNumber);
+                    announceShownAt = Time.unscaledTime;
+                    announceExpanded = false;
+                }
+
+                var firstBreak = text.IndexOf('\n');
+                AnnouncementCollapsed = firstBreak >= 0 && !announceExpanded && Time.unscaledTime - announceShownAt >= AnnouncementFullSeconds;
+                if (AnnouncementCollapsed) text = text.Substring(0, firstBreak) + "  (click for details)";
                 Set(announceText, text);
                 var h = Mathf.Ceil(announceText.preferredHeight);
                 announceText.rectTransform.sizeDelta = new Vector2(820, h);

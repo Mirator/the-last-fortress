@@ -1,0 +1,50 @@
+full run: crossing seed 2: generated (attempt 0) rules=release-rules-4
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  framing: focus=(4.75, 0.00, 10.50) size=4,50
+  Night 1: Reward 62,9s; Keep -0 (500/500); lost 0; killed 10 (hero 6)
+  Reward FortressHeart,WarBonds,KillZone -> FortressHeart
+Day 2: gold left 0; House 8 12; Wall 11 10
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 2: Reward 68,6s; Keep -0 (650/650); lost 0; killed 16 (hero 7)
+  Reward HeavyShot,BlastShields,Sharpshooters -> HeavyShot
+Day 3: gold left 12; House 13 8
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 3: Reward 90,0s; Keep -0 (650/650); lost 0; killed 20 (hero 7)
+  Reward SignalFires,MarketSquare,Recycling -> SignalFires
+Day 4: gold left 6; Wall 10 9; Farm 12 13
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 4: Reward 93,2s; Keep -0 (650/650); lost 1; killed 23 (hero 10)
+  Reward ReinforcedTimber,WarBonds,BlastShields -> BlastShields
+Day 5: gold left 42; Wall 10 11
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 5: Reward 86,8s; Keep -0 (650/650); lost 1; killed 31 (hero 9)
+  Reward Recycling,LastStand,CounterBattery -> CounterBattery
+Day 6: gold left 33; Tower 8 10
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 6: Reward 96,5s; Keep -0 (650/650); lost 0; killed 37 (hero 6)
+  Reward KillZone,Shrapnel,ReinforcedTimber -> Shrapnel
+Day 7: gold left 24; Tower 12 10
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 7: Reward 85,6s; Keep -0 (650/650); lost 0; killed 42 (hero 5)
+  Reward WarBonds,ThriftyConstruction,BarbedDefenses -> ThriftyConstruction
+Day 8: gold left 64; 
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 8: Reward 92,6s; Keep -0 (650/650); lost 0; killed 54 (hero 7)
+  Reward Recycling,Gatehouse,LastStand -> Gatehouse
+Day 9: gold left 7; Cannon 7 7; Watchtower 9 8
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 9: Reward 116,3s; Keep -0 (650/650); lost 0; killed 64 (hero 7)
+  Reward ExpandedVision,FocusedFire,ReinforcedTimber -> ExpandedVision
+Day 10: gold left 47; 
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 10: Reward 97,0s; Keep -0 (650/650); lost 0; killed 72 (hero 7)
+  Reward WarBonds,Sharpshooters,HardenedRoofs -> Sharpshooters
+Day 11: gold left 18; Cannon 12 6
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 11: Reward 130,4s; Keep -0 (650/650); lost 0; killed 81 (hero 6)
+  Reward WarBonds,Overwatch,ReinforcedTimber -> Overwatch
+Day 12: gold left 30; Watchtower 11 8
+  briefing collapsed=True
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 12: Victory 109,2s; Keep -0 (650/650); lost 0; killed 91 (hero 8)
+Result: Victory; nights 12/12; defeated 541; bought 18; perks [FortressHeart,HeavyShot,SignalFires,BlastShields,CounterBattery,Shrapnel,ThriftyConstruction,Gatehouse,ExpandedVision,Sharpshooters,Overwatch]

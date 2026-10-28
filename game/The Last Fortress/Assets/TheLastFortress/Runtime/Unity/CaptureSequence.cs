@@ -936,6 +936,13 @@ namespace TheLastFortress
                 game.SyncViews();
                 game.CameraRig.ResetView();
                 yield return Shot($"full-{day:00}-a-day");
+                if (day == game.Sim.TotalNights && game.Hud.AnnouncementText != null)
+                {
+                    yield return new WaitForSecondsRealtime(HudView.AnnouncementFullSeconds + 0.5f); // the briefing collapses
+                    yield return Shot($"full-{day:00}-a2-day-collapsed");
+                    log.AppendLine($"  briefing collapsed={game.Hud.AnnouncementCollapsed}");
+                }
+
                 game.CameraRig.ShowWholeBoard();
                 yield return Shot($"full-{day:00}-b-day-board");
                 if (!game.StartNight())
