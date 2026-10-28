@@ -26,7 +26,7 @@ namespace TheLastFortress
 
         void BuildHeroPanel(RectTransform root)
         {
-            var panel = Panel(root, "HeroPanel", new Vector2(0, 0), new Vector2(24, 24), new Vector2(340, 104));
+            var panel = Panel(root, "HeroPanel", new Vector2(0, 0), new Vector2(24, 24), new Vector2(380, 104));
             heroPanel = panel.gameObject;
             heroText = Label(panel, "Text", 22, TextAnchor.UpperLeft, new Vector2(18, -12), new Vector2(310, 30), Palette.HudText);
             heroText.fontStyle = FontStyle.Bold;
@@ -38,7 +38,8 @@ namespace TheLastFortress
             heroFill.pivot = new Vector2(0, 0.5f);
             heroFill.offsetMin = heroFill.offsetMax = Vector2.zero;
             heroFill.gameObject.AddComponent<Image>().color = Palette.RouteCyan;
-            heroHint = Label(panel, "Hint", 18, TextAnchor.UpperLeft, new Vector2(18, -68), new Vector2(310, 28), Palette.HudText.WithAlpha(0.75f));
+            // 20 pt and brighter: at 18 pt and 75% it was about 12 px at 1280x720 (capture review 2026-10-28).
+            heroHint = Label(panel, "Hint", 20, TextAnchor.UpperLeft, new Vector2(18, -68), new Vector2(350, 30), Palette.HudText.WithAlpha(0.9f));
             heroPanel.SetActive(false);
 
             // Hero view: when the Keep is hit while it is behind or beside the camera, a coral tag at the screen edge points to it.

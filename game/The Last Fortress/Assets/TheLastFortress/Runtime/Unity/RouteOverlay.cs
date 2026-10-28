@@ -219,8 +219,11 @@ namespace TheLastFortress
             this.content = content;
             // Route/breach/selection/link lines may use an on-top material so tall Towers never hide them (MVP).
             lineMat = content.overlayOnTop != null ? content.overlayOnTop : content.overlay;
+            // A dark under-stroke drawn just before each route line, so the cyan reads over pale water and sand too.
+            underMat = new Material(lineMat) { name = lineMat.name + " (under-stroke)", renderQueue = lineMat.renderQueue - 1 };
             committedLine = Prims.Line(transform, "CommittedRoute", lineMat, Palette.RouteCyan.WithAlpha(0.35f), 0.07f);
             primaryLine = Prims.Line(transform, "RouteLine", lineMat, Palette.RouteCyan, 0.14f);
+            UnderStroke(primaryLine);
             rangeRing = Prims.Line(transform, "RangeRing", lineMat, Palette.RouteCyan.WithAlpha(0.8f), 0.05f);
             rangeRing.loop = true;
             selectionSquare = Prims.Line(transform, "Selection", lineMat, Palette.RouteCyan, 0.06f);
@@ -239,6 +242,7 @@ namespace TheLastFortress
             for (var i = 1; i < MaxEntries; i++)
             {
                 extraLines[i] = Prims.Line(transform, $"RouteLine{i}", lineMat, Palette.RouteCyan.WithAlpha(0.8f), 0.1f);
+                UnderStroke(extraLines[i]);
                 extraBreach[i] = BuildBreachMarker($"BreachMarker{i}");
             }
 
@@ -450,6 +454,7 @@ namespace TheLastFortress
                 UpdateLinks(sim);
             }
 
+            SyncUnderStrokes();
             UpdateEntryMarkers(sim);
             UpdateChevrons(day);
             UpdateRangeAndSelection(sim, player);
@@ -633,6 +638,31 @@ namespace TheLastFortress
             line.SetPosition(1, a + new Vector3(0, 0, s));
             line.SetPosition(2, a + new Vector3(s, 0, s));
             line.SetPosition(3, a + new Vector3(s, 0, 0));
+        }
+
+        Material underMat;
+        readonly List<(LineRenderer line, LineRenderer under)> underStrokes = new List<(LineRenderer, LineRenderer)>();
+        Vector3[] strokeBuffer = new Vector3[64];
+
+        /// <summary>Route line contrast: a darker, wider copy of the line drawn under it.</summary>
+        void UnderStroke(LineRenderer line)
+        {
+            var under = Prims.Line(transform, line.name + "Under", underMat, new Color(0.06f, 0.11f, 0.13f, 0.6f), line.startWidth + 0.06f);
+            underStrokes.Add((line, under));
+        }
+
+        /// <summary>Copies each route line's points to its under-stroke (after every route update).</summary>
+        void SyncUnderStrokes()
+        {
+            foreach (var (line, under) in underStrokes)
+            {
+                var n = line.positionCount;
+                if (strokeBuffer.Length < n) strokeBuffer = new Vector3[n * 2];
+                line.GetPositions(strokeBuffer);
+                under.positionCount = n;
+                if (n > 0) under.SetPositions(strokeBuffer);
+                under.enabled = line.enabled && line.gameObject.activeInHierarchy;
+            }
         }
 
         static void SetLine(LineRenderer line, Route route, int lastIndex)

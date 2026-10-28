@@ -507,7 +507,7 @@ namespace TheLastFortress
                     break;
             }
 
-            if (sim.StressMode) Set(infoText, $"{sim.AliveEnemyCount} Grunts active across 4 entries · Keep/Walls invulnerable · {sim.NightElapsedSeconds:0}s");
+            if (sim.StressMode) Set(infoText, $"{sim.AliveEnemyCount} enemies active across 4 entries · Keep/Walls invulnerable · {sim.NightElapsedSeconds:0}s");
 
             // Route summary (Day only)
             var route = overlay.PrimaryRoute;

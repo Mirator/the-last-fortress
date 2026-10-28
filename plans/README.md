@@ -40,6 +40,7 @@ Prepared on 2026-10-15 using the improve skill. These plans are implementation h
 | [028](028-reward-card-lockout-tint.md) | Reward cards stay opaque during the 0.8 s lockout (corrects the 026/027 capture-artefact note) | P2 | XS | `specs/002-game-rules.md` v1.12 section 13 (no rule change) | DONE: reward frame before/after |
 | [029](029-hero-view-occluder-fade.md) | Hero view: meshes hiding the hero turn see-through at 30%; Walls no longer pull the camera in | P1 | M | Spec `specs/archive/011-hero-view-occluder-fade.md` v0.3 (approved 2026-10-28: D1 buildings and trees, D2 Walls let the camera through, D3 30%) | DONE: camera test with two mutations, PlayMode 24/24 (+1 skipped), release build, hero-camera capture 0 fallbacks. Owner live check PENDING |
 | [030](030-night-pacing.md) | Night pacing: call early for gold, release-rules-4 bosses at 15 s | P1 | M | Spec `specs/archive/012-night-pacing.md` v0.3 (approved 2026-10-28: D1-D4; boss 15 s kept after the probe) | DONE: EditMode 131/131, PlayMode 24/24 (+1 skipped), two mutations, recorded policy wins hold, probe 3/15 losses vs 2; full-run capture with a call. Owner live check PENDING |
+| [031](031-polish-batch.md) | Polish: larger hero hint, route lines with a dark under-stroke, stress label wording | P2 | S | `specs/002-game-rules.md` v1.14 §13 (no rule change) | DONE: PlayMode 24/24 (+1 skipped), release build, captures at 1280x720. Owner look PENDING |
 
 ## Current third-person audit (2026-10-20)
 

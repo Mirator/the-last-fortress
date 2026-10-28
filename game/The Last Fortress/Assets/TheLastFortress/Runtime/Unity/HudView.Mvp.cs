@@ -694,7 +694,7 @@ namespace TheLastFortress
                 if (clamped.x - halfWidth < resourcesRect.anchoredPosition.x + resourcesRect.sizeDelta.x + 10f)
                     clamped.y = Mathf.Min(clamped.y, size.y + resourcesRect.anchoredPosition.y - resourcesRect.sizeDelta.y - 32f);
                 // Low on screen the corners hold the Hero panel (left) and the speed and night buttons (right): keep tags between.
-                if (clamped.y < 330f) clamped.x = Mathf.Clamp(clamped.x, 400f + halfWidth, size.x - 340f - halfWidth);
+                if (clamped.y < 330f) clamped.x = Mathf.Clamp(clamped.x, 420f + halfWidth, size.x - 340f - halfWidth);
                 var hidden = g.x < 0f || g.x > size.x || g.y < minY || g.y > size.y - topReserve + 22f;
                 var arrow = !hidden ? "" : g.x < 0f ? "< " : g.x > size.x ? "> " : g.y >= minY ? "^ " : "v ";
                 // The hero view shows a tag only as an edge arrow: on screen it would cover the hero and the fight.
