@@ -58,7 +58,7 @@ The full frames are in `game/The Last Fortress/TestResults/023/{before,after1,af
 | Release builds (`before-build.log`, `after-build-2.log`, `release-build.log`) | Succeeded, 0 errors; built to `Builds/Plan023-before` and `Builds/Plan023-after`, then the final code to `Builds/Release` for the owner |
 | Hero view unchanged | Before vs after, pixels differing by more than 8: 28k (720p) and 53k (1080p). Two identical after-builds differ by 34k and 118k (animated grass and flames), so the difference is noise. |
 
-**Performance:** paired and alternating, stress fixture with the hero, strategic view, 1920×1080, Editor closed (`perf/`).
+**Performance:** paired and alternating, stress fixture with the hero, strategic view, Editor closed (`perf/`). The runs asked for 1920×1080, but the window was capped at **1440×900** by the screen (every measurement file says so), so these are 1440×900 numbers, not section 14's 1080p reference.
 
 | Run | Build | Median | p95 | p99 | Max |
 |---|---|---:|---:|---:|---:|
@@ -71,6 +71,33 @@ The full frames are in `game/The Last Fortress/TestResults/023/{before,after1,af
 - The strategic stress view uses the default zoom, so this compares what ships: the 4.5 view with markers against the 5.5 view without. It is not the cost of the markers alone.
 - Run 3's 41 ms hitch was in the baseline build; its cause was not investigated (compare plan 019's 66.8 ms).
 
+## Owner's first look and fix (2026-10-28)
+
+**What the owner's screenshots showed:**
+- Close up, each red Grunt disc was drawn over the Grunt itself. Only its head stuck out, so it read as a cartoon bomb, which is confusing next to the real Bomber.
+- At the 0.18-tile minimum, a marker was as large as the figure.
+- Zoomed out, it worked.
+
+**Fix:**
+- **Draw order.**
+  - Markers now draw at queue 2455, after the board's opaque geometry, so terrain, buildings and trees still never hide them.
+  - Enemy figures use run-time copies of their opaque materials at queue 2460 (`DrawAfterMarkers`; the shared assets are untouched). A figure standing on its marker therefore covers it.
+  - A figure behind a building is still hidden by it, but its marker still shows.
+  - Route lines (queue 4000) now draw over markers.
+- **Size and fade.** The minimum marker size is 0.18 → 0.12 tile, and markers fade out between half-height 4 and 3 [P].
+- **Captures.** `-capture-set 023` gains close-ups at 3.5 (`walls-3.5`, `lineup-3.5`).
+
+**Re-verified:**
+- The captures (`TestResults/023/after3/`) show figures drawn over their discs, markers behind the Tower still visible, and markers faded and foot-sized at 3.5.
+- Full PlayMode: 24 passed, 1 skipped (`after-r3/PlayMode.xml`).
+- Paired performance (`perf-r3/`, 1440×900):
+  - before 4.30, 4.03, 3.85 ms median;
+  - after 3.81, 4.00 ms median.
+
+  There is no measurable difference, though the machine was noisier than in the first round. Run 2 is invalid and excluded: its simulation never stepped (`sim_steps_during_measure=0`, most likely the window lost focus), which also made it fail the gate.
+  - A single 61.7 ms frame occurred in after-run 5 (the before runs had 27 and 23 ms); its cause was not investigated.
+- EditMode was not re-run (no Core change).
+
 ## Not done / pending
 
 - **Owner review of the captures and the live feel. This is the acceptance of record.** In particular:
@@ -78,7 +105,7 @@ The full frames are in `game/The Last Fortress/TestResults/023/{before,after1,af
   - whether 18 px markers are big enough;
   - the colours. Grunt red and the Runner's yellow sit near the coral and amber UI hues, though the shapes differ.
 - **Plan stage 1.2 was not done.** Nobody checked the mouse wheel at the cap, `Z` (whole board) or Reset Camera by hand in the Editor. The evidence is indirect: `SetView` clamps, and the full PlayMode suite passes.
-- **Capture-only artefact.** Offscreen captures draw the HUD with the camera, so a marker (queue 4001, no depth test) can draw over a HUD panel in those frames, as route lines always could. None was seen in the reviewed frames. The real HUD is a screen-space overlay drawn after the camera.
+- **Capture-only artefact.** Offscreen captures draw the HUD with the camera, so a marker (no depth test; queue 4001 before the fix, 2455 after) can draw over a HUD panel in those frames, as route lines always could. None was seen in the reviewed frames. The real HUD is a screen-space overlay drawn after the camera.
 - **Day captures of enemies don't exist,** because enemies only appear at night. The Day board frames check framing only.
 - **The hero's ring was not changed.** At 10.5 it stays about 60 px wide; this was checked in the frames.
 - **Not re-run:** the scripted policy runs, because nothing in the simulation changed.

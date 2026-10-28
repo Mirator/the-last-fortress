@@ -915,6 +915,8 @@ namespace TheLastFortress
                            $"alive={game.Sim.AliveEnemyCount} at buildings={game.Sim.Enemies.Count(e => e.Alive && e.TargetBuildingId >= 0)}");
             game.CameraRig.SetView(new Vector3(8f, 0f, 10f), 4.5f);
             yield return Shot("023-walls-4.5");
+            game.CameraRig.SetView(new Vector3(8f, 0f, 10f), 3.5f);
+            yield return Shot("023-walls-3.5");
             game.CameraRig.SetView(CameraRig.DefaultFocus, 10.5f);
             yield return Shot("023-walls-10.5");
             game.Sim.SetPaused(false);
@@ -932,6 +934,8 @@ namespace TheLastFortress
             var cz = (float)game.Sim.Enemies.Where(e => e.Alive).DefaultIfEmpty().Average(e => e == null ? 10.5 : e.Z);
             game.CameraRig.SetView(new Vector3(cx, 0f, cz), 4.5f);
             yield return Shot("023-lineup-4.5");
+            game.CameraRig.SetView(new Vector3(cx, 0f, cz), 3.5f);
+            yield return Shot("023-lineup-3.5");
             game.CameraRig.SetView(CameraRig.DefaultFocus, 10.5f);
             yield return Shot("023-lineup-10.5");
             game.Sim.SetPaused(false);

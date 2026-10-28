@@ -7,7 +7,8 @@ This document extends `002-game-rules.md` v1.8 and respects `001-vision.md`. It 
 **As built (v0.3), where it differs from the text below:**
 - the Runner's marker is a triangle that always points up the screen, not along its heading;
 - enemy HP bars keep the on-screen size they have at half-height 5.5 when zoomed further out, rather than a fixed pixel size;
-- the provisional values chosen from the captures are 18 px, 0.18 tile minimum and 0.42 tile maximum;
+- the provisional values chosen from the captures are 18 px, 0.12 tile minimum and 0.42 tile maximum;
+- after the owner's first look (2026-10-28), markers are drawn under the enemy figures (only terrain, buildings and trees are ignored), because close up a marker drawn on top hid the figure and a Grunt read as a bomb; they also fade out between half-height 4 and 3;
 - the fill colours are those listed in `002-game-rules.md` section 13.
 
 ## 1. Problem

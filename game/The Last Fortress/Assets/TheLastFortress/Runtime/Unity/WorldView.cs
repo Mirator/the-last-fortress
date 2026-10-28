@@ -528,7 +528,9 @@ namespace TheLastFortress
             repairMat = Prims.Tinted(content.overlay, Palette.RouteCyan.WithAlpha(0.9f));
             auraMat = Prims.Tinted(content.overlay, Palette.WarningCoral.WithAlpha(0.16f));
             markerMat = Prims.Tinted(content.overlayOnTop != null ? content.overlayOnTop : content.overlay, Color.white);
-            markerMat.renderQueue = 4001; // after the route lines (Overlay), so a marker is never cut by a line
+            // Drawn after the board's opaque geometry (so terrain, buildings and trees never hide it) but before the enemy
+            // figures, which use copies of their materials queued after it: a figure standing on its marker covers it.
+            markerMat.renderQueue = MarkerQueue;
             enemyArrowMat = Prims.Tinted(content.overlay, Palette.WarningCoral);
             particles = new FxParticles(fxRoot, content.overlay);
             for (var i = 0; i < 4; i++)
@@ -597,6 +599,36 @@ namespace TheLastFortress
             v.sharedProfile = profile;
             v.weight = weight;
             return v;
+        }
+
+        /// <summary>Opaque queue range ends at 2500: markers at 2455 and enemy figures at 2460 both draw in the opaque pass.</summary>
+        const int MarkerQueue = 2455, FigureQueue = 2460;
+
+        readonly Dictionary<Material, Material> figureMaterials = new Dictionary<Material, Material>();
+
+        /// <summary>Swaps an enemy model's opaque materials for run-time copies drawn after the class markers (shared assets untouched).</summary>
+        void DrawAfterMarkers(GameObject model)
+        {
+            foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+            {
+                var mats = r.sharedMaterials;
+                var changed = false;
+                for (var i = 0; i < mats.Length; i++)
+                {
+                    var m = mats[i];
+                    if (m == null || m.renderQueue >= MarkerQueue) continue; // transparent parts (flames, glows) keep their queue
+                    if (!figureMaterials.TryGetValue(m, out var copy))
+                    {
+                        copy = new Material(m) { name = m.name + " (figure)", renderQueue = FigureQueue };
+                        figureMaterials[m] = copy;
+                    }
+
+                    mats[i] = copy;
+                    changed = true;
+                }
+
+                if (changed) r.sharedMaterials = mats;
+            }
         }
 
         /// <summary>Swaps the shared window material for the view's night-reactive copy on one instantiated model.</summary>
@@ -1256,6 +1288,13 @@ namespace TheLastFortress
         {
             var alpha = Mathf.Clamp01((float)sim.InterpolationAlpha);
             var markers = 0;
+            // Close up the figures read on their own: markers fade out between half-height 4 and 3.
+            var markerAlpha = barViewer != null && barViewer.orthographic ? Mathf.InverseLerp(MarkerHiddenBelow, MarkerFullFrom, barViewer.orthographicSize) : 1f;
+            if (!Mathf.Approximately(markerAlpha, shownMarkerAlpha))
+            {
+                shownMarkerAlpha = markerAlpha;
+                Prims.SetColor(markerMat, Color.white.WithAlpha(markerAlpha));
+            }
             foreach (var e in sim.Enemies)
             {
                 if (!enemyViews.TryGetValue(e.Id, out var view))
@@ -1332,7 +1371,7 @@ namespace TheLastFortress
                 view.HpBar.transform.rotation = BarRotation;
                 // Strategic: half the old width over true-scale figures; hero view: constant on-screen size.
                 if (showBar) view.HpBar.transform.localScale = Vector3.one * BarScale(view.HpBar.transform.position, view.BarWidth, 0.5f, true);
-                var classMarker = !HeroCameraShown;
+                var classMarker = !HeroCameraShown && markerAlpha > 0f;
                 if (view.Marker.activeSelf != classMarker) view.Marker.SetActive(classMarker);
                 if (classMarker)
                 {
@@ -1620,6 +1659,7 @@ namespace TheLastFortress
             root.transform.SetParent(enemiesRoot, false);
             if (content.enemyScale > 0f && !Mathf.Approximately(content.enemyScale, 1f)) root.transform.localScale = Vector3.one * content.enemyScale;
             var model = Instantiate(content.EnemyPrefabFor(e.Kind), root.transform).transform;
+            DrawAfterMarkers(model.gameObject);
             model.name = "Model";
             model.localPosition = Vector3.zero;
             model.localRotation = Quaternion.identity;
@@ -1812,7 +1852,12 @@ namespace TheLastFortress
         }
 
         /// <summary>Marker size on screen in pixels, and its world diameter limits in tiles (spec 009 rule 3; provisional).</summary>
-        const float MarkerPixels = 18f, MarkerMinTiles = 0.18f, MarkerMaxTiles = 0.42f, BossMarkerFactor = 1.5f;
+        const float MarkerPixels = 18f, MarkerMinTiles = 0.12f, MarkerMaxTiles = 0.42f, BossMarkerFactor = 1.5f;
+
+        /// <summary>Strategic half-heights where markers start to fade and are gone (spec 009, owner review 2026-10-28; provisional).</summary>
+        const float MarkerFullFrom = 4f, MarkerHiddenBelow = 3f;
+
+        float shownMarkerAlpha = 1f;
 
         /// <summary>The strategic camera looks down at 40°, so ground shapes are drawn stretched along its view to read true on screen.</summary>
         static readonly float MarkerStretch = 1f / Mathf.Sin(CameraRig.Pitch * Mathf.Deg2Rad);
