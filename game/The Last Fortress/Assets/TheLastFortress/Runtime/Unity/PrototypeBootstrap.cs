@@ -28,6 +28,9 @@ namespace TheLastFortress
         /// <summary>Third-person camera of the hero view (release scene only; null elsewhere).</summary>
         public HeroCameraRig HeroRig { get; private set; }
 
+        /// <summary>Spec 011: fades what hides the hero in the hero view (null without the fade material).</summary>
+        public HeroOccluderFade HeroFade { get; private set; }
+
         /// <summary>Presents the hero (release scene only).</summary>
         public HeroPresenter HeroView { get; private set; }
 
@@ -398,6 +401,7 @@ namespace TheLastFortress
 
         void CreateHeroView()
         {
+            HeroFade = new HeroOccluderFade(content.heroFade);
             var strategic = cameraRig.Camera;
             var go = new GameObject("HeroCamera") { tag = "MainCamera" };
             go.transform.SetParent(transform, false);
@@ -535,6 +539,7 @@ namespace TheLastFortress
                 else if (fixedHeroCamera.HasValue) HeroRig.Follow(fixedHeroCamera.Value, Sim, dt);
                 HeroView.SetHiddenFromCamera(HeroViewActive && HeroRig.ShownDistance < 0.12f && !HeroRig.InTransition);
                 var heroCameraShown = HeroViewActive || exitingHeroView || fixedHeroCamera.HasValue;
+                HeroFade?.Sync(World, HeroRig.Camera, fixedHeroCamera ?? HeroView.ShownPosition, heroCameraShown, dt);
                 Sky.Sync(World.NightBlend, heroCameraShown, HeroRig.Camera);
                 if (heroCameraShown) World.DrawGrass(HeroRig.Camera, Sim); // true-scale grass, hero camera only
                 if (World.StrategicBackground.HasValue) cameraRig.Camera.backgroundColor = World.StrategicBackground.Value;

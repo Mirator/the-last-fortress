@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-28 19:26:33Z" end-time="2026-10-28 19:26:34Z" duration="1,4815993">
+  <test-suite type="TestSuite" id="1036" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-10-28 19:26:33Z" end-time="2026-10-28 19:26:34Z" duration="1.481599" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1030" name="TheLastFortress.PlayMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.PlayMode.Tests.dll" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-10-28 19:26:33Z" end-time="2026-10-28 19:26:34Z" duration="1.473771" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="44680" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1031" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-10-28 19:26:33Z" end-time="2026-10-28 19:26:34Z" duration="1.472532" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1032" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-10-28 19:26:33Z" end-time="2026-10-28 19:26:34Z" duration="1.471697" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1021" name="ReleaseSceneTests" fullname="TheLastFortress.Tests.ReleaseSceneTests" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-10-28 19:26:33Z" end-time="2026-10-28 19:26:34Z" duration="1.470111" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1028" name="TheHeroCameraKeepsItsNearPlaneOutOfBuildingsAndSettles" fullname="TheLastFortress.Tests.ReleaseSceneTests.TheHeroCameraKeepsItsNearPlaneOutOfBuildingsAndSettles" methodname="TheHeroCameraKeepsItsNearPlaneOutOfBuildingsAndSettles" classname="TheLastFortress.Tests.ReleaseSceneTests" runstate="Runnable" seed="626342561" result="Passed" start-time="2026-10-28 19:26:33Z" end-time="2026-10-28 19:26:34Z" duration="1.456481" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[New run: ravine seed 14: generated (attempt 0)
+<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\PlayMode-20261028-202634.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

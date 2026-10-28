@@ -454,8 +454,43 @@ namespace TheLastFortress.Tests
             Assert.IsTrue(game.HeroRig.ShownPoseClear(), "against the Tower: the near plane entered a blocker");
             Assert.Greater(game.HeroRig.ShownDistance, 0.2f, "against the Tower the camera stays behind the hero");
 
+            // Spec 011: a Wall never pulls the camera in; the Wall in front of the camera fades instead of hiding the hero.
+            Building wall = null;
+            foreach (var cell in new[] { new GridPos(12, 13), new GridPos(13, 12), new GridPos(7, 13), new GridPos(13, 7) })
+                if (game.Sim.TryPlace(BuildingKind.Wall, cell, out wall) == PlacementRejection.None) break;
+            Assert.IsNotNull(wall, "a Wall was placed");
+            game.SyncViews(0f);
+            // The drawn palisade's box: the hero stands just outside its thin side, looking away, so the camera is behind it.
+            var meshes = new System.Collections.Generic.List<Renderer>();
+            game.World.CollectFadeCandidates(meshes);
+            var palisade = new Bounds();
+            var found = false;
+            foreach (var r in meshes)
+            {
+                var c = r.bounds.center;
+                if (c.x < wall.Cell.X || c.x > wall.Cell.X + 1 || c.z < wall.Cell.Z || c.z > wall.Cell.Z + 1) continue;
+                if (found) palisade.Encapsulate(r.bounds);
+                else palisade = r.bounds;
+                found = true;
+            }
+
+            Assert.IsTrue(found, "the Wall is drawn");
+            var acrossX = palisade.size.x <= palisade.size.z;
+            var stand = acrossX ? new Vector3(palisade.max.x + 0.08f, 0f, palisade.center.z) : new Vector3(palisade.center.x, 0f, palisade.max.z + 0.08f);
+            hero.UnitsX = hero.PrevUnitsX = (int)System.Math.Round(stand.x * HeroRules.UnitsPerTile);
+            hero.UnitsZ = hero.PrevUnitsZ = (int)System.Math.Round(stand.z * HeroRules.UnitsPerTile);
+            game.HeroRig.SkipTransition();
+            game.HeroRig.SetOrbit(acrossX ? 90f : 0f, 10f); // looking away from the Wall: the camera's line runs through it
+            var keptYaw = game.HeroRig.Yaw;
+            for (var i = 0; i < 20; i++) game.SyncViews(1f / 30f);
+            Assert.Greater(game.HeroRig.ShownDistance, 0.5f, "the Wall pulled the camera in");
+            Assert.Greater(game.HeroFade.FadedCount, 0, "the Wall hiding the hero is not faded");
+
             yield return Press(Key.Tab);
             Assert.IsFalse(game.HeroViewActive);
+            var exitUntil = Time.realtimeSinceStartup + 3f;
+            while (game.HeroFade.FadedCount > 0 && Time.realtimeSinceStartup < exitUntil) yield return null;
+            Assert.AreEqual(0, game.HeroFade.FadedCount, "the strategic view shows a faded mesh");
             yield return Press(Key.Tab); // eased entry, not skipped
             for (var i = 0; i < 20; i++)
             {
@@ -466,7 +501,7 @@ namespace TheLastFortress.Tests
             }
 
             Assert.IsFalse(game.HeroRig.InTransition, "the entry finished within 0.35 s");
-            Assert.AreEqual(270f, game.HeroRig.Yaw, 1e-3f, "the orbit is kept within the run");
+            Assert.AreEqual(keptYaw, game.HeroRig.Yaw, 1e-3f, "the orbit is kept within the run");
         }
 
         /// <summary>

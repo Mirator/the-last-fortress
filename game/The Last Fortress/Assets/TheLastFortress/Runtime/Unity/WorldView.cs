@@ -281,7 +281,8 @@ namespace TheLastFortress
             into.Clear();
             foreach (var view in buildingViews.Values)
             {
-                if (view.Root == null) continue;
+                // Spec 011: Walls let the camera through (the Wall it is in or behind fades instead).
+                if (view.Root == null || view.Building.Kind == BuildingKind.Wall) continue;
                 view.Root.GetComponentsInChildren(false, blockerRenderers);
                 foreach (var r in blockerRenderers)
                     if (!IsUnder(r.transform, view.HpBar) && !IsUnder(r.transform, view.Smoke) && !IsUnder(r.transform, view.Glow)) into.Add(r.bounds);
@@ -317,6 +318,30 @@ namespace TheLastFortress
         }
 
         static bool IsUnder(Transform t, GameObject root) => root != null && t.IsChildOf(root.transform);
+
+        /// <summary>
+        /// Spec 011: the meshes the hero view may fade, the same ones the camera blockers come from (Walls included): each
+        /// building's drawn meshes (not its HP bar, smoke or glow) and the props of forest and rock cells.
+        /// </summary>
+        public void CollectFadeCandidates(List<Renderer> into)
+        {
+            into.Clear();
+            foreach (var view in buildingViews.Values)
+            {
+                if (view.Root == null) continue;
+                view.Root.GetComponentsInChildren(false, blockerRenderers);
+                foreach (var r in blockerRenderers)
+                    if (!IsUnder(r.transform, view.HpBar) && !IsUnder(r.transform, view.Smoke) && !IsUnder(r.transform, view.Glow)) into.Add(r);
+            }
+
+            if (terrainRoot == null) return;
+            foreach (Transform cell in terrainRoot.transform)
+            {
+                if (!cell.name.StartsWith("Forest") && !cell.name.StartsWith("Rock")) continue;
+                cell.GetComponentsInChildren(false, blockerRenderers);
+                into.AddRange(blockerRenderers);
+            }
+        }
 
         /// <summary>Delay from the hero's swing event to the blade's contact in the shown swing (legacy rules).</summary>
         public const float HeroBladeDelay = 0.08f;

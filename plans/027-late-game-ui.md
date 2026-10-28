@@ -15,11 +15,14 @@ All paths are under `game/The Last Fortress/Assets/TheLastFortress/Runtime/Unity
 - **Run summary** (`SummaryText`). "Building links active" becomes "Synergies active", the term the rules use.
 - **Capture** (`CaptureSequence.cs`). The full run adds `full-12-a2-day-collapsed`, taken 12.5 s into Day 12, and logs `briefing collapsed=`.
 
-## Not changed: reward cards
+## Not changed: reward cards (corrected 2026-10-28)
 
-The full-run frames showed the board through the reward cards, but that is an offscreen-capture artefact. In offscreen captures the HUD is drawn by the world camera. The plan 008 frame, taken without offscreen mode, shows the cards opaque (alpha 0.97), as the code sets them. So no change was made.
+This section first called the see-through reward cards an offscreen-capture artefact. That was wrong.
 
-The artefact can still mislead later reviews. Rendering the HUD in a second pass in `CaptureOffscreen` would remove it; that hasn't been done.
+- **What we checked:** an onscreen capture of the same reward screen shows the same translucency.
+- **What else matched:** offscreen and onscreen frames otherwise differ only in text anti-aliasing and shadow edges.
+- **The real cause:** Unity's default disabled tint (alpha 0.5) on the card buttons during the 0.8 s reward lockout.
+- **Where it's fixed:** plan 028.
 
 ## Verification (fresh, 2026-10-28)
 

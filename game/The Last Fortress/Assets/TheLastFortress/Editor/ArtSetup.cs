@@ -267,6 +267,34 @@ namespace TheLastFortress.Editor
         }
 
         /// <summary>
+        /// Plan 029 (spec 011): creates the hero-view fade material (TheLastFortress/HeroFade) and assigns it to the release
+        /// content, so the shader reaches the player build; every other asset stays untouched.
+        /// Batch: -executeMethod TheLastFortress.Editor.ArtSetup.RunHeroFade
+        /// </summary>
+        [MenuItem("The Last Fortress/Art/Create and Assign Hero Fade Material")]
+        public static void RunHeroFade()
+        {
+            const string path = "Assets/TheLastFortress/Materials/HeroFade.mat";
+            var shader = Shader.Find("TheLastFortress/HeroFade");
+            if (shader == null) throw new FileNotFoundException("Shader TheLastFortress/HeroFade missing.");
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                material = new Material(shader);
+                AssetDatabase.CreateAsset(material, path);
+            }
+
+            material.shader = shader;
+            EditorUtility.SetDirty(material);
+            var content = AssetDatabase.LoadAssetAtPath<PrototypeContent>(ReleaseSetup.ContentPath);
+            if (content == null) throw new FileNotFoundException("Release content missing; run the release setup first.");
+            content.heroFade = material;
+            EditorUtility.SetDirty(content);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Hero fade material created and assigned to the release content.");
+        }
+
+        /// <summary>
         /// Plan 019: imports only the release-rules-4 hero (Art/Source~/models_hero_v4.py: elbows, wrists, ankles) as its
         /// own prefab with <see cref="HeroAnimationRig"/> and assigns it to the release content's contactHeroPrefab. The
         /// legacy hero, every enemy, model, prefab and material stay untouched.

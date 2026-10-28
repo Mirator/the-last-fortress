@@ -34,7 +34,7 @@ The run takes about 4 minutes and produces 64 frames.
 - **Framing:** half-height 4.5 on Night 1 (West only), and 7.81 on every two- to four-entry night. It never reached the 10.5 cap.
 - **The findings** are in the session report. In short:
   - the run is not in danger at any point;
-  - the reward cards look translucent, but that is an artefact of offscreen capture, not a game bug. Offscreen captures draw the HUD through the world camera, and plan 008's non-offscreen frame shows solid cards;
+  - the reward cards are see-through in the frames. This is real, not a capture artefact (corrected 2026-10-28; plan 027 first said otherwise). During the 0.8 s reward lockout the disabled buttons used Unity's default tint, which halves the cards' alpha. Every capture falls inside that window. Fixed in plan 028;
   - the Day 12 briefing stacks two panels over the board;
   - the perks list grows over the north entry tag.
 

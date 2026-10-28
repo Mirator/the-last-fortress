@@ -277,6 +277,9 @@ namespace TheLastFortress
                 button.targetGraphic = img;
                 var colors = button.colors;
                 colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
+                // During the 0.8 s reward lockout the card dims but stays opaque (Unity's default halves its alpha, so the
+                // board showed through the text).
+                colors.disabledColor = new Color(0.8f, 0.8f, 0.8f, 1f);
                 button.colors = colors;
                 button.onClick.AddListener(() => Choose(index));
                 rewardTitles[i] = Label(rt, "Title", 30, TextAnchor.UpperCenter, new Vector2(0, -24), new Vector2(360, 44), Palette.Amber, true);

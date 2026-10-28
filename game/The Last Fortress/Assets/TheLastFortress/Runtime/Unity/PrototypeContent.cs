@@ -69,6 +69,9 @@ namespace TheLastFortress
         [Tooltip("Optional overlay material drawn on top of geometry (route, breach, selection). Falls back to 'overlay'.")]
         public Material overlayOnTop;
 
+        [Tooltip("Spec 011: see-through material for meshes that hide the hero in the hero view (TheLastFortress/HeroFade).")]
+        public Material heroFade;
+
         [Header("Presentation (MVP; optional — empty keeps the scene silent and the cards text-only)")]
         public AudioContent audio;
 

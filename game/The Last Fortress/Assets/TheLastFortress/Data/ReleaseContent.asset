@@ -51,6 +51,7 @@ MonoBehaviour:
   foliage: {fileID: 2100000, guid: cfb12aa74e207044386bc35424b0d9bd, type: 2}
   rock: {fileID: 2100000, guid: 51e6202bac68e824ea0be3bc67649c8c, type: 2}
   overlayOnTop: {fileID: 2100000, guid: 0e8c8736da47ca74abcfea08a727159f, type: 2}
+  heroFade: {fileID: 2100000, guid: 764526d1cf44aba4891c4349cd025b2d, type: 2}
   audio: {fileID: 11400000, guid: c2eb28b257129464eab7af78ce00ab82, type: 2}
   buildingIcons:
   - {fileID: 0}
