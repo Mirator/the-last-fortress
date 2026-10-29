@@ -6,6 +6,7 @@ What the game is and should become. Specs never refer to implementation plans; p
 |---|---|---|
 | [001-vision.md](001-vision.md) | Vision, pillars, core loop, direction, risks, success criteria. No rules. | Living |
 | [002-game-rules.md](002-game-rules.md) | The complete current rules of the game (release profile with the hero, plus how the legacy profiles differ) | v1.17 (`release-rules-4`, 2026-10-29); implemented; the single source of current rules |
+| [015-building-upgrades.md](015-building-upgrades.md) | Feature spec: tiers II and III for all eight buildings (stats plus one trait each, slow as a new status), bought by Day | v0.2 APPROVED 2026-10-29; implementation in plan 034 |
 | [archive/](archive/README.md) | Earlier milestone specs, kept as history | Not current; do not plan from them |
 
 How specs change:

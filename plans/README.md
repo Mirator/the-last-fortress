@@ -43,6 +43,7 @@ Prepared on 2026-10-15 using the improve skill. These plans are implementation h
 | [031](031-polish-batch.md) | Polish: larger hero hint, route lines with a dark under-stroke, stress label wording | P2 | S | `specs/002-game-rules.md` v1.14 §13 (no rule change) | DONE: PlayMode 24/24 (+1 skipped), release build, captures at 1280x720. Owner look PENDING |
 | [032](032-buildings-let-the-camera-through.md) | No building pulls the hero camera in; buildings fade instead (hero behind Towers, the Keep, Houses) | P1 | S | Spec `specs/archive/013-buildings-let-the-camera-through.md` v0.3 (owner request 2026-10-28) | DONE: camera test updated with a mutation, PlayMode 24/24 (+1 skipped), release build, hero-camera 0 fallbacks. Owner live check PENDING |
 | [033](033-unit-collision.md) | Unit collision: enemy bodies, lanes and spacing in the simulation, attack slots on buildings, hero blocked and pushed by enemies; balance check and bounded tuning | P1 | L | Spec `specs/archive/014-unit-collision.md` v0.3 | DONE: EditMode 133/133 (2 new tests, 3 mutations), PlayMode 24/24 (+1 skipped), probe 2/15 losses (was 3), stress 3.5 ms median. Owner live check PENDING |
+| [034](034-building-upgrades.md) | Building upgrade tiers II and III for all eight buildings: stats plus one trait each, slow as a new status, Upgrade button and U, saves, upgrade-aware policy scripts and a balance gate | P1 | L | Spec `specs/015-building-upgrades.md` v0.2 (approved 2026-10-29) | TODO |
 
 ## Current third-person audit (2026-10-20)
 
