@@ -45,6 +45,9 @@ namespace TheLastFortress
 
         public int RepairReach;
 
+        /// <summary>Upgrade tiers II and III (<see cref="BuildingUpgrades"/>); null when this rules version has no upgrades.</summary>
+        public BuildingTier[] Tiers;
+
         public bool CanAttack => AttackDamage > 0;
         public bool Purchasable => Kind != BuildingKind.Keep;
 
@@ -187,7 +190,29 @@ namespace TheLastFortress
             },
         };
 
-        /// <summary>A copy of this tuning set whose enemy definitions are replaced by <paramref name="map"/> (buildings shared).</summary>
+        /// <summary>Spec 015 (release-rules-4): the same definitions with upgrade tiers II and III on every purchasable kind.</summary>
+        public PrototypeDefinitions WithUpgrades()
+        {
+            var d = (PrototypeDefinitions)MemberwiseClone();
+            BuildingDefinition U(BuildingDefinition b)
+            {
+                if (b == null || !b.Purchasable) return b;
+                var c = b.Copy();
+                c.Tiers = BuildingUpgrades.Table(b.Kind);
+                return c;
+            }
+
+            d.Wall = U(Wall);
+            d.Tower = U(Tower);
+            d.House = U(House);
+            d.Farm = U(Farm);
+            d.SpikeTrap = U(SpikeTrap);
+            d.Cannon = U(Cannon);
+            d.Watchtower = U(Watchtower);
+            d.RepairStation = U(RepairStation);
+            return d;
+        }
+
         /// <summary>release-rules-4 (owner, 2026-10-21): the same definitions with a 1 x 1 Cannon; costs and stats unchanged.</summary>
         public PrototypeDefinitions WithCompactCannon()
         {
@@ -198,6 +223,7 @@ namespace TheLastFortress
             return d;
         }
 
+        /// <summary>A copy of this tuning set whose enemy definitions are replaced by <paramref name="map"/> (buildings shared).</summary>
         public PrototypeDefinitions WithEnemies(Func<EnemyDefinition, EnemyDefinition> map)
         {
             var d = (PrototypeDefinitions)MemberwiseClone();

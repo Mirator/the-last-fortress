@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-29 09:19:54Z" end-time="2026-10-29 09:19:58Z" duration="4,6756213">
+  <test-suite type="TestSuite" id="1000" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="155" result="Passed" start-time="2026-10-29 09:19:54Z" end-time="2026-10-29 09:19:58Z" duration="4.675621" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1191" name="TheLastFortress.EditMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.EditMode.Tests.dll" runstate="Runnable" testcasecount="155" result="Passed" start-time="2026-10-29 09:19:54Z" end-time="2026-10-29 09:19:58Z" duration="4.665632" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="12836" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1192" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="155" result="Passed" start-time="2026-10-29 09:19:54Z" end-time="2026-10-29 09:19:58Z" duration="4.662608" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1193" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="155" result="Passed" start-time="2026-10-29 09:19:54Z" end-time="2026-10-29 09:19:58Z" duration="4.660144" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1119" name="PacingProbe" fullname="TheLastFortress.Tests.PacingProbe" classname="TheLastFortress.Tests.PacingProbe" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-29 09:19:54Z" end-time="2026-10-29 09:19:58Z" duration="4.655534" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1120" name="Measure" fullname="TheLastFortress.Tests.PacingProbe.Measure" methodname="Measure" classname="TheLastFortress.Tests.PacingProbe" runstate="Runnable" seed="271793844" result="Passed" start-time="2026-10-29 09:19:54Z" end-time="2026-10-29 09:19:58Z" duration="4.639866" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[policy seed night dur first_combat_s quiet_pct longest_quiet_s last_spawn_s keep_dmg
+kill-zone 1 1 60 15,1 39 15 14 0
+kill-zone 1 2 68 15,5 35 15 23 0
+kill-zone 1 3 85 19,6 29 20 24 0
+kill-zone 1 4 78 7,8 16 8 30 0
+kill-zone 1 5 68 9,2 18 9 30 0
+kill-zone 1 6 120 10,0 17 10 35 0
+kill-zone 1 7 93 5,8 11 6 41 0
+kill-zone 1 8 85 6,5 9 6 48 0
+kill-zone 1 9 90 4,4 5 4 53 0
+kill-zone 1 10 90 6,5 7 6 57 0
+kill-zone 1 11 88 4,5 6 4 59 0
+kill-zone 1 12 88 6,5 8 6 62 0
+# Result: Victory; nights 12/12; combat 16,9 min; defeated 542; bought 23 (defense 19, economy 4); earned 687; perks [HeavyShot,Overwatch,ExpandedVision,SignalFires,Gatehouse,CounterBattery,WarBonds,ThriftyConstruction,FlamingArrows,BlastShields,Shrapnel]; Bomber fuses 1, blasts 1
+
+kill-zone 2 1 65 44,1 67 44 14 0
+kill-zone 2 2 72 17,8 45 18 23 0
+kill-zone 2 3 97 23,1 34 23 24 0
+kill-zone 2 4 98 26,0 38 26 30 0
+kill-zone 2 5 103 15,3 18 15 30 0
+kill-zone 2 6 98 17,5 19 17 35 0
+kill-zone 2 7 98 17,8 18 18 41 0
+kill-zone 2 8 111 17,9 16 18 48 0
+kill-zone 2 9 125 6,8 10 7 53 0
+kill-zone 2 10 104 7,9 9 8 57 0
+kill-zone 2 11 140 9,4 12 9 59 0
+kill-zone 2 12 108 4,6 5 5 62 0
+# Result: Victory; nights 12/12; combat 20,3 min; defeated 541; bought 18 (defense 14, economy 4); earned 450; perks [FortressHeart,HeavyShot,SignalFires,BlastShields,CounterBattery,Shrapnel,ThriftyConstruction,Gatehouse,ExpandedVision,Sharpshooters,Overwatch]; Bomber fuses 2, blasts 2
+
+kill-zone 3 1 72 45,6 63 46 14 0
+kill-zone 3 2 71 22,3 31 22 23 0
+kill-zone 3 3 85 16,4 33 16 24 0
+kill-zone 3 4 93 19,9 24 20 30 0
+kill-zone 3 5 86 14,7 17 15 30 0
+kill-zone 3 6 109 10,4 15 10 35 0
+kill-zone 3 7 79 6,4 16 6 41 0
+kill-zone 3 8 81 6,3 17 6 48 0
+kill-zone 3 9 84 9,6 14 10 53 0
+kill-zone 3 10 74 8,0 12 8 57 0
+kill-zone 3 11 78 5,9 7 6 59 0
+kill-zone 3 12 109 5,3 9 5 62 0
+# Result: Victory; nights 12/12; combat 17,0 min; defeated 542; bought 22 (defense 18, economy 4); earned 687; perks [ExpandedVision,CounterBattery,Sharpshooters,ReinforcedTimber,WarBonds,Overwatch,Shrapnel,FocusedFire,FortressHeart,BlastShields,FlamingArrows]; Bomber fuses 1, blasts 1
+
+kill-zone 4 1 65 44,1 67 44 14 0
+kill-zone 4 2 71 9,5 32 9 23 0
+kill-zone 4 3 89 15,1 27 15 24 0
+kill-zone 4 4 119 21,4 41 21 30 0
+kill-zone 4 5 188 10,4 51 67 30 0
+kill-zone 4 6 134 14,4 23 14 35 0
+kill-zone 4 7 87 7,0 24 10 41 0
+kill-zone 4 8 89 10,3 16 10 48 0
+kill-zone 4 9 103 8,6 11 9 53 240
+kill-zone 4 10 113 10,2 10 10 57 0
+kill-zone 4 11 102 7,7 10 8 59 0
+kill-zone 4 12 121 6,9 7 7 62 0
+# Result: Victory; nights 12/12; combat 21,4 min; defeated 540; bought 16 (defense 12, economy 4); earned 327; perks [BlastShields,FortressHeart,Gatehouse,Sharpshooters,FocusedFire,FlamingArrows,HeavyShot,Shrapnel,ThriftyConstruction,ExpandedVision,Overwatch]; Bomber fuses 3, blasts 3
+
+kill-zone 5 1 72 45,6 63 46 14 0
+kill-zone 5 2 70 15,1 26 15 23 0
+kill-zone 5 3 88 9,4 30 9 24 0
+kill-zone 5 4 87 27,2 31 27 30 0
+kill-zone 5 5 134 18,3 38 22 30 0
+kill-zone 5 6 135 8,4 14 8 35 0
+kill-zone 5 7 100 14,3 25 14 41 0
+kill-zone 5 8 89 5,7 15 6 48 0
+kill-zone 5 9 127 9,2 16 9 53 0
+kill-zone 5 10 101 8,0 11 8 57 0
+kill-zone 5 11 106 7,3 11 7 59 0
+kill-zone 5 12 134 6,4 15 9 62 0
+# Result: Victory; nights 12/12; combat 20,7 min; defeated 542; bought 16 (defense 12, economy 4); earned 374; perks [Gatehouse,FortressHeart,Overwatch,BlastShields,Sharpshooters,ExpandedVision,FlamingArrows,FocusedFire,SignalFires,CounterBattery,WarBonds]; Bomber fuses 1, blasts 1
+
+corridor 1 1 29 11,3 38 11 14 0
+corridor 1 2 41 7,6 19 8 23 0
+corridor 1 3 50 10,6 28 11 24 0
+corridor 1 4 56 3,8 7 4 30 0
+corridor 1 5 64 8,1 12 8 30 0
+corridor 1 6 67 7,8 12 8 35 0
+corridor 1 7 58 6,7 20 7 41 0
+corridor 1 8 68 6,8 10 7 48 0
+corridor 1 9 81 5,8 9 6 53 0
+corridor 1 10 66 5,9 9 6 57 500
+# Result: Defeat; nights 9/12; combat 9,7 min; defeated 328; bought 14 (defense 12, economy 2); earned 318; perks [SpikedCorridor,HardenedRoofs,Overwatch,BlastShields,KillZone,Sharpshooters,FlamingArrows,ExpandedVision,LastStand]; Bomber fuses 1, blasts 1
+
+corridor 2 1 33 14,6 44 15 14 0
+corridor 2 2 38 8,8 23 9 23 0
+corridor 2 3 43 8,5 26 8 24 0
+corridor 2 4 50 8,5 21 8 30 0
+corridor 2 5 80 5,2 21 5 30 0
+corridor 2 6 94 5,0 12 5 35 40
+corridor 2 7 62 5,1 8 5 41 0
+corridor 2 8 67 5,1 8 5 48 0
+corridor 2 9 83 4,2 5 4 53 240
+corridor 2 10 73 8,2 11 8 57 0
+corridor 2 11 76 6,1 8 6 59 0
+corridor 2 12 80 5,3 7 5 62 0
+# Result: Victory; nights 12/12; combat 13,0 min; defeated 543; bought 16 (defense 14, economy 2); earned 410; perks [Overwatch,KillZone,FlamingArrows,CounterBattery,Gatehouse,FocusedFire,SpikedCorridor,ExpandedVision,Sharpshooters,WarBonds,HardenedRoofs]; Bomber fuses 0, blasts 0
+
+corridor 3 1 38 14,6 38 15 14 0
+corridor 3 2 39 9,3 24 9 23 0
+corridor 3 3 45 9,0 27 9 24 0
+corridor 3 4 50 9,0 24 9 30 0
+corridor 3 5 52 5,6 18 6 30 0
+corridor 3 6 71 5,5 13 5 35 40
+corridor 3 7 62 7,8 15 8 41 0
+corridor 3 8 66 7,9 12 8 48 0
+corridor 3 9 81 4,2 6 4 53 30
+corridor 3 10 71 6,0 8 6 57 0
+corridor 3 11 86 7,3 8 7 59 120
+corridor 3 12 84 1,9 2 2 62 230
+# Result: Victory; nights 12/12; combat 12,4 min; defeated 543; bought 18 (defense 16, economy 2); earned 500; perks [Sharpshooters,FocusedFire,Gatehouse,WarBonds,SpikedCorridor,CounterBattery,ExpandedVision,Overwatch,KillZone,FlamingArrows,LastStand]; Bomber fuses 0, blasts 0
+
+corridor 4 1 33 14,6 44 15 14 0
+corridor 4 2 39 9,3 24 9 23 0
+corridor 4 3 43 8,5 26 8 24 0
+corridor 4 4 50 8,5 21 8 30 0
+corridor 4 5 53 9,3 17 9 30 0
+corridor 4 6 68 4,4 6 4 35 0
+corridor 4 7 59 4,3 7 4 41 0
+corridor 4 8 69 9,2 13 9 48 0
+corridor 4 9 80 7,5 9 7 53 40
+corridor 4 10 88 8,4 9 8 57 54
+corridor 4 11 67 4,0 9 4 59 556
+# Result: Defeat; nights 10/12; combat 10,8 min; defeated 402; bought 14 (defense 12, economy 2); earned 320; perks [KillZone,Overwatch,FlamingArrows,ExpandedVision,FortressHeart,BlastShields,HardenedRoofs,Sharpshooters,HeavyShot,SpikedCorridor]; Bomber fuses 2, blasts 2
+
+corridor 5 1 38 14,6 38 15 14 0
+corridor 5 2 38 8,8 23 9 23 0
+corridor 5 3 45 8,5 25 8 24 0
+corridor 5 4 49 8,5 23 8 30 0
+corridor 5 5 50 7,7 16 8 30 0
+corridor 5 6 70 7,4 10 7 35 0
+corridor 5 7 59 5,0 15 5 41 0
+corridor 5 8 65 4,8 8 5 48 0
+corridor 5 9 70 8,5 12 8 53 0
+corridor 5 10 73 8,2 11 8 57 0
+corridor 5 11 76 2,8 4 3 59 0
+corridor 5 12 79 1,9 2 2 62 0
+# Result: Victory; nights 12/12; combat 11,9 min; defeated 543; bought 22 (defense 20, economy 2); earned 570; perks [Overwatch,KillZone,CounterBattery,FlamingArrows,WarBonds,ThriftyConstruction,Gatehouse,ExpandedVision,SpikedCorridor,HeavyShot,Sharpshooters]; Bomber fuses 0, blasts 0
+
+economy 1 1 30 14,6 48 15 14 0
+economy 1 2 45 9,3 22 9 23 0
+economy 1 3 54 11,8 28 12 24 0
+economy 1 4 62 7,8 17 8 30 0
+economy 1 5 128 7,6 51 50 30 0
+economy 1 6 78 7,7 10 8 35 0
+economy 1 7 86 4,4 9 4 41 0
+economy 1 8 72 1,3 2 1 48 0
+economy 1 9 68 2,2 4 2 53 0
+economy 1 10 69 1,3 2 1 57 0
+economy 1 11 74 1,3 7 4 59 0
+economy 1 12 74 1,3 2 1 62 0
+# Result: Victory; nights 12/12; combat 14,0 min; defeated 541; bought 33 (defense 23, economy 10); earned 1209; perks [Shrapnel,Overwatch,ExpandedVision,MarketSquare,FortressHeart,Sharpshooters,WarBonds,HeavyShot,EfficientFarming,BlastShields,ReinforcedTimber]; Bomber fuses 3, blasts 2; upgrades 1
+
+economy 2 1 40 17,9 45 18 14 0
+economy 2 2 41 9,3 23 9 23 0
+economy 2 3 48 10,6 30 11 24 0
+economy 2 4 51 8,5 23 8 30 0
+economy 2 5 85 10,3 13 10 30 0
+economy 2 6 115 8,4 10 8 35 0
+economy 2 7 86 4,4 7 4 41 0
+economy 2 8 64 2,2 5 2 48 0
+economy 2 9 75 1,3 3 1 53 0
+economy 2 10 72 1,3 2 1 57 0
+economy 2 11 76 3,2 4 3 59 0
+economy 2 12 78 3,1 4 3 62 0
+# Result: Victory; nights 12/12; combat 13,8 min; defeated 538; bought 35 (defense 23, economy 12); earned 1442; perks [MarketSquare,Sharpshooters,Overwatch,HardenedRoofs,WarBonds,ExpandedVision,FlamingArrows,FortressHeart,CounterBattery,ThriftyConstruction,ReinforcedTimber]; Bomber fuses 5, blasts 5; upgrades 5
+
+economy 3 1 40 17,9 45 18 14 0
+economy 3 2 42 10,9 26 11 23 0
+economy 3 3 47 9,0 36 9 24 0
+economy 3 4 54 10,6 25 11 30 0
+economy 3 5 81 15,4 19 15 30 0
+economy 3 6 76 8,1 11 8 35 0
+economy 3 7 61 6,5 11 6 41 0
+economy 3 8 63 4,4 7 4 48 0
+economy 3 9 78 3,4 5 3 53 0
+economy 3 10 72 2,6 4 3 57 0
+economy 3 11 106 2,6 2 3 59 0
+economy 3 12 94 5,7 6 6 62 0
+# Result: Victory; nights 12/12; combat 13,6 min; defeated 541; bought 32 (defense 20, economy 12); earned 1218; perks [MarketSquare,Sharpshooters,FortressHeart,WarBonds,ExpandedVision,ThriftyConstruction,FieldEngineers,FlamingArrows,HardenedRoofs,BlastShields,CounterBattery]; Bomber fuses 3, blasts 2; upgrades 5
+
+economy 4 1 40 17,9 45 18 14 0
+economy 4 2 43 10,8 25 11 23 0
+economy 4 3 59 10,6 33 11 24 0
+economy 4 4 95 14,5 26 14 30 0
+economy 4 5 80 10,4 24 10 30 0
+economy 4 6 72 9,6 13 10 35 0
+economy 4 7 64 4,8 10 5 41 0
+economy 4 8 63 4,0 7 4 48 0
+economy 4 9 70 3,0 4 3 53 0
+economy 4 10 63 1,3 2 1 57 0
+economy 4 11 75 1,3 2 1 59 0
+economy 4 12 74 1,3 2 1 62 0
+# Result: Victory; nights 12/12; combat 13,3 min; defeated 537; bought 36 (defense 23, economy 13); earned 1341; perks [HardenedRoofs,EfficientFarming,FortressHeart,Sharpshooters,ExpandedVision,WarBonds,Overwatch,Shrapnel,CounterBattery,BlastShields,MarketSquare]; Bomber fuses 7, blasts 6; upgrades 1
+
+economy 5 1 40 17,9 45 18 14 0
+economy 5 2 41 10,3 25 10 23 0
+economy 5 3 47 8,3 33 8 24 0
+economy 5 4 48 10,0 25 10 30 0
+economy 5 5 53 8,0 22 8 30 0
+economy 5 6 77 8,1 13 8 35 0
+economy 5 7 71 9,8 14 10 41 0
+economy 5 8 78 2,6 3 3 48 0
+economy 5 9 96 5,1 6 5 53 0
+economy 5 10 78 3,4 4 3 57 0
+economy 5 11 108 2,6 4 3 59 0
+economy 5 12 93 3,4 4 3 62 500
+# Result: Defeat; nights 11/12; combat 13,8 min; defeated 519; bought 28 (defense 21, economy 7); earned 1046; perks [ExpandedVision,Gatehouse,HardenedRoofs,FlamingArrows,Sharpshooters,BlastShields,WarBonds,EfficientFarming,ReinforcedTimber,Shrapnel,Overwatch]; Bomber fuses 3, blasts 2; upgrades 3
+
+
+<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\EditMode-20261029-101958.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

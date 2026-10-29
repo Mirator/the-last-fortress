@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="21" result="Failed(Child)" total="21" passed="18" failed="3" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0,1807027">
+  <test-suite type="TestSuite" id="1000" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="155" result="Failed" site="Child" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.180703" total="21" passed="18" failed="3" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1191" name="TheLastFortress.EditMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.EditMode.Tests.dll" runstate="Runnable" testcasecount="155" result="Failed" site="Child" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.169959" total="21" passed="18" failed="3" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="12400" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1192" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="155" result="Failed" site="Child" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.166300" total="21" passed="18" failed="3" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1193" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="155" result="Failed" site="Child" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.162597" total="21" passed="18" failed="3" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1167" name="UpgradeTests" fullname="TheLastFortress.Tests.UpgradeTests" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" testcasecount="21" result="Failed" site="Child" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.158158" total="21" passed="18" failed="3" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1187" name="AGranaryDestroyedInCombatPaysHalfItsIncomeAtTheNextDawn" fullname="TheLastFortress.Tests.UpgradeTests.AGranaryDestroyedInCombatPaysHalfItsIncomeAtTheNextDawn" methodname="AGranaryDestroyedInCombatPaysHalfItsIncomeAtTheNextDawn" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="21010316" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.054662" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1183" name="BossesTakeHalfTheSlowAndASlowedEnemyStillMovesOneUnit" fullname="TheLastFortress.Tests.UpgradeTests.BossesTakeHalfTheSlowAndASlowedEnemyStillMovesOneUnit" methodname="BossesTakeHalfTheSlowAndASlowedEnemyStillMovesOneUnit" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="2134813119" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.003646" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1184" name="ConcussionSlowsEveryEnemyTheCannonHits" fullname="TheLastFortress.Tests.UpgradeTests.ConcussionSlowsEveryEnemyTheCannonHits" methodname="ConcussionSlowsEveryEnemyTheCannonHits" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="1772501786" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.001148" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1178" name="EffectiveValuesFollowTheTierTable" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.006603" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1170" name="EffectiveValuesFollowTheTierTable(Wall)" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable(Wall)" methodname="EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="336158405" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000968" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1171" name="EffectiveValuesFollowTheTierTable(Tower)" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable(Tower)" methodname="EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="932424826" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000919" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1172" name="EffectiveValuesFollowTheTierTable(House)" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable(House)" methodname="EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="505146489" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000125" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1173" name="EffectiveValuesFollowTheTierTable(Farm)" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable(Farm)" methodname="EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="1897489534" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000119" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1174" name="EffectiveValuesFollowTheTierTable(SpikeTrap)" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable(SpikeTrap)" methodname="EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="439079125" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000117" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1175" name="EffectiveValuesFollowTheTierTable(Cannon)" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable(Cannon)" methodname="EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="389304141" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000137" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1176" name="EffectiveValuesFollowTheTierTable(Watchtower)" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable(Watchtower)" methodname="EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="845193623" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.001182" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1177" name="EffectiveValuesFollowTheTierTable(RepairStation)" fullname="TheLastFortress.Tests.UpgradeTests.EffectiveValuesFollowTheTierTable(RepairStation)" methodname="EffectiveValuesFollowTheTierTable" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="1809460971" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000273" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1169" name="LegacyProfilesHaveNoUpgrades" fullname="TheLastFortress.Tests.UpgradeTests.LegacyProfilesHaveNoUpgrades" methodname="LegacyProfilesHaveNoUpgrades" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="1063122105" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.001970" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1186" name="MarketHallAddsOncePerFarm" fullname="TheLastFortress.Tests.UpgradeTests.MarketHallAddsOncePerFarm" methodname="MarketHallAddsOncePerFarm" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="462171474" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000432" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1189" name="PerksComposeWithTiers" fullname="TheLastFortress.Tests.UpgradeTests.PerksComposeWithTiers" methodname="PerksComposeWithTiers" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="1663703388" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.026891" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1182" name="SlowTakesTheStrongerPercentAndTheLaterExpiryAndNeverStacks" fullname="TheLastFortress.Tests.UpgradeTests.SlowTakesTheStrongerPercentAndTheLaterExpiryAndNeverStacks" methodname="SlowTakesTheStrongerPercentAndTheLaterExpiryAndNeverStacks" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="1339327675" result="Failed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.008987" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  stronger percent, refreshed expiry, no stacking
+  Expected: (50, 75)
+  But was:  (80, 75)
+]]></message>
+                <stack-trace><![CDATA[at TheLastFortress.Tests.UpgradeTests.SlowTakesTheStrongerPercentAndTheLaterExpiryAndNeverStacks () [0x0014a] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\EditMode\UpgradeTests.cs:182
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1181" name="TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId" fullname="TheLastFortress.Tests.UpgradeTests.TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.005009" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1179" name="TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId(2,50)" fullname="TheLastFortress.Tests.UpgradeTests.TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId(2,50)" methodname="TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="1992482678" result="Failed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.003890" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[  Expected: 3
+  But was:  2
+]]></message>
+                  <stack-trace><![CDATA[at TheLastFortress.Tests.UpgradeTests.TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId (System.Int32 tier, System.Int32 percent) [0x001a0] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\EditMode\UpgradeTests.cs:161
+]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1180" name="TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId(3,100)" fullname="TheLastFortress.Tests.UpgradeTests.TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId(3,100)" methodname="TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="668191495" result="Failed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000402" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[  Expected: 3
+  But was:  2
+]]></message>
+                  <stack-trace><![CDATA[at TheLastFortress.Tests.UpgradeTests.TheSecondArrowHitsTheEnemyNearestTheFirstNotTheLowestId (System.Int32 tier, System.Int32 percent) [0x001a0] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\EditMode\UpgradeTests.cs:161
+]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+            <test-case id="1190" name="TiersRoundTripThroughSavesAndOlderOrInvalidRecordsAreHandled" fullname="TheLastFortress.Tests.UpgradeTests.TiersRoundTripThroughSavesAndOlderOrInvalidRecordsAreHandled" methodname="TiersRoundTripThroughSavesAndOlderOrInvalidRecordsAreHandled" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="757718904" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.026696" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1188" name="TierThreeRepairStationCaresForTheKeepAndWatchtowerTiersReachFurther" fullname="TheLastFortress.Tests.UpgradeTests.TierThreeRepairStationCaresForTheKeepAndWatchtowerTiersReachFurther" methodname="TierThreeRepairStationCaresForTheKeepAndWatchtowerTiersReachFurther" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="1808263159" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.001090" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1168" name="UpgradingIsDayOnlyAndAtomicChargesTheTierPriceKeepsTheHpShareAndRefundsHalfTheTotalPaid" fullname="TheLastFortress.Tests.UpgradeTests.UpgradingIsDayOnlyAndAtomicChargesTheTierPriceKeepsTheHpShareAndRefundsHalfTheTotalPaid" methodname="UpgradingIsDayOnlyAndAtomicChargesTheTierPriceKeepsTheHpShareAndRefundsHalfTheTotalPaid" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="2041850243" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.001532" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1185" name="WallSpikesReflectAndStoneIgnoresTheWallMultiplier" fullname="TheLastFortress.Tests.UpgradeTests.WallSpikesReflectAndStoneIgnoresTheWallMultiplier" methodname="WallSpikesReflectAndStoneIgnoresTheWallMultiplier" classname="TheLastFortress.Tests.UpgradeTests" runstate="Runnable" seed="980874428" result="Passed" start-time="2026-10-29 09:28:16Z" end-time="2026-10-29 09:28:16Z" duration="0.000883" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\EditMode-20261029-102816.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

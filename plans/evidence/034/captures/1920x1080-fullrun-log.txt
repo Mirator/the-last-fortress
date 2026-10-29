@@ -1,0 +1,52 @@
+full run: crossing seed 2: generated (attempt 0) rules=release-rules-4
+Day 1: gold left 12; Tower 9 9; Tower 11 11; Tower 9 11; Tower 11 9; House 12 8; Wall 9 10
+  selected Tower (9,9) tier 1: HP 80 / 80   at (9,9)|Damage 10 every 0.9 s · range 4.0|Next, tier II for 49 gold: damage 12, second arrow at 50%|Sell refund: 24 gold [Upgrade 49 gold Not enough gold]
+  framing: focus=(4.75, 0.00, 10.50) size=4,50
+  Night 1: Reward 65,4s; Keep -0 (500/500); lost 0; killed 10 (hero 4)
+  Reward FortressHeart,WarBonds,KillZone -> FortressHeart
+Day 2: gold left 0; House 8 12; Wall 11 10
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  call early: offered +10, called=True
+  Night 2: Reward 68,6s; Keep -0 (650/650); lost 0; killed 16 (hero 9)
+  Reward HeavyShot,BlastShields,Sharpshooters -> HeavyShot
+Day 3: gold left 8; House 13 8; Wall 10 9; dawn early call +10
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 3: Reward 96,9s; Keep -0 (650/650); lost 0; killed 20 (hero 7)
+  Reward SignalFires,MarketSquare,Recycling -> SignalFires
+Day 4: gold left 2; Farm 12 13; Wall 10 11
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 4: Reward 98,7s; Keep -0 (650/650); lost 0; killed 25 (hero 9)
+  Reward ReinforcedTimber,CounterBattery,WarBonds -> CounterBattery
+Day 5: gold left 20; Tower 8 10
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 5: Reward 92,7s; Keep -0 (650/650); lost 1; killed 31 (hero 9)
+  Reward SpikedCorridor,HardenedRoofs,LastStand -> HardenedRoofs
+Day 6: gold left 28; Tower 12 10
+  framing: focus=(10.00, 0.00, 10.50) size=7,81
+  Night 6: Reward 131,2s; Keep -0 (650/650); lost 4; killed 37 (hero 8)
+  Reward FocusedFire,KillZone,Sharpshooters -> Sharpshooters
+Day 7: gold left 48; 
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 7: Reward 99,0s; Keep -0 (650/650); lost 0; killed 42 (hero 8)
+  Reward Recycling,EfficientFarming,ReinforcedTimber -> ReinforcedTimber
+Day 8: gold left 68; 
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 8: Reward 108,3s; Keep -0 (650/650); lost 0; killed 54 (hero 10)
+  Reward FlamingArrows,EfficientFarming,Overwatch -> Overwatch
+Day 9: gold left 11; Cannon 7 7
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 9: Reward 121,6s; Keep -0 (650/650); lost 0; killed 64 (hero 10)
+  Reward Recycling,KillZone,Gatehouse -> Gatehouse
+Day 10: gold left 31; 
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 10: Reward 111,6s; Keep -0 (650/650); lost 0; killed 72 (hero 10)
+  Reward ThriftyConstruction,SpikedCorridor,FlamingArrows -> FlamingArrows
+Day 11: gold left 19; Watchtower 9 8
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 11: Reward 157,3s; Keep -0 (650/650); lost 0; killed 81 (hero 11)
+  Reward Shrapnel,Recycling,BarbedDefenses -> Shrapnel
+Day 12: gold left 39; 
+  briefing collapsed=True
+  framing: focus=(10.25, 0.00, 10.25) size=7,81
+  Night 12: Victory 134,2s; Keep -0 (650/650); lost 1; killed 91 (hero 12)
+Result: Victory; nights 12/12; defeated 543; bought 16; perks [FortressHeart,HeavyShot,SignalFires,CounterBattery,HardenedRoofs,Sharpshooters,ReinforcedTimber,Overwatch,Gatehouse,FlamingArrows,Shrapnel]

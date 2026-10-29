@@ -84,6 +84,9 @@ namespace TheLastFortress
 
         /// <summary>Spec 012: gold earned by calling this night early, paid at the next dawn (0 when not called).</summary>
         public int EarlyCallGold;
+
+        /// <summary>Spec 015: half the income of tier III Farms (Granary) destroyed this night, paid at the next dawn.</summary>
+        public int GranaryGold;
     }
 
     /// <summary>
@@ -106,7 +109,7 @@ namespace TheLastFortress
         readonly int[] activePerEntry = new int[8];
         readonly List<string> ownedPerks = new List<string>();
         readonly List<RewardOffer> offerHistory = new List<RewardOffer>();
-        readonly HashSet<int> buffedTowers = new HashSet<int>();
+        readonly Dictionary<int, int> buffedTowers = new Dictionary<int, int>(); // tower ID -> tier of the Watchtower buffing it
         readonly List<Building> buildingScratch = new List<Building>();
         readonly HashSet<int> provokedArchers = new HashSet<int>();
         int buffKey = -1;
@@ -320,6 +323,46 @@ namespace TheLastFortress
             return true;
         }
 
+        /// <summary>
+        /// Spec 015: why <paramref name="building"/> cannot be upgraded one tier now (None when it can). Phase first, then the
+        /// building, the tier and the gold.
+        /// </summary>
+        public UpgradeRejection CheckUpgrade(Building building)
+        {
+            if (building == null) return UpgradeRejection.NothingSelected;
+            if (GetBuilding(building.Id) != building || !building.IsAlive || building.Definition.Tiers == null) return UpgradeRejection.NotUpgradable;
+            if (building.Tier >= BuildingUpgrades.MaxTier) return UpgradeRejection.MaxTier;
+            if (State != RunState.Day || StressMode) return UpgradeRejection.NotDay;
+            return Gold < placement.UpgradePriceFor(building) ? UpgradeRejection.InsufficientGold : UpgradeRejection.None;
+        }
+
+        /// <summary>Price of the next tier for this building (after ThriftyConstruction), or -1 when it has none.</summary>
+        public int UpgradePrice(Building building) => placement.UpgradePriceFor(building);
+
+        /// <summary>
+        /// Spec 015: one tier up, atomically (one charge, one tier). The building keeps its share of HP,
+        /// <c>ceil(hp x max' / max)</c>; footprint, routes, targets and cooldowns never change.
+        /// </summary>
+        public UpgradeRejection TryUpgrade(Building building)
+        {
+            var result = CheckUpgrade(building);
+            if (result != UpgradeRejection.None) return result;
+            var price = placement.UpgradePriceFor(building);
+            if (!placement.TrySpend(price)) return UpgradeRejection.InsufficientGold;
+            building.TotalPaid += price;
+            building.Tier++;
+            if (building.Definition.HasHp)
+            {
+                var max = EffectiveMaxHp(building);
+                if (max != building.MaxHp) building.Hp = (int)(((long)building.Hp * max + building.MaxHp - 1) / building.MaxHp);
+                building.MaxHp = max;
+            }
+
+            buffKey = -1; // a Watchtower's reach and bonus follow its tier
+            events.Add(new SimEvent(SimEventType.BuildingUpgraded, Tick, building.Id, building.Tier, building.Cell));
+            return result;
+        }
+
         public static bool IsRotatable(BuildingKind kind) =>
             kind == BuildingKind.Tower || kind == BuildingKind.House || kind == BuildingKind.Farm ||
             kind == BuildingKind.Cannon || kind == BuildingKind.Watchtower || kind == BuildingKind.RepairStation;
@@ -378,39 +421,74 @@ namespace TheLastFortress
         public Building GetBuilding(int id) => buildingsById.TryGetValue(id, out var b) ? b : null;
         public Enemy GetEnemy(int id) => enemiesById.TryGetValue(id, out var e) ? e : null;
 
-        // ---------- Effective stats (shared definitions + run perks; definitions are never mutated) ----------
+        // ---------- Effective stats (shared definitions + tier + run perks; definitions are never mutated) ----------
 
-        public int EffectiveMaxHp(BuildingDefinition def)
+        /// <summary>Tier I (ghosts, cards): the definition's maximum HP with perks.</summary>
+        public int EffectiveMaxHp(BuildingDefinition def) => EffectiveMaxHp(def, 1);
+
+        public int EffectiveMaxHp(Building b) => EffectiveMaxHp(b.Definition, b.Tier);
+
+        /// <summary>Definition, then tier (+% of the definition, floor), then perks.</summary>
+        public int EffectiveMaxHp(BuildingDefinition def, int tier)
         {
             if (!def.HasHp) return 0;
+            var hp = def.MaxHp * (100 + BuildingUpgrades.For(def, tier).HpPercent) / 100;
             if (def.Kind == BuildingKind.Wall && HasPerk(PerkRules.ReinforcedTimber))
-                return def.MaxHp * (100 + PerkRules.ReinforcedTimberPercent) / 100;
-            if (def.Kind == BuildingKind.Keep && HasPerk(PerkRules.FortressHeart)) return def.MaxHp + PerkRules.FortressHeartHp;
-            return def.MaxHp;
+                return hp * (100 + PerkRules.ReinforcedTimberPercent) / 100;
+            if (def.Kind == BuildingKind.Keep && HasPerk(PerkRules.FortressHeart)) return hp + PerkRules.FortressHeartHp;
+            return hp;
         }
 
+        static BuildingTier TierOf(Building b) => BuildingUpgrades.For(b.Definition, b.Tier);
+
         /// <summary>
-        /// Range of an Archer Tower or Cannon: base, x1.1 with ExpandedVision (Archer Towers only), then +the Watchtower
-        /// bonus once when buffed (floating point).
+        /// Range of an Archer Tower or Cannon: base + tier, x1.1 with ExpandedVision (Archer Towers only), then +the buffing
+        /// Watchtower's bonus once (floating point).
         /// </summary>
         public double TowerRange(Building tower)
         {
-            var range = TowerRange(tower.Definition);
-            if (IsWatchtowerBuffed(tower)) range += Definitions.Watchtower.RangeBonus;
+            var range = TowerRange(tower.Definition, TierOf(tower).RangeBonus);
+            var watchtower = BuffingWatchtowerTier(tower);
+            if (watchtower > 0) range += WatchtowerRangeBonus(watchtower);
             return range;
         }
 
         /// <summary>Range without position-dependent bonuses (cards, ghosts before placement).</summary>
-        public double TowerRange(BuildingDefinition tower) =>
-            tower.Range * (tower.Kind == BuildingKind.Tower && HasPerk(PerkRules.ExpandedVision) ? PerkRules.ExpandedVisionFactor : 1.0);
+        public double TowerRange(BuildingDefinition tower) => TowerRange(tower, 0);
+
+        double TowerRange(BuildingDefinition tower, double tierBonus) =>
+            (tower.Range + tierBonus) * (tower.Kind == BuildingKind.Tower && HasPerk(PerkRules.ExpandedVision) ? PerkRules.ExpandedVisionFactor : 1.0);
+
+        /// <summary>Attack interval in whole steps: the tier's interval when it has one, else the definition's.</summary>
+        public static int AttackTicks(Building tower)
+        {
+            var tier = TierOf(tower);
+            return PrototypeDefinitions.ToTicks(tier.IntervalSeconds > 0 ? tier.IntervalSeconds : tower.Definition.AttackIntervalSeconds);
+        }
+
+        public static double AttackIntervalSeconds(Building tower) => AttackTicks(tower) * PrototypeDefinitions.StepSeconds;
+
+        /// <summary>Range bonus a Watchtower of this tier gives (tier I: the definition's).</summary>
+        public double WatchtowerRangeBonus(int tier)
+        {
+            var t = BuildingUpgrades.For(Definitions.Watchtower, tier);
+            return t.WatchRangeBonus > 0 ? t.WatchRangeBonus : Definitions.Watchtower.RangeBonus;
+        }
+
+        /// <summary>Spotter damage bonus (percent) a Watchtower of this tier gives to the towers it buffs.</summary>
+        public int SpotterPercent(int tier) => tier < 1 ? 0 : BuildingUpgrades.For(Definitions.Watchtower, tier).SpotterPercent;
 
         /// <summary>
         /// Whether a living Watchtower currently boosts this Archer Tower/Cannon (edge-adjacent, or within Chebyshev 2 with
-        /// SignalFires). Non-stacking. Cached per solid-occupancy revision, so construction, sale and destruction recompute it.
+        /// SignalFires or at tier III, 3 with both). Non-stacking: the highest-tier Watchtower in reach applies. Cached per
+        /// solid-occupancy revision, so construction, sale, destruction and upgrades recompute it.
         /// </summary>
-        public bool IsWatchtowerBuffed(Building tower)
+        public bool IsWatchtowerBuffed(Building tower) => BuffingWatchtowerTier(tower) > 0;
+
+        /// <summary>Tier of the Watchtower buffing this tower (0 when none).</summary>
+        public int BuffingWatchtowerTier(Building tower)
         {
-            if (Definitions.Watchtower == null || !tower.Definition.CanAttack) return false;
+            if (Definitions.Watchtower == null || !tower.Definition.CanAttack) return 0;
             var key = grid.Revision * 2 + (HasPerk(PerkRules.SignalFires) ? 1 : 0);
             if (key != buffKey)
             {
@@ -418,22 +496,33 @@ namespace TheLastFortress
                 RefreshWatchtowerBuffs();
             }
 
-            return buffedTowers.Contains(tower.Id);
+            return buffedTowers.TryGetValue(tower.Id, out var tier) ? tier : 0;
         }
 
-        /// <summary>Attackers a Watchtower ghost at <paramref name="anchor"/> would cover (placement preview).</summary>
-        public List<Building> TowersBuffedBy(GridPos anchor)
+        /// <summary>Attackers a Watchtower at <paramref name="anchor"/> of this tier would cover (placement preview, selection).</summary>
+        public List<Building> TowersBuffedBy(GridPos anchor, int tier = 1)
         {
             var list = new List<Building>();
             if (Definitions.Watchtower == null) return list;
-            var ghost = new Building(-1, Definitions.Watchtower, anchor, 0);
+            var ghost = new Building(-1, Definitions.Watchtower, anchor, 0) { Tier = tier };
             foreach (var t in towers)
                 if (t.IsAlive && WatchtowerReaches(ghost, t)) list.Add(t);
             return list;
         }
 
-        bool WatchtowerReaches(Building watchtower, Building tower) =>
-            HasPerk(PerkRules.SignalFires) ? tower.ChebyshevTo(watchtower) <= PerkRules.SignalFiresReach : tower.SharesEdgeWith(watchtower);
+        /// <summary>Chebyshev reach of this Watchtower (0 = edge-adjacent only): 2 with SignalFires or at tier III, 3 with both.</summary>
+        public int WatchtowerReach(Building watchtower)
+        {
+            var reach = TierOf(watchtower).WatchReach;
+            if (!HasPerk(PerkRules.SignalFires)) return reach;
+            return reach > 0 ? reach + 1 : PerkRules.SignalFiresReach;
+        }
+
+        bool WatchtowerReaches(Building watchtower, Building tower)
+        {
+            var reach = WatchtowerReach(watchtower);
+            return reach > 0 ? tower.ChebyshevTo(watchtower) <= reach : tower.SharesEdgeWith(watchtower);
+        }
 
         void RefreshWatchtowerBuffs()
         {
@@ -442,15 +531,19 @@ namespace TheLastFortress
             {
                 if (w.Kind != BuildingKind.Watchtower || !w.IsAlive) continue;
                 foreach (var t in towers)
-                    if (t.IsAlive && WatchtowerReaches(w, t)) buffedTowers.Add(t.Id);
+                    if (t.IsAlive && WatchtowerReaches(w, t) && (!buffedTowers.TryGetValue(t.Id, out var best) || w.Tier > best))
+                        buffedTowers[t.Id] = w.Tier;
             }
         }
 
         /// <summary>LastStand condition: Keep HP strictly below 30% of its current maximum.</summary>
         public bool LastStandActive => HasPerk(PerkRules.LastStand) && Keep.Hp * 100 < Keep.MaxHp * PerkRules.LastStandThresholdPercent;
 
-        /// <summary>Direct Tower damage: percent bonuses add against the base, then floor once (10 → 16 with both).</summary>
-        public int TowerDamage(Building tower) => TowerDamage(tower.Definition);
+        /// <summary>A tower's attack damage at its tier before percentages: definition + tier% (floor).</summary>
+        public static int BaseDamage(Building tower) => tower.Definition.AttackDamage * (100 + TierOf(tower).DamagePercent) / 100;
+
+        /// <summary>Direct damage without target-dependent bonuses: tier base, then perk and Spotter percentages add, floor once.</summary>
+        public int TowerDamage(Building tower) => BaseDamage(tower) * (100 + DamagePercent(tower, null)) / 100;
 
         /// <summary>Damage without target-dependent bonuses. Archer Tower perks never apply to the Cannon.</summary>
         public int TowerDamage(BuildingDefinition tower)
@@ -463,29 +556,36 @@ namespace TheLastFortress
         }
 
         /// <summary>Damage of one shot against this enemy: adds KillZone (Archer Tower) or HeavyShot (Cannon) to the sum, floors once.</summary>
-        public int DamageAgainst(Building tower, Enemy target)
+        public int DamageAgainst(Building tower, Enemy target) => BaseDamage(tower) * (100 + DamagePercent(tower, target)) / 100;
+
+        /// <summary>
+        /// The percentages that add against a tower's tier base: Sharpshooters, Last Stand and Kill Zone (Archer Towers), Heavy
+        /// Shot (Cannons), and the buffing Watchtower's Spotter (both). Target-dependent ones only with a target.
+        /// </summary>
+        int DamagePercent(Building tower, Enemy target)
         {
-            var percent = 0;
+            var percent = SpotterPercent(BuffingWatchtowerTier(tower));
             if (tower.Kind == BuildingKind.Tower)
             {
                 if (HasPerk(PerkRules.Sharpshooters)) percent += PerkRules.SharpshootersPercent;
                 if (LastStandActive) percent += PerkRules.LastStandPercent;
-                if (HasPerk(PerkRules.KillZone) && (grid.HasTrap(target.Cell) || grid.HasAdjacentTrap(target.Cell))) percent += PerkRules.KillZonePercent;
+                if (target != null && HasPerk(PerkRules.KillZone) && (grid.HasTrap(target.Cell) || grid.HasAdjacentTrap(target.Cell))) percent += PerkRules.KillZonePercent;
             }
-            else if (tower.Kind == BuildingKind.Cannon && HasPerk(PerkRules.HeavyShot) && (target.Kind == EnemyKind.Brute || target.Definition.IsBoss))
+            else if (target != null && tower.Kind == BuildingKind.Cannon && HasPerk(PerkRules.HeavyShot) && (target.Kind == EnemyKind.Brute || target.Definition.IsBoss))
                 percent += PerkRules.HeavyShotPercent;
 
-            return tower.Definition.AttackDamage * (100 + percent) / 100;
+            return percent;
         }
 
-        /// <summary>Cannon splash radius: base, +0.5 with Shrapnel.</summary>
+        /// <summary>Cannon splash radius: base + tier, +0.5 with Shrapnel.</summary>
         public double SplashRadius(Building cannon) =>
-            cannon.Definition.SplashRadius + (HasPerk(PerkRules.Shrapnel) ? PerkRules.ShrapnelRadius : 0);
+            cannon.Definition.SplashRadius + TierOf(cannon).SplashBonus + (HasPerk(PerkRules.Shrapnel) ? PerkRules.ShrapnelRadius : 0);
 
-        /// <summary>Spike Trap damage: base, +4 per edge-adjacent Spike Trap with SpikedCorridor (max +8).</summary>
+        /// <summary>Spike Trap damage: the tier's (else the definition's), +4 per edge-adjacent Spike Trap with SpikedCorridor (max +8).</summary>
         public int TrapDamage(Building trap)
         {
-            var damage = trap.Definition.TrapDamage;
+            var tier = TierOf(trap);
+            var damage = tier.TrapDamage > 0 ? tier.TrapDamage : trap.Definition.TrapDamage;
             if (!HasPerk(PerkRules.SpikedCorridor)) return damage;
             var bonus = 0;
             foreach (var d in GridPos.CardinalOrder)
@@ -509,13 +609,17 @@ namespace TheLastFortress
             return false;
         }
 
+        /// <summary>The enemy's Wall multiplier against this target: only on Walls, and never on a stone (tier III) Wall.</summary>
+        static int WallMultiplier(int multiplier, Building target) =>
+            target.Kind == BuildingKind.Wall && !TierOf(target).Stone ? multiplier : 1;
+
         /// <summary>
         /// One enemy hit on a building: base x Wall multiplier, +the Commander aura (other non-boss enemies within its radius),
         /// then reductions in order Gatehouse, HardenedRoofs (ranged hits on economy/support buildings).
         /// </summary>
         public int EnemyHitDamage(Enemy e, Building target)
         {
-            var damage = e.Definition.AttackDamage * (target.Kind == BuildingKind.Wall ? e.Definition.WallDamageMultiplier : 1);
+            var damage = e.Definition.AttackDamage * WallMultiplier(e.Definition.WallDamageMultiplier, target);
             var aura = CommanderAuraPercent(e);
             if (aura > 0) damage = damage * (100 + aura) / 100;
             if (GatehouseProtects(target)) damage = Reduce(damage, PerkRules.GatehouseReductionPercent);
@@ -545,18 +649,19 @@ namespace TheLastFortress
         public int BlastDamage(Enemy bomber, Building target, bool primary)
         {
             var def = bomber.Definition;
-            var damage = primary ? def.BlastDamage * (target.Kind == BuildingKind.Wall ? def.WallDamageMultiplier : 1) : def.BlastSplashDamage;
+            var damage = primary ? def.BlastDamage * WallMultiplier(def.WallDamageMultiplier, target) : def.BlastSplashDamage;
             if (GatehouseProtects(target)) damage = Reduce(damage, PerkRules.GatehouseReductionPercent);
             if (HasPerk(PerkRules.BlastShields)) damage = Reduce(damage, PerkRules.BlastShieldsReductionPercent);
             return damage;
         }
 
-        /// <summary>Reflected damage per received melee hit: 3 with any adjacent trap, +3 with BarbedDefenses (max 6).</summary>
+        /// <summary>Reflected damage per received melee hit: 3 with any adjacent trap, +3 with BarbedDefenses, +the tier's spikes.</summary>
         public int WallReflection(Building wall)
         {
             if (wall.Kind != BuildingKind.Wall) return 0;
             var reflect = grid.HasAdjacentTrap(wall.Cell) ? EconomyRules.WallTrapReflect : 0;
             if (HasPerk(PerkRules.BarbedDefenses)) reflect += PerkRules.BarbedReflect;
+            reflect += TierOf(wall).Reflect; // spikes (spec 015)
             return reflect;
         }
 
@@ -803,8 +908,13 @@ namespace TheLastFortress
                     if (grid.IsSolid(c) || grid.HasTrap(c)) return $"Building {bd.id} overlaps another structure.";
                 }
 
-                var b = new Building(bd.id, def, cell, bd.price) { Orientation = bd.orientation };
-                b.MaxHp = EffectiveMaxHp(def);
+                // Spec 015: a missing tier is tier I and a missing total the purchase price (saves from before upgrades).
+                var tier = bd.tier == 0 ? 1 : bd.tier;
+                var paid = bd.paid == 0 ? bd.price : bd.paid;
+                if (tier < 1 || tier > BuildingUpgrades.MaxTier || (tier > 1 && def.Tiers == null)) return $"Building {bd.id} has invalid tier {bd.tier}.";
+                if (paid < bd.price || (tier == 1 && paid != bd.price)) return $"Building {bd.id} has invalid total paid {bd.paid}.";
+                var b = new Building(bd.id, def, cell, bd.price) { Orientation = bd.orientation, Tier = tier, TotalPaid = paid };
+                b.MaxHp = EffectiveMaxHp(b);
                 if (def.HasHp && (bd.hp < 1 || bd.hp > b.MaxHp)) return $"Building {bd.id} HP {bd.hp} outside 1..{b.MaxHp}.";
                 b.Hp = def.HasHp ? bd.hp : 0;
                 grid.Install(b);
@@ -845,7 +955,7 @@ namespace TheLastFortress
                 case PerkRules.FortressHeart:
                     foreach (var b in grid.AllBuildings())
                     {
-                        var max = EffectiveMaxHp(b.Definition);
+                        var max = EffectiveMaxHp(b);
                         var delta = max - b.MaxHp;
                         if (delta <= 0) continue;
                         b.MaxHp = max;
@@ -910,11 +1020,13 @@ namespace TheLastFortress
             foreach (var station in stations)
             {
                 buildingScratch.Clear();
+                var reach = RepairReach(station);
+                var keepCare = engineers || TierOf(station).KeepCare;
                 foreach (var b in grid.AllBuildings())
                 {
                     if (b == station || !b.IsAlive || !b.Definition.HasHp || b.Hp >= b.MaxHp) continue;
-                    if (b.Kind == BuildingKind.Keep && !engineers) continue;
-                    if (station.ChebyshevTo(b) <= def.RepairReach) buildingScratch.Add(b);
+                    if (b.Kind == BuildingKind.Keep && !keepCare) continue;
+                    if (station.ChebyshevTo(b) <= reach) buildingScratch.Add(b);
                 }
 
                 buildingScratch.Sort((a, b) =>
@@ -922,7 +1034,7 @@ namespace TheLastFortress
                     var c = ((long)a.Hp * b.MaxHp).CompareTo((long)b.Hp * a.MaxHp);
                     return c != 0 ? c : a.Id.CompareTo(b.Id);
                 });
-                var budget = def.RepairBudget + (engineers ? PerkRules.FieldEngineersBudget : 0);
+                var budget = RepairBudget(station);
                 var total = 0;
                 foreach (var b in buildingScratch)
                 {
@@ -938,6 +1050,28 @@ namespace TheLastFortress
             }
         }
 
+        /// <summary>
+        /// A Repair Station's dawn budget: its tier's (else the definition's), +30 with FieldEngineers, and +30 more when the
+        /// perk meets tier III Keep care (spec 015: the perk extends the trait).
+        /// </summary>
+        public int RepairBudget(Building station)
+        {
+            var tier = TierOf(station);
+            var budget = tier.RepairBudget > 0 ? tier.RepairBudget : station.Definition.RepairBudget;
+            if (!HasPerk(PerkRules.FieldEngineers)) return budget;
+            return budget + PerkRules.FieldEngineersBudget * (tier.KeepCare ? 2 : 1);
+        }
+
+        /// <summary>A Repair Station's Chebyshev reach: its tier's, else the definition's.</summary>
+        public static int RepairReach(Building station)
+        {
+            var tier = TierOf(station);
+            return tier.RepairReach > 0 ? tier.RepairReach : station.Definition.RepairReach;
+        }
+
+        /// <summary>Whether this Repair Station's dawn repair reaches the Keep (FieldEngineers or tier III Keep care).</summary>
+        public bool RepairsKeep(Building station) => HasPerk(PerkRules.FieldEngineers) || TierOf(station).KeepCare;
+
         void PayIncome(int day)
         {
             if (day <= LastPaidDay || day > TotalNights) return;
@@ -945,7 +1079,11 @@ namespace TheLastFortress
             var income = IncomeForecast();
             if (HasPerk(PerkRules.WarBonds) && LastNight != null && LastNight.Night == day - 1 && LastNight.KeepDamage == 0)
                 income.Bonus = PerkRules.WarBondsGold;
-            if (LastNight != null && LastNight.Night == day - 1) income.EarlyCall = LastNight.EarlyCallGold;
+            if (LastNight != null && LastNight.Night == day - 1)
+            {
+                income.EarlyCall = LastNight.EarlyCallGold;
+                income.Granary = LastNight.GranaryGold;
+            }
             LastIncome = income;
             placement.Earn(LastIncome.Total);
             Stats.GoldEarned += LastIncome.Total;
@@ -1372,11 +1510,11 @@ namespace TheLastFortress
         /// </summary>
         void AdvanceSegment(Enemy e)
         {
-            var progress = e.ProgressUnits + e.MoveUnitsPerStep;
+            var progress = e.ProgressUnits + MoveUnits(e);
             double laneX = e.LaneX, laneZ = e.LaneZ;
             if (e.Definition.BodyRadius > 0)
             {
-                EaseLane(e, ref laneX, ref laneZ);
+                EaseLane(e, MoveUnits(e), ref laneX, ref laneZ);
                 if (!BodyMayStep(e, progress, laneX, laneZ)) return;
             }
 
@@ -1412,11 +1550,11 @@ namespace TheLastFortress
         }
 
         /// <summary>Spec 014: the lane offset turns with the route at half the walking speed, so corners stay smooth.</summary>
-        static void EaseLane(Enemy e, ref double laneX, ref double laneZ)
+        static void EaseLane(Enemy e, int units, ref double laneX, ref double laneZ)
         {
             double dx = e.NextCell.X - e.Cell.X, dz = e.NextCell.Z - e.Cell.Z; // cardinal unit step
             double tx = dz * e.Lane, tz = -dx * e.Lane; // to the right of travel
-            var max = e.MoveUnitsPerStep * 0.5 / EnemyDefinition.UnitsPerTile;
+            var max = units * 0.5 / EnemyDefinition.UnitsPerTile;
             double ex = tx - laneX, ez = tz - laneZ;
             var len = Math.Sqrt(ex * ex + ez * ez);
             if (len <= max) { laneX = tx; laneZ = tz; }
@@ -1433,7 +1571,7 @@ namespace TheLastFortress
         {
             if (e.PassUnits > 0)
             {
-                e.PassUnits = Math.Max(0, e.PassUnits - e.MoveUnitsPerStep);
+                e.PassUnits = Math.Max(0, e.PassUnits - MoveUnits(e));
                 e.BlockedTicks = 0;
                 return true;
             }
@@ -1496,6 +1634,8 @@ namespace TheLastFortress
             if (trap == null || !e.Alive) return;
             events.Add(new SimEvent(SimEventType.TrapTriggered, Tick, trap.Id, e.Id, e.Cell));
             DamageEnemy(e, TrapDamage(trap), trap.Id);
+            var tier = TierOf(trap);
+            ApplySlow(e, tier.SlowPercent, tier.SlowSeconds); // barbs (spec 015)
         }
 
         /// <summary>Applies damage and records the kill exactly once.</summary>
@@ -1533,7 +1673,7 @@ namespace TheLastFortress
             {
                 if (!t.IsAlive) continue;
                 var range = TowerRange(t);
-                var ticks = PrototypeDefinitions.ToTicks(t.Definition.AttackIntervalSeconds);
+                var ticks = AttackTicks(t);
                 var target = t.TargetEnemyId >= 0 ? GetEnemy(t.TargetEnemyId) : null;
                 if (target == null || !target.Alive || !InRange(t, target.X, target.Z, range))
                 {
@@ -1545,12 +1685,69 @@ namespace TheLastFortress
                 if (target == null || Tick < t.AttackDueTick) continue;
                 t.AttackDueTick += ticks;
                 events.Add(new SimEvent(SimEventType.TowerShot, Tick, t.Id, target.Id, target.Cell, t.CenterX, t.CenterZ, target.X, target.Z));
-                if (t.Kind == BuildingKind.Cannon) CannonSplash(t, target);
-                else DamageEnemy(target, DamageAgainst(t, target), t.Id);
+                if (t.Kind == BuildingKind.Cannon)
+                {
+                    CannonSplash(t, target);
+                    if (!target.Alive) t.TargetEnemyId = -1;
+                    continue;
+                }
+
+                var second = SecondArrowTarget(t, range, target); // chosen before the first arrow lands
+                ArrowHit(t, target, 100);
                 if (!target.Alive) t.TargetEnemyId = -1;
-                else if (t.Kind == BuildingKind.Tower && HasPerk(PerkRules.FlamingArrows)) ApplyBurn(target);
+                if (second == null) continue;
+                events.Add(new SimEvent(SimEventType.TowerShot, Tick, t.Id, second.Id, second.Cell, t.CenterX, t.CenterZ, second.X, second.Z));
+                ArrowHit(t, second, TierOf(t).SecondArrowPercent);
             }
         }
+
+        /// <summary>One Archer Tower hit at this percentage of its damage (floor): a hit like any other, so FlamingArrows burns.</summary>
+        void ArrowHit(Building tower, Enemy target, int percent)
+        {
+            DamageEnemy(target, DamageAgainst(tower, target) * percent / 100, tower.Id);
+            if (target.Alive && HasPerk(PerkRules.FlamingArrows)) ApplyBurn(target);
+        }
+
+        /// <summary>
+        /// Spec 015 second arrow (Archer Tower tier II+): another living enemy in range, nearest to the primary target's position,
+        /// ties to the lowest ID; null without the trait or another enemy in range. Never changes the tower's held target.
+        /// </summary>
+        Enemy SecondArrowTarget(Building tower, double range, Enemy primary)
+        {
+            if (TierOf(tower).SecondArrowPercent <= 0) return null;
+            Enemy best = null;
+            var bestDistance = double.MaxValue;
+            foreach (var e in enemies) // ascending spawn ID; the strict comparison keeps the lowest ID on ties
+            {
+                if (e == primary || !e.Alive || !InRange(tower, e.X, e.Z, range)) continue;
+                double dx = e.X - primary.X, dz = e.Z - primary.Z, d = dx * dx + dz * dz;
+                if (d >= bestDistance - 1e-9) continue;
+                best = e;
+                bestDistance = d;
+            }
+
+            return best;
+        }
+
+        /// <summary>
+        /// Spec 015 slow: the stronger of the current (if still running) and the new percentage, until the later expiry; never
+        /// stacks. Bosses take half (floor). Movement only: attack timing never changes.
+        /// </summary>
+        void ApplySlow(Enemy e, int percent, double seconds)
+        {
+            if (!e.Alive || percent <= 0) return;
+            if (e.Definition.IsBoss) percent /= 2;
+            var active = Tick < e.SlowUntilTick;
+            e.SlowPercent = active ? Math.Max(e.SlowPercent, percent) : percent;
+            e.SlowUntilTick = Math.Max(active ? e.SlowUntilTick : 0, Tick + PrototypeDefinitions.ToTicks(seconds));
+        }
+
+        /// <summary>Movement units this enemy walks this step: (100 - slow)% of its speed, floor, at least 1.</summary>
+        public int MoveUnits(Enemy e) =>
+            Tick < e.SlowUntilTick && e.SlowPercent > 0 ? Math.Max(1, e.MoveUnitsPerStep * (100 - e.SlowPercent) / 100) : e.MoveUnitsPerStep;
+
+        /// <summary>Whether a slow currently holds this enemy back (presentation).</summary>
+        public bool IsSlowed(Enemy e) => Tick < e.SlowUntilTick && e.SlowPercent > 0;
 
         /// <summary>
         /// FlamingArrows: a fresh burn ticks 20 and 40 and 60 steps after application; a refresh extends expiry to now+60
@@ -1586,6 +1783,7 @@ namespace TheLastFortress
         void CannonSplash(Building cannon, Enemy primary)
         {
             var r = SplashRadius(cannon);
+            var tier = TierOf(cannon);
             double px = primary.X, pz = primary.Z;
             foreach (var e in enemies)
             {
@@ -1599,6 +1797,7 @@ namespace TheLastFortress
                 }
 
                 DamageEnemy(e, DamageAgainst(cannon, e), cannon.Id);
+                ApplySlow(e, tier.SlowPercent, tier.SlowSeconds); // concussion (spec 015)
             }
         }
 
@@ -1707,6 +1906,9 @@ namespace TheLastFortress
             events.Add(new SimEvent(SimEventType.BuildingDamaged, Tick, sourceId, target.Id, target.Cell));
             if (target.Hp > 0) return;
             if (target.Kind == BuildingKind.Keep) return; // defeat is evaluated at the end of the step
+            // Granary (spec 015): half the income it would have paid, valued now, while it still stands on the grid.
+            if (TierOf(target).Granary && LastNight != null && !target.Removed)
+                LastNight.GranaryGold += EconomyRules.IncomeOf(grid, target, FarmBonusPercent(HasPerk(PerkRules.EfficientFarming))) / 2;
             if (!grid.Release(target)) return; // occupancy is released exactly once, immediately
             Unregister(target);
             if (LastNight != null) LastNight.BuildingsLost++;
@@ -1714,7 +1916,7 @@ namespace TheLastFortress
             events.Add(new SimEvent(SimEventType.BuildingDestroyed, Tick, target.Id, sourceId, target.Cell,
                 target.Cell.X + half, target.Cell.Z + half, target.Cell.X + half, target.Cell.Z + half));
             if (!HasPerk(PerkRules.Recycling)) return;
-            var refund = target.PurchasePrice / 4;
+            var refund = target.TotalPaid / 4;
             placement.Earn(refund);
             Stats.GoldEarned += refund;
         }
@@ -2411,7 +2613,7 @@ namespace TheLastFortress
                         }
                     }
 
-                    if (length > stopAt) MoveOff(e, dx, dz, Math.Min(e.MoveUnitsPerStep, length - stopAt), length);
+                    if (length > stopAt) MoveOff(e, dx, dz, Math.Min(MoveUnits(e), length - stopAt), length);
                     return;
                 }
             }
@@ -2419,9 +2621,9 @@ namespace TheLastFortress
             GridCoordinates.TileCenter(e.Cell, out var cx, out var cz);
             long bx = (long)Math.Round(cx * HeroRules.UnitsPerTile) - e.OffUnitsX, bz = (long)Math.Round(cz * HeroRules.UnitsPerTile) - e.OffUnitsZ;
             var back = HeroMotion.IsqrtCeil(bx * bx + bz * bz);
-            if (back > e.MoveUnitsPerStep)
+            if (back > MoveUnits(e))
             {
-                MoveOff(e, bx, bz, e.MoveUnitsPerStep, back);
+                MoveOff(e, bx, bz, MoveUnits(e), back);
                 return;
             }
 
@@ -2572,7 +2774,8 @@ namespace TheLastFortress
             foreach (var b in buildings)
                 sb.Append("B").Append(b.Id).Append(' ').Append(b.Kind).Append(b.Cell).Append(" hp=").Append(b.Hp).Append('/').Append(b.MaxHp)
                     .Append(" price=").Append(b.PurchasePrice).Append(" rot=").Append(b.Orientation)
-                    .Append(" tgt=").Append(b.TargetEnemyId).Append(" due=").Append(b.AttackDueTick).AppendLine();
+                    .Append(" tgt=").Append(b.TargetEnemyId).Append(" due=").Append(b.AttackDueTick)
+                    .Append(b.Tier > 1 ? $" tier={b.Tier} paid={b.TotalPaid}" : "").AppendLine(); // spec 015: only when upgraded, so older fingerprints hold
             foreach (var e in enemies)
                 sb.Append("E").Append(e.Id).Append(' ').Append(e.Kind).Append(" entry=").Append(e.EntryIndex).Append(" hp=").Append(e.Hp)
                     .Append(" cell=").Append(e.Cell).Append(" next=").Append(e.NextCell).Append(" mv=").Append(e.Moving)
@@ -2582,6 +2785,7 @@ namespace TheLastFortress
                     .Append(e.TargetBuildingId).Append(e.TargetsHero ? "+hero" : "").Append(" due=").Append(e.AttackDueTick)
                     .Append(" burn=").Append(e.Burning).Append(':').Append(e.BurnNextTick).Append(':').Append(e.BurnExpiryTick)
                     .Append(e.FuseLit ? $" fuse={e.DetonateTick}" : "")
+                    .Append(e.SlowUntilTick > 0 ? $" slow={e.SlowPercent}:{e.SlowUntilTick}" : "")
                     .Append(e.Definition.BodyRadius > 0 ? $" body={e.LaneX.ToString("R", inv)},{e.LaneZ.ToString("R", inv)}:{e.BlockedTicks}:{e.PassUnits}" : "")
                     .Append(e.Pursuing || e.Returning || e.Chased || e.PursueCooldownTick > 0 || e.ProvokedUntilTick > 0
                         ? $" chase={(e.Pursuing ? "p" : e.Returning ? "r" : "-")}{(e.Chased ? "!" : "")}:{e.PursueUntilTick}:{e.PursueCooldownTick}:{e.ProvokedUntilTick}:{e.OffUnitsX},{e.OffUnitsZ}:{e.ResumeBuildingId}" : "")

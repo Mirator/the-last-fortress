@@ -1033,6 +1033,12 @@ namespace TheLastFortress
         }
 
 
+        /// <summary>Spec 015: one tier up for the selected building (U or the Upgrade button); refused with a sound.</summary>
+        public void UpgradeSelected()
+        {
+            if (Player.Selected != null && !Suspended && Sim.TryUpgrade(Player.Selected) != UpgradeRejection.None) Audio?.Play(SoundId.UiReject);
+        }
+
         public void RotateSelected()
         {
             if (Player.Selected != null) Sim.TryRotate(Player.Selected);

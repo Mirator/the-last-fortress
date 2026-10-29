@@ -342,7 +342,7 @@ namespace TheLastFortress
                     : "Goal: keep the Keep standing through six nights; the last one is a siege with a Siege Golem.\n") +
                 "Build by day, then start the night. Towers fire on their own. Enemies take the open route to the Keep; " +
                 "if Walls seal it, they break through the first structure in the way.";
-            Label(hp, "Controls", 21, TextAnchor.UpperLeft, new Vector2(44, -210), new Vector2(900, 300), Palette.HudText).text =
+            Label(hp, "Controls", 21, TextAnchor.UpperLeft, new Vector2(44, -210), new Vector2(900, 330), Palette.HudText).text =
                 (game.IsRelease
                     ? "1–8  choose Wall, Archer Tower, House, Farm, Spike Trap, Cannon, Watchtower, Repair Station\n"
                     : "1–5  choose Wall, Archer Tower, House, Farm, Spike Trap\n") +
@@ -350,6 +350,7 @@ namespace TheLastFortress
                 "Right click or Esc  cancel the building tool or selection\n" +
                 "Hold right mouse button and drag  move around the map\n" +
                 "R  rotate the ghost or the selected building (Walls connect automatically)\n" +
+                (game.IsRelease ? "U or Upgrade  raise the selected building one tier by day (I → II → III; each tier adds a trait)\n" : "") +
                 "WASD / arrow keys  pan · mouse wheel  zoom · Reset Camera  back to the Keep · Z  the whole board\n" +
                 "Space or PAUSE  pause and resume the night (inspection still works)\n" +
                 "F or II / 1× / 2× / 3×  night speed (picking a speed also resumes)\n" +

@@ -71,7 +71,7 @@ namespace TheLastFortress
 
         /// <summary>
         /// Whether the live Day differs from the last durable checkpoint in saved player progress: gold, buildings
-        /// (type/anchor/HP/facing/price), perks or Day number. Evaluated on request only; ignores view state, grid revision
+        /// (type/anchor/HP/facing/price/tier), perks or Day number. Evaluated on request only; ignores view state, grid revision
         /// and offer/run identifiers.
         /// </summary>
         public bool HasUnsavedDayEdits(RunSimulation sim)
@@ -86,7 +86,8 @@ namespace TheLastFortress
             for (var i = 0; i < now.buildings.Length; i++)
             {
                 BuildingData a = now.buildings[i], b = LastDay.buildings[i];
-                if (a.id != b.id || a.kind != b.kind || a.x != b.x || a.z != b.z || a.hp != b.hp || a.orientation != b.orientation || a.price != b.price)
+                if (a.id != b.id || a.kind != b.kind || a.x != b.x || a.z != b.z || a.hp != b.hp || a.orientation != b.orientation || a.price != b.price
+                    || a.tier != b.tier || a.paid != b.paid)
                     return true;
             }
 

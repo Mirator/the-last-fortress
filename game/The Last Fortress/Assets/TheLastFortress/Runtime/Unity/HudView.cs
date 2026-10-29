@@ -22,7 +22,7 @@ namespace TheLastFortress
         }
 
         Text goldText, keepText, incomeText, stateText, infoText, routeText, tooltipText, breachText, selectionTitle, selectionBody,
-            terminalTitle, terminalBody, diagnosticText, primaryLabel, stressText, repairLabel;
+            terminalTitle, terminalBody, diagnosticText, primaryLabel, stressText, repairLabel, upgradeLabel;
         RectTransform keepFill, tooltipRect, breachRect, statusRect, resourcesRect;
         GameObject selectionPanel, tooltipPanel, breachLabel, terminalOverlay, stressBanner, diagnosticPanel, rewardOverlay, bossPanel;
         Image primaryImage;
@@ -71,6 +71,11 @@ namespace TheLastFortress
         public Button MenuRestartButton { get; private set; }
         public Button ResetCameraButton { get; private set; }
         public Button SellButton { get; private set; }
+
+        /// <summary>Spec 015: one tier up for the selection (U); disabled with its reason by Night, at tier III or without the gold.</summary>
+        public Button UpgradeButton { get; private set; }
+
+        public string UpgradeLabel => upgradeLabel != null ? upgradeLabel.text : "";
         public Button TerminalRestartButton { get; private set; }
         public GameObject TerminalOverlay => terminalOverlay;
         public string TerminalTitle => terminalTitle.text;
@@ -205,6 +210,9 @@ namespace TheLastFortress
             {
                 RotateButton = MakeButton(selectionPanel.transform, "Rotate (R)", new Vector2(0, 1), new Vector2(18, -184), new Vector2(160, 50), game.RotateSelected, out _);
                 RotateButton.gameObject.SetActive(false);
+                UpgradeButton = MakeButton(selectionPanel.transform, "Upgrade (U)", new Vector2(0, 1), new Vector2(190, -184), new Vector2(172, 50), game.UpgradeSelected, out upgradeLabel);
+                upgradeLabel.fontSize = 20;
+                UpgradeButton.gameObject.SetActive(false);
             }
             selectionPanel.SetActive(false);
 
@@ -382,11 +390,12 @@ namespace TheLastFortress
         /// <summary>Effective direct damage/interval/range; burn and Last Stand state named separately.</summary>
         static string TowerDetails(RunSimulation sim, Building tower)
         {
-            var def = tower.Definition;
             var damage = sim.TowerDamage(tower);
+            var baseDamage = RunSimulation.BaseDamage(tower);
             var range = sim.TowerRange(tower);
-            var text = $"Damage {damage}{(damage != def.AttackDamage ? $" (base {def.AttackDamage})" : "")} every {def.AttackIntervalSeconds.ToString("0.##", CultureInfo.InvariantCulture)} s · range {range.ToString("0.0#", CultureInfo.InvariantCulture)}";
-            if (sim.IsWatchtowerBuffed(tower)) text += " (Watchtower +" + sim.Definitions.Watchtower.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture) + ")";
+            var text = $"Damage {damage}{(damage != baseDamage ? $" (base {baseDamage})" : "")} every {RunSimulation.AttackIntervalSeconds(tower).ToString("0.##", CultureInfo.InvariantCulture)} s · range {range.ToString("0.0#", CultureInfo.InvariantCulture)}";
+            var watchtower = sim.BuffingWatchtowerTier(tower);
+            if (watchtower > 0) text += " (Watchtower +" + sim.WatchtowerRangeBonus(watchtower).ToString("0.#", CultureInfo.InvariantCulture) + ")";
             if (tower.Kind == BuildingKind.Cannon)
                 return text + $"\nHits every enemy within {sim.SplashRadius(tower).ToString("0.0#", CultureInfo.InvariantCulture)} tiles of its target";
             if (sim.HasPerk(PerkRules.LastStand)) text += sim.LastStandActive ? " · Last Stand active" : " · Last Stand below 30% Keep";
@@ -396,16 +405,45 @@ namespace TheLastFortress
 
         static string WatchtowerDetails(RunSimulation sim, Building watchtower)
         {
-            var n = sim.TowersBuffedBy(watchtower.Cell).Count;
-            var reach = sim.HasPerk(PerkRules.SignalFires) ? "within 2 tiles" : "touching it";
-            return $"+{watchtower.Definition.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range to Archer Towers and Cannons {reach} (never stacks) · boosting {n}";
+            var n = sim.TowersBuffedBy(watchtower.Cell, watchtower.Tier).Count;
+            var reachTiles = sim.WatchtowerReach(watchtower);
+            var reach = reachTiles > 0 ? $"within {reachTiles} tiles" : "touching it";
+            var spotter = sim.SpotterPercent(watchtower.Tier);
+            return $"+{sim.WatchtowerRangeBonus(watchtower.Tier).ToString("0.#", CultureInfo.InvariantCulture)} range{(spotter > 0 ? $" and +{spotter}% damage" : "")} to Archer Towers and Cannons {reach} (never stacks) · boosting {n}";
         }
 
-        static string RepairStationDetails(RunSimulation sim, BuildingDefinition d)
+        static string RepairStationDetails(RunSimulation sim, Building station)
         {
-            var budget = d.RepairBudget + (sim.HasPerk(PerkRules.FieldEngineers) ? PerkRules.FieldEngineersBudget : 0);
-            var keep = sim.HasPerk(PerkRules.FieldEngineers) ? ", the Keep too" : "";
-            return $"At dawn restores up to {budget} HP to damaged buildings within {d.RepairReach} tiles{keep}, weakest first";
+            var keep = sim.RepairsKeep(station) ? ", the Keep too" : "";
+            return $"At dawn restores up to {sim.RepairBudget(station)} HP to damaged buildings within {RunSimulation.RepairReach(station)} tiles{keep}, weakest first";
+        }
+
+        /// <summary>Spec 015: what a tier gives against tier I (its stats and trait), for the selection panel.</summary>
+        static string TierText(BuildingDefinition def, int tier)
+        {
+            var t = BuildingUpgrades.For(def, tier);
+            var inv = CultureInfo.InvariantCulture;
+            var parts = new List<string>();
+            if (t.HpPercent > 0) parts.Add($"HP {def.MaxHp * (100 + t.HpPercent) / 100}");
+            if (t.DamagePercent > 0) parts.Add($"damage {def.AttackDamage * (100 + t.DamagePercent) / 100}");
+            if (t.IntervalSeconds > 0) parts.Add($"every {t.IntervalSeconds.ToString("0.##", inv)} s");
+            if (t.RangeBonus > 0) parts.Add($"range +{t.RangeBonus.ToString("0.##", inv)}");
+            if (t.SplashBonus > 0) parts.Add($"splash +{t.SplashBonus.ToString("0.##", inv)}");
+            if (t.IncomeBonus > 0) parts.Add($"+{t.IncomeBonus} gold/day");
+            if (t.TrapDamage > 0) parts.Add($"{t.TrapDamage} damage");
+            if (t.Reflect > 0) parts.Add($"spikes reflect {t.Reflect}");
+            if (t.Stone) parts.Add("stone: no double damage from Brutes, Bombers or bosses");
+            if (t.SecondArrowPercent > 0) parts.Add(t.SecondArrowPercent >= 100 ? "second arrow at full damage" : $"second arrow at {t.SecondArrowPercent}%");
+            if (t.SlowPercent > 0) parts.Add($"slows {t.SlowPercent}% for {t.SlowSeconds.ToString("0.#", inv)} s");
+            if (t.MarketHallBonus > 0) parts.Add($"Market hall: touching Farms +{t.MarketHallBonus}");
+            if (t.Granary) parts.Add("Granary: half its income if destroyed");
+            if (t.WatchRangeBonus > 0) parts.Add($"+{t.WatchRangeBonus.ToString("0.#", inv)} range");
+            if (t.SpotterPercent > 0) parts.Add($"+{t.SpotterPercent}% damage");
+            if (t.WatchReach > 0) parts.Add($"reach {t.WatchReach} tiles");
+            if (t.RepairBudget > 0) parts.Add($"{t.RepairBudget} HP at dawn");
+            if (t.RepairReach > 0) parts.Add($"within {t.RepairReach} tiles");
+            if (t.KeepCare) parts.Add("the Keep too");
+            return string.Join(", ", parts);
         }
 
         /// <summary>A House/Farm's own effective daily income with the reasons it differs from base.</summary>
@@ -582,13 +620,17 @@ namespace TheLastFortress
             if (selectionPanel.activeSelf != (sel != null)) selectionPanel.SetActive(sel != null);
             if (sel != null)
             {
-                Set(selectionTitle, sel.Definition.DisplayName);
-                var body = sel.Definition.HasHp ? $"HP {sel.Hp} / {sel.MaxHp}   at {sel.Cell}" : $"{sel.Definition.TrapDamage} damage on entry · walkable   at {sel.Cell}";
+                var tiers = campaign && sel.Definition.Tiers != null;
+                Set(selectionTitle, tiers ? $"{sel.Definition.DisplayName} {BuildingUpgrades.Numeral(sel.Tier)}" : sel.Definition.DisplayName);
+                var body = sel.Definition.HasHp ? $"HP {sel.Hp} / {sel.MaxHp}   at {sel.Cell}" : $"{sim.TrapDamage(sel)} damage on entry · walkable   at {sel.Cell}";
                 if (sel.Kind == BuildingKind.Tower || sel.Kind == BuildingKind.Cannon) body += "\n" + TowerDetails(sim, sel);
                 if (sel.Kind == BuildingKind.Watchtower) body += "\n" + WatchtowerDetails(sim, sel);
-                if (sel.Kind == BuildingKind.RepairStation) body += "\n" + RepairStationDetails(sim, sel.Definition);
+                if (sel.Kind == BuildingKind.RepairStation) body += "\n" + RepairStationDetails(sim, sel);
+                if (tiers && sel.Tier > 1) body += $"\nTier {BuildingUpgrades.Numeral(sel.Tier)}: {TierText(sel.Definition, sel.Tier)}";
+                if (tiers && sel.Tier < BuildingUpgrades.MaxTier)
+                    body += $"\nNext, tier {BuildingUpgrades.Numeral(sel.Tier + 1)} for {sim.UpgradePrice(sel)} gold: {TierText(sel.Definition, sel.Tier + 1)}";
                 if (sel.Definition.DailyIncome > 0 && campaign) body += "\n" + IncomeDetails(sim, sel);
-                if (sel.Kind == BuildingKind.Wall && sim.WallReflection(sel) > 0) body += $"\nReflects {sim.WallReflection(sel)} per hit (Spike Trap link)";
+                if (sel.Kind == BuildingKind.Wall && sim.WallReflection(sel) > 0) body += $"\nReflects {sim.WallReflection(sel)} per melee hit";
                 var day = sim.State == RunState.Day && !sim.StressMode;
                 var canSell = day && sel.IsDestructible;
                 if (canSell) body += $"\nSell refund: {PlacementService.RefundFor(sel)} gold";
@@ -604,7 +646,18 @@ namespace TheLastFortress
                     Set(repairLabel, sel.Hp >= sel.MaxHp ? "Full health" : restored > 0 ? $"Repair +{restored} HP\nfor {cost} gold" : "No gold");
                 }
 
-                if (game.IsMvp) LayoutSelection(day && RunSimulation.IsRotatable(sel.Kind));
+                var showUpgrade = UpgradeButton != null && tiers && !sim.StressMode;
+                if (UpgradeButton != null && UpgradeButton.gameObject.activeSelf != showUpgrade) UpgradeButton.gameObject.SetActive(showUpgrade);
+                if (showUpgrade)
+                {
+                    var check = sim.CheckUpgrade(sel);
+                    UpgradeButton.interactable = check == UpgradeRejection.None;
+                    Set(upgradeLabel, check == UpgradeRejection.None ? $"Upgrade (U)\n{sim.UpgradePrice(sel)} gold"
+                        : check == UpgradeRejection.InsufficientGold ? $"Upgrade {sim.UpgradePrice(sel)} gold\nNot enough gold"
+                        : check == UpgradeRejection.NotDay ? "Upgrade\nonly by day" : BuildingUpgrades.Describe(check));
+                }
+
+                if (game.IsMvp) LayoutSelection(day && RunSimulation.IsRotatable(sel.Kind), showUpgrade);
             }
 
             // Ghost tooltip
@@ -716,7 +769,7 @@ namespace TheLastFortress
                 case BuildingKind.Watchtower:
                     return $"+{d.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range to Archer Towers and Cannons touching it (never stacks)";
                 case BuildingKind.RepairStation:
-                    return RepairStationDetails(sim, d) + " · 2x2";
+                    return RepairStationDetails(sim, new Building(-1, d, default, 0)) + " · 2x2";
                 case BuildingKind.House:
                 case BuildingKind.Farm:
                     var dawns = Mathf.Max(0, sim.TotalNights - sim.NightNumber);
@@ -767,7 +820,7 @@ namespace TheLastFortress
         /// Selection panel grows upward to fit its text; action rows sit below the text, so details, refund and repair
         /// quote never overlap the Sell/Repair/Rotate hit targets.
         /// </summary>
-        void LayoutSelection(bool rotateRow)
+        void LayoutSelection(bool rotateRow, bool upgrade)
         {
             var bodyHeight = Mathf.Max(28f, Mathf.Ceil(selectionBody.preferredHeight));
             selectionBody.rectTransform.sizeDelta = new Vector2(350, bodyHeight);
@@ -780,7 +833,9 @@ namespace TheLastFortress
             {
                 var rotateY = anyAction ? rowY - 58f : rowY;
                 ((RectTransform)RotateButton.transform).anchoredPosition = new Vector2(18, rotateY);
-                if (rotateRow) height = -rotateY + 50f + 8f;
+                // Upgrade shares the second row: beside Rotate, or in its place when the building cannot rotate.
+                if (UpgradeButton != null) ((RectTransform)UpgradeButton.transform).anchoredPosition = new Vector2(rotateRow ? 190 : 18, rotateY);
+                if (rotateRow || upgrade) height = -rotateY + 50f + 8f;
             }
 
             ((RectTransform)selectionPanel.transform).sizeDelta = new Vector2(380, height + 8f);

@@ -111,7 +111,23 @@ namespace TheLastFortress
             return PlacementRejection.None;
         }
 
-        public static int RefundFor(Building building) => building.PurchasePrice / 2; // floor for non-negative prices
+        /// <summary>floor(total paid x 0.5): the purchase price plus every upgrade price (spec 015).</summary>
+        public static int RefundFor(Building building) => building.TotalPaid / 2; // floor for non-negative prices
+
+        /// <summary>Current price of upgrading this building one tier (after ThriftyConstruction), or -1 when it cannot be upgraded.</summary>
+        public int UpgradePriceFor(Building building)
+        {
+            if (building?.Definition.Tiers == null || building.Tier >= BuildingUpgrades.MaxTier) return -1;
+            return EconomyRules.ConstructionPrice(BuildingUpgrades.BasePrice(building.Definition, building.Tier + 1), Thrifty);
+        }
+
+        /// <summary>Charges an upgrade atomically; false (nothing changed) when the price is unaffordable.</summary>
+        public bool TrySpend(int price)
+        {
+            if (price < 0 || Gold < price) return false;
+            Gold -= price;
+            return true;
+        }
 
         public SellRejection TrySell(Building building, out int refund)
         {

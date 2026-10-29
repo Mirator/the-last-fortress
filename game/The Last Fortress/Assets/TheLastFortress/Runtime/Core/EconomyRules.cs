@@ -20,7 +20,10 @@ namespace TheLastFortress
         /// <summary>Spec 012: gold for calling the previous night early; its own dawn line, never part of a Day forecast.</summary>
         public int EarlyCall;
 
-        public int Total => Keep + Houses + Farms + Bonus + EarlyCall;
+        /// <summary>Spec 015: half the income of tier III Farms destroyed in the previous night; its own dawn line, never forecast.</summary>
+        public int Granary;
+
+        public int Total => Keep + Houses + Farms + Bonus + EarlyCall + Granary;
     }
 
     /// <summary>Fixed MVP economy rules from specification 003. Pure functions over authoritative grid state.</summary>
@@ -120,13 +123,38 @@ namespace TheLastFortress
         /// Daily income of one surviving House or Farm (0 for anything else). The single per-building rule used by the
         /// payment, the forecast and the HUD: Farm = floor((base + 5 if any edge-adjacent House) * (100 + bonus) / 100).
         /// </summary>
-        public static int BuildingIncome(GridState grid, Building b, int farmBonusPercent, int houseLinkBonus = 0)
+        public static int BuildingIncome(GridState grid, Building b, int farmBonusPercent, int houseLinkBonus = 0) =>
+            b == null || !b.IsAlive ? 0 : IncomeOf(grid, b, farmBonusPercent, houseLinkBonus);
+
+        /// <summary>
+        /// The income rule without the survival check (also the Granary's half at destruction). Tier income adds to the base;
+        /// a Farm's adjacency term is +5 for any edge-adjacent House and +5 more for a Market hall among them (once each).
+        /// </summary>
+        public static int IncomeOf(GridState grid, Building b, int farmBonusPercent, int houseLinkBonus = 0)
         {
-            if (b == null || !b.IsAlive) return 0;
-            if (b.Kind == BuildingKind.House) return b.Definition.DailyIncome + (houseLinkBonus > 0 && HouseHasAdjacentHouse(grid, b) ? houseLinkBonus : 0);
+            var tier = BuildingUpgrades.For(b.Definition, b.Tier);
+            if (b.Kind == BuildingKind.House)
+                return b.Definition.DailyIncome + tier.IncomeBonus + (houseLinkBonus > 0 && HouseHasAdjacentHouse(grid, b) ? houseLinkBonus : 0);
             if (b.Kind != BuildingKind.Farm) return 0;
-            var gross = b.Definition.DailyIncome + (FarmHasAdjacentHouse(grid, b) ? FarmHouseBonus : 0);
+            var gross = b.Definition.DailyIncome + tier.IncomeBonus + (FarmHasAdjacentHouse(grid, b) ? FarmHouseBonus : 0) + MarketHallBonus(grid, b);
             return gross * (100 + farmBonusPercent) / 100;
+        }
+
+        /// <summary>Spec 015 Market hall: the largest bonus among surviving edge-adjacent Houses (once per Farm, not per House).</summary>
+        public static int MarketHallBonus(GridState grid, Building farm)
+        {
+            var best = 0;
+            foreach (var cell in farm.Cells)
+            foreach (var d in GridPos.CardinalOrder)
+            {
+                var n = cell + d;
+                if (farm.Covers(n)) continue;
+                var other = grid.GetOccupant(n);
+                if (other == null || other.Kind != BuildingKind.House || !other.IsAlive) continue;
+                best = System.Math.Max(best, BuildingUpgrades.For(other.Definition, other.Tier).MarketHallBonus);
+            }
+
+            return best;
         }
     }
 }

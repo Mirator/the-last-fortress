@@ -128,6 +128,7 @@ namespace TheLastFortress
                 if (keyboard.spaceKey.wasPressedThisFrame && sim.State == RunState.Night) game.TogglePause();
                 if (keyboard.fKey.wasPressedThisFrame && game.IsMvp && !sim.StressMode) game.CycleGameSpeed(); // 1× → 2× → 3× → 1×
                 if (keyboard.rKey.wasPressedThisFrame && sim.State == RunState.Day && game.IsMvp) RotateClockwise();
+                if (keyboard.uKey.wasPressedThisFrame && Selected != null && game.IsMvp) game.UpgradeSelected(); // spec 015
             }
 
             // Camera first: it decides whether this frame's right release ended a pan drag or was a plain click.

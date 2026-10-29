@@ -52,8 +52,8 @@ namespace TheLastFortress
         /// </summary>
         public static bool BombersLightOnContact(string rulesVersion) => WalkingEnemies(rulesVersion);
 
-        /// <summary>release-rules-4 definitions: release-rules-3 enemies and a 1 x 1 Cannon (owner, 2026-10-21).</summary>
-        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => Bodies(Walking(defs)).WithCompactCannon();
+        /// <summary>release-rules-4 definitions: release-rules-3 enemies, a 1 x 1 Cannon (owner, 2026-10-21) and upgrade tiers (spec 015).</summary>
+        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => Bodies(Walking(defs)).WithCompactCannon().WithUpgrades();
 
         /// <summary>Spec 014 (release-rules-4): body radii in tiles [P]; bosses are wider.</summary>
         public static PrototypeDefinitions Bodies(PrototypeDefinitions defs) => defs.WithEnemies(e =>

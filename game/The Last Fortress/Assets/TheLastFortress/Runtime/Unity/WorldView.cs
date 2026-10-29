@@ -108,6 +108,11 @@ namespace TheLastFortress
 
             /// <summary>Amber light at the tower torch, lit at night (authored art only).</summary>
             public Light TorchLight;
+
+            /// <summary>Spec 015: one amber diamond per tier above I, over the HP bar (null at tier I), and the tier it shows.</summary>
+            public GameObject Pips;
+
+            public int PipTier = 1;
         }
 
         sealed class EnemyView
@@ -323,7 +328,7 @@ namespace TheLastFortress
                 if (view.Root == null) continue;
                 view.Root.GetComponentsInChildren(false, blockerRenderers);
                 foreach (var r in blockerRenderers)
-                    if (!IsUnder(r.transform, view.HpBar) && !IsUnder(r.transform, view.Smoke) && !IsUnder(r.transform, view.Glow)) into.Add(r);
+                    if (!IsUnder(r.transform, view.HpBar) && !IsUnder(r.transform, view.Smoke) && !IsUnder(r.transform, view.Glow) && !IsUnder(r.transform, view.Pips)) into.Add(r);
             }
 
             if (terrainRoot == null) return;
@@ -516,6 +521,10 @@ namespace TheLastFortress
 
         /// <summary>Whether this enemy's view shows a lit fuse / a Commander aura disc (diagnostics).</summary>
         public bool FuseVisible(int enemyId) => enemyViews.TryGetValue(enemyId, out var v) && v.Fuse != null && v.Fuse.activeSelf;
+
+        /// <summary>Spec 015: tier pips shown over a building (0 at tier I or without a view).</summary>
+        public int TierPipCount(int buildingId) =>
+            buildingViews.TryGetValue(buildingId, out var v) && v.Pips != null && v.Pips.activeInHierarchy ? v.Pips.transform.childCount : 0;
 
         public bool AuraVisible(int enemyId) => enemyViews.TryGetValue(enemyId, out var v) && v.Aura != null && v.Aura.activeInHierarchy;
         public bool HasEnemyView(int id) => enemyViews.ContainsKey(id);
@@ -1132,6 +1141,7 @@ namespace TheLastFortress
                         }
 
                         break;
+                    case SimEventType.BuildingUpgraded:
                     case SimEventType.BuildingRepaired:
                         if (buildingViews.TryGetValue(e.SourceId, out var repaired))
                             SpawnCue(CueKind.Repair, repaired.Root.transform.position + Vector3.up * 0.4f, 0f);
@@ -1263,6 +1273,13 @@ namespace TheLastFortress
                     view.HpBar.transform.localScale = Vector3.one * BarScale(view.HpBar.transform.position, 0.84f, 1f);
                 }
 
+                if (view.PipTier != b.Tier) SetTierPips(view, b.Tier);
+                if (view.Pips != null)
+                {
+                    view.Pips.transform.rotation = BarRotation;
+                    view.Pips.transform.localScale = Vector3.one * BarScale(view.Pips.transform.position, 0.84f, 1f);
+                }
+
                 // Buildings never bounce (owner feedback 2026-10-19): no squash on a hit, no rise when a tower fires. Hits read
                 // through impact sparks, the HP bar and the Keep cues; shots through the archer, muzzle and projectile.
                 if (view.Flash > 0f) view.Flash -= dt;
@@ -1296,7 +1313,7 @@ namespace TheLastFortress
                 buildingViews.Remove(id);
                 CameraBlockerVersion++;
                 // Destroyed in combat: collapse in place. Sold or reset: gone at once.
-                if (destroyedThisFrame.Contains(id)) StartDying(v.Root, null, true, 0f, v.HpBar, v.Smoke, v.Glow);
+                if (destroyedThisFrame.Contains(id)) StartDying(v.Root, null, true, 0f, v.HpBar, v.Smoke, v.Glow, v.Pips);
                 else Destroy(v.Root);
             }
         }
@@ -1830,6 +1847,34 @@ namespace TheLastFortress
                 puff.localScale = Vector3.one * Mathf.Lerp(0.16f, 0.42f, t) * (1f - t * 0.45f);
             }
         }
+
+        /// <summary>
+        /// Spec 015 tier pips (presentation only): II and III show one or two amber diamonds just above the HP bar's place,
+        /// flat to the screen like the bar, in both views.
+        /// </summary>
+        void SetTierPips(BuildingView view, int tier)
+        {
+            view.PipTier = tier;
+            if (view.Pips != null) Destroy(view.Pips);
+            view.Pips = null;
+            if (tier <= 1) return;
+            if (pipMat == null) pipMat = Prims.Tinted(content.overlay, Palette.Amber);
+            var pips = new GameObject("TierPips");
+            pips.transform.SetParent(view.Root.transform, false);
+            pips.transform.localPosition = view.HpBar.transform.localPosition + new Vector3(0f, 0.16f, 0f);
+            var n = tier - 1;
+            for (var i = 0; i < n; i++)
+            {
+                var pip = Prims.Create(PrimitiveType.Cube, pips.transform, new Vector3((i - (n - 1) / 2f) * 0.16f, 0f, 0f), new Vector3(0.1f, 0.1f, 0.02f), pipMat, "Pip");
+                pip.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                pip.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+
+            view.Pips = pips;
+            CameraBlockerVersion++; // the fade candidates exclude the pips
+        }
+
+        Material pipMat;
 
         GameObject CreateBar(Transform parent, float height, float width, Material fillMat, out Transform fill)
         {

@@ -168,6 +168,46 @@ namespace TheLastFortress.Tests
             Assert.LessOrEqual(game.World.PendingCueCount, WorldView.CueCaps.Sum(), "cues stay pooled and capped");
         }
 
+        /// <summary>Spec 015: a Tower selected by click goes to tier III through U and the button by Day; Night refuses with its reason.</summary>
+        [UnityTest]
+        public IEnumerator ASelectedTowerUpgradesTwiceByDayAndNightRefusesWithItsReason()
+        {
+            ContinueSaved(new RunSimulation(new RunConfig
+            {
+                Definitions = game.NewRunDefinitions, Seed = 7, Terrain = TerrainMap.Flat(), Campaign = ReleaseCampaign.Create(7, MapProfiles.Meadow),
+            }));
+            yield return null;
+            Assert.AreEqual(PlacementRejection.None, game.Sim.TryPlace(BuildingKind.Tower, new GridPos(8, 9), out var tower));
+            Assert.AreEqual(PlacementRejection.None, game.Sim.TryPlace(BuildingKind.Tower, new GridPos(12, 11), out var other));
+            yield return Click(game.CameraRig.CellToScreen(tower.Cell));
+            Assert.AreSame(tower, game.Player.Selected, "selected by a click");
+            game.SyncViews();
+            StringAssert.Contains("Next, tier II for 49 gold", game.Hud.SelectionText);
+            var (gold, damage) = (game.Sim.Gold, game.Sim.TowerDamage(tower));
+
+            yield return Press(Key.U);
+            Assert.AreEqual((2, gold - 49), (tower.Tier, game.Sim.Gold), "U upgrades by Day");
+            Assert.Greater(game.Sim.TowerDamage(tower), damage);
+            game.SyncViews();
+            Assert.IsTrue(game.Hud.UpgradeButton.gameObject.activeSelf && game.Hud.UpgradeButton.interactable);
+            StringAssert.Contains("73 gold", game.Hud.UpgradeLabel);
+            game.Hud.UpgradeButton.onClick.Invoke();
+            Assert.AreEqual((3, gold - 49 - 73), (tower.Tier, game.Sim.Gold), "the button upgrades too");
+            game.SyncViews();
+            Assert.AreEqual((false, "Maximum tier"), (game.Hud.UpgradeButton.interactable, game.Hud.UpgradeLabel));
+            Assert.AreEqual(2, game.World.TierPipCount(tower.Id), "two pips at tier III");
+            Assert.AreEqual(0, game.World.TierPipCount(other.Id), "none at tier I");
+
+            game.Player.Select(other);
+            Assert.IsTrue(game.StartNight());
+            gold = game.Sim.Gold;
+            yield return Press(Key.U);
+            game.SyncViews();
+            Assert.AreEqual((1, gold), (other.Tier, game.Sim.Gold), "no upgrade at Night");
+            Assert.IsFalse(game.Hud.UpgradeButton.interactable);
+            StringAssert.Contains("only by day", game.Hud.UpgradeLabel);
+        }
+
         [UnityTest]
         public IEnumerator SixNightSaveContinuesInTheReleaseBuildWithItsOwnRulesAndCards()
         {

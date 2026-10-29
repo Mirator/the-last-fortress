@@ -1,6 +1,6 @@
 # Plan 034: building upgrade tiers
 
-Status: **TODO** (2026-10-29). Priority P1. Effort L (about 5–7 days, tuning included). Implements **`specs/015-building-upgrades.md` v0.2** (approved 2026-10-29: D1–D7 and the section 4 table as recommended). Current rules: `specs/002-game-rules.md` v1.17. Baseline commit: `0dce05c`.
+Status: **DONE** (2026-10-29; results in section 4). Owner live check pending. Priority P1. Effort L (about 5–7 days, tuning included). Implements **`specs/archive/015-building-upgrades.md` v0.2** (approved 2026-10-29: D1–D7 and the section 4 table as recommended). Current rules: `specs/002-game-rules.md` v1.17. Baseline commit: `0dce05c`.
 
 ## 1. Pre-check (2026-10-29)
 
@@ -72,3 +72,53 @@ Paths are under `game/The Last Fortress/Assets/TheLastFortress/Runtime/`.
 - **Slow and bodies.** Slowed enemies queue longer (spec 014). This is checked by the body invariant test and the probe's night lengths.
 - **Selection panel space** at 1280×720 with four buttons and longer text. Checked in captures.
 - **Presentation of the second arrow.** It needs a second `TowerShot` event; WorldView already draws one arrow per event.
+
+## 4. Results (fresh, 2026-10-29)
+
+Evidence is in `evidence/034/` (XML results, probe outputs, stress files and selected captures; logs stay local).
+
+**Code** (all under `Runtime/`):
+- `Core/BuildingUpgrades.cs` (new): the section 4 table as data (`BuildingTier` per kind and tier), the prices, `UpgradeRejection` and its text.
+- `BuildingDefinition.Tiers`, added by `PrototypeDefinitions.WithUpgrades()` inside `ReleaseCampaign.Contact` only. Legacy profiles have none, and `TryUpgrade` refuses them.
+- `Building.Tier` and `TotalPaid`. `Enemy.SlowPercent` and `SlowUntilTick`.
+- `RunSimulation`:
+  - the action: `CheckUpgrade`, `UpgradePrice`, `TryUpgrade` (HP share, Watchtower cache reset);
+  - building-aware values: `EffectiveMaxHp(b)`, `BaseDamage`, `TowerDamage(b)`, `DamageAgainst` (with Spotter), `TowerRange(b)`, `AttackTicks`, `SplashRadius`, `TrapDamage`, `WallReflection`, `RepairBudget`/`RepairReach`/`RepairsKeep`, `BuffingWatchtowerTier`/`WatchtowerReach`;
+  - stone in `EnemyHitDamage` and `BlastDamage`;
+  - the second arrow (`SecondArrowTarget`, `ArrowHit`), slow (`ApplySlow`, `MoveUnits`, read in every movement site) and the Granary (`NightRecap.GranaryGold`, `IncomeBreakdown.Granary`);
+  - Recycling from the total paid;
+  - the snapshot adds `tier=`/`paid=` and `slow=` only when set, so older fingerprints hold.
+- `EconomyRules`: tier income and the Market hall. `PlacementService`: refunds from the total paid, the upgrade price, `TrySpend`.
+- `RunCheckpoint.BuildingData.tier` and `paid`, with validation. `RunPersistence` compares them for unsaved Day edits.
+- Presentation:
+  - `HudView`: the tier in the title, the current and next tier with price, and an Upgrade (U) button with its reason. Detail text uses the building-aware values.
+  - `PlayerController`: U. `PrototypeBootstrap.UpgradeSelected`.
+  - `WorldView`: tier pips and the repair cue on an upgrade. `AudioDirector`: the build sound.
+  - `RouteOverlay`: tier-aware Watchtower and Repair Station previews.
+  - The Help line.
+- `CaptureSequence`: the kill-zone upgrade items in the full run, a per-tier selection shot, and a new `-capture-set 034`.
+
+**Owner questions.** The six open choices (section 6 of the archived spec) were sent to the owner with defaults before stage 3. No answer arrived, so the defaults are implemented and documented. The spec's table and prices are unchanged.
+
+| Check | Result |
+|---|---|
+| Baseline at `fdb8be1` (`baseline/`) | EditMode 133/133, fresh. PlayMode was not re-run: the batch run compiled the first stage-1 edits and failed. The code was unchanged since `28419c1`, whose saved result is 24 passed, 1 skipped (`evidence/033/final/PlayMode.xml`). |
+| New EditMode tests (`UpgradeTests`, 13 tests, 21 cases) | Passed (`stage1/`, `stage4/`, `final/`). The upgrade action (price, atomicity, Day only, maximum tier, `ceil` HP share 51→67→83, refund `floor(49/2)`), legacy refusal, values per kind and tier, second arrow (nearest, not lowest ID; half and full), slow (stronger percent, later expiry, no stacking; boss half; minimum 1 unit), concussion, spikes and stone, Market hall once per Farm, Granary floor (27 → 13), Keep care and Watchtower tiers, perks with tiers (Thrifty 65 not 66, Signal Fires reach 3, Field Engineers 140), save round trip, older records and refusals. |
+| Mutations (`stage3/`) | Second arrow to the lowest ID: both cases failed as intended. Stacking slows: failed as intended. Granary rounding up: failed as intended. |
+| PlayMode `ASelectedTowerUpgradesTwiceByDayAndNightRefusesWithItsReason` | Passed: a click selects, U and the button upgrade (49 then 73 gold), two pips, "Maximum tier", and at Night U changes nothing and the label says "only by day". |
+| Existing tests | Unchanged except the policy scripts (below). The `release-rules-3` replay fingerprint still holds. |
+| Full EditMode (`final/EditMode.xml`) | 154/154 on the final code (probe removed), recorded policy wins included (those play `release-rules-1`, where upgrade items are skipped) |
+| Full PlayMode (`final/PlayMode.xml`) | 25 passed, 1 skipped (the same diagnostic probe as before) |
+| Balance gate (stage 5; pacing probe, active hero, seeds 1-5 on their own orientations) | Final scripts (`stage5/pacing-v3-upgrades-late-queue.txt`): kill-zone 5/5, corridor 3/5, economy 5/5, the same seeds as the baseline (`evidence/033/pacing-after-collision.txt`). No rate rose, no win was lost, no tuning round was used. 7 of 15 runs bought 1-8 tiers. Kill-zone seeds 2-5 and corridor seeds 1-4 never reached their upgrade items, because they spend everything on their planned layout. |
+| How the script design was chosen | v1 (`pacing-v1-…`): upgrades after the Day's defense minimum. Kill-zone and corridor never upgraded, since they never meet the minimum. Economy lost seed 5 (`economy5-logs.txt`): with upgrades off it reproduces the baseline exactly; with House upgrades its perk path diverged. v2 (`pacing-v2-…`): upgrades mid-queue. Corridor 1/5, economy 4/5. v3: upgrades after the planned layout, kept. Conclusion: at the spec's values a tier is worth less per gold than a new building while good cells remain, so upgrades do not make the scripted game easier. |
+| Performance (`perf/`, stress with the hero, 1440×900, alternating builds) | Before (`Builds/Plan033`) 4.18 / 4.29 ms median, after 4.29 / 4.27 ms, within this machine's ±0.4 ms noise (the machine ran slower than during plan 033). p99 before 5.8 / 6.3, after 6.8 / 7.3 ms; one after run had a 25 ms max. The fixture has no upgraded buildings, so the second arrow and slow are not exercised there. |
+| Release build (`Builds/Release`) | Succeeded, 0 errors |
+| Captures (`captures/`; full sets local) | `-capture-set fullrun` at 1280×720 and 1920×1080: Victory on seed 2, but it bought only 12 defense items, so no upgrade. `-capture-set 034` at both resolutions: the selection panel at tiers I, II and III fits with four buttons; pips show over tier II and III buildings; a night with slowed Grunts. |
+
+**Not verified:**
+- That the second arrow and slow read in play. In stills the second arrow is hard to pick out, and slow has no mark of its own.
+- How tiers feel in a human run.
+- Whether the economy tiers pay back in practice.
+- The tier values themselves: the scripts barely use tier III.
+
+Owner live check pending.

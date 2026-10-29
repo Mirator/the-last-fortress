@@ -491,6 +491,9 @@ namespace TheLastFortress
                 case SimEventType.BuildingRepaired:
                     Play(SoundId.Repair);
                     break;
+                case SimEventType.BuildingUpgraded:
+                    Play(SoundId.Build);
+                    break;
                 case SimEventType.PerkAcquired:
                     Play(SoundId.Reward);
                     break;

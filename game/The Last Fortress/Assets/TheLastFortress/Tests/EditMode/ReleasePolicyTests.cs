@@ -48,7 +48,8 @@ namespace TheLastFortress.Tests
                 "Tower 9 9", "Tower 11 11", "Tower 9 11", "Tower 11 9", "Wall 9 10", "Wall 11 10", "Wall 10 9", "Wall 10 11",
                 "Tower 8 10", "Tower 12 10", // cheaper Towers: two more before saving for Cannons
                 "Cannon 7 7", "Watchtower 9 8", "Cannon 12 6", "Watchtower 11 8", "Cannon 7 12", "Watchtower 8 11",
-                "Cannon 13 11", "Watchtower 12 11", "Tower 10 8", "Tower 10 12",
+                "Cannon 13 11", "Watchtower 12 11", "Tower 9 9 2", "Tower 11 11 2", "Tower 9 11 2", "Tower 11 9 2", "Tower 10 8",
+                "Tower 10 12", "Cannon 7 7 2", "Cannon 12 6 2", "Tower 9 9 3", "Tower 11 11 3",
                 "RepairStation 6 9", "Cannon 4 9", "Cannon 15 9", "Cannon 9 15", "Cannon 9 4",
                 "Tower 7 10", "Tower 13 10", "Tower 10 7", "Tower 10 13", "Tower 6 11", "Tower 14 9",
             },
@@ -74,7 +75,8 @@ namespace TheLastFortress.Tests
             {
                 "Tower 8 9", "Tower 11 11", "Tower 8 11", "Tower 11 9", "SpikeTrap 7 10", "SpikeTrap 12 10", "Tower 6 11", "Tower 13 9",
                 "SpikeTrap 6 10", "SpikeTrap 13 10", "SpikeTrap 5 10", "SpikeTrap 14 10", "Cannon 6 8", "Cannon 12 11",
-                "Watchtower 8 8", "Watchtower 14 12", "Tower 4 9", "Tower 15 11", "SpikeTrap 4 10", "SpikeTrap 15 10",
+                "Watchtower 8 8", "Watchtower 14 12", "Tower 4 9", "Tower 15 11", "Tower 8 9 2", "Tower 11 11 2", "SpikeTrap 4 10",
+                "SpikeTrap 15 10", "SpikeTrap 7 10 2", "SpikeTrap 12 10 2", "Cannon 6 8 2", "Cannon 12 11 2",
                 "Tower 9 12", "Tower 11 8", "SpikeTrap 10 12", "SpikeTrap 10 8", "Cannon 6 11", "Cannon 12 8", "RepairStation 7 14",
                 "Tower 3 11", "Tower 16 9", "SpikeTrap 3 10", "SpikeTrap 16 10", "Tower 9 8", "Tower 11 12", "Tower 5 11", "Tower 14 9",
                 "SpikeTrap 2 10", "SpikeTrap 17 10", "Tower 2 9", "Tower 17 11",
@@ -100,13 +102,14 @@ namespace TheLastFortress.Tests
             {
                 "Tower 9 9", "Tower 11 11", "Tower 9 11", "Tower 11 9", "Wall 9 10", "Wall 11 10", "Wall 10 9", "Wall 10 11",
                 "Tower 7 11", "Tower 13 9", "RepairStation 9 14", "Watchtower 8 11", "Cannon 4 9", "Cannon 15 10", "Tower 7 10",
-                "Tower 13 10", "Cannon 9 4", "Cannon 10 15", "RepairStation 14 8", "Watchtower 12 10", "Tower 10 7", "Tower 10 13",
+                "Tower 13 10", "Cannon 9 4", "Cannon 10 15", "Tower 9 9 2", "Tower 11 11 2", "Tower 9 11 2", "Tower 11 9 2",
+                "RepairStation 14 8", "Watchtower 12 10", "Cannon 4 9 2", "Cannon 15 10 2", "Tower 10 7", "Tower 10 13",
                 "Cannon 4 13", "Cannon 15 6", "Tower 8 10", "Tower 12 11", "Tower 6 10", "Tower 14 10", "Tower 6 8", "Tower 14 12",
             },
             Economy = new[]
             {
                 "House 8 12", "House 8 13", "Farm 6 12", "House 12 8", "House 13 8", "Farm 12 6", "House 12 12", "House 12 13",
-                "Farm 13 12", "House 7 8", "House 8 7", "Farm 6 6", "House 7 13", "House 13 7",
+                "Farm 13 12", "House 7 8", "House 8 7", "Farm 6 6", "House 7 13", "House 13 7", "House 8 12 2", "House 8 13 2", "Farm 6 12 2",
             },
             MinDefense = new[] { 3, 4, 4, 6, 6, 9, 11, 14, 17, 20, 23, 26 },
             EconomyUntilDay = 8,
@@ -130,13 +133,26 @@ namespace TheLastFortress.Tests
 
             public bool Exhausted => next >= items.Length;
 
-            /// <summary>Buys the next items while affordable; skips illegal cells for good. Stops on gold or <paramref name="limit"/>.</summary>
+            /// <summary>
+            /// Buys the next items while affordable; skips illegal cells for good. Stops on gold or <paramref name="limit"/>.
+            /// Spec 015: "Kind x y tier" raises the building there to that tier and counts as one item; it is skipped when
+            /// there is none or the rules have no tiers.
+            /// </summary>
             public void Buy(RunSimulation sim, List<string> log, int limit = int.MaxValue)
             {
                 while (next < items.Length && Bought < limit)
                 {
                     var p = items[next].Split(' ');
                     var kind = (BuildingKind)Enum.Parse(typeof(BuildingKind), p[0]);
+                    if (p.Length > 3)
+                    {
+                        if (!TryUpgradeItem(sim, kind, new GridPos(int.Parse(p[1]), int.Parse(p[2])), int.Parse(p[3]), out var skipped)) return;
+                        log.Add(skipped ? $"{items[next]} SKIP" : $"upgrade {items[next]}");
+                        if (!skipped) Bought++;
+                        next++;
+                        continue;
+                    }
+
                     var r = sim.TryPlace(kind, new GridPos(int.Parse(p[1]), int.Parse(p[2])), out _);
                     if (r == PlacementRejection.InsufficientGold) return;
                     log.Add(r == PlacementRejection.None ? items[next] : $"{items[next]} SKIP {r}");
@@ -144,6 +160,21 @@ namespace TheLastFortress.Tests
                     next++;
                 }
             }
+        }
+
+        /// <summary>Raises the building at <paramref name="cell"/> to <paramref name="tier"/>; false while a tier is unaffordable.</summary>
+        static bool TryUpgradeItem(RunSimulation sim, BuildingKind kind, GridPos cell, int tier, out bool skipped)
+        {
+            var b = kind == BuildingKind.SpikeTrap ? sim.Grid.GetTrap(cell) : sim.Grid.GetOccupant(cell);
+            skipped = b == null || b.Kind != kind || b.Cell != cell || b.Tier >= tier;
+            while (!skipped && b.Tier < tier)
+            {
+                var r = sim.TryUpgrade(b);
+                if (r == UpgradeRejection.InsufficientGold) return false;
+                skipped = r != UpgradeRejection.None; // a profile without tiers
+            }
+
+            return true;
         }
 
         /// <summary>How a scripted run drives the hero (release-rules-2 only; plan 012 balance guard).</summary>
@@ -290,6 +321,7 @@ namespace TheLastFortress.Tests
             var combat = 0.0;
             var (fuses, blasts, batch) = (0, 0, new List<SimEvent>()); // Bomber role check (plan 015 review)
             var kite = hero == HeroScript.Kite ? new KiteState() : null;
+            var upgrades = 0;
             for (var day = 1; day <= sim.TotalNights && !sim.IsTerminal; day++)
             {
                 var bought = new List<string>();
@@ -309,6 +341,7 @@ namespace TheLastFortress.Tests
                     bought.Add($"repair Keep +{restored}");
                 }
 
+                upgrades += bought.Count(b => b.StartsWith("upgrade "));
                 log.AppendLine($"Day {day}: gold left {sim.Gold}; {string.Join("; ", bought)}");
                 Assert.IsTrue(sim.StartNight(), $"{policy.Name} seed {seed}: night {day} starts: {string.Join("; ", sim.Diagnostics)}");
                 var steps = 0;
@@ -368,7 +401,8 @@ namespace TheLastFortress.Tests
             }
 
             log.AppendLine($"Result: {sim.State}; nights {sim.Stats.NightsCleared}/12; combat {combat / 60:0.0} min; defeated {sim.Stats.EnemiesDefeated}; " +
-                           $"bought {sim.Stats.BuildingsPurchased} (defense {defense.Bought}, economy {economy.Bought}); earned {sim.Stats.GoldEarned}; perks [{string.Join(",", sim.OwnedPerks)}]; Bomber fuses {fuses}, blasts {blasts}");
+                           $"bought {sim.Stats.BuildingsPurchased} (defense {defense.Bought}, economy {economy.Bought}); earned {sim.Stats.GoldEarned}; perks [{string.Join(",", sim.OwnedPerks)}]; Bomber fuses {fuses}, blasts {blasts}" +
+                           (upgrades > 0 ? $"; upgrades {upgrades}" : ""));
             log.AppendLine();
             return sim;
         }
@@ -479,7 +513,7 @@ namespace TheLastFortress.Tests
                 for (var i = 0; i < (s & 3); i++) (dx, dz) = (-dz, dx);
                 return new GridPos(k.X + dx, k.Z + dz);
             }).ToList();
-            return $"{p[0]} {cells.Min(c => c.X)} {cells.Min(c => c.Z)}";
+            return $"{p[0]} {cells.Min(c => c.X)} {cells.Min(c => c.Z)}" + (p.Length > 3 ? " " + p[3] : "");
         }
 
         [Test]

@@ -712,11 +712,12 @@ namespace TheLastFortress
 
             // Watchtower: outline every tower the ghost (or the selected Watchtower) would boost.
             GridPos? watch = null;
+            var watchTier = 1;
             if (ghostKind == BuildingKind.Watchtower && GhostValid) watch = player.HoverCell;
-            else if (player.Selected != null && player.Selected.Kind == BuildingKind.Watchtower) watch = player.Selected.Cell;
+            else if (player.Selected != null && player.Selected.Kind == BuildingKind.Watchtower) (watch, watchTier) = (player.Selected.Cell, player.Selected.Tier);
             var marks = 0;
             if (watch.HasValue)
-                foreach (var t in sim.TowersBuffedBy(watch.Value))
+                foreach (var t in sim.TowersBuffedBy(watch.Value, watchTier))
                 {
                     while (buffMarks.Count <= marks)
                     {
@@ -733,11 +734,12 @@ namespace TheLastFortress
 
             // Repair Station: the square it repairs at dawn (Chebyshev reach around its footprint).
             GridPos? station = null;
+            var reach = sim.Definitions.RepairStation?.RepairReach ?? 0;
             if (ghostKind == BuildingKind.RepairStation) station = player.HoverCell;
-            else if (player.Selected != null && player.Selected.Kind == BuildingKind.RepairStation) station = player.Selected.Cell;
+            else if (player.Selected != null && player.Selected.Kind == BuildingKind.RepairStation)
+                (station, reach) = (player.Selected.Cell, RunSimulation.RepairReach(player.Selected)); // its tier's reach
             if (station.HasValue && sim.Definitions.RepairStation != null)
             {
-                var reach = sim.Definitions.RepairStation.RepairReach;
                 Square(reachSquare, new GridPos(station.Value.X - reach, station.Value.Z - reach), 2 + reach * 2, 0f);
             }
             else reachSquare.positionCount = 0;

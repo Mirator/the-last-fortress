@@ -67,6 +67,9 @@ namespace TheLastFortress
 
         /// <summary>Spec 012: the player called the rest of tonight's spawns early (target = bonus gold paid at the next dawn).</summary>
         EarlyCalled,
+
+        /// <summary>Spec 015: a building went up one tier (source building, target = its new tier).</summary>
+        BuildingUpgraded,
     }
 
     /// <summary>Notification for presentation adapters. Simulation state stays authoritative.</summary>

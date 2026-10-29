@@ -1,0 +1,14 @@
+tier 1: HP 80 / 80   at (6,9)|Damage 10 every 0.9 s · range 4.0|Next, tier II for 49 gold: damage 12, second arrow at 50%|Sell refund: 24 gold [Upgrade (U) 49 gold]
+upgrade to 2: None
+tier 2: HP 80 / 80   at (6,9)|Damage 12 every 0.9 s · range 4.0|Tier II: damage 12, second arrow at 50%|Next, tier III for 73 gold: damage 14, range +0.5, second arrow at full damage|Sell refund: 49 gold [Upgrade (U) 73 gold]
+upgrade to 3: None
+tier 3: HP 80 / 80   at (6,9)|Damage 14 every 0.9 s · range 4.5|Tier III: damage 14, range +0.5, second arrow at full damage|Sell refund: 85 gold [Maximum tier]
+Tower (6,11) tier 1
+Watchtower (6,8) tier 2
+Wall (9,9) tier 3
+Cannon (7,12) tier 2
+SpikeTrap (3,10) tier 2
+SpikeTrap (4,10) tier 3
+House (12,8) tier 3
+pips: tower 2; gold left 778
+night: tick 342, slowed 2, alive 5

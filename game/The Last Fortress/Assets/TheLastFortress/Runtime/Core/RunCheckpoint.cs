@@ -90,6 +90,9 @@ namespace TheLastFortress
     public sealed class BuildingData
     {
         public int id, kind, x, z, orientation, hp, price;
+
+        /// <summary>Spec 015: upgrade tier and total price paid; 0 (absent in older saves) means tier I and the purchase price.</summary>
+        public int tier, paid;
     }
 
     [Serializable]
@@ -192,7 +195,7 @@ namespace TheLastFortress
 
             var buildings = new List<BuildingData>();
             foreach (var b in sim.Grid.AllBuildings())
-                buildings.Add(new BuildingData { id = b.Id, kind = (int)b.Kind, x = b.Cell.X, z = b.Cell.Z, orientation = b.Orientation, hp = b.Hp, price = b.PurchasePrice });
+                buildings.Add(new BuildingData { id = b.Id, kind = (int)b.Kind, x = b.Cell.X, z = b.Cell.Z, orientation = b.Orientation, hp = b.Hp, price = b.PurchasePrice, tier = b.Tier, paid = b.TotalPaid });
             buildings.Sort((a, b) => a.id.CompareTo(b.id));
             cp.buildings = buildings.ToArray();
 

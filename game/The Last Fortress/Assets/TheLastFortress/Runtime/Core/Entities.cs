@@ -15,6 +15,12 @@ namespace TheLastFortress
         /// <summary>Actual price paid (after any discount); refunds use this, never the current definition cost.</summary>
         public readonly int PurchasePrice;
 
+        /// <summary>Upgrade tier 1-3 (spec 015). Never changes footprint, solidity or routing.</summary>
+        public int Tier = 1;
+
+        /// <summary>Purchase price plus every upgrade price paid; sale and Recycling refund from it.</summary>
+        public int TotalPaid;
+
         public int Hp;
 
         /// <summary>Effective maximum HP (definition plus run modifiers). Equals the definition value without perks.</summary>
@@ -37,6 +43,7 @@ namespace TheLastFortress
             Cell = cell;
             Cells = definition.Footprint(cell);
             PurchasePrice = purchasePrice;
+            TotalPaid = purchasePrice;
             MaxHp = definition.MaxHp;
             Hp = definition.MaxHp;
         }
@@ -130,6 +137,11 @@ namespace TheLastFortress
         public bool Burning;
         public long BurnNextTick;
         public long BurnExpiryTick;
+
+        /// <summary>Spec 015 slow: movement at (100 - percent)% while the tick is before <see cref="SlowUntilTick"/>. Never stacks.</summary>
+        public int SlowPercent;
+
+        public long SlowUntilTick;
 
         public double X, Z;
         public double PrevX, PrevZ;

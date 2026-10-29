@@ -133,6 +133,13 @@ namespace TheLastFortress
                 yield break;
             }
 
+            if (game.IsRelease && captureSet == "034")
+            {
+                yield return RunPlan034();
+                Application.Quit();
+                yield break;
+            }
+
             if (game.IsRelease && captureSet == "023")
             {
                 yield return RunPlan023();
@@ -687,6 +694,94 @@ namespace TheLastFortress
         }
 
         /// <summary>
+        /// -capture-set 034 (spec 015): an Archer Tower's selection panel at tiers I, II and III; tier pips on a fortress of
+        /// upgraded buildings; then Night 1 with the second arrow in flight and Grunts slowed by barbed Spike Traps. A flat board
+        /// with one west entry, loaded through the real save path with 1500 gold (the capture's own save folder).
+        /// </summary>
+        IEnumerator RunPlan034()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            var spawns = new System.Collections.Generic.List<SpawnEntry>();
+            for (var i = 0; i < 14; i++) spawns.Add(new SpawnEntry(i * 10, MvpCampaign.West, 0, i % 5 == 4 ? EnemyKind.Brute : EnemyKind.Grunt));
+            var campaign = new CampaignConfig
+            {
+                Label = "upgrades", OffersRewards = true, RulesVersion = ReleaseCampaign.RulesVersion, CampaignId = ReleaseCampaign.CampaignId,
+                PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
+                Nights = new[] { new WavePlan("upgrades", spawns.ToArray(), new[] { MvpCampaign.West }), new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West }) },
+            };
+            var start = CheckpointCodec.Capture(new RunSimulation(new RunConfig { Definitions = game.NewRunDefinitions, Seed = 7, Terrain = TerrainMap.Flat(), Campaign = campaign }));
+            start.gold = 1500;
+            if (!game.Persistence.Store.WriteRun(0, start, out var error)) log.AppendLine("save failed: " + error);
+            game.OpenMenu();
+            game.Continue();
+            yield return null;
+            var sim = game.Sim;
+
+            sim.TryPlace(BuildingKind.Tower, new GridPos(6, 9), out var tower);
+            game.CameraRig.ResetView();
+            for (var tier = 1; tier <= BuildingUpgrades.MaxTier; tier++)
+            {
+                if (tier > 1) log.AppendLine($"upgrade to {tier}: {sim.TryUpgrade(tower)}");
+                game.Player.Select(tower);
+                game.SyncViews();
+                yield return Shot($"034-{tier}-selected-tier{tier}");
+                log.AppendLine($"tier {tower.Tier}: {game.Hud.SelectionText?.Replace('\n', '|')} [{game.Hud.UpgradeLabel.Replace('\n', ' ')}]");
+            }
+
+            game.Player.Select(null);
+            Building Up(BuildingKind kind, int x, int z, int tier)
+            {
+                sim.TryPlace(kind, new GridPos(x, z), out var b);
+                while (b != null && b.Tier < tier && sim.TryUpgrade(b) == UpgradeRejection.None) { }
+                log.AppendLine($"{kind} {b?.Cell} tier {b?.Tier}");
+                return b;
+            }
+
+            Up(BuildingKind.Tower, 6, 11, 1);
+            Up(BuildingKind.Watchtower, 6, 8, 2);
+            Up(BuildingKind.Wall, 9, 9, 3);
+            Up(BuildingKind.Cannon, 7, 12, 2);
+            Up(BuildingKind.SpikeTrap, 3, 10, 2);
+            Up(BuildingKind.SpikeTrap, 4, 10, 3);
+            Up(BuildingKind.House, 12, 8, 3);
+            game.SyncViews();
+            yield return Shot("034-4-pips-day");
+            log.AppendLine($"pips: tower {game.World.TierPipCount(tower.Id)}; gold left {sim.Gold}");
+
+            game.StartNight();
+            var slowed = 0;
+            for (var i = 0; i < 2400 && sim.State == RunState.Night; i++)
+            {
+                sim.Step();
+                game.SyncViews((float)PrototypeDefinitions.StepSeconds);
+                slowed = 0;
+                var inRange = 0;
+                foreach (var e in sim.Enemies)
+                {
+                    if (sim.IsSlowed(e)) slowed++;
+                    if (RunSimulation.InRange(tower, e.X, e.Z, sim.TowerRange(tower))) inRange++;
+                }
+
+                if (slowed >= 2 && inRange >= 3) break;
+            }
+
+            log.AppendLine($"night: tick {sim.Tick}, slowed {slowed}, alive {sim.AliveEnemyCount}");
+            for (var i = 0; i < 3; i++) // a few steps more so arrows are in flight
+            {
+                sim.Step();
+                game.SyncViews((float)PrototypeDefinitions.StepSeconds);
+            }
+
+            yield return Shot("034-5-night-second-arrow-and-slow");
+            game.CameraRig.ShowWholeBoard();
+            yield return Shot("034-6-night-board");
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-034-capture-log.txt"), log.ToString());
+        }
+
+        /// <summary>
         /// -capture-set scale: the hero face to face with the Keep, a Wall, an Archer Tower and a House, seen from the side at
         /// eye height in the hero view, for judging relative scale.
         /// </summary>
@@ -898,6 +993,7 @@ namespace TheLastFortress
             game.NewRun(seed, false);
             yield return null;
             var symmetry = MapProfiles.SymmetryFor(seed);
+            var selectedTierShot = 0;
             var defense = new ScriptQueue(FullRunDefense, symmetry);
             var economy = new ScriptQueue(FullRunEconomy, symmetry);
             log.AppendLine($"full run: {game.Sim.Config.Terrain.Describe()} rules={game.Sim.Campaign.RulesVersion}");
@@ -941,6 +1037,18 @@ namespace TheLastFortress
                     yield return new WaitForSecondsRealtime(HudView.AnnouncementFullSeconds + 0.5f); // the briefing collapses
                     yield return Shot($"full-{day:00}-a2-day-collapsed");
                     log.AppendLine($"  briefing collapsed={game.Hud.AnnouncementCollapsed}");
+                }
+
+                // Spec 015: the selection panel of the first Archer Tower each time its tier changes (I, II, III).
+                var shown = sim.Grid.GetOccupant(FullRunSelected(symmetry));
+                if (shown != null && shown.Kind == BuildingKind.Tower && shown.Tier != selectedTierShot)
+                {
+                    selectedTierShot = shown.Tier;
+                    game.Player.Select(shown);
+                    game.SyncViews();
+                    yield return Shot($"full-{day:00}-a3-selected-tier{shown.Tier}");
+                    log.AppendLine($"  selected {shown.Kind} {shown.Cell} tier {shown.Tier}: {game.Hud.SelectionText?.Replace('\n', '|')} [{game.Hud.UpgradeLabel.Replace('\n', ' ')}]");
+                    game.Player.Select(null);
                 }
 
                 game.CameraRig.ShowWholeBoard();
@@ -990,7 +1098,8 @@ namespace TheLastFortress
             "Tower 9 9", "Tower 11 11", "Tower 9 11", "Tower 11 9", "Wall 9 10", "Wall 11 10", "Wall 10 9", "Wall 10 11",
             "Tower 8 10", "Tower 12 10",
             "Cannon 7 7", "Watchtower 9 8", "Cannon 12 6", "Watchtower 11 8", "Cannon 7 12", "Watchtower 8 11",
-            "Cannon 13 11", "Watchtower 12 11", "Tower 10 8", "Tower 10 12",
+            "Cannon 13 11", "Watchtower 12 11", "Tower 9 9 2", "Tower 11 11 2", "Tower 9 11 2", "Tower 11 9 2", "Tower 10 8",
+            "Tower 10 12", "Cannon 7 7 2", "Cannon 12 6 2", "Tower 9 9 3", "Tower 11 11 3",
             "RepairStation 6 9", "Cannon 4 9", "Cannon 15 9", "Cannon 9 15", "Cannon 9 4",
             "Tower 7 10", "Tower 13 10", "Tower 10 7", "Tower 10 13", "Tower 6 11", "Tower 14 9",
         };
@@ -998,6 +1107,13 @@ namespace TheLastFortress
         static readonly string[] FullRunEconomy = { "House 12 8", "House 8 12", "House 13 8", "Farm 12 13", "House 7 12", "Farm 6 13", "House 13 7", "Farm 15 7" };
 
         static readonly int[] FullRunMinDefense = { 4, 4, 6, 7, 11, 13, 16, 17, 20, 23, 26, 29 };
+
+        /// <summary>The first Archer Tower of the full run, turned to the board's symmetry (its selection is captured per tier).</summary>
+        static GridPos FullRunSelected(int symmetry)
+        {
+            var p = new ScriptQueue(new[] { "Tower 9 9" }, symmetry).First.Split(' ');
+            return new GridPos(int.Parse(p[1]), int.Parse(p[2]));
+        }
 
         static readonly string[] FullRunPerks =
         {
@@ -1019,12 +1135,33 @@ namespace TheLastFortress
 
             public bool Exhausted => next >= items.Length;
 
+            public string First => items[0];
+
             public void Buy(RunSimulation sim, System.Collections.Generic.List<string> log, int limit = int.MaxValue)
             {
                 while (next < items.Length && Bought < limit)
                 {
                     var p = items[next].Split(' ');
                     var kind = (BuildingKind)System.Enum.Parse(typeof(BuildingKind), p[0]);
+                    if (p.Length > 3)
+                    {
+                        // Spec 015: "Kind x y tier" raises the building there to that tier (the kill-zone policy's upgrades).
+                        var cell = new GridPos(int.Parse(p[1]), int.Parse(p[2]));
+                        var b = kind == BuildingKind.SpikeTrap ? sim.Grid.GetTrap(cell) : sim.Grid.GetOccupant(cell);
+                        var skipped = b == null || b.Kind != kind || b.Cell != cell || b.Tier >= int.Parse(p[3]);
+                        while (!skipped && b.Tier < int.Parse(p[3]))
+                        {
+                            var u = sim.TryUpgrade(b);
+                            if (u == UpgradeRejection.InsufficientGold) return;
+                            skipped = u != UpgradeRejection.None;
+                        }
+
+                        log.Add(skipped ? $"{items[next]} SKIP" : $"upgrade {items[next]}");
+                        if (!skipped) Bought++;
+                        next++;
+                        continue;
+                    }
+
                     var r = sim.TryPlace(kind, new GridPos(int.Parse(p[1]), int.Parse(p[2])), out _);
                     if (r == PlacementRejection.InsufficientGold) return;
                     log.Add(r == PlacementRejection.None ? items[next] : $"{items[next]} SKIP {r}");
@@ -1046,7 +1183,7 @@ namespace TheLastFortress
                     for (var i = 0; i < (s & 3); i++) (dx, dz) = (-dz, dx);
                     return new GridPos(k.X + dx, k.Z + dz);
                 }).ToList();
-                return $"{p[0]} {cells.Min(c => c.X)} {cells.Min(c => c.Z)}";
+                return $"{p[0]} {cells.Min(c => c.X)} {cells.Min(c => c.Z)}" + (p.Length > 3 ? " " + p[3] : "");
             }
         }
 

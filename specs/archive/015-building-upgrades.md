@@ -1,6 +1,6 @@
 # Feature spec 015: building upgrade tiers
 
-Version 0.2, 2026-10-29. Status: **APPROVED** (owner, 2026-10-29). The scope (D1–D4), the upgrade table in section 4, and D5–D7 were all accepted as recommended.
+Version 0.2, 2026-10-29. Status: **IMPLEMENTED and merged into `../002-game-rules.md` v1.18 (2026-10-29); archived.** Not current: plan from `002-game-rules.md`. Approved by the owner on 2026-10-29: the scope (D1–D4), the upgrade table in section 4, and D5–D7 were all accepted as recommended. The owner's live check is pending.
 
 Changes `002-game-rules.md` v1.17, sections 6, 7, 10, 12 and 13, under `release-rules-4`. Legacy profiles are unchanged.
 
@@ -82,3 +82,18 @@ Prices are tier II at 1 × base and tier III at 1.5 × base, rounded down, as is
 - **EditMode, rules:** the price, gold and atomicity of an upgrade; HP share kept; refunds of the total paid; Thrifty Construction on upgrades; each trait's rule (one case per building, tier II and III where the trait differs); slow (refresh, strongest wins, half on bosses, minimum speed); save round trip with tiers; legacy refusal.
 - **Policy:** the scripts gain an upgrade order. Kill-zone, corridor and economy, seeds 1–5, against the pre-upgrade baseline (D7).
 - **Captures:** the selection panel at each tier, tier pips, a slowed column, and a second arrow. The owner's look is the acceptance of record.
+
+## 6. As built (2026-10-29)
+
+The section 4 table and prices are implemented unchanged; no tuning round was needed. Where the rules above left a choice open, the implementation took these, and they are merged into the game rules:
+
+- **Order of effects.** Definition, then tier, then perks. A tier's percentage raise is of the definition value, floored (Archer Tower 12 and 14, Cannon 25, Wall 104 and 128 HP). An Archer Tower's tier III range is `(4.0 + 0.5) × 1.1` with Expanded Vision.
+- **Second arrow.** It is an Archer Tower hit like any other: Sharpshooters, Last Stand, Kill Zone, Spotter and Flaming Arrows' burn apply. Its half is floored once. It is chosen before the first arrow lands, among the other living enemies in range.
+- **Market hall.** Once per Farm, however many tier III Houses touch it. It belongs to the Farm's adjacency term, so Efficient Farming multiplies it.
+- **Two Watchtowers.** The highest-tier Watchtower in reach gives its range bonus and Spotter damage; still one buff per tower.
+- **Slow refresh.** The stronger of the running and the new percentage, and the later of the two expiries. Bosses take half the percentage, floored (30% to 15%, 50% to 25%).
+- **Granary.** `floor(income / 2)`, the income valued at the moment the Farm is destroyed (tier, adjacency and Efficient Farming included). It is its own dawn line and is never part of the forecast.
+- **Repair Station III with Field Engineers.** Budget 80 + 30 + 30 = 140, reach 3.
+- **Upgrade refusal order.** Maximum tier is reported before Night, so a tier III building at Night says "Maximum tier".
+- **Policy scripts (D7).** Upgrades are items in the scripts' own build queues, after the planned layout (ring Towers, Cannons, Spike Traps, Houses and Farms). Scripts that upgraded earlier, instead of mid-game buildings, lost wins against the baseline. At these values a tier is worth less per gold than a new building while good cells remain. Upgrades do not make the scripted game easier.
+- **Presentation.** Tier pips are amber diamonds above the HP bar. There is no visual mark for a slowed enemy: it walks slower, its gait follows its speed.
