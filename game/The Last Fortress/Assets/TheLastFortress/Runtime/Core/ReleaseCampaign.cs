@@ -53,7 +53,14 @@ namespace TheLastFortress
         public static bool BombersLightOnContact(string rulesVersion) => WalkingEnemies(rulesVersion);
 
         /// <summary>release-rules-4 definitions: release-rules-3 enemies and a 1 x 1 Cannon (owner, 2026-10-21).</summary>
-        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => Walking(defs).WithCompactCannon();
+        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => Bodies(Walking(defs)).WithCompactCannon();
+
+        /// <summary>Spec 014 (release-rules-4): body radii in tiles [P]; bosses are wider.</summary>
+        public static PrototypeDefinitions Bodies(PrototypeDefinitions defs) => defs.WithEnemies(e =>
+        {
+            e.BodyRadius = e.Kind == EnemyKind.Brute ? 0.10 : EnemyDefinition.IsBossKind(e.Kind) ? 0.18 : 0.07;
+            return e;
+        });
 
         /// <summary>release-rules-3 enemy HP against release-rules-2 [P]; Brute and Raider Archer have their own values below.</summary>
         public const double WalkingHpScale = 1.5;

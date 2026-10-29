@@ -1720,7 +1720,9 @@ namespace TheLastFortress
 
             GridCoordinates.TileCenter(e.Cell, out var sx, out var sz);
             // Bosses walk the lane centre; others get one of seven fixed offsets (by ID) so a column reads as several bodies.
-            var offset = e.Definition.IsBoss ? Vector3.zero : new Vector3(((e.Id * 37) % 7 - 3) * 0.04f, 0f, ((e.Id * 53) % 7 - 3) * 0.04f);
+            // Spec 014: an enemy with a body walks its own lane in the simulation, so it is drawn exactly where it is.
+            var offset = e.Definition.IsBoss || e.Definition.BodyRadius > 0 ? Vector3.zero
+                : new Vector3(((e.Id * 37) % 7 - 3) * 0.04f, 0f, ((e.Id * 53) % 7 - 3) * 0.04f);
             return new EnemyView
             {
                 Enemy = e, Root = root, Model = model, HpBar = bar, HpFill = fill, Burn = burn, Fuse = fuse, Aura = aura, Marker = classMarker, Offset = offset,

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Failed(Child)" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-28 22:21:30Z" end-time="2026-10-28 22:21:31Z" duration="0,3199003">
+  <test-suite type="TestSuite" id="1000" name="The Last Fortress" fullname="The Last Fortress" runstate="Runnable" testcasecount="134" result="Failed" site="Child" start-time="2026-10-28 22:21:30Z" end-time="2026-10-28 22:21:31Z" duration="0.319900" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1167" name="TheLastFortress.EditMode.Tests.dll" fullname="C:/Users/Miroslav Pavelek/Documents/Games/the-last-fortress/game/The Last Fortress/Library/ScriptAssemblies/TheLastFortress.EditMode.Tests.dll" runstate="Runnable" testcasecount="134" result="Failed" site="Child" start-time="2026-10-28 22:21:30Z" end-time="2026-10-28 22:21:31Z" duration="0.309614" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="8816" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1168" name="TheLastFortress" fullname="TheLastFortress" runstate="Runnable" testcasecount="134" result="Failed" site="Child" start-time="2026-10-28 22:21:30Z" end-time="2026-10-28 22:21:31Z" duration="0.307323" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1169" name="Tests" fullname="TheLastFortress.Tests" runstate="Runnable" testcasecount="134" result="Failed" site="Child" start-time="2026-10-28 22:21:30Z" end-time="2026-10-28 22:21:31Z" duration="0.305337" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1040" name="HeroRulesTests" fullname="TheLastFortress.Tests.HeroRulesTests" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" testcasecount="18" result="Failed" site="Child" start-time="2026-10-28 22:21:30Z" end-time="2026-10-28 22:21:31Z" duration="0.297413" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1055" name="EnemyBodiesKeepTheirDistanceQueueAtTheKeepAndTheNightStillEnds" fullname="TheLastFortress.Tests.HeroRulesTests.EnemyBodiesKeepTheirDistanceQueueAtTheKeepAndTheNightStillEnds" methodname="EnemyBodiesKeepTheirDistanceQueueAtTheKeepAndTheNightStillEnds" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="919723649" result="Passed" start-time="2026-10-28 22:21:30Z" end-time="2026-10-28 22:21:31Z" duration="0.243673" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1056" name="TheHeroCannotWalkThroughAnEnemyAndAWalkingEnemyPushesTheHero" fullname="TheLastFortress.Tests.HeroRulesTests.TheHeroCannotWalkThroughAnEnemyAndAWalkingEnemyPushesTheHero" methodname="TheHeroCannotWalkThroughAnEnemyAndAWalkingEnemyPushesTheHero" classname="TheLastFortress.Tests.HeroRulesTests" runstate="Runnable" seed="206750590" result="Failed" start-time="2026-10-28 22:21:31Z" end-time="2026-10-28 22:21:31Z" duration="0.036721" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  the hero walked into the Grunt at step 8
+  Expected: greater than or equal to -0.00083333333333333339d
+  But was:  -0.019999999999999352d
+]]></message>
+                <stack-trace><![CDATA[at TheLastFortress.Tests.HeroRulesTests.TheHeroCannotWalkThroughAnEnemyAndAWalkingEnemyPushesTheHero () [0x001fd] in C:\Users\Miroslav Pavelek\Documents\Games\the-last-fortress\game\The Last Fortress\Assets\TheLastFortress\Tests\EditMode\HeroRulesTests.cs:618
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: TestResults\EditMode-20261028-232131.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

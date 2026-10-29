@@ -1,0 +1,6 @@
+framing: focus=(10.50, 0.00, 15.75) size=4,50 easing=False
+framing: focus=(10.00, 0.00, 10.50) size=7,81 easing=False
+dense: True alive=25
+walls: True alive=27 at buildings=6
+lineup: True SiegeCommander@3,3,9,5 SiegeGolem@2,6,9,5 Brute@5,3,9,2 Archer@3,1,9,5 Grunt@6,6,9,8 Bomber@3,1,9,4 Runner@5,6,9,6
+stress: alive=100

@@ -454,10 +454,12 @@ namespace TheLastFortress.Tests
             var p = hero.Profile;
             const int south = 32, north = 0;
             var hp = grunt.Hp;
+            // Spec 014: the Grunt stands in its lane beside the cell centre; distances are measured from where it is.
+            int gx = (int)System.Math.Round(grunt.X * 1200), gz = (int)System.Math.Round(grunt.Z * 1200);
 
             // Accepted toward the Grunt near the edge of reach, then backing off during the wind-up: the hero's position at
             // contact decides, so it misses.
-            PlaceHero(hero, 9 * 1200 + 600, 10 * 1200 + 600 + 258);
+            PlaceHero(hero, gx, gz + 258);
             Drain(sim);
             sim.Step(HeroCommand.Fine(-1, true, south));
             for (var i = 0; i < p.WindUpTicks; i++) sim.Step(HeroCommand.Fine(north, false, south));
@@ -466,7 +468,7 @@ namespace TheLastFortress.Tests
 
             // Accepted facing north (away) beyond touching distance: turning to the Grunt during the wind-up still misses.
             while (sim.Tick < hero.SwingReadyTick) sim.Step(Still);
-            PlaceHero(hero, 9 * 1200 + 600, 10 * 1200 + 600 + 180); // 0.15 tile north of the Grunt
+            PlaceHero(hero, gx, gz + 204); // 0.17 tile north of the Grunt: beyond touching (0.15), within reach
             Drain(sim);
             sim.Step(HeroCommand.Fine(-1, true, north));
             for (var i = 0; i < p.WindUpTicks; i++) sim.Step(HeroCommand.Fine(-1, false, south));
@@ -511,7 +513,8 @@ namespace TheLastFortress.Tests
             StepWith(sim, () => Still, () => grunt.TargetBuildingId == sim.Keep.Id);
             var hero = sim.Hero;
             var hp = grunt.Hp;
-            PlaceHero(hero, 9 * 1200 + 600, 10 * 1200 + 600 + 96); // 0.08 tile north, touching
+            // 0.14 tile north of where the Grunt stands: bodies touching (0.06 + 0.07), within the 0.15 touch reach
+            PlaceHero(hero, (int)System.Math.Round(grunt.X * 1200), (int)System.Math.Round(grunt.Z * 1200) + 168);
             sim.Step(HeroCommand.Fine(-1, true, 0)); // aimed north, away from the Grunt
             for (var i = 0; i < hero.Profile.WindUpTicks; i++) sim.Step(Still);
             Assert.AreEqual(hp - hero.Profile.SwingDamage, grunt.Hp, "touching: struck whatever the aim");
@@ -523,9 +526,10 @@ namespace TheLastFortress.Tests
             Assert.AreEqual((grunt.Cell.X + 0.5, grunt.Cell.Z + 0.5), (grunt.X, grunt.Z), "back on a cell centre");
             StepWith(sim, () => Still, () => grunt.TargetBuildingId == sim.Keep.Id, 1000);
 
-            GridCoordinates.TileCenter(grunt.Cell, out var gx, out var gz);
+            // Spec 014: it stands in its lane beside the cell centre; distances are measured from where it stands.
+            double gx = grunt.X, gz = grunt.Z;
             var (ux, uz) = ((int)System.Math.Round(gx * 1200), (int)System.Math.Round(gz * 1200));
-            PlaceHero(hero, ux, uz + 96); // touching again, inside its hit reach
+            PlaceHero(hero, ux, uz + 168); // touching again (0.14: the bodies meet), inside its hit reach
             sim.Step(HeroCommand.Fine(-1, true, 0));
             for (var i = 0; i < hero.Profile.WindUpTicks; i++) sim.Step(Still);
             StepWith(sim, () => Still, () => grunt.TargetsHero, 5);
@@ -541,6 +545,80 @@ namespace TheLastFortress.Tests
             Assert.AreEqual(sim.Keep.Id, grunt.TargetBuildingId, "back on the Keep");
             Assert.AreEqual(sim.Keep.Hp < keepHp ? due + grunt.AttackTicks : due, grunt.AttackDueTick, "the attack timing is kept, not restarted");
             StepWith(sim, () => Still, () => sim.Keep.Hp < keepHp, (int)System.Math.Max(1, due - sim.Tick + 1));
+        }
+
+        /// <summary>
+        /// Spec 014: enemy bodies never overlap while they walk, queue and attack (except a body that took the pass rule after
+        /// a long wait, or one chasing the hero); a crowd at an unguarded Keep forms queues, and the night still ends.
+        /// </summary>
+        [Test]
+        public void EnemyBodiesKeepTheirDistanceQueueAtTheKeepAndTheNightStillEnds()
+        {
+            var spawns = new List<(long, EnemyKind, GridPos)>();
+            for (var i = 0; i < 4; i++) spawns.Add((0, EnemyKind.Grunt, MvpCampaign.West)); // four at once: the entry makes them wait
+            for (var i = 0; i < 10; i++) spawns.Add((20 + i * 12, i % 4 == 3 ? EnemyKind.Brute : EnemyKind.Grunt, MvpCampaign.West));
+            spawns.Add((60, EnemyKind.SiegeGolem, MvpCampaign.West));
+            var sim = NewHeroRun(Wave(spawns.ToArray()), null, ReleaseCampaign.RulesV4);
+            Assert.IsTrue(sim.StartNight());
+            var passed = new HashSet<int>();
+            var queued = false;
+            for (var step = 0; step < 30000 && sim.State == RunState.Night; step++)
+            {
+                sim.Step(Still);
+                var alive = sim.Enemies.Where(e => e.Alive && !e.Pursuing && !e.Returning).ToList();
+                foreach (var e in alive)
+                {
+                    if (e.PassUnits > 0) passed.Add(e.Id);
+                    if (e.BlockedTicks > 0) queued = true;
+                }
+
+                for (var i = 0; i < alive.Count; i++)
+                for (var j = i + 1; j < alive.Count; j++)
+                {
+                    var (a, b) = (alive[i], alive[j]);
+                    if (passed.Contains(a.Id) || passed.Contains(b.Id)) continue;
+                    var gap = System.Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Z - b.Z) * (a.Z - b.Z)) - a.Definition.BodyRadius - b.Definition.BodyRadius;
+                    // A body easing into its lane at a corner may brush a neighbour beside it by one step of sideways
+                    // movement (at most 0.015 tile for a Runner); anything more is a body walking into another.
+                    Assert.GreaterOrEqual(gap, -0.02, $"E{a.Id} and E{b.Id} overlap at tick {sim.Tick}");
+                }
+            }
+
+            Assert.AreNotEqual(RunState.Night, sim.State, "the night ended");
+            Assert.IsTrue(queued, "bodies waited behind each other");
+        }
+
+        /// <summary>
+        /// Spec 014: the hero slides against an enemy body and cannot walk through it, and a walking enemy pushes the hero
+        /// out of its way instead of stopping; the enemy keeps its route. A Siege Golem: bosses never chase the hero.
+        /// </summary>
+        [Test]
+        public void TheHeroCannotWalkThroughAnEnemyAndAWalkingEnemyPushesTheHero()
+        {
+            var sim = NewHeroRun(Wave((0, EnemyKind.SiegeGolem, MvpCampaign.West)), null, ReleaseCampaign.RulesV4);
+            Assert.IsTrue(sim.StartNight());
+            var golem = sim.Enemies[0];
+            var hero = sim.Hero;
+            StepWith(sim, () => Still, () => golem.X > 4.0, 4000);
+            double Gap() => System.Math.Sqrt((golem.X - hero.X) * (golem.X - hero.X) + (golem.Z - hero.Z) * (golem.Z - hero.Z))
+                            - hero.Profile.RadiusUnits / 1200.0 - golem.Definition.BodyRadius;
+
+            // Standing in its path: the Golem walks on and the hero is pushed ahead of it.
+            PlaceHero(hero, (int)System.Math.Round((golem.X + 0.6) * 1200), (int)System.Math.Round(golem.Z * 1200));
+            var start = hero.X;
+            StepWith(sim, () => Still, () => hero.X - start > 0.3, 400);
+            Assert.Greater(Gap(), -0.1 - 1e-3, "pushed out of the body step by step");
+
+            // Walking into a body: it stops against it and never overlaps.
+            StepWith(sim, () => Still, () => golem.TargetBuildingId == sim.Keep.Id, 8000);
+            PlaceHero(hero, (int)System.Math.Round((golem.X - 0.5) * 1200), (int)System.Math.Round(golem.Z * 1200));
+            for (var i = 0; i < 60; i++)
+            {
+                sim.Step(HeroCommand.Fine(16, false, 16)); // heading east, into the Golem
+                Assert.GreaterOrEqual(Gap(), -1.0 / 1200, $"the hero walked into the Golem at step {i}");
+            }
+
+            Assert.Less(Gap(), 0.05, "it walked up to the body");
         }
 
         /// <summary>

@@ -163,6 +163,19 @@ namespace TheLastFortress
         public long PursueUntilTick, PursueCooldownTick, ProvokedUntilTick;
         public int OffUnitsX, OffUnitsZ;
 
+        /// <summary>
+        /// Spec 014: sideways lane from the route centreline (tiles, by ID; 0 for bosses and bodiless enemies), the offset
+        /// vector currently applied (eases toward the lane across the direction of travel), steps spent blocked by a body
+        /// ahead and units it may still walk through bodies after a long wait.
+        /// </summary>
+        public readonly double Lane;
+
+        public double LaneX, LaneZ;
+        public int BlockedTicks, PassUnits;
+
+        /// <summary>The body this enemy waited behind on its last step (-1 when it moved).</summary>
+        public int BlockerId = -1;
+
         /// <summary>Bomber: fuse lit at its attack cell; it never moves or retargets again and detonates at <see cref="DetonateTick"/>.</summary>
         public bool FuseLit;
 
@@ -180,6 +193,7 @@ namespace TheLastFortress
             Hp = definition.MaxHp;
             Cell = cell;
             NextCell = cell;
+            Lane = definition.BodyRadius > 0 && !definition.IsBoss ? UnitBodies.Lanes[id * 3 % UnitBodies.Lanes.Length] : 0;
             GridCoordinates.TileCenter(cell, out X, out Z);
             PrevX = X;
             PrevZ = Z;

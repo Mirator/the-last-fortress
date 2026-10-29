@@ -265,13 +265,14 @@ namespace TheLastFortress.Tests
         [Test]
         public void PendingSpawnsComeFourTimesSoonerAndTheWholeSecondsSavedArePaidAtDawn()
         {
-            // Called at tick 10: 30 -> 10 + ceil(20/4) = 15, 61 -> 10 + ceil(51/4) = 23 (floor would give 22),
-            // 106 -> 10 + ceil(96/4) = 34; the last spawn moves 72 ticks = 3.6 s earlier: 3 gold (rounding would give 4).
-            var sim = Campaign(ReleaseCampaign.RulesV4, Grunts(0, 30, 61, 106), Grunts(0));
+            // Called at tick 10: 30 -> 10 + ceil(20/4) = 15, 91 -> 10 + ceil(81/4) = 31 (floor would give 30),
+            // 186 -> 10 + ceil(176/4) = 54; the last spawn moves 132 ticks = 6.6 s earlier: 6 gold (rounding would give 7).
+            // Spawns at least 10 steps apart, so a Grunt's body (spec 014) has always cleared the entry for the next.
+            var sim = Campaign(ReleaseCampaign.RulesV4, Grunts(0, 30, 91, 186), Grunts(0));
             Assert.IsTrue(sim.StartNight());
             for (var i = 0; i < 10; i++) sim.Step();
             Drain(sim); // the tick-0 spawn and the first steps
-            Assert.AreEqual(3, sim.EarlyCallGoldNow, "the button shows the bonus before the call");
+            Assert.AreEqual(6, sim.EarlyCallGoldNow, "the button shows the bonus before the call");
             Assert.IsTrue(sim.CallEarly());
             Assert.IsFalse(sim.CallEarly(), "once per night");
             var spawned = new List<long>();
@@ -281,12 +282,12 @@ namespace TheLastFortress.Tests
                 spawned.AddRange(Drain(sim).Where(e => e.Type == SimEventType.EnemySpawned).Select(e => e.Tick));
             }
 
-            CollectionAssert.AreEqual(new long[] { 15, 23, 34 }, spawned, "compressed spawn ticks");
+            CollectionAssert.AreEqual(new long[] { 15, 31, 54 }, spawned, "compressed spawn ticks");
             Assert.AreEqual(RunState.Reward, sim.State, "the Towers cleared the night");
             Assert.AreEqual(0, sim.IncomeForecast().EarlyCall, "never part of a forecast");
             var dayGold = sim.Gold;
             Assert.IsTrue(sim.ChoosePerk(sim.CurrentOffer.OfferId, sim.CurrentOffer.PerkIds[0]));
-            Assert.AreEqual(3, sim.LastIncome.EarlyCall, "paid at the next dawn as its own line");
+            Assert.AreEqual(6, sim.LastIncome.EarlyCall, "paid at the next dawn as its own line");
             Assert.AreEqual(sim.LastIncome.Total, sim.Gold - dayGold, "and included in the dawn payment");
 
             Assert.IsTrue(sim.StartNight());
@@ -296,7 +297,7 @@ namespace TheLastFortress.Tests
         [Test]
         public void LegacyRulesCannotCallEarly()
         {
-            var sim = Campaign(ReleaseCampaign.RulesV3, Grunts(0, 30, 61, 106), Grunts(0));
+            var sim = Campaign(ReleaseCampaign.RulesV3, Grunts(0, 30, 91, 186), Grunts(0));
             Assert.IsTrue(sim.StartNight());
             Assert.IsFalse(sim.CallEarly());
         }

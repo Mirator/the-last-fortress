@@ -1137,7 +1137,8 @@ namespace TheLastFortress
 
             yield return HeroShot("023-dense-h-west", 270f, 10f);
             game.Sim.SetPaused(false);
-            log.AppendLine($"walls: {StepUntil(() => game.Sim.Enemies.Count(e => e.Alive && e.TargetBuildingId >= 0) >= 8, 2400)} " +
+            // Spec 014: attackers queue along a building's faces, so 6 at once (8 before unit collision).
+            log.AppendLine($"walls: {StepUntil(() => game.Sim.Enemies.Count(e => e.Alive && e.TargetBuildingId >= 0) >= 6, 2400)} " +
                            $"alive={game.Sim.AliveEnemyCount} at buildings={game.Sim.Enemies.Count(e => e.Alive && e.TargetBuildingId >= 0)}");
             game.CameraRig.SetView(new Vector3(8f, 0f, 10f), 4.5f);
             yield return Shot("023-walls-4.5");

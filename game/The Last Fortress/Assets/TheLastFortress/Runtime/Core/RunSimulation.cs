@@ -230,6 +230,7 @@ namespace TheLastFortress
             LastNight = null;
             nextSpawnIndex = 0;
             earlyCallTick = -1;
+            spawnWaitTicks = 0;
             nextBuildingId = 1;
             nextEnemyId = 1;
             accumulatorNs = 0;
@@ -624,6 +625,7 @@ namespace TheLastFortress
 
             LastNight = new NightRecap { Night = NightNumber }; // before the time-zero spawn
             earlyCallTick = -1;
+            spawnWaitTicks = 0;
             SetState(RunState.Night);
             ReleaseDueSpawns(); // the time-zero spawn appears on entering Night, before any movement step
             return true;
@@ -1060,8 +1062,13 @@ namespace TheLastFortress
             while (nextSpawnIndex < Wave.Spawns.Count && DueTick(Wave.Spawns[nextSpawnIndex]) <= Tick
                    && enemies.Count < MvpCampaign.MaxLiveEnemies)
             {
-                var s = Wave.Spawns[nextSpawnIndex++];
-                Spawn(s.Cell, s.EntryIndex, s.Kind);
+                var next = Wave.Spawns[nextSpawnIndex];
+                // Spec 014: a body waits while its entry point is taken (FIFO), at most UnitBodies.WaitTicks. The stress
+                // fixture does not wait: it is a fixed 100-enemy load for performance checks.
+                if (!StressMode && EntryTaken(next) && spawnWaitTicks++ < UnitBodies.WaitTicks) break;
+                spawnWaitTicks = 0;
+                nextSpawnIndex++;
+                Spawn(next.Cell, next.EntryIndex, next.Kind);
             }
 
             RefillMaintainedEntries();
@@ -1091,6 +1098,23 @@ namespace TheLastFortress
             for (var i = 0; i < Wave.EntryCells.Count; i++)
                 for (var n = activePerEntry[i]; n < Wave.MaintainActivePerEntry; n++)
                     Spawn(Wave.EntryCells[i], i, EnemyKind.Grunt);
+        }
+
+        int spawnWaitTicks;
+
+        bool EntryTaken(SpawnEntry s)
+        {
+            var r = Definitions.EnemyFor(s.Kind)?.BodyRadius ?? 0;
+            if (r <= 0) return false;
+            GridCoordinates.TileCenter(s.Cell, out var x, out var z);
+            foreach (var o in enemies)
+            {
+                if (!o.Alive || o.Definition.BodyRadius <= 0) continue;
+                double dx = o.X - x, dz = o.Z - z, sum = r + o.Definition.BodyRadius;
+                if (dx * dx + dz * dz < sum * sum - 1e-9) return true;
+            }
+
+            return false;
         }
 
         void Spawn(GridPos cell, int entryIndex, EnemyKind kind)
@@ -1342,11 +1366,24 @@ namespace TheLastFortress
             return best;
         }
 
-        /// <summary>Fixed-point movement: speed * 60 units per step, 1200 units per tile; arrival keeps the remainder.</summary>
+        /// <summary>
+        /// Fixed-point movement: speed * 60 units per step, 1200 units per tile; arrival keeps the remainder. With a body
+        /// (spec 014) the step is taken only when it brings the body no closer to another body ahead than their radii.
+        /// </summary>
         void AdvanceSegment(Enemy e)
         {
+            var progress = e.ProgressUnits + e.MoveUnitsPerStep;
+            double laneX = e.LaneX, laneZ = e.LaneZ;
+            if (e.Definition.BodyRadius > 0)
+            {
+                EaseLane(e, ref laneX, ref laneZ);
+                if (!BodyMayStep(e, progress, laneX, laneZ)) return;
+            }
+
+            e.LaneX = laneX;
+            e.LaneZ = laneZ;
             e.MoveTicks++;
-            e.ProgressUnits += e.MoveUnitsPerStep;
+            e.ProgressUnits = progress;
             if (e.ProgressUnits >= EnemyDefinition.UnitsPerTile)
             {
                 e.CarryUnits = e.ProgressUnits - EnemyDefinition.UnitsPerTile;
@@ -1356,6 +1393,8 @@ namespace TheLastFortress
                 e.MoveTicks = 0;
                 e.RouteIndex++;
                 GridCoordinates.TileCenter(e.Cell, out e.X, out e.Z);
+                e.X += e.LaneX;
+                e.Z += e.LaneZ;
                 TriggerTrap(e);
                 return;
             }
@@ -1368,8 +1407,86 @@ namespace TheLastFortress
             GridCoordinates.TileCenter(e.Cell, out var fx, out var fz);
             GridCoordinates.TileCenter(e.NextCell, out var tx, out var tz);
             var t = (double)e.ProgressUnits / EnemyDefinition.UnitsPerTile;
-            e.X = fx + (tx - fx) * t;
-            e.Z = fz + (tz - fz) * t;
+            e.X = fx + (tx - fx) * t + e.LaneX;
+            e.Z = fz + (tz - fz) * t + e.LaneZ;
+        }
+
+        /// <summary>Spec 014: the lane offset turns with the route at half the walking speed, so corners stay smooth.</summary>
+        static void EaseLane(Enemy e, ref double laneX, ref double laneZ)
+        {
+            double dx = e.NextCell.X - e.Cell.X, dz = e.NextCell.Z - e.Cell.Z; // cardinal unit step
+            double tx = dz * e.Lane, tz = -dx * e.Lane; // to the right of travel
+            var max = e.MoveUnitsPerStep * 0.5 / EnemyDefinition.UnitsPerTile;
+            double ex = tx - laneX, ez = tz - laneZ;
+            var len = Math.Sqrt(ex * ex + ez * ez);
+            if (len <= max) { laneX = tx; laneZ = tz; }
+            else { laneX += ex / len * max; laneZ += ez / len * max; }
+        }
+
+        /// <summary>
+        /// Spec 014: whether a body may take this step. Blocked when the new position comes within the sum of radii of a body
+        /// ahead (in front along the direction of travel) and closer than now; pursuing and returning enemies never block.
+        /// After UnitBodies.WaitTicks blocked, a body not queued behind an engaged line walks through bodies for
+        /// UnitBodies.PassUnits, so crossings and head-on meetings always resolve.
+        /// </summary>
+        bool BodyMayStep(Enemy e, int progress, double laneX, double laneZ)
+        {
+            if (e.PassUnits > 0)
+            {
+                e.PassUnits = Math.Max(0, e.PassUnits - e.MoveUnitsPerStep);
+                e.BlockedTicks = 0;
+                return true;
+            }
+
+            GridCoordinates.TileCenter(e.Cell, out var fx, out var fz);
+            GridCoordinates.TileCenter(e.NextCell, out var tx, out var tz);
+            var t = Math.Min(1.0, (double)progress / EnemyDefinition.UnitsPerTile);
+            double nx = fx + (tx - fx) * t + laneX, nz = fz + (tz - fz) * t + laneZ;
+            double dirX = tx - fx, dirZ = tz - fz;
+            Enemy blocker = null;
+            foreach (var o in enemies)
+            {
+                if (o == e || !o.Alive || o.Definition.BodyRadius <= 0 || o.Pursuing || o.Returning) continue;
+                var r = e.Definition.BodyRadius + o.Definition.BodyRadius;
+                double ax = o.X - nx, az = o.Z - nz;
+                var after = ax * ax + az * az;
+                if (after >= r * r - 1e-9) continue;
+                double cx = o.X - e.X, cz = o.Z - e.Z;
+                if (cx * dirX + cz * dirZ <= 1e-9) continue; // not ahead
+                if (after >= cx * cx + cz * cz - 1e-12) continue; // moving away or alongside
+                blocker = o;
+                break;
+            }
+
+            if (blocker == null)
+            {
+                e.BlockedTicks = 0;
+                e.BlockerId = -1;
+                return true;
+            }
+
+            e.BlockerId = blocker.Id;
+            if (++e.BlockedTicks < UnitBodies.WaitTicks || QueuedBehindEngaged(blocker)) return false;
+            e.BlockedTicks = 0;
+            e.PassUnits = UnitBodies.PassUnits;
+            return true;
+        }
+
+        /// <summary>
+        /// Whether the chain of bodies waiting behind each other, starting at <paramref name="o"/>, ends at an enemy that is
+        /// attacking (a building or the hero) or has lit its fuse. A circle of waiting bodies with no attacker is not engaged,
+        /// so it resolves through the pass rule.
+        /// </summary>
+        bool QueuedBehindEngaged(Enemy o)
+        {
+            for (var i = 0; i < 16 && o != null && o.Alive; i++)
+            {
+                if (o.TargetBuildingId >= 0 || o.TargetsHero || o.FuseLit) return true;
+                if (o.BlockerId < 0) return false;
+                enemiesById.TryGetValue(o.BlockerId, out o);
+            }
+
+            return false;
         }
 
         /// <summary>Spike Trap: fixed damage once when an enemy completes entry into the trap's cell.</summary>
@@ -1961,13 +2078,64 @@ namespace TheLastFortress
             }
 
             // Legacy rules: an uncontrolled hero stands still. release-rules-4: it brakes to rest with the motor.
+            PushHeroOutOfBodies();
             if (!command.Controlled && !hero.Profile.ContactPhase) return;
             if (command.Controlled) hero.Facing = command.Facing;
             HeroMotion.Step(ref hero.UnitsX, ref hero.UnitsZ, ref hero.VelX, ref hero.VelZ, command, hero.Attacking(HeroClock), hero.Profile, HeroOverlaps);
         }
 
         HeroMotion.Overlaps heroOverlaps;
-        HeroMotion.Overlaps HeroOverlaps => heroOverlaps ?? (heroOverlaps = HeroOverlapsBlocked);
+        HeroMotion.Overlaps HeroOverlaps => heroOverlaps ?? (heroOverlaps = HeroOverlapsAnything);
+
+        /// <summary>
+        /// Buildings, terrain and the edge, then (spec 014, at Night) enemy bodies the hero does not already overlap: the
+        /// hero slides along them but can always step out of a body it is inside.
+        /// </summary>
+        bool HeroOverlapsAnything(int ux, int uz)
+        {
+            if (HeroOverlapsBlocked(ux, uz)) return true;
+            if (State != RunState.Night || hero == null || !hero.Profile.ContactPhase) return false;
+            foreach (var o in enemies)
+                if (o.Alive && o.Definition.BodyRadius > 0 && BodyOverlapsHeroAt(o, ux, uz) && !BodyOverlapsHeroAt(o, hero.UnitsX, hero.UnitsZ)) return true;
+            return false;
+        }
+
+        bool BodyOverlapsHeroAt(Enemy o, long ux, long uz)
+        {
+            long ox = (long)Math.Round(o.X * HeroRules.UnitsPerTile), oz = (long)Math.Round(o.Z * HeroRules.UnitsPerTile);
+            var r = hero.Profile.RadiusUnits + (long)Math.Round(o.Definition.BodyRadius * HeroRules.UnitsPerTile);
+            long dx = ux - ox, dz = uz - oz;
+            return dx * dx + dz * dz < r * r;
+        }
+
+        /// <summary>
+        /// Spec 014: enemies push the hero. After the enemies moved, the hero leaves each body it overlaps (ID order) along
+        /// the line between their centres, by at most UnitBodies.HeroPushUnits in total, never into a building, terrain or
+        /// the edge; with no room it stays overlapped (enemies are never stopped by the hero).
+        /// </summary>
+        void PushHeroOutOfBodies()
+        {
+            if (State != RunState.Night || !hero.Profile.ContactPhase) return;
+            var budget = (long)UnitBodies.HeroPushUnits;
+            foreach (var o in enemies)
+            {
+                if (budget <= 0) break;
+                if (!o.Alive || o.Definition.BodyRadius <= 0 || !BodyOverlapsHeroAt(o, hero.UnitsX, hero.UnitsZ)) continue;
+                long ox = (long)Math.Round(o.X * HeroRules.UnitsPerTile), oz = (long)Math.Round(o.Z * HeroRules.UnitsPerTile);
+                long dx = hero.UnitsX - ox, dz = hero.UnitsZ - oz;
+                var r = hero.Profile.RadiusUnits + (long)Math.Round(o.Definition.BodyRadius * HeroRules.UnitsPerTile);
+                var length = HeroMotion.IsqrtCeil(dx * dx + dz * dz);
+                if (length == 0) { dx = 1; dz = 0; length = 1; } // exactly on top: out to the east
+                var push = Math.Min(budget, r - length + 1);
+                if (push <= 0) continue;
+                var nx = (int)(hero.UnitsX + dx * push / length);
+                var nz = (int)(hero.UnitsZ + dz * push / length);
+                if (HeroOverlapsBlocked(nx, nz)) continue;
+                hero.UnitsX = nx;
+                hero.UnitsZ = nz;
+                budget -= push;
+            }
+        }
 
         /// <summary>
         /// Read-only prediction for the view: where the next fixed step would put the hero with this command, computed by the
@@ -2059,7 +2227,8 @@ namespace TheLastFortress
                     var dx = e.X - hero.X;
                     var dz = e.Z - hero.Z;
                     var d = dx * dx + dz * dz;
-                    if (d > p.SwingReach * p.SwingReach + 1e-9 || d >= best - 1e-12 || !StrikeClear(e)) continue;
+                    var reach = p.SwingReach + UnitBodies.ExtraReach(e.Definition);
+                    if (d > reach * reach + 1e-9 || d >= best - 1e-12 || !StrikeClear(e)) continue;
                     nearest = e;
                     best = d;
                 }
@@ -2089,7 +2258,7 @@ namespace TheLastFortress
             hero.AttackPending = false;
             contactVictims.Clear();
             foreach (var e in enemies)
-                if (e.Alive && p.InSwing(f, e.X - hero.X, e.Z - hero.Z) && StrikeClear(e)) contactVictims.Add(e);
+                if (e.Alive && p.InSwing(f, e.X - hero.X, e.Z - hero.Z, UnitBodies.ExtraReach(e.Definition)) && StrikeClear(e)) contactVictims.Add(e);
             events.Add(new SimEvent(SimEventType.HeroContact, HeroClock, HeroRules.SourceId, contactVictims.Count, hero.Cell, hero.X, hero.Z,
                 hero.X + HeroRules.FacingX[f] / 1024.0 * p.SwingReach, hero.Z + HeroRules.FacingZ[f] / 1024.0 * p.SwingReach));
             foreach (var e in contactVictims)
@@ -2162,6 +2331,7 @@ namespace TheLastFortress
             e.TargetsHero = false;
             e.OffUnitsX = (int)Math.Round(e.X * HeroRules.UnitsPerTile);
             e.OffUnitsZ = (int)Math.Round(e.Z * HeroRules.UnitsPerTile);
+            e.LaneX = e.LaneZ = 0; // off the route the body position is its own; the lane eases back in afterwards
             return true;
         }
 
@@ -2230,8 +2400,9 @@ namespace TheLastFortress
                 {
                     long dx = hero.UnitsX - e.OffUnitsX, dz = hero.UnitsZ - e.OffUnitsZ;
                     var length = HeroMotion.IsqrtCeil(dx * dx + dz * dz);
-                    var stopAt = (long)(p.EnemyHitReach * HeroRules.UnitsPerTile * 0.75);
-                    if (length <= (long)(p.EnemyHitReach * HeroRules.UnitsPerTile))
+                    var reachTiles = p.EnemyHitReach + UnitBodies.ExtraReach(e.Definition);
+                    var stopAt = (long)(reachTiles * HeroRules.UnitsPerTile * 0.75);
+                    if (length <= (long)(reachTiles * HeroRules.UnitsPerTile))
                     {
                         if (!e.TargetsHero)
                         {
@@ -2316,7 +2487,8 @@ namespace TheLastFortress
             if (Tick < e.AttackDueTick) return;
             // Melee reach is the hero's own: a hero that steps back out of reach is not hit (the due hit waits, so it lands
             // as soon as the hero is in reach again). Hit-and-run is a real move. Ranged hits use the archer's range.
-            if (!e.Definition.IsRanged && HeroDistanceSq(e) > hero.Profile.EnemyHitReach * hero.Profile.EnemyHitReach + 1e-9) return;
+            var hitReach = hero.Profile.EnemyHitReach + UnitBodies.ExtraReach(e.Definition);
+            if (!e.Definition.IsRanged && HeroDistanceSq(e) > hitReach * hitReach + 1e-9) return;
             e.AttackDueTick += e.AttackTicks;
             var damage = e.Definition.AttackDamage;
             var aura = CommanderAuraPercent(e);
@@ -2410,6 +2582,7 @@ namespace TheLastFortress
                     .Append(e.TargetBuildingId).Append(e.TargetsHero ? "+hero" : "").Append(" due=").Append(e.AttackDueTick)
                     .Append(" burn=").Append(e.Burning).Append(':').Append(e.BurnNextTick).Append(':').Append(e.BurnExpiryTick)
                     .Append(e.FuseLit ? $" fuse={e.DetonateTick}" : "")
+                    .Append(e.Definition.BodyRadius > 0 ? $" body={e.LaneX.ToString("R", inv)},{e.LaneZ.ToString("R", inv)}:{e.BlockedTicks}:{e.PassUnits}" : "")
                     .Append(e.Pursuing || e.Returning || e.Chased || e.PursueCooldownTick > 0 || e.ProvokedUntilTick > 0
                         ? $" chase={(e.Pursuing ? "p" : e.Returning ? "r" : "-")}{(e.Chased ? "!" : "")}:{e.PursueUntilTick}:{e.PursueCooldownTick}:{e.ProvokedUntilTick}:{e.OffUnitsX},{e.OffUnitsZ}:{e.ResumeBuildingId}" : "")
                     .AppendLine();

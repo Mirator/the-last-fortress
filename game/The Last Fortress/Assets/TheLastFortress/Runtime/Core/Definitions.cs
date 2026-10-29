@@ -122,6 +122,9 @@ namespace TheLastFortress
 
         public int AuraDamagePercent;
 
+        /// <summary>Spec 014: body radius in tiles; enemies with a body keep their distance and block the hero (0 = no body).</summary>
+        public double BodyRadius;
+
         public bool IsRanged => AttackRange > 0;
         public bool IsBomber => Kind == EnemyKind.Bomber;
         public bool IsBoss => IsBossKind(Kind);

@@ -140,7 +140,7 @@ namespace TheLastFortress
         public static readonly HeroProfile V4 = new HeroProfile
         {
             ContactPhase = true, RadiusUnits = 72, MaxSpeedUnits = 42, AccelUnits = 14, BrakeUnits = 21, AttackSpeedPercent = 50,
-            SwingDamage = 10, SwingIntervalTicks = 15, WindUpTicks = 3, SwingReach = 0.225, TouchReach = 0.1,
+            SwingDamage = 10, SwingIntervalTicks = 15, WindUpTicks = 3, SwingReach = 0.225, TouchReach = 0.15, // spec 014: bodies touching (0.06 + 0.07 + 0.02)
             SwingHalfArcCos = 0.6427876096865394, // cos 50 degrees, written out: no runtime trigonometry in the rules
             EngageRange = 0.2, StickyRange = 0.35, EnemyHitReach = 0.225,
             PursuitStart = 1.0, PursuitLeash = 1.5, PursuitTicks = 80, PursuitCooldownTicks = 40, ProvokeTicks = 40,
@@ -158,12 +158,16 @@ namespace TheLastFortress
             }
         }
 
-        /// <summary>Whether a point (dx, dz) tiles from the hero centre lies inside this profile's swing for a facing.</summary>
-        public bool InSwing(int facing, double dx, double dz)
+        /// <summary>
+        /// Whether a point (dx, dz) tiles from the hero centre lies inside this profile's swing for a facing; an enemy wider
+        /// than a Grunt adds <paramref name="extra"/> to both reaches (spec 014), so its larger body stays in reach.
+        /// </summary>
+        public bool InSwing(int facing, double dx, double dz, double extra = 0)
         {
             var d2 = dx * dx + dz * dz;
-            if (d2 > SwingReach * SwingReach + 1e-9) return false;
-            if (d2 < 1e-12 || d2 <= TouchReach * TouchReach + 1e-9) return true; // touching: struck whatever the aim
+            double reach = SwingReach + extra, touch = TouchReach + extra;
+            if (d2 > reach * reach + 1e-9) return false;
+            if (d2 < 1e-12 || d2 <= touch * touch + 1e-9) return true; // touching: struck whatever the aim
             var dot = (dx * HeroRules.FacingX[facing] + dz * HeroRules.FacingZ[facing]) / 1024.0;
             return dot >= SwingHalfArcCos * Math.Sqrt(d2) - 1e-9;
         }
