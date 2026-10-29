@@ -72,7 +72,7 @@ namespace TheLastFortress
             canvas.planeDistance = cam.nearClipPlane + 0.005f; // in front of everything: ground and grass never cover the HUD
             Canvas.ForceUpdateCanvases();
             // Instanced draws (hero-view grass) are queued per frame and were consumed by the frame's own render.
-            if (game.HeroViewActive) game.World.DrawGrass(cam, game.Sim);
+            if (game.HeroViewActive || game.ExitingHeroView) game.World.DrawGrass(cam, game.Sim, 1f - game.HeroRig.StrategicBlend);
             cam.targetTexture = rt;
             cam.Render();
             cam.targetTexture = null;
@@ -115,6 +115,13 @@ namespace TheLastFortress
             if (game.IsRelease && captureSet == "hero-camera")
             {
                 yield return RunHeroCamera();
+                Application.Quit();
+                yield break;
+            }
+
+            if (game.IsRelease && captureSet == "hero-exit")
+            {
+                yield return RunHeroExit();
                 Application.Quit();
                 yield break;
             }
@@ -1687,6 +1694,66 @@ namespace TheLastFortress
             game.Player.HeroInputOverride = null;
             game.ExternalViewClock = false;
             File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-hero-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set hero-exit (release build, 2026-10-29): leaving and re-entering the hero view, 1/30 s frames, by Day and
+        /// at Night with enemies alive, at field of view 60 and 90; the frame after each exit is the strategic camera's, so a
+        /// jump at the swap shows as a difference between two consecutive frames. Logs the blend per frame.
+        /// </summary>
+        IEnumerator RunHeroExit()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.AutoAdvance = false;
+            game.SkipOnboarding();
+            game.SetMapProfile(MapProfiles.Meadow);
+            game.NewRun(7, false);
+            var sim = game.Sim;
+            foreach (var (kind, x, z) in Plan011Layout) sim.TryPlace(kind, new GridPos(x, z), out _);
+            game.ExternalViewClock = true;
+            var frame = 0;
+            const float dt = 1f / 30f;
+
+            IEnumerator Frames(string label, int count)
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    game.Player.HeroInputOverride = HeroCommand.None;
+                    yield return null;
+                    game.SyncViews(dt);
+                    yield return new WaitForEndOfFrame();
+                    CaptureOffscreen(Path.Combine(dir, $"{Screen.width}x{Screen.height}-exit-{frame:000}.png"));
+                    log.AppendLine($"{frame:000} {label} hero={game.HeroViewActive} exiting={game.ExitingHeroView} camera={game.ActiveCamera.name} " +
+                                   $"blend={game.HeroRig.StrategicBlend:0.000} fog={game.HeroRig.FogAmount:0.000} markers={game.World.VisibleMarkerCount}");
+                    frame++;
+                }
+            }
+
+            IEnumerator OutAndIn(string label, float fov, float pitch)
+            {
+                game.HeroRig.FieldOfView = fov;
+                game.SetHeroView(true);
+                game.HeroRig.SkipTransition();
+                game.HeroRig.SetOrbit(30f, pitch);
+                yield return Frames($"{label}-hero", 4);
+                game.SetHeroView(false, true); // as Tab: eased out
+                yield return Frames($"{label}-exit", 16);
+                game.SetHeroView(true); // eased in
+                yield return Frames($"{label}-enter", 14);
+                game.SetHeroView(false, true);
+                yield return Frames($"{label}-exit2", 14);
+            }
+
+            yield return OutAndIn("day-fov60", 60f, 16f);
+            yield return OutAndIn("day-fov90", 90f, -5f);
+            game.StartNight();
+            for (var i = 0; i < 3000 && sim.State == RunState.Night && sim.AliveEnemyCount < 3; i++) sim.Step();
+            for (var i = 0; i < 60; i++) game.SyncViews(dt); // the Night light blend settles, so frame differences are the camera's
+            yield return OutAndIn("night-fov60", 60f, 16f);
+            game.Player.HeroInputOverride = null;
+            game.ExternalViewClock = false;
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-exit-log.txt"), log.ToString());
         }
 
         /// <summary>

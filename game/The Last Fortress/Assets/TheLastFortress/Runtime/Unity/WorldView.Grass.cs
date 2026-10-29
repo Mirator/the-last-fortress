@@ -111,10 +111,10 @@ namespace TheLastFortress
         }
 
         /// <summary>Draws the clumps within reach of the hero camera (shrinking out at the edge, so nothing pops).</summary>
-        public void DrawGrass(Camera cam, RunSimulation sim)
+        public void DrawGrass(Camera cam, RunSimulation sim, float height = 1f)
         {
             GrassDrawn = 0;
-            if (grassMat == null || grassSpots.Count == 0 || cam == null || sim == null) return;
+            if (grassMat == null || grassSpots.Count == 0 || cam == null || sim == null || height <= 0f) return;
             if (sim.Grid.Revision != grassRevision || sim.Grid.TrapRevision != grassTrapRevision)
             {
                 grassRevision = sim.Grid.Revision;
@@ -146,7 +146,7 @@ namespace TheLastFortress
                 {
                     var d = new Vector2(s.x - centre.x, s.z - centre.y).magnitude;
                     if (d > GrassRadius) continue;
-                    var scale = s.w * Mathf.Clamp01((GrassRadius - d) / GrassFade);
+                    var scale = s.w * height * Mathf.Clamp01((GrassRadius - d) / GrassFade);
                     if (scale < 0.05f) continue;
                     var yaw = s.w * 997f % 360f;
                     grassBatch.Add(Matrix4x4.TRS(new Vector3(s.x, s.y, s.z), Quaternion.Euler(0f, yaw, 0f), new Vector3(scale, scale, scale)));

@@ -384,9 +384,11 @@ namespace TheLastFortress.Tests
                 var steps = game.AdvanceSimulation(0.1f);
                 for (var i = 0; i < steps; i++) twin.Step(HeroCommand.None);
                 game.SyncViews(0.1f);
-                // Spec 009: one class marker per living enemy while the strategic camera shows, none through the hero camera.
+                // Spec 009: one class marker per living enemy while the strategic camera shows, none through the hero camera
+                // (they fade in and out while it blends to or from the strategic projection).
                 var heroCamera = game.World.HeroCameraShown;
-                Assert.AreEqual(heroCamera ? 0 : game.Sim.AliveEnemyCount, game.World.VisibleMarkerCount, $"class markers (hero camera {heroCamera}, frame {frame})");
+                if (!heroCamera || game.World.StrategicBlend <= 0f)
+                    Assert.AreEqual(heroCamera ? 0 : game.Sim.AliveEnemyCount, game.World.VisibleMarkerCount, $"class markers (hero camera {heroCamera}, frame {frame})");
                 if (game.Sim.AliveEnemyCount > 0) markersSeen[heroCamera ? 1 : 0]++;
             }
 
@@ -538,8 +540,17 @@ namespace TheLastFortress.Tests
             yield return Press(Key.Tab);
             Assert.IsFalse(game.HeroViewActive);
             var exitUntil = Time.realtimeSinceStartup + 3f;
-            while (game.HeroFade.FadedCount > 0 && Time.realtimeSinceStartup < exitUntil) yield return null;
+            while ((game.HeroFade.FadedCount > 0 || game.ExitingHeroView) && Time.realtimeSinceStartup < exitUntil) yield return null;
             Assert.AreEqual(0, game.HeroFade.FadedCount, "the strategic view shows a faded mesh");
+            Assert.IsFalse(game.ExitingHeroView, "the exit finished");
+            // The last hero-camera frame is the strategic image: no jump when the views swap, on the ground or above it.
+            var strategic = game.CameraRig.Camera;
+            foreach (var p in new[] { game.CameraRig.Focus, game.CameraRig.Focus + new Vector3(3f, 0f, -2f), game.CameraRig.Focus + new Vector3(-2f, 1.5f, 1f) })
+            {
+                Vector2 shown = game.HeroRig.Camera.WorldToScreenPoint(p), swapped = strategic.WorldToScreenPoint(p);
+                Assert.Less(Vector2.Distance(shown, swapped), 1f, $"{p} moves at the swap: {shown} -> {swapped}");
+            }
+
             yield return Press(Key.Tab); // eased entry, not skipped
             for (var i = 0; i < 20; i++)
             {

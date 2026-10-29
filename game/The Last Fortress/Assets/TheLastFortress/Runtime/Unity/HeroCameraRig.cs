@@ -91,7 +91,7 @@ namespace TheLastFortress
         /// orthographic view framed, so the move is a smooth push-in instead of a dive from 40 units out. Within a run the
         /// last orbit is kept; a new, loaded or restarted run begins from the strategic yaw (<see cref="ResetOrbit"/>).
         /// </summary>
-        public void BeginFrom(Transform from, float yaw, float orthographicSize, Vector3 focus)
+        public void BeginFrom(Camera from, float yaw, float orthographicSize, Vector3 focus)
         {
             if (!orbitKept)
             {
@@ -101,8 +101,10 @@ namespace TheLastFortress
             }
 
             var frame = orthographicSize / Mathf.Tan(Camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
-            fromPosition = focus - from.forward * frame;
-            fromRotation = from.rotation;
+            fromPosition = focus - from.transform.forward * frame;
+            fromRotation = from.transform.rotation;
+            MatchStrategic(from, orthographicSize, fromPosition);
+            toStrategic = toStrategicFrom = 1f;
             transition = TransitionSeconds;
             shownDistance = shownZoom = distance;
             shownLift = targetLift = 0f;
@@ -114,6 +116,21 @@ namespace TheLastFortress
         Vector3 exitFrom;
         Quaternion exitFromRotation;
 
+        /// <summary>
+        /// How far the shown view has gone from the hero view (0) toward the strategic one (1). The first half fades the fog
+        /// out; the second blends the projection from perspective to the strategic camera's orthographic one, so the views swap
+        /// on the same image instead of jumping (owner, 2026-10-29), and the entry starts from it.
+        /// </summary>
+        float toStrategic, toStrategicFrom;
+
+        float orthoSize, orthoNear, orthoFar;
+
+        /// <summary>Hero-view fog shown, 0..1 (1 outside the transitions).</summary>
+        public float FogAmount => 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(toStrategic * 2f));
+
+        /// <summary>The projection blend toward the strategic view, 0..1.</summary>
+        public float StrategicBlend => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(toStrategic * 2f - 1f));
+
         /// <summary>Easing back out to the strategic framing (owner, 2026-10-21: both directions smooth).</summary>
         public bool Exiting => exiting;
 
@@ -124,6 +141,7 @@ namespace TheLastFortress
             exitLeft = TransitionSeconds;
             exitFrom = transform.position;
             exitFromRotation = transform.rotation;
+            toStrategicFrom = toStrategic;
             transition = 0f;
         }
 
@@ -133,6 +151,7 @@ namespace TheLastFortress
             exiting = false;
             fromPosition = transform.position;
             fromRotation = transform.rotation;
+            toStrategicFrom = toStrategic;
             transition = TransitionSeconds;
             shownDistance = shownZoom = distance;
             shownLift = targetLift = 0f;
@@ -141,23 +160,63 @@ namespace TheLastFortress
 
         /// <summary>
         /// One frame of the exit: the perspective camera moves to where it frames what the orthographic strategic camera
-        /// frames (as the entry starts), then the views swap. A pose that would enter a blocker ends the exit at once.
-        /// Returns true when it is finished.
+        /// frames (as the entry starts) while its projection blends into the strategic one, then the views swap. A pose that
+        /// would enter a blocker ends the exit at once. Returns true when it is finished.
         /// </summary>
-        public bool FollowExit(Transform strategic, float orthographicSize, Vector3 focus, float dt)
+        public bool FollowExit(Camera strategic, float orthographicSize, Vector3 focus, float dt)
         {
             if (!exiting) return true;
             var frame = orthographicSize / Mathf.Tan(Camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
-            var to = focus - strategic.forward * frame;
+            var to = focus - strategic.transform.forward * frame;
+            MatchStrategic(strategic, orthographicSize, to); // the player may zoom the strategic view during the exit
             exitLeft = Mathf.Max(0f, exitLeft - dt);
             var t = Mathf.SmoothStep(0f, 1f, 1f - exitLeft / TransitionSeconds);
             var p = Vector3.Lerp(exitFrom, to, t);
-            var r = Quaternion.Slerp(exitFromRotation, strategic.rotation, t);
+            var r = Quaternion.Slerp(exitFromRotation, strategic.transform.rotation, t);
             if (exitLeft > 0f && (Obstacles.Blocked(p, HeroCameraObstacles.Margin) || !NearPlaneClear(p, r, Camera))) exitLeft = 0f;
-            else transform.SetPositionAndRotation(p, r);
+            else
+            {
+                toStrategic = Mathf.Lerp(toStrategicFrom, 1f, t);
+                transform.SetPositionAndRotation(p, r);
+                ApplyProjection();
+            }
+
             if (exitLeft > 0f) return false;
             exiting = false;
             return true;
+        }
+
+        /// <summary>
+        /// The orthographic projection the strategic camera shows, placed at <paramref name="at"/> on its view axis: the same
+        /// half-height, and its clip planes moved by the distance between the two cameras so the same geometry is drawn.
+        /// </summary>
+        void MatchStrategic(Camera strategic, float orthographicSize, Vector3 at)
+        {
+            var offset = Vector3.Dot(at - strategic.transform.position, strategic.transform.forward);
+            orthoSize = orthographicSize;
+            orthoNear = strategic.nearClipPlane - offset;
+            orthoFar = strategic.farClipPlane - offset;
+        }
+
+        /// <summary>
+        /// The element-wise blend of the perspective and the strategic orthographic projection. It is the perspective view
+        /// seen from ever farther back with an ever narrower angle, so the framing at the strategic focus stays put.
+        /// </summary>
+        void ApplyProjection()
+        {
+            var c = Camera;
+            var s = StrategicBlend;
+            if (s <= 0f)
+            {
+                c.ResetProjectionMatrix();
+                return;
+            }
+
+            var perspective = Matrix4x4.Perspective(c.fieldOfView, c.aspect, c.nearClipPlane, c.farClipPlane);
+            var ortho = Matrix4x4.Ortho(-orthoSize * c.aspect, orthoSize * c.aspect, -orthoSize, orthoSize, orthoNear, orthoFar);
+            var m = new Matrix4x4();
+            for (var i = 0; i < 16; i++) m[i] = Mathf.Lerp(perspective[i], ortho[i], s);
+            c.projectionMatrix = m;
         }
 
         /// <summary>A new, loaded or restarted run: the next entry starts from the strategic yaw again.</summary>
@@ -302,12 +361,16 @@ namespace TheLastFortress
                 }
                 else
                 {
+                    toStrategic = Mathf.Lerp(toStrategicFrom, 0f, t);
                     transform.SetPositionAndRotation(p, r);
+                    ApplyProjection();
                     return;
                 }
             }
 
+            toStrategic = 0f;
             transform.SetPositionAndRotation(position, rotation);
+            ApplyProjection();
         }
 
         bool NearPlaneClear(Vector3 position, Quaternion rotation, Camera c)

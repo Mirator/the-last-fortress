@@ -42,9 +42,10 @@ namespace TheLastFortress
         public int FadedCount => faded.Count;
 
         /// <summary>
-        /// Updates the fade for this frame. With <paramref name="shown"/> false (strategic view) everything is restored at once.
+        /// Updates the fade for this frame. With <paramref name="shown"/> false (strategic view) everything is restored at once;
+        /// while <paramref name="leaving"/> (easing out to the strategic view) everything eases back, so nothing pops at the swap.
         /// </summary>
-        public void Sync(WorldView world, Camera cam, Vector3 hero, bool shown, float dt)
+        public void Sync(WorldView world, Camera cam, Vector3 hero, bool shown, float dt, bool leaving = false)
         {
             if (template == null) return;
             if (!shown || world == null || cam == null)
@@ -67,7 +68,7 @@ namespace TheLastFortress
             foreach (var r in candidates)
             {
                 if (r == null) continue;
-                var hides = Hides(r.bounds, eye, hero, pad);
+                var hides = !leaving && Hides(r.bounds, eye, hero, pad);
                 faded.TryGetValue(r, out var state);
                 if (!hides && state == null) continue;
                 if (state == null)

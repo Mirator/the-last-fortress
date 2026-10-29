@@ -204,22 +204,33 @@ namespace TheLastFortress
             return mesh;
         }
 
-        /// <summary>Per frame: day/night blend and whether the hero view renders (fog, clouds and stars belong to that view only).</summary>
-        public void Sync(float nightBlend, bool heroView, Camera heroCamera)
+        /// <summary>
+        /// Per frame: day/night blend and whether the hero view renders (fog, clouds and stars belong to that view only).
+        /// <paramref name="fog"/> below 1 pushes the fog out of sight while the view turns to or from the strategic one.
+        /// </summary>
+        public void Sync(float nightBlend, bool heroView, Camera heroCamera, float fog = 1f)
         {
             var sunDir = Sun != null ? -Sun.transform.forward : Vector3.up;
             if (!Mathf.Approximately(nightBlend, shownBlend) || Vector3.Dot(sunDir, shownSun) < 0.9999f) Apply(nightBlend);
             if (heroCamera != null) heroCamera.backgroundColor = Horizon;
             if (domeGo != null && domeGo.activeSelf != heroView) domeGo.SetActive(heroView);
-            if (heroView == fogOn) return;
-            fogOn = heroView;
-            RenderSettings.fog = heroView;
-            if (!heroView) return;
+            var on = heroView && fog > 0f;
+            // Light haze across the board, full on the horizon; beyond the far clip plane when fully pushed out.
+            if (on)
+            {
+                RenderSettings.fogStartDistance = 18f + (1f - fog) * FogPush;
+                RenderSettings.fogEndDistance = 170f + (1f - fog) * FogPush;
+            }
+
+            if (on == fogOn) return;
+            fogOn = on;
+            RenderSettings.fog = on;
+            if (!on) return;
             RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogStartDistance = 18f; // light haze across the board, full on the horizon
-            RenderSettings.fogEndDistance = 170f;
             RenderSettings.fogColor = Horizon;
         }
+
+        const float FogPush = 400f;
 
         void Apply(float blend)
         {

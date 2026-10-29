@@ -455,7 +455,7 @@ namespace TheLastFortress
                     exitingHeroView = false; // turned back mid-exit: ease in from where the camera is
                     HeroRig.BeginFromCurrent();
                 }
-                else HeroRig.BeginFrom(cameraRig.transform, CameraRig.Yaw, cameraRig.Size, cameraRig.Focus);
+                else HeroRig.BeginFrom(cameraRig.Camera, CameraRig.Yaw, cameraRig.Size, cameraRig.Focus);
             }
 
             else GameSpeed = speedBeforeHeroView; // the strategic speed returns (never resumes a pause either)
@@ -527,6 +527,9 @@ namespace TheLastFortress
             if (Overlay.gameObject.activeSelf != overlayShown) Overlay.gameObject.SetActive(overlayShown);
             World.CharacterScale = FigureScale; // the same in both views
             World.HeroCameraShown = HeroViewActive || exitingHeroView || fixedHeroCamera.HasValue;
+            // The hero camera blending to or from the strategic projection (last frame's: the camera moves after the world syncs).
+            World.StrategicBlend = World.HeroCameraShown && HeroRig != null ? HeroRig.StrategicBlend : 0f;
+            World.StrategicSize = cameraRig.Size;
             World.Sync(Sim, frameEvents, fxDt);
             if (HeroView != null)
             {
@@ -535,13 +538,13 @@ namespace TheLastFortress
                     HeroViewActive ? HeroRig.Yaw : (float?)null);
                 if (HeroViewActive || exitingHeroView || fixedHeroCamera.HasValue) HeroRig.Obstacles.Refresh(World); // read-only blockers from what is drawn
                 if (HeroViewActive) HeroRig.Follow(HeroView.ShownPosition, Sim, dt);
-                else if (exitingHeroView && HeroRig.FollowExit(cameraRig.transform, cameraRig.Size, cameraRig.Focus, dt)) FinishHeroExit();
+                else if (exitingHeroView && HeroRig.FollowExit(cameraRig.Camera, cameraRig.Size, cameraRig.Focus, dt)) FinishHeroExit();
                 else if (fixedHeroCamera.HasValue) HeroRig.Follow(fixedHeroCamera.Value, Sim, dt);
                 HeroView.SetHiddenFromCamera(HeroViewActive && HeroRig.ShownDistance < 0.12f && !HeroRig.InTransition);
                 var heroCameraShown = HeroViewActive || exitingHeroView || fixedHeroCamera.HasValue;
-                HeroFade?.Sync(World, HeroRig.Camera, fixedHeroCamera ?? HeroView.ShownPosition, heroCameraShown, dt);
-                Sky.Sync(World.NightBlend, heroCameraShown, HeroRig.Camera);
-                if (heroCameraShown) World.DrawGrass(HeroRig.Camera, Sim); // true-scale grass, hero camera only
+                HeroFade?.Sync(World, HeroRig.Camera, fixedHeroCamera ?? HeroView.ShownPosition, heroCameraShown, dt, exitingHeroView);
+                Sky.Sync(World.NightBlend, heroCameraShown, HeroRig.Camera, HeroRig.FogAmount);
+                if (heroCameraShown) World.DrawGrass(HeroRig.Camera, Sim, 1f - HeroRig.StrategicBlend); // true-scale grass, hero camera only
                 if (World.StrategicBackground.HasValue) cameraRig.Camera.backgroundColor = World.StrategicBackground.Value;
             }
 

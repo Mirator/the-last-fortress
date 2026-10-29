@@ -271,6 +271,20 @@ namespace TheLastFortress
         /// <summary>The hero camera renders this frame (set by the bootstrap): close-range cues replace the strategic markers.</summary>
         public bool HeroCameraShown { get; set; }
 
+        /// <summary>
+        /// While the hero camera blends to or from the strategic projection (set by the bootstrap): 0..1 toward the strategic
+        /// view, and its half-height. Strategic markers and HP-bar sizes follow the blend so nothing changes at the swap.
+        /// </summary>
+        public float StrategicBlend { get; set; }
+
+        public float StrategicSize { get; set; } = CameraRig.DefaultSize;
+
+        /// <summary>How much the strategic markers show: 1 in the strategic view, the blend while the hero camera renders.</summary>
+        float StrategicShown => HeroCameraShown ? StrategicBlend : 1f;
+
+        /// <summary>The orthographic half-height on screen: the strategic camera's, or the one the hero camera blends to.</summary>
+        float ViewerSize => barViewer != null && barViewer.orthographic ? barViewer.orthographicSize : StrategicSize;
+
         /// <summary>Changes whenever a building view or the terrain decoration is created, rebuilt, turned or removed.</summary>
         public int CameraBlockerVersion { get; private set; }
 
@@ -1323,7 +1337,7 @@ namespace TheLastFortress
             var alpha = Mathf.Clamp01((float)sim.InterpolationAlpha);
             var markers = 0;
             // Close up the figures read on their own: markers fade out between half-height 4 and 3.
-            var markerAlpha = barViewer != null && barViewer.orthographic ? Mathf.InverseLerp(MarkerHiddenBelow, MarkerFullFrom, barViewer.orthographicSize) : 1f;
+            var markerAlpha = Mathf.InverseLerp(MarkerHiddenBelow, MarkerFullFrom, ViewerSize) * StrategicShown;
             if (!Mathf.Approximately(markerAlpha, shownMarkerAlpha))
             {
                 shownMarkerAlpha = markerAlpha;
@@ -1405,7 +1419,7 @@ namespace TheLastFortress
                 view.HpBar.transform.rotation = BarRotation;
                 // Strategic: half the old width over true-scale figures; hero view: constant on-screen size.
                 if (showBar) view.HpBar.transform.localScale = Vector3.one * BarScale(view.HpBar.transform.position, view.BarWidth, 0.5f, true);
-                var classMarker = !HeroCameraShown && markerAlpha > 0f;
+                var classMarker = markerAlpha > 0f;
                 if (view.Marker.activeSelf != classMarker) view.Marker.SetActive(classMarker);
                 if (classMarker)
                 {
@@ -1413,7 +1427,7 @@ namespace TheLastFortress
                     markers++;
                 }
 
-                var marker = e.Burning && !HeroCameraShown;
+                var marker = e.Burning && StrategicShown >= 0.5f;
                 if (view.Burn.activeSelf != marker) view.Burn.SetActive(marker);
                 if (e.Burning) view.Burn.transform.localScale = BurnSize * (0.8f + 0.25f * Mathf.Sin(fxTime * 18f + e.Id));
                 EmitEnemyFire(view, e.Burning, e.FuseLit, dt);
@@ -1909,10 +1923,11 @@ namespace TheLastFortress
         float BarScale(Vector3 at, float worldWidth, float strategic, bool keepOnZoomOut = false)
         {
             // Enemy bars (spec 009): zoomed out past half-height 5.5 (the default before plan 023) they keep the on-screen size they have there.
-            if (barViewer != null && barViewer.orthographic && keepOnZoomOut) return strategic * Mathf.Max(1f, barViewer.orthographicSize / 5.5f);
-            if (barViewer == null || barViewer.orthographic) return strategic;
+            var ortho = keepOnZoomOut ? strategic * Mathf.Max(1f, ViewerSize / 5.5f) : strategic;
+            if (barViewer == null || barViewer.orthographic) return ortho;
             var distance = Vector3.Distance(barViewer.transform.position, at);
-            return Mathf.Clamp(distance * 0.05f / Mathf.Max(0.01f, worldWidth), 0.02f, strategic);
+            var perspective = Mathf.Clamp(distance * 0.05f / Mathf.Max(0.01f, worldWidth), 0.02f, strategic);
+            return Mathf.Lerp(perspective, ortho, HeroCameraShown ? StrategicBlend : 0f);
         }
 
         /// <summary>Marker size on screen in pixels, and its world diameter limits in tiles (spec 009 rule 3; provisional).</summary>
@@ -1935,7 +1950,7 @@ namespace TheLastFortress
         void PlaceMarker(EnemyView view)
         {
             var cam = barViewer;
-            var size = cam != null && cam.orthographic ? cam.orthographicSize : CameraRig.DefaultSize;
+            var size = cam != null && cam.orthographic ? cam.orthographicSize : StrategicSize;
             var pixels = cam != null ? Mathf.Max(1, cam.pixelHeight) : Mathf.Max(1, Screen.height);
             var d = Mathf.Clamp(MarkerPixels * 2f * size / pixels, MarkerMinTiles, MarkerMaxTiles);
             if (view.Enemy.Definition.IsBoss) d *= BossMarkerFactor;
