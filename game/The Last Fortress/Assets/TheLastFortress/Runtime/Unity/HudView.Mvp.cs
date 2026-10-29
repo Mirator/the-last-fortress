@@ -13,7 +13,7 @@ namespace TheLastFortress
     {
         GameObject menuOverlay, settingsPanel, saveFailedPanel, helpPanel, creditsPanel, guidePanel, announcePanel, golemBanner;
         Text menuStatus, menuContinueLabel, seedText, saveFailedText, settingsSensitivity, settingsShake, settingsWindow, settingsResolution, settingsStatus,
-            settingsMaster, settingsMusic, settingsSfx, menuTitle, menuPromise, guideHeader, guideBody, announceText, golemTitle, golemBody,
+            settingsMaster, settingsMusic, settingsSfx, menuTitle, menuPromise, guideHeader, guideBody, announceText, golemTitle,
             settingsLook, settingsInvert, settingsFov, settingsHeroNight;
         InputField seedInput;
         GameSettings editing;
@@ -55,7 +55,7 @@ namespace TheLastFortress
 
         public string GuideText => guidePanel.activeSelf ? guideHeader.text + "\n" + guideBody.text : null;
         public string AnnouncementText => announcePanel.activeSelf ? announceText.text : null;
-        public string GolemBannerText => golemBanner.activeSelf ? golemTitle.text + "\n" + golemBody.text : null;
+        public string GolemBannerText => golemBanner.activeSelf ? golemTitle.text : null;
         public Button NewRunButton { get; private set; }
 
         /// <summary>Release title only: cycles the map profile used by the next New Run.</summary>
@@ -68,6 +68,11 @@ namespace TheLastFortress
         public Button SaveAndQuitButton { get; private set; }
         public Button SettingsButton { get; private set; }
         public Button RunMenuButton { get; private set; }
+
+        /// <summary>In-run menu: retry the same seed from Day 1 (the top bar's Restart hides at Night).</summary>
+        public Button MenuRestartRunButton { get; private set; }
+
+        GameObject copySeedButton;
         public Button RotateButton { get; private set; }
         public Button NewSeedButton { get; private set; }
         public Button RetrySaveButton { get; private set; }
@@ -116,7 +121,7 @@ namespace TheLastFortress
             HelpButton = MakeButton(menu, "Help", new Vector2(0, 1), new Vector2(392, -12), new Vector2(96, 52), OpenHelp, out var helpLabel);
             helpLabel.fontSize = 21;
             seedText = Label(menu, "Seed", 18, TextAnchor.MiddleLeft, new Vector2(14, -68), new Vector2(360, 34), Palette.HudText);
-            MakeButton(menu, "Copy seed", new Vector2(0, 1), new Vector2(378, -68), new Vector2(110, 34), CopySeed, out var copyLabel);
+            copySeedButton = MakeButton(menu, "Copy seed", new Vector2(0, 1), new Vector2(378, -68), new Vector2(110, 34), CopySeed, out var copyLabel).gameObject;
             copyLabel.fontSize = 18;
         }
 
@@ -180,14 +185,14 @@ namespace TheLastFortress
             announceText = Label(announcePanel.transform, "Text", 21, TextAnchor.UpperCenter, new Vector2(0, -8), new Vector2(820, 52), Palette.HudText, true);
             announcePanel.SetActive(false);
 
-            // Siege Golem arrival: a short, non-blocking banner (the boss bar keeps its health afterwards).
-            golemBanner = Panel(root, "GolemBanner", new Vector2(0.5f, 1), new Vector2(0, -262), new Vector2(760, 92)).gameObject;
+            // Boss arrival: a short, non-blocking title (the boss line in the status panel keeps its health afterwards; its
+            // numbers are on the Day briefing and the Help).
+            golemBanner = Panel(root, "GolemBanner", new Vector2(0.5f, 1), new Vector2(0, -262), new Vector2(760, 58)).gameObject;
             var gImg = golemBanner.GetComponent<Image>();
             gImg.color = Palette.HudSurface.WithAlpha(0.88f);
             gImg.raycastTarget = false;
             golemTitle = Label(golemBanner.transform, "Title", 34, TextAnchor.UpperCenter, new Vector2(0, -8), new Vector2(740, 44), Palette.WarningCoral, true);
             golemTitle.fontStyle = FontStyle.Bold;
-            golemBody = Label(golemBanner.transform, "Body", 21, TextAnchor.UpperCenter, new Vector2(0, -54), new Vector2(740, 30), Palette.HudText, true);
             golemBanner.SetActive(false);
 
             // First-run guide: top-right under the run menu; never blocks Start Night.
@@ -276,6 +281,11 @@ namespace TheLastFortress
             menuContinueLabel.fontSize = 22;
             RecoverButton = MakeButton(menuPanel, "Recover backup", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () => game.RecoverBackup(), out _);
             ResumeButton = MakeButton(menuPanel, "Resume", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 64), game.CloseMenu, out _);
+            MenuRestartRunButton = MakeButton(menuPanel, "Restart (same seed, Day 1)", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () =>
+            {
+                game.CloseMenu();
+                game.RequestRestart(); // a progressed run asks first; the dialog holds the world like the menu did
+            }, out _);
             SaveAndQuitButton = MakeButton(menuPanel, "Save and Quit", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () => game.SaveAndQuit(), out _);
             SettingsButton = MakeButton(menuPanel, "Settings", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), OpenSettings, out _);
             MenuHelpButton = MakeButton(menuPanel, "Help", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), OpenHelp, out _);
@@ -286,6 +296,7 @@ namespace TheLastFortress
             menuStack.Add((ContinueButton.gameObject, 64));
             menuStack.Add((RecoverButton.gameObject, 56));
             menuStack.Add((ResumeButton.gameObject, 64));
+            menuStack.Add((MenuRestartRunButton.gameObject, 56));
             menuStack.Add((SaveAndQuitButton.gameObject, 56));
             menuStack.Add((SettingsButton.gameObject, 56));
             menuStack.Add((MenuHelpButton.gameObject, 56));
@@ -674,14 +685,29 @@ namespace TheLastFortress
                 if (!active) continue;
                 var cell = wave.EntryCells[i];
                 var count = 0;
-                foreach (var s in wave.Spawns)
-                    if (s.EntryIndex == i) count++;
+                var pending = 0;
+                for (var k = 0; k < wave.Spawns.Count; k++)
+                    if (wave.Spawns[k].EntryIndex == i)
+                    {
+                        count++;
+                        if (k >= sim.SpawnedCount) pending++;
+                    }
+
+                // At Night the pads and torches mark the entries: a tag stays only as an edge arrow, without counts, and
+                // only while that entry still has enemies to send.
+                var night = sim.State == RunState.Night;
+                if (night && pending == 0)
+                {
+                    if (entryMarkers[i].activeSelf) entryMarkers[i].SetActive(false);
+                    continue;
+                }
+
                 var isNew = sim.State == RunState.Day && IsNewEntry(sim, cell);
 
                 // Project the entry's road mouth and set the tag beside it, on the side away from the screen centre: the routes
                 // run toward the Keep in the middle, so neither the entry nor the route's first cells are covered. The tag
                 // stays inside the free play area (below the top panels, above the cards); an arrow means the entry is off screen.
-                var label0 = $"{(isNew ? "NEW " : "")}{WaveText.EntryName(cell).ToUpperInvariant()} {count}";
+                var label0 = $"{(isNew ? "NEW " : "")}{WaveText.EntryName(cell).ToUpperInvariant()}{(night ? "" : $" {count}")}";
                 var halfWidth = ((label0.Length + 2) * 12f + 26f) / 2f;
                 var sp = cam.WorldToScreenPoint(RouteOverlay.RoadMouth(cell));
                 var g = ScreenToCanvas(new Vector2(sp.x, sp.y));
@@ -698,8 +724,10 @@ namespace TheLastFortress
                 if (clamped.y < 330f) clamped.x = Mathf.Clamp(clamped.x, 420f + halfWidth, size.x - 340f - halfWidth);
                 var hidden = g.x < 0f || g.x > size.x || g.y < minY || g.y > size.y - topReserve + 22f;
                 var arrow = !hidden ? "" : g.x < 0f ? "< " : g.x > size.x ? "> " : g.y >= minY ? "^ " : "v ";
-                // The hero view shows a tag only as an edge arrow: on screen it would cover the hero and the fight.
-                if (game.HeroViewActive && !hidden)
+                // The hero view and the Night show a tag only as an edge arrow: on screen it would cover the fight.
+                // At Night an entry under the top panels still has its pad and torch in view: only one truly off screen counts.
+                var offScreen = sp.z < 0 || g.x < 0f || g.x > size.x || g.y < 0f || g.y > size.y;
+                if ((game.HeroViewActive && !hidden) || (night && !offScreen))
                 {
                     if (entryMarkers[i].activeSelf) entryMarkers[i].SetActive(false);
                     continue;
@@ -795,9 +823,6 @@ namespace TheLastFortress
                 golemBannerTimer = GolemBannerSeconds;
                 var bd = boss.Definition;
                 Set(golemTitle, $"THE {bd.DisplayName.ToUpperInvariant()} HAS ARRIVED");
-                var aura = bd.AuraDamagePercent > 0 ? $" · aura +{bd.AuraDamagePercent}% nearby" : "";
-                Set(golemBody, $"From {WaveText.EntryName(boss.Cell)} · {bd.MaxHp} HP · hits for {bd.AttackDamage}, {bd.WallDamageMultiplier}x on Walls{aura}");
-                // One line at 720p: the aura's numbers are on the Day announcement and the Help; the banner keeps the gist.
                 golemBanner.SetActive(true);
             }
             else if (sim.State != RunState.Night && golemBanner.activeSelf)
@@ -811,6 +836,7 @@ namespace TheLastFortress
         {
             var map = sim.Config.Terrain;
             Set(seedText, sim.StressMode ? "Stress fixture (debug)" : $"Seed {sim.Seed.ToString(CultureInfo.InvariantCulture)} · {MapLabel(map)}");
+            LayoutTopRight(sim.State == RunState.Night && !sim.StressMode);
 
             var sel = player.Selected;
             var canRotate = sel != null && sim.State == RunState.Day && !sim.StressMode && RunSimulation.IsRotatable(sel.Kind);
@@ -856,6 +882,7 @@ namespace TheLastFortress
                                            save.Status == SaveStatus.Invalid || save.Status == SaveStatus.IoError);
             RecoverButton.gameObject.SetActive(!hasRun && damaged);
             ResumeButton.gameObject.SetActive(hasRun);
+            MenuRestartRunButton.gameObject.SetActive(hasRun && !sim.IsTerminal);
             newRunRow.gameObject.SetActive(!hasRun); // in-run: Save and Quit first, so a New Run never replaces the active run
             if (MapButton != null)
             {
@@ -911,6 +938,25 @@ namespace TheLastFortress
         }
 
         float topPanelsBottom;
+        bool? topRightNight;
+
+        /// <summary>
+        /// At Night the top-right panel keeps only Reset Camera, Menu and Help: Restart (also in the Menu), the seed and
+        /// Copy seed are Day matters.
+        /// </summary>
+        void LayoutTopRight(bool night)
+        {
+            if (topRightNight == night) return;
+            topRightNight = night;
+            if (MenuRestartButton.gameObject.activeSelf == night) MenuRestartButton.gameObject.SetActive(!night);
+            if (seedText.gameObject.activeSelf == night) seedText.gameObject.SetActive(!night);
+            if (copySeedButton.activeSelf == night) copySeedButton.SetActive(!night);
+            var shift = night ? 124f : 0f;
+            ((RectTransform)ResetCameraButton.transform).anchoredPosition = new Vector2(136 - shift, -12);
+            ((RectTransform)RunMenuButton.transform).anchoredPosition = new Vector2(284 - shift, -12);
+            ((RectTransform)HelpButton.transform).anchoredPosition = new Vector2(392 - shift, -12);
+            topMenuRect.sizeDelta = new Vector2(500 - shift, night ? 76 : 112);
+        }
 
         /// <summary>
         /// Sizes the status panel to its text (a four-entry preview with a boss line wraps to four lines), then stacks
@@ -924,26 +970,29 @@ namespace TheLastFortress
             routeText.rectTransform.anchoredPosition = new Vector2(0, routeY);
             var routeH = string.IsNullOrEmpty(routeText.text) ? 0f : Mathf.Ceil(routeText.preferredHeight);
             routeText.rectTransform.sizeDelta = new Vector2(840, Mathf.Max(1f, routeH));
-            statusRect.sizeDelta = new Vector2(860, Mathf.Max(112f, -routeY + routeH + 10f));
+            var statusH = Mathf.Max(112f, -routeY + routeH + 10f);
+            // The boss line and bar sit inside the status panel, under its text.
+            ((RectTransform)bossPanel.transform).anchoredPosition = new Vector2(0, -(24f + statusH - 8f));
+            if (bossPanel.activeSelf) statusH += 50f;
+            statusRect.sizeDelta = new Vector2(860, statusH);
 
             var y = -(24f + statusRect.sizeDelta.y + 10f);
-            ((RectTransform)bossPanel.transform).anchoredPosition = new Vector2(0, y);
             ((RectTransform)announcePanel.transform).anchoredPosition = new Vector2(0, y);
             var bottom = -y - 10f;
-            if (bossPanel.activeSelf) bottom = -y + 54f;
             if (announcePanel.activeSelf) bottom = Mathf.Max(bottom, -y + ((RectTransform)announcePanel.transform).sizeDelta.y);
             ((RectTransform)golemBanner.transform).anchoredPosition = new Vector2(0, -(bottom + 12f));
-            if (golemBanner.activeSelf) bottom += 12f + 92f;
+            if (golemBanner.activeSelf) bottom += 12f + 58f;
             if (guidePanel.activeSelf) bottom = Mathf.Max(bottom, 146f + ((RectTransform)guidePanel.transform).sizeDelta.y);
             topPanelsBottom = bottom;
 
             var incomeH = Mathf.Max(24f, Mathf.Ceil(incomeText.preferredHeight));
             incomeText.rectTransform.sizeDelta = new Vector2(350, incomeH);
-            var perksY = -122f - incomeH - 4f;
+            var noIncome = string.IsNullOrEmpty(incomeText.text);
+            var perksY = noIncome ? -122f : -122f - incomeH - 4f;
             perksText.rectTransform.anchoredPosition = new Vector2(20, perksY);
             var perksH = string.IsNullOrEmpty(perksText.text) ? 0f : Mathf.Ceil(perksText.preferredHeight);
             perksText.rectTransform.sizeDelta = new Vector2(350, Mathf.Max(1f, perksH));
-            resourcesRect.sizeDelta = new Vector2(380, Mathf.Max(196f, -perksY + perksH + 12f));
+            resourcesRect.sizeDelta = new Vector2(380, Mathf.Max(noIncome ? 120f : 196f, -perksY + perksH + 12f));
         }
 
         /// <summary>Stacks the visible menu rows under the title, then the status text.</summary>

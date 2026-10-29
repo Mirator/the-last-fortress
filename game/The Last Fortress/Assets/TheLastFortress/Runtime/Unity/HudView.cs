@@ -23,7 +23,7 @@ namespace TheLastFortress
 
         Text goldText, keepText, incomeText, stateText, infoText, routeText, tooltipText, breachText, selectionTitle, selectionBody,
             terminalTitle, terminalBody, diagnosticText, primaryLabel, stressText, repairLabel, upgradeLabel;
-        RectTransform keepFill, tooltipRect, breachRect, statusRect, resourcesRect;
+        RectTransform keepFill, tooltipRect, breachRect, statusRect, resourcesRect, topMenuRect;
         GameObject selectionPanel, tooltipPanel, breachLabel, terminalOverlay, stressBanner, diagnosticPanel, rewardOverlay, bossPanel;
         Image primaryImage;
         readonly List<BuildCard> cards = new List<BuildCard>();
@@ -147,11 +147,19 @@ namespace TheLastFortress
             bossFill.anchorMax = Vector2.one;
             bossFill.offsetMin = bossFill.offsetMax = Vector2.zero;
             bossFill.gameObject.AddComponent<Image>().color = Palette.WarningCoral;
+            if (mvp)
+            {
+                // The MVP draws the boss line inside the status panel (LayoutTop grows it), so no panel of its own.
+                bossPanel.GetComponent<Image>().enabled = false;
+                bossPanel.transform.Find("Accent").gameObject.SetActive(false);
+            }
+
             bossPanel.SetActive(false);
 
             // Top-right: menu
             var mvpMenu = game.IsMvp;
             var menu = Panel(root, "Menu", new Vector2(1, 1), new Vector2(-24, -24), new Vector2(mvpMenu ? 500 : 430, mvpMenu ? 112 : 76));
+            topMenuRect = menu;
             MenuRestartButton = MakeButton(menu, "Restart", new Vector2(0, 1), new Vector2(12, -12), new Vector2(mvpMenu ? 116 : 196, 52), game.RequestRestart, out var restartTop);
             ResetCameraButton = MakeButton(menu, "Reset Camera", new Vector2(0, 1), new Vector2(mvpMenu ? 136 : 220, -12), new Vector2(mvpMenu ? 140 : 198, 52), game.ResetCamera, out var resetTop);
             if (mvpMenu) restartTop.fontSize = resetTop.fontSize = 21;
@@ -190,10 +198,11 @@ namespace TheLastFortress
                 {
                     var index = i;
                     speedButtons[i] = MakeButton(speed, i == 0 ? "II" : $"{PrototypeBootstrap.GameSpeeds[i - 1]}×", Vector2.zero, new Vector2(i * 77f, 0), new Vector2(69, 56),
-                        () => { if (index == 0) game.Sim.SetPaused(true); else game.SetGameSpeed(PrototypeBootstrap.GameSpeeds[index - 1]); }, out speedLabels[i]);
+                        () => { if (index == 0) game.Sim.SetPaused(!game.Sim.Paused); else game.SetGameSpeed(PrototypeBootstrap.GameSpeeds[index - 1]); }, out speedLabels[i]);
                 }
 
-                CallEarlyButton = MakeButton(root, "CALL EARLY", new Vector2(1, 0), new Vector2(-24, 204), new Vector2(300, 52), () => game.CallEarly(), out callEarlyLabel);
+                // Night only, so it sits on the speed row's line, left of it (the build cards are hidden at Night).
+                CallEarlyButton = MakeButton(root, "CALL EARLY", new Vector2(1, 0), new Vector2(-336, 24), new Vector2(300, 56), () => game.CallEarly(), out callEarlyLabel);
                 callEarlyLabel.fontSize = 22;
                 CallEarlyButton.gameObject.SetActive(false);
             }
@@ -491,6 +500,10 @@ namespace TheLastFortress
             var show = (sim.State == RunState.Day || sim.State == RunState.Night) && !sim.StressMode && !game.TitleScreen;
             if (row.activeSelf != show) row.SetActive(show);
             if (!show) return;
+            // At Night the row takes the PAUSE button's place (II pauses and resumes); by Day it sits above START NIGHT.
+            var rowRect = (RectTransform)row.transform;
+            var rowY = sim.State == RunState.Night ? 24f : 136f;
+            if (rowRect.anchoredPosition.y != rowY) rowRect.anchoredPosition = new Vector2(-24, rowY);
             var paused = sim.State == RunState.Night && sim.Paused;
             speedButtons[0].interactable = sim.State == RunState.Night;
             for (var i = 2; i < speedButtons.Length; i++) speedButtons[i].interactable = !game.HeroViewActive; // 1x only in the hero view
@@ -508,9 +521,9 @@ namespace TheLastFortress
             Set(goldText, $"Gold  {sim.Gold}");
             Set(keepText, $"Keep  {sim.Keep.Hp} / {sim.Keep.MaxHp}");
             keepFill.anchorMax = new Vector2(Mathf.Clamp01((float)sim.Keep.Hp / sim.Keep.MaxHp), 1);
-            // Plan 019: in the hero view at Night the income forecast steps back (it cannot change until dawn); gold, Keep HP,
-            // the night and the threat lines stay.
-            Set(incomeText, sim.IsCampaign && !(game.HeroViewActive && sim.State == RunState.Night) ? IncomeLine(sim) : "");
+            // At Night the income forecast steps back (it cannot change until dawn); gold, Keep HP, the night and the threat
+            // lines stay.
+            Set(incomeText, sim.IsCampaign && sim.State != RunState.Night ? IncomeLine(sim) : "");
 
             var wave = sim.Wave;
             var campaign = sim.IsCampaign;
@@ -612,7 +625,9 @@ namespace TheLastFortress
                 PrimaryButton.interactable = false;
             }
 
-            if (PrimaryButton.gameObject.activeSelf == sim.IsTerminal) PrimaryButton.gameObject.SetActive(!sim.IsTerminal); // the outcome card has its own actions
+            // The outcome card has its own actions; at Night the speed row's II is the pause (one row instead of three).
+            var showPrimary = !sim.IsTerminal && !(speedButtons[0] != null && sim.State == RunState.Night && !sim.StressMode);
+            if (PrimaryButton.gameObject.activeSelf != showPrimary) PrimaryButton.gameObject.SetActive(showPrimary);
             RefreshSpeed(sim);
 
             // Selection panel
@@ -688,7 +703,9 @@ namespace TheLastFortress
             if (stressBanner.activeSelf != sim.StressMode) stressBanner.SetActive(sim.StressMode);
 
             // Perks and boss
-            Set(perksText, sim.OwnedPerks.Count == 0 ? "" : "Perks: " + string.Join(", ", PerkTitles(sim)));
+            // At Night the list is planning detail: only its count stays.
+            Set(perksText, sim.OwnedPerks.Count == 0 ? "" : sim.State == RunState.Night ? $"Perks: {sim.OwnedPerks.Count} (listed by Day)"
+                : "Perks: " + string.Join(", ", PerkTitles(sim)));
             Enemy boss = null;
             foreach (var e in sim.Enemies)
                 if (e.Alive && e.Definition.IsBoss) boss = e;

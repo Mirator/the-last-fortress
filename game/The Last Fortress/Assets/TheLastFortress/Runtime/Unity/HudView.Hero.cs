@@ -15,6 +15,9 @@ namespace TheLastFortress
         Text heroText, heroHint, keepDirection;
         GameObject crosshair;
 
+        /// <summary>The hero panel shows its key hints through this night, then only when the mouse must be recaptured.</summary>
+        public const int HintNights = 3;
+
         /// <summary>Whether the hero view's aiming crosshair is shown (tests read it).</summary>
         public bool CrosshairShown => crosshair != null && crosshair.activeSelf;
 
@@ -131,10 +134,16 @@ namespace TheLastFortress
             }
 
             heroFill.anchorMax = new Vector2(hero.Alive ? Mathf.Clamp01((float)hero.Hp / HeroRules.MaxHp) : 0f, 1);
-            Set(heroHint, game.HeroViewActive
-                ? game.AwaitingRecapture ? "Click to take the mouse back · Tab strategy"
-                : sim.State == RunState.Night ? "Click attack · Tab strategy · P pause" : "Tab strategy · Enter night · 1-8 build"
-                : sim.State == RunState.Day ? "Guarding · Tab hero · Enter night" : "Guarding · Tab hero · H find");
+            // Key hints are for learning: from Night HintNights + 1 on only the mouse-recapture prompt (it is needed) stays.
+            var learning = sim.NightNumber <= HintNights;
+            Set(heroHint, game.HeroViewActive && game.AwaitingRecapture ? "Click to take the mouse back · Tab strategy"
+                : !learning ? ""
+                : game.HeroViewActive
+                    ? sim.State == RunState.Night ? "Click attack · Tab strategy · P pause" : "Tab strategy · Enter night · 1-8 build"
+                    : sim.State == RunState.Day ? "Guarding · Tab hero · Enter night" : "Guarding · Tab hero · H find");
+            var panelH = heroHint.text.Length > 0 ? 104f : 74f;
+            var panelRect = (RectTransform)heroPanel.transform;
+            if (panelRect.sizeDelta.y != panelH) panelRect.sizeDelta = new Vector2(380, panelH);
             var menuPanel = canvasRect.Find("Gameplay/Menu");
             if (menuPanel != null && menuPanel.gameObject.activeSelf == game.HeroViewActive) menuPanel.gameObject.SetActive(!game.HeroViewActive);
         }
