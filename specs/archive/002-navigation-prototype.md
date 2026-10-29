@@ -1,6 +1,6 @@
 # Navigation prototype specification
 
-Version: 1.0, 2026-10-15. Status (2026-10-19): implemented; kept as the prototype rules reference. Current release rules: [005-release-rules.md](005-release-rules.md). This document defines the first implementation milestone, not the six-night MVP or full release. Routing policy and milestone boundaries were confirmed by the owner; numerical tuning and technical defaults below are initial implementation decisions subject to measured revision.
+Version: 1.0, 2026-10-15. Status (2026-10-19): implemented; kept as the prototype rules reference. Current rules: [../002-game-rules.md](../002-game-rules.md) (status line updated 2026-10-29). This document defines the first implementation milestone, not the six-night MVP or full release. Routing policy and milestone boundaries were confirmed by the owner; numerical tuning and technical defaults below are initial implementation decisions subject to measured revision.
 
 ## Goal and boundaries
 

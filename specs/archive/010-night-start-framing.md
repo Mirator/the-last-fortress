@@ -4,7 +4,7 @@ Version 0.3, 2026-10-28. Status: **IMPLEMENTED and merged into `../002-game-rule
 
 ## 1. Problem
 
-Plan 023 moved the default zoom from half-height 5.5 to 4.5 so true-scale figures read. The entries sit on the board edge, about 10 tiles from the Keep, outside that view.
+Spec 009 (D3) moved the default zoom from half-height 5.5 to 4.5 so true-scale figures read. The entries sit on the board edge, about 10 tiles from the Keep, outside that view.
 
 In the 2026-10-28 capture review, 3.5 s into a dense night with 24 enemies alive, none was on screen at the default zoom. Only the off-screen entry tags (`WEST 20`, `EAST 20`) showed where the threat was. The 5.5 view is barely better. The player's first seconds of each night show an empty board.
 

@@ -77,7 +77,7 @@ The owner wants enemies not to pass through each other, and the hero not to pass
   - the touch hit works at body contact;
   - deadlock release.
 - **Determinism:** the existing fingerprints for legacy profiles are unchanged, and replays of `release-rules-4` are stable.
-- **Policy runs:** the 15-run probe and the recorded wins. The result must not be "much more difficult" (the owner's constraint). Throughput changes are expected, so retune only the values marked [P] here, in this spec's plan, with a section 16 row.
+- **Policy runs:** the 15-run probe and the recorded wins. The result must not be "much more difficult" (the owner's constraint). Throughput changes are expected, so retune only the values marked [P] here, with a section 16 row.
 - **Performance:** the stress fixture of 100 enemies stays within section 14's budget.
 - **Captures:** columns, crowds at a Wall and the Keep, the hero brushing past enemies, and a boss in a column. The owner's look is the acceptance of record.
 

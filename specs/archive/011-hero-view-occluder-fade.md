@@ -12,7 +12,7 @@ Changes `002-game-rules.md` v1.12, section 18 (Camera and focus). Presentation o
 The 2026-10-28 capture reviews found two problems in the hero view near the player's own fortress:
 
 - **Palisades fill the view.** Next to the Keep, palisade stakes fill a third of the screen.
-- **The hero can vanish.** With the hero's back to a Tower or Wall, there is no room for the camera behind them. Since plan 024 the camera then shows from the shoulder at distance 0, and the hero is drawn shadow-only, so the player sees no hero.
+- **The hero can vanish.** With the hero's back to a Tower or Wall, there is no room for the camera behind them. Since the pivot fix of rules v1.10 the camera then shows from the shoulder at distance 0, and the hero is drawn shadow-only, so the player sees no hero.
 
 ## 2. Decisions (owner, 2026-10-28)
 
@@ -41,7 +41,7 @@ The 2026-10-28 capture reviews found two problems in the hero view near the play
 - **Back to a Wall:** with the hero's back to a Wall and looking away from it, the camera stays at its set distance behind the hero, the hero is visible, and the Wall is faded.
 - **Between camera and hero:** a Tower or tree between the camera and the hero is faded, and the hero is visible through it.
 - **Leaving the hero view:** after leaving, no mesh is faded.
-- **Captures:** the plan 013 and 024 hero frames by the Keep and the Wall corner show the hero, before and after. The owner's look is the acceptance of record.
+- **Captures:** the existing capture frames of the hero by the Keep and at the Wall corner show the hero, before and after. The owner's look is the acceptance of record.
 
 ## 5. As built (2026-10-28)
 

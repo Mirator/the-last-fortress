@@ -17,7 +17,7 @@ The owner's screenshot (release build, 2026-10-28, Night 1, a window about 930 p
 
 - **This is at about the default zoom, not zoomed out.** The Keep (about 19 m, 2.4 tiles) is about 170 px tall in the frame. At the 40° pitch that gives about 90 px per tile, so a half-height of about 5. The problem is therefore the default view, not only the far zoom.
 
-- **Why this happens.** Figures are drawn at true scale in both views (owner decision 2026-10-19, section 17): a person is about 0.22 tile tall. The strategic camera is orthographic, with a half-height from 2.5 to 14 tiles. At 1080p a tile is 540 / half-height pixels, so about 98 px at the default 5.5 and 39 px at 14. Plan 014 measured a person at about 10–14 px at the default zoom and left open "class markers vs closer zoom".
+- **Why this happens.** Figures are drawn at true scale in both views (owner decision 2026-10-19, section 17): a person is about 0.22 tile tall. The strategic camera is orthographic, with a half-height from 2.5 to 14 tiles. At 1080p a tile is 540 / half-height pixels, so about 98 px at the default 5.5 and 39 px at 14. A measurement on 2026-10-19 found a person at about 10–14 px at the default zoom and left open "class markers vs closer zoom".
 - **The vision is not met.** `001-vision.md` asks that "enemy classes are distinguishable at low zoom", and pillar 3 asks for readable battles.
 - **What is already there.**
   - **Hero:** a cyan ground ring of fixed world size, about 1.2 tiles across, so about 46 px wide at half-height 14. The hero can already be found; the figure inside the ring is what is small.
@@ -47,7 +47,7 @@ Out of scope:
 | B | Enlarge figures in the strategic view only, growing with zoom | Yes | No: the views differ in proportions | Figures clip into Walls and each other in crowds; the figure no longer shows where the enemy really is. |
 | **C** | **Class markers.** A flat class-shaped marker under each enemy in the strategic view. Its world size grows with zoom, so its size on screen stays about the same. | **Yes** | **Yes**: a marker is presentation detail, like the hero's ring | Small to medium: one marker per enemy view, a size rule tied to the camera. Risk: clutter in crowds, which the size cap (section 5) bounds. |
 | **D** | **Cap the zoom-out** at the existing `WholeBoardSize` (half-height 10.5) instead of 14 | Removes the worst case | Yes | Trivial. Above 10.5 the view shows mostly mist beyond the board. |
-| **F** | **Closer default zoom.** Default half-height 5.5 → 4.0–4.5, which plan 014 already named as an option. | Only at the default; zooming out still shows specks | Yes | Trivial. The figures are about 25–35% larger on screen at the default, but each screen shows less of the board; `Z` (the whole board) and the wheel are unchanged. This is the only option here that makes figures **bigger** at the zoom of the complaint without changing their scale. |
+| **F** | **Closer default zoom.** Default half-height 5.5 → 4.0–4.5, an option already named when the true scale was set. | Only at the default; zooming out still shows specks | Yes | Trivial. The figures are about 25–35% larger on screen at the default, but each screen shows less of the board; `Z` (the whole board) and the wheel are unchanged. This is the only option here that makes figures **bigger** at the zoom of the complaint without changing their scale. |
 | E | Constant on-screen HP bars in the strategic view | Only damaged enemies | Yes | Small, but does not show class or undamaged enemies. Folded into C (section 5, item 5). |
 
 ## 4. Recommendation
@@ -119,7 +119,7 @@ The stage 4 captures include the default view at 5.5, 4.5 and 4.0, so this can b
   The provisional values (k, cap, colours) are fixed from these captures.
 - **No speck test.** At half-height 10.5, at both resolutions, every class can be named from its marker in the capture, and no enemy is hidden behind a tree or building.
 - **Crowd test.** In the stress fixture, the lanes still read as lanes, and a group at a Wall still reads as a group of identifiable classes.
-- **Performance.** The paired stress run still meets the section 14 gate. Section 14's figures predate the threat change and plan 022, so take a fresh baseline in the same session.
+- **Performance.** The paired stress run still meets the section 14 gate. Section 14's figures predate the threat change and the one-chase rule (spec 008), so take a fresh baseline in the same session.
 - **Not in scope of acceptance:** the hero view. It must look exactly as before.
 
 ## 8. Not changed / later

@@ -2,6 +2,8 @@
 
 Source: https://chatgpt.com/share/6ad07d7a-e294-83eb-b843-7f391179455c
 
+Status (2026-10-29): historical; superseded by [../001-vision.md](../001-vision.md) and [../002-game-rules.md](../002-game-rules.md).
+
 (GDD v1.1, revised 2026-10-15) Single-player · Strategy / Roguelite / Base Defense · PC / Steam
 
 ## Document scope and implementation order

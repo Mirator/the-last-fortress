@@ -1,6 +1,6 @@
 # Release profile rules — `release-rules-1`
 
-Frozen 2026-10-16. Status (2026-10-19): implemented; the twelve-night release profile. This is the contract the code implements; the code may not improvise beyond it. Every number is tagged **[I]** invariant (a rule; changing it is a rules-version change) or **[P]** provisional tuning (may change after observed play, inside the stated bounds, with the change recorded in the tuning log, section 8). Names match `Definitions.cs`, `PerkRules.cs`, `MvpCampaign.cs` and the new `ReleaseCampaign.cs` / `MapProfiles.cs`.
+Frozen 2026-10-16. Status (2026-10-29): implemented as `release-rules-1`, then superseded: consolidated into [../002-game-rules.md](../002-game-rules.md), which is the current contract (the game is `release-rules-4`). Kept as history. As frozen, it read: this is the contract the code implements; the code may not improvise beyond it. Every number is tagged **[I]** invariant (a rule; changing it is a rules-version change) or **[P]** provisional tuning (may change after observed play, inside the stated bounds, with the change recorded in the tuning log, section 8). Names match `Definitions.cs`, `PerkRules.cs`, `MvpCampaign.cs` and the new `ReleaseCampaign.cs` / `MapProfiles.cs`.
 
 Nothing here changes the six-night MVP profile (`mvp-rules-1`). It keeps its definitions, its 10-perk pool, its night table, its generator and its save schema 1.
 

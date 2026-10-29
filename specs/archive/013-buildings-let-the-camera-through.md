@@ -4,7 +4,7 @@ Version 0.3, 2026-10-28. Status: **IMPLEMENTED and merged into `../002-game-rule
 
 ## 1. Problem
 
-After plan 029, Walls let the camera through. With the hero's back to a Tower, the Keep or a House, the camera is still pulled in to the hero's shoulder, and the hero is drawn shadow-only, so the player sees no hero (`plans/evidence/029/captures/tower-back-unchanged.jpg`).
+After spec 011, Walls let the camera through. With the hero's back to a Tower, the Keep or a House, the camera is still pulled in to the hero's shoulder, and the hero is drawn shadow-only, so the player sees no hero.
 
 ## 2. Decision
 

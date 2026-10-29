@@ -1,6 +1,6 @@
 # Six-night MVP rules and scope
 
-Version 1.0, 2026-10-15. Status (2026-10-19): implemented as profile `mvp-rules-1`, which stays unchanged in later builds. The twelve-night release rules are in [005-release-rules.md](005-release-rules.md). This document makes the GDD's MVP scope concrete.
+Version 1.0, 2026-10-15. Status (2026-10-19): implemented as profile `mvp-rules-1`, which stays unchanged in later builds. The current rules, including how this profile differs, are in [../002-game-rules.md](../002-game-rules.md) section 15 (status line updated 2026-10-29). This document makes the GDD's MVP scope concrete.
 
 Owner-confirmed choices: retain open-route-first breaching; provide guaranteed Keep income; defer soldiers. Remaining rules and numerical values are initial design defaults. Balance changes require recorded fixture results; expanding scope requires a new decision.
 
