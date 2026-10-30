@@ -55,26 +55,31 @@ namespace TheLastFortress
         /// <summary>release-rules-4 definitions: release-rules-3 enemies, a 1 x 1 Cannon (owner, 2026-10-21) and upgrade tiers (spec 015).</summary>
         public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => WithLand(WithMine(Pressure(Bodies(Walking(defs))).WithCompactCannon())).WithUpgrades();
 
-        /// <summary>Spec 017 D3 [P]: a House earns 4 + 2 per free fertile neighbour (at most 4), a Farm 8 + 3 (at most 8).</summary>
+        /// <summary>Spec 017 D3 [P], tuned in plan 037: a House earns 4 + 3 per free fertile neighbour (at most 4), a Farm 8 + 4 (at most 8).</summary>
         public static PrototypeDefinitions WithLand(PrototypeDefinitions defs)
         {
             if (defs.House == null || defs.House.LandIncome > 0) return defs;
             var d = defs.WithEnemies(e => e);
             d.House = defs.House.Copy();
-            (d.House.DailyIncome, d.House.LandIncome) = (4, 2);
+            (d.House.DailyIncome, d.House.LandIncome) = (4, 3); // plan 037 round 2
             d.Farm = defs.Farm.Copy();
-            (d.Farm.DailyIncome, d.Farm.LandIncome) = (8, 3);
+            (d.Farm.DailyIncome, d.Farm.LandIncome) = (8, 4); // plan 037 round 2
             return d;
         }
 
         /// <summary>Spec 016 pressure [P]: release-rules-4 enemy HP against release-rules-3, as a percentage (floor).</summary>
-        public const int PressureHpPercent = 100; // round 1 (120, with counts 130) favoured the sealed ring: see plan 036
+        public const int PressureHpPercent = 120; // plan 037 round 1
 
         /// <summary>Spec 016 pressure [P]: release-rules-4 ordinary enemy counts on Nights 4-12, as a percentage (floor); the
         /// spawn cadence shrinks by the same factor, so a night's spawns take about as long.</summary>
-        public const int PressureCountPercent = 100;
+        public const int PressureCountPercent = 130; // plan 037 round 1
 
         public const int PressureFromNight = 4;
+
+        /// <summary>Plan 037 round 3 [P]: ordinary enemy counts on Nights 9-12 instead of <see cref="PressureCountPercent"/>.</summary>
+        public const int PressureLateCountPercent = 160;
+
+        public const int PressureLateFromNight = 9;
 
         public static PrototypeDefinitions Pressure(PrototypeDefinitions defs) => defs.WithEnemies(e =>
         {
@@ -157,9 +162,10 @@ namespace TheLastFortress
                 var r = table[i];
                 r.BossSeconds = BossSecondsV4;
                 if (i + 1 < PressureFromNight) continue;
-                int P(int n) => n * PressureCountPercent / 100;
+                var percent = i + 1 >= PressureLateFromNight ? PressureLateCountPercent : PressureCountPercent;
+                int P(int n) => n * percent / 100;
                 (r.Grunts, r.Runners, r.Brutes, r.Bombers, r.Archers) = (P(r.Grunts), P(r.Runners), P(r.Brutes), P(r.Bombers), P(r.Archers));
-                r.CadenceSeconds = System.Math.Round(r.CadenceSeconds * 100 / PressureCountPercent, 2);
+                r.CadenceSeconds = System.Math.Round(r.CadenceSeconds * 100 / percent, 2);
             }
 
             return table;

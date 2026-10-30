@@ -397,7 +397,7 @@ namespace TheLastFortress.Tests
         public void ASprintSpeedSaveKeepsItsSpeedsAndNewRunsWalk()
         {
             // Literal versions: release-rules-4 (plan 019) keeps the release-rules-3 enemies with its own hero top speed.
-            foreach (var (rules, grunt, gruntHp, heroUnits, cannon) in new[] { ("release-rules-2", 1.0, 30, 90, 2), ("release-rules-3", 0.3, 45, 48, 2), ("release-rules-4", 0.3, 45, 42, 1) })
+            foreach (var (rules, grunt, gruntHp, heroUnits, cannon) in new[] { ("release-rules-2", 1.0, 30, 90, 2), ("release-rules-3", 0.3, 45, 48, 2), ("release-rules-4", 0.3, 45 * ReleaseCampaign.PressureHpPercent / 100, 42, 1) })
             {
                 var run = new RunSimulation(new RunConfig
                 {
@@ -419,7 +419,7 @@ namespace TheLastFortress.Tests
         public void TwelveNightsFollowTheTableWithSeededEntriesAndPreviewWhatSpawns()
         {
             var defs = ReleaseDefinitions.CreateDefault();
-            var table = ReleaseCampaign.Table();
+            var table = ReleaseCampaign.Table(ReleaseCampaign.RulesVersion); // the default profile's table (release-rules-4 pressure, plan 037)
             var rotations = new HashSet<string>();
             for (uint seed = 0; seed < 50; seed++)
             {

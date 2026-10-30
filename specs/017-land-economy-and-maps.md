@@ -1,6 +1,6 @@
 # Feature spec 017: land economy and map overhaul
 
-Version 0.4, 2026-10-30. Status: **APPROVED 2026-10-30.** Owner decisions 2026-10-30: D1-a, D5-a, D6-a, D7-a, D9-a; D2-a, D3, D4-a, D8 and D10 as recommended, confirmed with plan 037; v0.3 adds the owner's answers on how tiers and perks combine with D3; v0.4 adds how nights use 3-5 entries, the fairness values and the four recipes. Builds on spec 016 (raids, gold veins, the Mine), whose pressure gate it takes over.
+Version 0.5, 2026-10-30. Status: **APPROVED 2026-10-30.** Owner decisions 2026-10-30: D1-a, D5-a, D6-a, D7-a, D9-a; D2-a, D3, D4-a, D8 and D10 as recommended, confirmed with plan 037; v0.3 adds the owner's answers on how tiers and perks combine with D3; v0.4 adds how nights use 3-5 entries, the fairness values and the four recipes; v0.5 records the owner loosening D10. Builds on spec 016 (raids, gold veins, the Mine), whose pressure gate it takes over.
 
 Changes `002-game-rules.md` (v1.21 once spec 016 is merged), sections 2, 5, 6, 7, 9, 11, 12, 13 and 16, under `release-rules-4`. Legacy profiles are unchanged.
 
@@ -71,6 +71,7 @@ Wealth then sits away from the core, and the player chooses how far to reach and
   - house-ring wins at most 2 of 5 on every recipe.
   - At least two other strategies win at least 3 of 5 on every recipe, and the strategy that wins most differs between at least two recipes.
   - Up to 4 tuning rounds, each a section 16 row. If the gate still fails, stop and report.
+  - v0.5 (owner, 2026-10-30): the gate failed after 4 rounds (plan 037 stage 6). After round 3, house-ring won at most 2/5 on every recipe. A second strategy reached 3/5 only on River Valley and Forest Edge. Kill-zone, a Wall-sealed Keep, won 5/5 on every recipe. **The owner accepted this partial result and loosened the gate**: the round 3 values are adopted, the sealed Keep is left for a later spec, and the plan continues to presentation and close.
 
 ## 4. Consequences the plan must cover
 
