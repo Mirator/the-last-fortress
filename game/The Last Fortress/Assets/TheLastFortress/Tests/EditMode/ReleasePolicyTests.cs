@@ -363,11 +363,13 @@ namespace TheLastFortress.Tests
         public static RunSimulation Play(Policy policy, uint seed, StringBuilder log, int symmetry = 0, string rules = ReleaseCampaign.RulesV1,
             HeroScript hero = HeroScript.Idle, bool build = true, HeroLog heroLog = null)
         {
+            var recipeMap = MapRecipes.IsRecipe(policy.Map) ? MapRecipes.Generate(policy.Map, seed) : null; // spec 017: generated maps, no symmetry
             var sim = new RunSimulation(new RunConfig
             {
                 // Each rules version plays with its own profile's definitions (release-rules-3: walking speeds, more HP).
                 Definitions = rules == ReleaseCampaign.RulesV4 ? ReleaseCampaign.Contact(ReleaseDefinitions.CreateDefault()) : ReleaseCampaign.WalkingEnemies(rules) ? ReleaseCampaign.Walking(ReleaseDefinitions.CreateDefault()) : ReleaseDefinitions.CreateDefault(),
-                Seed = seed, Terrain = MapProfiles.Generate(policy.Map, seed, symmetry), Campaign = ReleaseCampaign.Create(seed, policy.Map, symmetry, rules),
+                Seed = seed, Terrain = recipeMap ?? MapProfiles.Generate(policy.Map, seed, symmetry),
+                Campaign = recipeMap != null ? ReleaseCampaign.Create(seed, recipeMap, rules) : ReleaseCampaign.Create(seed, policy.Map, symmetry, rules),
             });
             log.AppendLine($"## {policy.Name} on {sim.Config.Terrain.Describe()} ({rules}{(sim.HasHero ? $", hero {hero}" : "")}{(build ? "" : ", no construction")})");
             var plan = policy.Build?.Invoke(sim);
