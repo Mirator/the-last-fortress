@@ -20,6 +20,9 @@ namespace TheLastFortress
         const float BankRun = 0.32f, FordRun = 0.4f;
         const float TerrainStep = 0.2f, TerrainMargin = 6f;
 
+        /// <summary>Spec 017 meadow edge: radius (cells) of the blur that rounds the fertile mask.</summary>
+        const float MeadowBlur = 1.25f;
+
         Material terrainGround, riverWater;
         Color waterSky, riverShallow, riverDeep, foamColor;
         float waterClock;
@@ -276,6 +279,32 @@ namespace TheLastFortress
                     lush = Mathf.Max(lush, Mathf.Clamp01(1f - toWater / 0.9f));
                 }
 
+                // Spec 017: fertile meadows read as rich green with soft furrows; other ground on a fertile-list map is drier.
+                // The meadow mask is the fertile share of a ~1-cell blur, with a noisy threshold: the edge falls on the cell
+                // border but reads as an organic patch, not a staircase. Every cell type gets it, so forest and rock cells
+                // blend into the ground around them instead of keeping a square of the old green.
+                if (map?.Fertile != null)
+                {
+                    float sum = 0f, total = 0f;
+                    for (var dz = -2; dz <= 2; dz++)
+                    for (var dx = -2; dx <= 2; dx++)
+                    {
+                        var n = new GridPos(cell.X + dx, cell.Z + dz);
+                        var ox = fx - 0.5f - dx;
+                        var oz = fz - 0.5f - dz;
+                        var w = Mathf.Max(0f, 1f - Mathf.Sqrt(ox * ox + oz * oz) / MeadowBlur);
+                        if (w <= 0f) continue;
+                        total += w;
+                        if (IsFertile(n)) sum += w;
+                    }
+
+                    var wobble = (Mathf.PerlinNoise(x * 1.3f + 7f, z * 1.3f + 31f) - 0.5f) * 0.32f;
+                    var fertile = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.3f, 0.7f, sum / total + wobble));
+                    var furrow = Mathf.Clamp01((Mathf.Sin((x + z) * Mathf.PI * 2.5f) - 0.55f) * 3f) * 0.14f;
+                    lush = Mathf.Lerp(Mathf.Min(lush, 0.32f), 1f, fertile);
+                    soil = Mathf.Lerp(Mathf.Max(soil, 0.3f), Mathf.Max(furrow, Mathf.Min(soil, 0.55f)), fertile);
+                }
+
                 // Blocked cells read as blocked: rock ground under boulders, needle litter under trees (soft at the cell edge).
                 // Round patches (merging across neighbouring blocked cells), not squares that would read as building plots.
                 var inner = 0f;
@@ -292,25 +321,7 @@ namespace TheLastFortress
                 if (type == TerrainType.Forest)
                 {
                     soil = Mathf.Max(soil, 0.5f * inner);
-                    lush = 1f;
-                }
-
-                // Spec 017: fertile meadows read as rich green with soft furrows; other land on a fertile-list map is drier.
-                if (map?.Fertile != null && type == TerrainType.Land)
-                {
-                    var fertile = 0f;
-                    for (var dz = -1; dz <= 1; dz++)
-                    for (var dx = -1; dx <= 1; dx++)
-                    {
-                        if (!IsFertile(new GridPos(cell.X + dx, cell.Z + dz))) continue;
-                        var ox = Mathf.Max(0f, Mathf.Abs(fx - 0.5f - dx) - 0.5f);
-                        var oz = Mathf.Max(0f, Mathf.Abs(fz - 0.5f - dz) - 0.5f);
-                        fertile = Mathf.Max(fertile, Mathf.Clamp01(1f - Mathf.Sqrt(ox * ox + oz * oz) / 0.25f));
-                    }
-
-                    var furrow = Mathf.Clamp01((Mathf.Sin((x + z) * Mathf.PI * 2.5f) - 0.55f) * 3f) * 0.14f;
-                    lush = Mathf.Lerp(Mathf.Min(lush, 0.2f), 1f, fertile);
-                    soil = Mathf.Lerp(Mathf.Max(soil, 0.38f), furrow, fertile);
+                    lush = Mathf.Lerp(lush, 0.85f, inner); // greener under the canopy, fading into the ground around it
                 }
 
                 if (tracks.Contains(cell)) soil = Mathf.Max(soil, 0.3f); // a worn track along an entry's route

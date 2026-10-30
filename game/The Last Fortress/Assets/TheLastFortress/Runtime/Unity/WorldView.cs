@@ -787,6 +787,7 @@ namespace TheLastFortress
         {
             if (terrainRoot != null) Destroy(terrainRoot);
             groundDetail.Clear(); // its tufts die with terrainRoot, also when no new terrain follows
+            veinViews.Clear();
             groundDetailRevision = -1;
             foreach (var m in terrainMeshes) Destroy(m);
             terrainMeshes.Clear();
@@ -854,6 +855,12 @@ namespace TheLastFortress
 
         Material veinGold, veinRock;
 
+        /// <summary>The vein model is authored at 1 x 1; drawn larger so it reads at the whole-board zoom.</summary>
+        const float VeinScale = 1.3f;
+
+        /// <summary>Gold vein models by cell (the art prefab only), hidden while a building stands on the vein.</summary>
+        readonly Dictionary<GridPos, GameObject> veinViews = new Dictionary<GridPos, GameObject>();
+
         /// <summary>
         /// Spec 016: each gold vein is a patch of dark spoil with flat gold-flecked stones, low enough that the hero walks
         /// over it and a building's own model covers it. Decoration only; never touches the simulation.
@@ -868,6 +875,16 @@ namespace TheLastFortress
             foreach (var cell in map.Veins)
             {
                 var c = Prims.CellCenter(cell);
+                if (content.goldVeinPrefab != null)
+                {
+                    // The ore ridge; turned per cell so the three veins differ. Hidden under a Mine (SyncGroundDetail).
+                    var vein = Prop(content.goldVeinPrefab, root, c, (cell.X * 67 + cell.Z * 29) % 4 * 90f + 20f, VeinScale);
+                    foreach (var mr in vein.GetComponentsInChildren<MeshRenderer>())
+                        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    veinViews[cell] = vein;
+                    continue;
+                }
+
                 var patch = Prims.Create(PrimitiveType.Cylinder, root, c + new Vector3(0, 0.012f, 0), new Vector3(0.78f, 0.006f, 0.7f), veinRock, "VeinPatch");
                 patch.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 for (var k = 0; k < 6; k++)
@@ -967,12 +984,18 @@ namespace TheLastFortress
                 set.Add(new GridPos(c.X + dx, c.Z + dz));
         }
 
-        /// <summary>Hides ground detail under buildings; rechecked only when occupancy changes.</summary>
+        /// <summary>Hides ground detail and vein ridges under buildings; rechecked only when occupancy changes.</summary>
         void SyncGroundDetail(RunSimulation sim)
         {
-            if (groundDetail.Count == 0 || sim.Grid.Revision == groundDetailRevision) return;
+            if ((groundDetail.Count == 0 && veinViews.Count == 0) || sim.Grid.Revision == groundDetailRevision) return;
             groundDetailRevision = sim.Grid.Revision;
             foreach (var pair in groundDetail)
+            {
+                var free = sim.Grid.GetOccupant(pair.Key) == null;
+                if (pair.Value.activeSelf != free) pair.Value.SetActive(free);
+            }
+
+            foreach (var pair in veinViews)
             {
                 var free = sim.Grid.GetOccupant(pair.Key) == null;
                 if (pair.Value.activeSelf != free) pair.Value.SetActive(free);

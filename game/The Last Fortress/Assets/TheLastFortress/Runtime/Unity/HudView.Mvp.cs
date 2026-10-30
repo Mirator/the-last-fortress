@@ -66,6 +66,9 @@ namespace TheLastFortress
         public Button RecoverButton { get; private set; }
         public Button ResumeButton { get; private set; }
         public Button SaveAndQuitButton { get; private set; }
+
+        /// <summary>In-run menu outside Day: back to the title without saving the night (asks first at Night/Reward).</summary>
+        public Button MenuMainMenuButton { get; private set; }
         public Button SettingsButton { get; private set; }
         public Button RunMenuButton { get; private set; }
 
@@ -286,7 +289,12 @@ namespace TheLastFortress
                 game.CloseMenu();
                 game.RequestRestart(); // a progressed run asks first; the dialog holds the world like the menu did
             }, out _);
-            SaveAndQuitButton = MakeButton(menuPanel, "Save and Quit", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () => game.SaveAndQuit(), out _);
+            SaveAndQuitButton = MakeButton(menuPanel, "Save and Quit to main menu", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () => game.SaveAndQuit(), out _);
+            MenuMainMenuButton = MakeButton(menuPanel, "Main menu", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () =>
+            {
+                game.CloseMenu();
+                game.RequestMainMenu(); // Night/Reward ask first; the dialog holds the world like the menu did
+            }, out _);
             SettingsButton = MakeButton(menuPanel, "Settings", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), OpenSettings, out _);
             MenuHelpButton = MakeButton(menuPanel, "Help", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), OpenHelp, out _);
             CreditsButton = MakeButton(menuPanel, "Credits", new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 56), () => creditsPanel.SetActive(true), out _);
@@ -298,6 +306,7 @@ namespace TheLastFortress
             menuStack.Add((ResumeButton.gameObject, 64));
             menuStack.Add((MenuRestartRunButton.gameObject, 56));
             menuStack.Add((SaveAndQuitButton.gameObject, 56));
+            menuStack.Add((MenuMainMenuButton.gameObject, 56));
             menuStack.Add((SettingsButton.gameObject, 56));
             menuStack.Add((MenuHelpButton.gameObject, 56));
             menuStack.Add((CreditsButton.gameObject, 56));
@@ -906,8 +915,11 @@ namespace TheLastFortress
                 }
             }
             seedRow.gameObject.SetActive(!hasRun && (seedExpanded || seedError != null));
-            SaveAndQuitButton.gameObject.SetActive(hasRun);
+            // Day saves on the way out; Night, Reward and an ended run leave through Main menu instead.
+            SaveAndQuitButton.gameObject.SetActive(hasRun && sim.State == RunState.Day);
             SaveAndQuitButton.interactable = hasRun && sim.State == RunState.Day && !pending;
+            MenuMainMenuButton.gameObject.SetActive(hasRun && sim.State != RunState.Day);
+            MenuMainMenuButton.interactable = !pending;
             CreditsButton.gameObject.SetActive(!hasRun);
             Set(menuPromise, hasRun ? $"Paused — {(sim.State == RunState.Day ? "Day" : sim.State == RunState.Night ? "Night" : "Reward")} {sim.NightNumber} of {sim.TotalNights}" : "Build by day. Hold until dawn.");
             LayoutMenu();

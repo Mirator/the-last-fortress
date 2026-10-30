@@ -159,6 +159,8 @@ namespace TheLastFortress.Editor
                 ["ArtSoilTilled"] = new Spec { Tex = "soil", Tint = new Color(0.52f, 0.4f, 0.3f), Tiling = 1.5f, Smoothness = 0.06f },
                 ["ArtHay"] = new Spec { Tex = "wood", Tint = new Color(0.95f, 0.82f, 0.5f), Tiling = 4f },
                 ["ArtPennant"] = new Spec { Tex = "cloth", Tint = Palette.Amber, Tiling = 4f },
+                ["ArtGoldOre"] = new Spec { Tint = C(0xE8B33A), Smoothness = 0.62f, Metallic = 0.85f, Emission = C(0xE8B33A) * 0.4f },
+                ["ArtOreRock"] = new Spec { Tex = "rock", Tint = new Color(0.64f, 0.58f, 0.52f), Tiling = 1.6f, Smoothness = 0.12f },
                 ["ArtKeg"] = new Spec { Tex = "wood", Tint = Palette.Hex(0xC08A52), Tiling = 3f, Emission = Palette.Hex(0xC08A52) * 0.3f },
                 ["ArtHazard"] = new Spec { Tex = "cloth", Tint = Palette.Hex(0xC8442C), Tiling = 4f, Emission = Palette.Hex(0xC8442C) * 0.6f },
                 ["ArtRunnerCloth"] = new Spec { Tex = "cloth", Tint = Palette.Hex(0xD39A4C), Tiling = 4f, Emission = Palette.Hex(0xD39A4C) * 0.4f },
@@ -284,6 +286,26 @@ namespace TheLastFortress.Editor
             PresentationSetup.Link(content);
             AssetDatabase.SaveAssets();
             Debug.Log("Mine imported and assigned to the release content.");
+        }
+
+        /// <summary>
+        /// Spec 016 gold vein decoration (models_ext.py gold_vein): imports it and assigns it to the release content; every
+        /// other asset stays untouched. Batch: -executeMethod TheLastFortress.Editor.ArtSetup.RunGoldVein
+        /// </summary>
+        [MenuItem("The Last Fortress/Art/Import and Assign Gold Vein")]
+        public static void RunGoldVein()
+        {
+            PrototypeSetup.EnsureFolder(Prefabs);
+            AssetDatabase.Refresh();
+            var mats = CreateMaterials();
+            ConfigureModels(mats, $"{Models}/ArtGoldVein.fbx");
+            var vein = Variant("ArtGoldVein");
+            var content = AssetDatabase.LoadAssetAtPath<PrototypeContent>(ReleaseSetup.ContentPath);
+            if (content == null) throw new FileNotFoundException("Release content missing; run the release setup first.");
+            content.goldVeinPrefab = vein;
+            EditorUtility.SetDirty(content);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Gold vein imported and assigned to the release content.");
         }
 
         /// <summary>

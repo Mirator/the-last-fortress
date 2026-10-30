@@ -860,6 +860,29 @@ namespace TheLastFortress
         }
 
         /// <summary>
+        /// In-run menu "Main menu" outside Day (Day uses Save and Quit). Ended runs leave at once; Night and Reward first
+        /// explain that Continue replays the night from its Day checkpoint.
+        /// </summary>
+        public void RequestMainMenu()
+        {
+            if (Persistence == null || !Persistence.HasRun || Sim.IsTerminal || Sim.State == RunState.Day)
+            {
+                QuitToMenuWithoutSaving();
+                return;
+            }
+
+            var offer = Sim.State == RunState.Reward ? $" The reward offer for Night {Sim.NightNumber} is kept." : "";
+            var request = new ConfirmRequest
+            {
+                Title = "Leave to the main menu?",
+                Body = $"Combat is not saved. Continue will replay Night {Sim.NightNumber} from the start of Day {Sim.NightNumber}.{offer}",
+            };
+            request.Options.Add(("Main menu", QuitToMenuWithoutSaving));
+            request.Options.Add(("Cancel", CancelConfirm));
+            OpenConfirm(request);
+        }
+
+        /// <summary>
         /// Menu "Quit game". With unsaved Day edits: save and exit / exit without them / cancel. During Night or Reward:
         /// explains that Continue replays the night from its Day checkpoint. Otherwise exits directly.
         /// </summary>

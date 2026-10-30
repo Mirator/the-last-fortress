@@ -358,6 +358,65 @@ def mine():
     export("ArtMine")
 
 
+GOLD_ORE, ORE_ROCK = "ArtGoldOre", "ArtOreRock"
+
+
+def jagged_bm(radius, rng, jitter=0.28, subdiv=1, floor=-0.25):
+    """A faceted stone: an icosphere with each vertex pushed in or out, its underside cut flat at floor * radius."""
+    bm = ico_bm(radius, subdiv)
+    for v in bm.verts:
+        v.co *= 1.0 + rng.uniform(-jitter, jitter)
+        v.co.z = max(v.co.z, floor * radius)
+    return bm
+
+
+def gold_vein():
+    """Spec 016 gold vein, 1 x 1 decoration (pivot at the cell centre), under 0.2 high: a weathered quartz-and-slate ridge
+    breaking the ground on a diagonal, split by a seam of native gold. Gold crystals sit in the cracks, nuggets and spoil
+    chips lie around an irregular patch of dark, gold-flecked earth. Low enough that the hero and enemies read over it."""
+    r = root("GoldVein")
+    p = Part("Body")
+    rng = random.Random(1849)
+    # irregular patch of dark spoil: a flat disc with a wobbling rim
+    ground = bmesh.new()
+    centre = ground.verts.new((0, 0, 0.004))
+    rim = []
+    for i in range(18):
+        a = i / 18 * math.tau
+        rr = 0.3 + 0.06 * math.sin(a * 3 + 1.1) + rng.uniform(-0.03, 0.03)
+        rim.append(ground.verts.new((math.cos(a) * rr, math.sin(a) * rr * 0.9, 0.002)))
+    for i in range(18):
+        ground.faces.new((centre, rim[i], rim[(i + 1) % 18]))
+    p.add(ground, SOIL_DARK, trs())
+    # the ridge: slabs along a diagonal, tilted as if pushed up out of the ground
+    # (x, y, size, stretch, quartz): dark ore rock with milky quartz boulders, where the gold shows
+    ridge = ((-0.24, -0.15, 0.12, 1.3, False), (-0.07, -0.03, 0.15, 1.2, True), (0.11, 0.1, 0.13, 1.25, False),
+             (0.26, 0.21, 0.09, 1.1, True), (-0.03, 0.17, 0.07, 1.0, False), (0.12, -0.12, 0.06, 1.0, True))
+    for (x, y, s, stretch, quartz) in ridge:
+        p.add(jagged_bm(s, rng, 0.22), STONE if quartz else ORE_ROCK,
+              trs((x, y, 0.0), (rng.uniform(-10, 10), rng.uniform(6, 18), 40 + rng.uniform(-20, 20)), (stretch, 0.8, 0.75)))
+        # gold set into the top of each stone: lumps half buried, never spikes (spikes read as the Spike Trap)
+        for k in range(4 if quartz else 2):
+            a = rng.uniform(0, math.tau)
+            d = rng.uniform(0.0, 0.45) * s
+            g = rng.uniform(0.026, 0.04) * (1.25 if quartz else 1.0)
+            p.add(jagged_bm(g, rng, 0.25, 1, -0.6), GOLD_ORE,
+                  trs((x + math.cos(a) * d, y + math.sin(a) * d, s * 0.62), (0, 0, rng.uniform(0, 360)), (1.3, 1.0, 0.6)))
+    # the seam: a flat ribbon of gold running along the ridge top
+    for (x, y, l) in ((-0.16, -0.09, 0.14), (0.02, 0.04, 0.16), (0.19, 0.16, 0.1)):
+        p.add(jagged_bm(0.5, rng, 0.1, 1, -0.5), GOLD_ORE, trs((x, y, 0.085), (0, 0, 40 + rng.uniform(-10, 10)), (l, 0.022, 0.03)))
+    # loose nuggets and grey spoil chips around the ridge
+    for i in range(16):
+        a = rng.uniform(0, math.tau)
+        d = rng.uniform(0.16, 0.36)
+        gold = i % 3 != 2
+        s = rng.uniform(0.014, 0.026) if gold else rng.uniform(0.022, 0.04)
+        p.add(jagged_bm(s, rng, 0.3, 0, -0.1), GOLD_ORE if gold else ORE_ROCK,
+              trs((math.cos(a) * d, math.sin(a) * d * 0.9, 0.004), (0, 0, rng.uniform(0, 360)), (1.2, 1.0, 0.7)))
+    p.build(r)
+    export("ArtGoldVein")
+
+
 if __name__ == "__main__":
     only = sys.argv[sys.argv.index("--") + 2:] if "--" in sys.argv else []
     if only:  # e.g. -- <output folder> cannon_field: regenerate only the named models

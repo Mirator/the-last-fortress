@@ -38,6 +38,9 @@ namespace TheLastFortress
 
         /// <summary>Spec 016 Mine (release-rules-4 only).</summary>
         public GameObject minePrefab;
+
+        [Tooltip("Spec 016 gold vein decoration (ore ridge with gold). Null draws the primitive patch with flecks.")]
+        public GameObject goldVeinPrefab;
         public GameObject raiderArcherPrefab;
         public GameObject bomberPrefab;
         public GameObject commanderPrefab;

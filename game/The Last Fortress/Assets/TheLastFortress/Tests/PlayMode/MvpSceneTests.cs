@@ -251,6 +251,14 @@ namespace TheLastFortress.Tests
             game.RequestQuit();
             StringAssert.Contains("Continue will replay Night 1 from the start of Day 1", game.PendingConfirm.Body);
             game.CancelConfirm();
+            game.OpenMenu();
+            game.SyncViews();
+            Assert.IsTrue(game.Hud.MenuMainMenuButton.gameObject.activeSelf && game.Hud.MenuMainMenuButton.interactable, "Night: the menu still leads back to the title");
+            Assert.IsFalse(game.Hud.SaveAndQuitButton.gameObject.activeSelf);
+            game.Hud.MenuMainMenuButton.onClick.Invoke();
+            StringAssert.Contains("Continue will replay Night 1 from the start of Day 1", game.PendingConfirm.Body);
+            game.CancelConfirm();
+            Assert.IsFalse(game.MenuOpen, "Cancel keeps playing the night");
             for (var i = 0; i < 20000 && game.Sim.State == RunState.Night; i++) game.Sim.Step();
             game.SyncViews();
             yield return null;
