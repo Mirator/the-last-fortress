@@ -1,6 +1,6 @@
 # Feature spec 017: land economy and map overhaul
 
-Version 0.2, 2026-10-30. Status: **APPROVED 2026-10-30.** Owner decisions 2026-10-30: D1-a, D5-a, D6-a, D7-a, D9-a; D2-a, D3, D4-a, D8 and D10 as recommended, confirmed with plan 037. Builds on spec 016 (raids, gold veins, the Mine), whose pressure gate it takes over.
+Version 0.3, 2026-10-30. Status: **APPROVED 2026-10-30.** Owner decisions 2026-10-30: D1-a, D5-a, D6-a, D7-a, D9-a; D2-a, D3, D4-a, D8 and D10 as recommended, confirmed with plan 037; v0.3 adds the owner's answers on how tiers and perks combine with D3. Builds on spec 016 (raids, gold veins, the Mine), whose pressure gate it takes over.
 
 Changes `002-game-rules.md` (v1.21 once spec 016 is merged), sections 2, 5, 6, 7, 9, 11, 12, 13 and 16, under `release-rules-4`. Legacy profiles are unchanged.
 
@@ -38,6 +38,10 @@ Wealth then sits away from the core, and the player chooses how far to reach and
 - **D3: Values [P].**
   - Starting points: House 4 + 2 per fertile neighbour, at most 4 sides (4–12). Farm 8 + 3 per fertile neighbour, at most 8 cells around a 2 × 2 (8–32).
   - Tiers, Market Square, Efficient Farming and the Farm + House bonus are re-expressed on top of these. The probe tunes them.
+  - v0.3 (owner, 2026-10-30), how they combine:
+    - House = 4 + 2 per free fertile neighbour + tier (+5 at II, +10 at III) + Market Square (+1 more per free fertile neighbour; it no longer rewards a House next to a House).
+    - Farm = floor((8 + 3 per free fertile neighbour + tier (+5 / +10) + Farm + House link (+5, kept) + Market hall (+5)) × (100 + Efficient Farming 30%) / 100).
+    - Tier bonuses stay flat. Every value is [P].
 - **D4: Preview.**
   - (a) *Recommended:* by Day, a ghost House or Farm shows its counted fertile cells and its expected income, and the selection panel shows the same for a placed building.
 

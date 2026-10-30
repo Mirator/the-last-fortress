@@ -37,6 +37,12 @@ namespace TheLastFortress.Tests
 
             /// <summary>Seeds (on this policy's profile) whose victory the test protects; other seeds are logged only.</summary>
             public uint[] Recorded;
+
+            /// <summary>
+            /// Spec 017: an adaptive script reads the board as played on Day 1 and returns its defense and economy items
+            /// (<see cref="AdaptivePolicies"/>); they are not turned with the symmetry. Null for the fixed scripts.
+            /// </summary>
+            public Func<RunSimulation, (string[] defense, string[] economy)> Build;
         }
 
         // Kill zone where every route converges: an Archer ring, Cannons on the diagonals boosted by Watchtowers, a sealed Keep.
@@ -364,8 +370,9 @@ namespace TheLastFortress.Tests
                 Seed = seed, Terrain = MapProfiles.Generate(policy.Map, seed, symmetry), Campaign = ReleaseCampaign.Create(seed, policy.Map, symmetry, rules),
             });
             log.AppendLine($"## {policy.Name} on {sim.Config.Terrain.Describe()} ({rules}{(sim.HasHero ? $", hero {hero}" : "")}{(build ? "" : ", no construction")})");
-            var defense = new Queue(policy.Defense.Select(i => TurnAboutKeep(i, symmetry)).ToArray());
-            var economy = new Queue(policy.Economy.Select(i => TurnAboutKeep(i, symmetry)).ToArray());
+            var plan = policy.Build?.Invoke(sim);
+            var defense = new Queue(plan?.defense ?? policy.Defense.Select(i => TurnAboutKeep(i, symmetry)).ToArray());
+            var economy = new Queue(plan?.economy ?? policy.Economy.Select(i => TurnAboutKeep(i, symmetry)).ToArray());
             var combat = 0.0;
             var (fuses, blasts, batch) = (0, 0, new List<SimEvent>()); // Bomber role check (plan 015 review)
             var kite = hero == HeroScript.Kite ? new KiteState() : null;

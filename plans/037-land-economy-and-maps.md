@@ -1,6 +1,6 @@
 # Plan 037: land economy and map overhaul
 
-Status: **APPROVED 2026-10-30, IN PROGRESS.** Spec 017 D1, D5, D6, D7 and D9 were decided on 2026-10-30; approving this plan confirmed D2-a, D3, D4-a, D8 and D10 as recommended. Priority P1. Effort XL (about 3–5 weeks, staged). Implements **`specs/017-land-economy-and-maps.md` v0.2**. Builds on plan 036: raids, gold veins and the Mine are implemented, tested and uncommitted; its pressure gate moves to spec 017 D10.
+Status: **APPROVED 2026-10-30, IN PROGRESS.** Spec 017 D1, D5, D6, D7 and D9 were decided on 2026-10-30; approving this plan confirmed D2-a, D3, D4-a, D8 and D10 as recommended. Priority P1. Effort XL (about 3–5 weeks, staged). Implements **`specs/017-land-economy-and-maps.md` v0.3**. Builds on plan 036: raids, gold veins and the Mine are implemented, tested and uncommitted; its pressure gate moves to spec 017 D10.
 
 The owner chose the options that keep stage 3 in the plan (a Keep that varies by map, generated entries) and a 20 × 20 board changed in place.
 
@@ -17,6 +17,8 @@ The owner chose the options that keep stage 3 in the plan (a Keep that varies by
 - **Probe.** `Tests/EditMode/Probe036.cs` and its `BeforeNight` hook are temporary and never committed.
 
 ## 2. Stages, each with a gate
+
+Owner, 2026-10-30: stage 2 runs before stage 1, because its gate is measured before any rule change.
 
 0. **Close plan 036 (stages 1–4).**
    - Merge raids, veins, the Mine and the 150 spawn limit into `002-game-rules.md` v1.21, and archive spec 016 with "gate superseded by spec 017".
@@ -79,3 +81,4 @@ The owner chose the options that keep stage 3 in the plan (a Keep that varies by
 | Stage | Result |
 |---|---|
 | 0. Close plan 036 | Rules v1.21 merged (raids, veins, the Mine, spawn limit 150); spec 016 archived with its gate superseded by spec 017 D10; probe hook removed. On the committed tree (the temporary probe moved out of `Assets`): EditMode 166/166, PlayMode 25 passed and 1 skipped (`evidence/037/stage0`). |
+| 2. Adaptive policy scripts (run before stage 1, owner 2026-10-30) | `Tests/EditMode/AdaptivePolicies.cs`: kill-zone, corridor, economy and house-ring builders that read the Keep, every night's entries, their Day-1 routes, terrain and veins (fertile land = all land until stage 1). Pacing and perks copied from the fixed twins. Probe (`evidence/037/stage2/probe037.txt`; active hero, seeds 1–5 on their own orientations, rules unchanged), fixed vs adaptive: kill-zone 5/5 vs 5/5, corridor 3/5 vs 4/5, economy 5/5 vs 5/5 (3 Mines each), house-ring 5/5 vs 5/5. **Gate passed** (all within one seed; no script tuning). The fixed results equal plan 036's round 0, so the `Play` hook changed nothing for them. New test `AdaptivePolicyTests` (plans legal, repeatable, corridor never seals an open entry; 3 profiles × 8 orientations × 2 seeds) passes. Not run: full EditMode (only test code changed; the stage 3 suites run in full). Known limit: the active-hero script still guards `GridState.KeepCell`; stage 3 moves it to the run's Keep. |
