@@ -71,6 +71,9 @@ namespace TheLastFortress
         public const int SpikedCorridorMax = 8;
         public const int GatehouseReductionPercent = 30;
         public const int MarketSquareBonus = 4;
+
+        /// <summary>Spec 017 v0.3 [P]: under the land rule, Market Square pays each House this much more per free fertile neighbour.</summary>
+        public const int MarketSquareFieldBonus = 1;
         public const int WarBondsGold = 30;
         public const int SignalFiresReach = 2;
         public const int FieldEngineersBudget = 30;
@@ -167,6 +170,10 @@ namespace TheLastFortress
                 default: return id;
             }
         }
+
+        /// <summary>Spec 017: the effect text under the land rule (Market Square pays per fertile field), else <see cref="Effect(string)"/>.</summary>
+        public static string Effect(string id, bool landEconomy) =>
+            landEconomy && id == MarketSquare ? $"Each House earns +{MarketSquareFieldBonus} gold per day more for every free fertile field beside it." : Effect(id);
 
         public static string Effect(string id)
         {

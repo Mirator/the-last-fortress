@@ -229,7 +229,7 @@ namespace TheLastFortress
             CurrentOffer = null;
             PendingOffer = null;
             Planner.ClearCache();
-            grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells);
+            grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells) { Fertile = config.Terrain?.Fertile };
             placement = new PlacementService(grid, Definitions, Definitions.StartingGold) { Terrain = config.Terrain };
             rewardRng = RunRandom.ForRewards(config.Seed);
             Stats = new RunStats();
@@ -887,7 +887,7 @@ namespace TheLastFortress
         internal string ApplyCheckpoint(RunCheckpoint cp, string[] perks, RewardOffer pending, List<RewardOffer> history, uint rngState)
         {
             ownedPerks.AddRange(perks); // before buildings: HP legality uses the effective maximum
-            grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells);
+            grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells) { Fertile = config.Terrain?.Fertile };
             buffKey = -1;
             buildingsById.Clear();
             towers.Clear();

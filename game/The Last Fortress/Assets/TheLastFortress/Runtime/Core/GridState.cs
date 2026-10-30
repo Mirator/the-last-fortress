@@ -38,6 +38,14 @@ namespace TheLastFortress
 
         public bool IsImpassableTerrain(GridPos cell) => GridCoordinates.IsInBounds(cell) && impassable[Index(cell)];
 
+        /// <summary>Spec 017: the map's fertile cells; null = every land cell (see <see cref="TerrainMap.Fertile"/>).</summary>
+        public ICollection<GridPos> Fertile { get; set; }
+
+        /// <summary>Spec 017: fertile land with no building and no trap on it (enemies and the hero do not matter).</summary>
+        public bool IsFreeFertile(GridPos cell) =>
+            GridCoordinates.IsInBounds(cell) && !impassable[Index(cell)] && (Fertile == null || Fertile.Contains(cell)) &&
+            occupants[Index(cell)] == null && traps[Index(cell)] == null;
+
         /// <summary>Solid building owning the cell, or null. Traps are not occupants.</summary>
         public Building GetOccupant(GridPos cell) =>
             GridCoordinates.IsInBounds(cell) ? occupants[Index(cell)] : null;

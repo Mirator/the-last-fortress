@@ -28,11 +28,8 @@ namespace TheLastFortress.Tests
                 EconomyUntilDay = fixedScript.EconomyUntilDay, Perks = fixedScript.Perks, Build = build,
             };
 
-        /// <summary>
-        /// Stage 2 stand-in for spec 017's fertile land: every land cell (the D9-a rule for a save without a fertile list).
-        /// Stage 1 replaces it with the map's fertile flag.
-        /// </summary>
-        static bool IsFertile(Board b, GridPos c) => b.IsLand(c);
+        /// <summary>Spec 017 fertile land as the run sees it (every land cell when the map has no fertile list).</summary>
+        static bool IsFertile(Board b, GridPos c) => b.IsLand(c) && (b.Fertile == null || b.Fertile.Contains(c));
 
         // ---------- kill-zone: seal the Keep, ring it with Towers, Cannons on the approaches ----------
 
@@ -232,6 +229,8 @@ namespace TheLastFortress.Tests
                         routeWeight[c] = (routeWeight.TryGetValue(c, out var w) ? w : 0) + uses[e];
                 }
             }
+
+            public ICollection<GridPos> Fertile => sim.Grid.Fertile;
 
             public bool IsLand(GridPos c) => GridCoordinates.IsInBounds(c) && !sim.Grid.IsImpassableTerrain(c);
 

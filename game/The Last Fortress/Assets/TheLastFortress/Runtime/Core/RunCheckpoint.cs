@@ -37,6 +37,11 @@ namespace TheLastFortress
 
         /// <summary>Spec 016: gold vein cells as z * 20 + x (optional; older saves have none).</summary>
         public int[] veins = new int[0];
+
+        /// <summary>Spec 017: fertile cells as z * 20 + x. Optional: without <see cref="fertileListed"/> (older saves) every free land cell is fertile.</summary>
+        public int[] fertile = new int[0];
+
+        public bool fertileListed;
         public NightData[] nights = new NightData[0];
 
         /// <summary>Active, Victory or Defeat. Terminal records keep the summary but cannot be continued.</summary>
@@ -178,6 +183,12 @@ namespace TheLastFortress
             if (cfg.Terrain != null)
                 for (var i = 0; i < cp.terrain.Length; i++) cp.terrain[i] = (int)cfg.Terrain.Cells[i];
             cp.veins = cfg.Terrain == null ? new int[0] : cfg.Terrain.Veins.ConvertAll(v => v.Z * GridCoordinates.Size + v.X).ToArray();
+            cp.fertileListed = cfg.Terrain?.Fertile != null;
+            var fertile = new List<int>();
+            if (cp.fertileListed)
+                foreach (var c in cfg.Terrain.Fertile) fertile.Add(c.Z * GridCoordinates.Size + c.X);
+            fertile.Sort();
+            cp.fertile = fertile.ToArray();
 
             var nights = new List<NightData>();
             foreach (var w in sim.Campaign.Nights)
@@ -337,6 +348,14 @@ namespace TheLastFortress
                 if (v < 0 || v >= cells || map.Cells[v] != TerrainType.Land || c == GridState.KeepCell || GridCoordinates.IsReservedRing(c) || map.IsVein(c))
                     return Fail("Bad gold vein.", out problem, out message);
                 map.Veins.Add(c);
+            }
+
+            if (cp.fertileListed)
+            {
+                map.Fertile = new HashSet<GridPos>();
+                foreach (var f in cp.fertile ?? new int[0])
+                    if (f < 0 || f >= cells || map.Cells[f] != TerrainType.Land || !map.Fertile.Add(new GridPos(f % GridCoordinates.Size, f / GridCoordinates.Size)))
+                        return Fail("Bad fertile cell.", out problem, out message);
             }
 
             // Waves

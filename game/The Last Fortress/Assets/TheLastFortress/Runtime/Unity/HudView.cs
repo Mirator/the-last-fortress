@@ -387,7 +387,7 @@ namespace TheLastFortress
                 if (!has) continue;
                 var id = offer.PerkIds[i];
                 Set(rewardTitles[i], PerkRules.Title(id));
-                Set(rewardBodies[i], PerkRules.Effect(id) + "\n\n" + Relevance(sim, id) + Condition(sim, id) + IncomePreview(sim, id));
+                Set(rewardBodies[i], PerkRules.Effect(id, sim.Definitions.House?.LandIncome > 0) + "\n\n" + Relevance(sim, id) + Condition(sim, id) + IncomePreview(sim, id));
             }
         }
 
@@ -799,7 +799,7 @@ namespace TheLastFortress
                     var dawns = Mathf.Max(0, sim.TotalNights - sim.NightNumber);
                     var perDay = d.Kind == BuildingKind.Farm && sim.HasPerk(PerkRules.EfficientFarming) ? d.DailyIncome * (100 + PerkRules.EfficientFarmingPercent) / 100 : d.DailyIncome;
                     if (dawns == 0) return "No dawns left: it would never pay";
-                    var more = d.Kind == BuildingKind.Farm ? " (more next to a House)" : "";
+                    var more = d.LandIncome > 0 ? $" plus {d.LandIncome} a day per free fertile field beside it" : d.Kind == BuildingKind.Farm ? " (more next to a House)" : "";
                     return $"Pays at {dawns} more dawn{(dawns == 1 ? "" : "s")}: +{perDay * dawns} gold{more}";
                 default:
                     return "";
@@ -1112,8 +1112,9 @@ namespace TheLastFortress
             {
                 case BuildingKind.Wall: return "Blocks enemy paths";
                 case BuildingKind.Tower: return sim == null ? $"Shoots · range {d.Range:0}" : $"Shoots {sim.TowerDamage(d)} · range {sim.TowerRange(d).ToString("0.#", CultureInfo.InvariantCulture)}";
-                case BuildingKind.House: return $"+{d.DailyIncome} gold per day";
+                case BuildingKind.House: return d.LandIncome > 0 ? $"+{d.DailyIncome}/day, +{d.LandIncome} per field" : $"+{d.DailyIncome} gold per day";
                 case BuildingKind.Farm:
+                    if (d.LandIncome > 0) return $"+{d.DailyIncome}/day, +{d.LandIncome} per field · 2x2";
                     var farm = sim != null && sim.HasPerk(PerkRules.EfficientFarming) ? d.DailyIncome * (100 + PerkRules.EfficientFarmingPercent) / 100 : d.DailyIncome;
                     return $"+{farm}/day · 2x2 tiles";
                 case BuildingKind.SpikeTrap: return "Hurts enemies on it";

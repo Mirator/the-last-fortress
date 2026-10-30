@@ -53,7 +53,19 @@ namespace TheLastFortress
         public static bool BombersLightOnContact(string rulesVersion) => WalkingEnemies(rulesVersion);
 
         /// <summary>release-rules-4 definitions: release-rules-3 enemies, a 1 x 1 Cannon (owner, 2026-10-21) and upgrade tiers (spec 015).</summary>
-        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => WithMine(Pressure(Bodies(Walking(defs))).WithCompactCannon()).WithUpgrades();
+        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => WithLand(WithMine(Pressure(Bodies(Walking(defs))).WithCompactCannon())).WithUpgrades();
+
+        /// <summary>Spec 017 D3 [P]: a House earns 4 + 2 per free fertile neighbour (at most 4), a Farm 8 + 3 (at most 8).</summary>
+        public static PrototypeDefinitions WithLand(PrototypeDefinitions defs)
+        {
+            if (defs.House == null || defs.House.LandIncome > 0) return defs;
+            var d = defs.WithEnemies(e => e);
+            d.House = defs.House.Copy();
+            (d.House.DailyIncome, d.House.LandIncome) = (4, 2);
+            d.Farm = defs.Farm.Copy();
+            (d.Farm.DailyIncome, d.Farm.LandIncome) = (8, 3);
+            return d;
+        }
 
         /// <summary>Spec 016 pressure [P]: release-rules-4 enemy HP against release-rules-3, as a percentage (floor).</summary>
         public const int PressureHpPercent = 100; // round 1 (120, with counts 130) favoured the sealed ring: see plan 036

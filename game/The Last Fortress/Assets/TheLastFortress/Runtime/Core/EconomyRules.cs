@@ -139,16 +139,49 @@ namespace TheLastFortress
         /// <summary>
         /// The income rule without the survival check (also the Granary's half at destruction). Tier income adds to the base;
         /// a Farm's adjacency term is +5 for any edge-adjacent House and +5 more for a Market hall among them (once each).
+        /// Spec 017 land rule (a definition with <see cref="BuildingDefinition.LandIncome"/>): the base also earns per free
+        /// fertile field, and Market Square (<paramref name="houseLinkBonus"/> &gt; 0) pays a House per field instead of per
+        /// neighbouring House.
         /// </summary>
         public static int IncomeOf(GridState grid, Building b, int farmBonusPercent, int houseLinkBonus = 0)
         {
             var tier = BuildingUpgrades.For(b.Definition, b.Tier);
+            var land = b.Definition.LandIncome > 0;
+            var fields = land ? Fields(grid, b) : 0;
             if (b.Kind == BuildingKind.House)
+            {
+                if (land)
+                    return b.Definition.DailyIncome + tier.IncomeBonus + fields * (b.Definition.LandIncome + (houseLinkBonus > 0 ? PerkRules.MarketSquareFieldBonus : 0));
                 return b.Definition.DailyIncome + tier.IncomeBonus + (houseLinkBonus > 0 && HouseHasAdjacentHouse(grid, b) ? houseLinkBonus : 0);
+            }
+
             if (b.Kind == BuildingKind.Mine) return b.Definition.DailyIncome + tier.IncomeBonus;
             if (b.Kind != BuildingKind.Farm) return 0;
-            var gross = b.Definition.DailyIncome + tier.IncomeBonus + (FarmHasAdjacentHouse(grid, b) ? FarmHouseBonus : 0) + MarketHallBonus(grid, b);
+            var gross = b.Definition.DailyIncome + tier.IncomeBonus + fields * b.Definition.LandIncome +
+                        (FarmHasAdjacentHouse(grid, b) ? FarmHouseBonus : 0) + MarketHallBonus(grid, b);
             return gross * (100 + farmBonusPercent) / 100;
+        }
+
+        /// <summary>
+        /// Spec 017 D1/D2: free fertile cells touching the footprint by an edge, each counted once per building (a cell shared
+        /// by two buildings counts for both). A building or trap on a cell removes it; enemies do not.
+        /// </summary>
+        public static int Fields(GridState grid, Building b) => FieldCells(grid, b.Cells).Count;
+
+        /// <summary>The cells <see cref="Fields"/> counts, for a footprint (also a ghost's, for the Day preview).</summary>
+        public static List<GridPos> FieldCells(GridState grid, IReadOnlyList<GridPos> footprint)
+        {
+            var list = new List<GridPos>();
+            foreach (var cell in footprint)
+            foreach (var d in GridPos.CardinalOrder)
+            {
+                var n = cell + d;
+                var inside = false;
+                foreach (var f in footprint) inside |= f == n;
+                if (!inside && !list.Contains(n) && grid.IsFreeFertile(n)) list.Add(n);
+            }
+
+            return list;
         }
 
         /// <summary>Spec 015 Market hall: the largest bonus among surviving edge-adjacent Houses (once per Farm, not per House).</summary>

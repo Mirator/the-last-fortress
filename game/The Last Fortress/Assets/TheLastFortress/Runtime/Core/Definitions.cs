@@ -32,6 +32,9 @@ namespace TheLastFortress
         /// <summary>Gold paid on entering each new Day while the building survives (MVP only).</summary>
         public int DailyIncome;
 
+        /// <summary>Spec 017 (release-rules-4 House and Farm): gold a day per free fertile cell touching the footprint by an edge; 0 = flat income.</summary>
+        public int LandIncome;
+
         /// <summary>Damage dealt once to an enemy completing entry into the cell (Spike Trap only).</summary>
         public int TrapDamage;
 

@@ -267,13 +267,58 @@ namespace TheLastFortress
                 var map = Transform(Candidate(profile, seed, attempt), symmetry);
                 if (Validate(profile, map) != null) continue;
                 PlaceVeins(map);
+                PlaceFertile(map);
                 return map;
             }
 
             var fallback = Transform(Skeleton(profile, seed), symmetry);
             fallback.Fallback = true;
             PlaceVeins(fallback);
+            PlaceFertile(fallback);
             return fallback;
+        }
+
+        public const uint FertileSalt = 0x1B873593;
+        public const int FertileMeadows = 4, FertileMeadowsOpen = 6, FertileRadius = 2, FertileSpacing = 4, FertileKeepDistance = 3;
+
+        /// <summary>
+        /// Spec 017, provisional until the map recipes (plan 037 stage 4): fertile meadows on the board as played. From their
+        /// own stream (seed ^ FertileSalt), meadow centres are drawn from land cells at Chebyshev 3-8 from the Keep, at least 4
+        /// apart; each meadow is the land within Manhattan distance 2 of its centre, never the reserved ring, a vein or a Keep
+        /// neighbour. 4 meadows (6 on the open Meadow profile); fewer when the board has no room.
+        /// </summary>
+        public static void PlaceFertile(TerrainMap map)
+        {
+            map.Fertile = new HashSet<GridPos>();
+            var keep = GridState.KeepCell;
+            var centres = new List<GridPos>();
+            for (var z = 0; z < GridCoordinates.Size; z++)
+            for (var x = 0; x < GridCoordinates.Size; x++)
+            {
+                var c = new GridPos(x, z);
+                var d = Chebyshev(c, keep);
+                if (d >= FertileKeepDistance && d <= 8 && !GridCoordinates.IsReservedRing(c) && map[c] == TerrainType.Land) centres.Add(c);
+            }
+
+            var rng = new RunRandom(map.Seed ^ FertileSalt);
+            var want = map.Profile == Meadow ? FertileMeadowsOpen : FertileMeadows;
+            var chosen = new List<GridPos>();
+            for (var i = 0; i < centres.Count && chosen.Count < want; i++)
+            {
+                var j = i + (int)rng.NextBounded((uint)(centres.Count - i));
+                (centres[i], centres[j]) = (centres[j], centres[i]);
+                var c = centres[i];
+                if (chosen.Exists(o => Chebyshev(o, c) < FertileSpacing)) continue;
+                chosen.Add(c);
+                for (var dz = -FertileRadius; dz <= FertileRadius; dz++)
+                for (var dx = -FertileRadius; dx <= FertileRadius; dx++)
+                {
+                    var f = new GridPos(c.X + dx, c.Z + dz);
+                    if (Math.Abs(dx) + Math.Abs(dz) > FertileRadius || !GridCoordinates.IsInBounds(f) || GridCoordinates.IsReservedRing(f)) continue;
+                    if (map[f] != TerrainType.Land || map.IsVein(f) || Chebyshev(f, keep) <= 1) continue;
+                    map.Fertile.Add(f);
+                }
+            }
         }
 
         public const uint VeinSalt = 0x3C6EF372;

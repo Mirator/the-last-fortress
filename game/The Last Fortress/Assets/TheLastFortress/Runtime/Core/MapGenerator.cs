@@ -39,6 +39,12 @@ namespace TheLastFortress
 
         public bool IsVein(GridPos c) => Veins.Contains(c);
 
+        /// <summary>
+        /// Spec 017 (release-rules-4): fertile land cells, which pay a House or Farm beside them while free. Null means every
+        /// land cell is fertile: a save from before the list (the D9-a rule), the MVP and the flat map.
+        /// </summary>
+        public HashSet<GridPos> Fertile;
+
         public List<GridPos> ImpassableCells()
         {
             var list = new List<GridPos>();
