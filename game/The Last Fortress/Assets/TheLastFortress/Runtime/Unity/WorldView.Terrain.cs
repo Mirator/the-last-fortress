@@ -282,7 +282,8 @@ namespace TheLastFortress
                     lush = 1f;
                 }
 
-                var keep = Mathf.Max(Mathf.Abs(x - GridState.KeepCell.X - 0.5f), Mathf.Abs(z - GridState.KeepCell.Z - 0.5f));
+                var k = map?.Keep ?? GridState.KeepCell; // the prototype scene has no map
+                var keep = Mathf.Max(Mathf.Abs(x - k.X - 0.5f), Mathf.Abs(z - k.Z - 0.5f));
                 soil = Mathf.Max(soil, Mathf.Clamp01(1.4f - keep) * 0.5f); // a trodden yard around the Keep
                 return new Color(soil, sand, rock, lush);
             }

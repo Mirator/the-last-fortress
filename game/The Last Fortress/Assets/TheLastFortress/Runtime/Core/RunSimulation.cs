@@ -229,7 +229,7 @@ namespace TheLastFortress
             CurrentOffer = null;
             PendingOffer = null;
             Planner.ClearCache();
-            grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells) { Fertile = config.Terrain?.Fertile };
+            grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells, config.Terrain?.Keep) { Fertile = config.Terrain?.Fertile };
             placement = new PlacementService(grid, Definitions, Definitions.StartingGold) { Terrain = config.Terrain };
             rewardRng = RunRandom.ForRewards(config.Seed);
             Stats = new RunStats();
@@ -246,7 +246,7 @@ namespace TheLastFortress
             LastPaidDay = 1;
             LastIncome = default;
             State = RunState.Day;
-            var keep = new Building(nextBuildingId++, Definitions.Keep, GridState.KeepCell, 0);
+            var keep = new Building(nextBuildingId++, Definitions.Keep, grid.KeepAt, 0);
             grid.Install(keep);
             buildingsById[keep.Id] = keep;
             bombersLightOnContact = config.Campaign != null && ReleaseCampaign.BombersLightOnContact(config.Campaign.RulesVersion);
@@ -709,7 +709,7 @@ namespace TheLastFortress
             {
                 var route = Planner.Plan(grid, entry, null);
                 if (!route.Found)
-                    errors.Add($"Invalid map: no open or breach route from spawn {entry} to any Keep neighbor of {GridState.KeepCell}.");
+                    errors.Add($"Invalid map: no open or breach route from spawn {entry} to any Keep neighbor of {grid.KeepAt}.");
             }
 
             return errors;
@@ -887,7 +887,7 @@ namespace TheLastFortress
         internal string ApplyCheckpoint(RunCheckpoint cp, string[] perks, RewardOffer pending, List<RewardOffer> history, uint rngState)
         {
             ownedPerks.AddRange(perks); // before buildings: HP legality uses the effective maximum
-            grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells) { Fertile = config.Terrain?.Fertile };
+            grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells, config.Terrain?.Keep) { Fertile = config.Terrain?.Fertile };
             buffKey = -1;
             buildingsById.Clear();
             towers.Clear();
@@ -905,7 +905,7 @@ namespace TheLastFortress
                 var cell = new GridPos(bd.x, bd.z);
                 if (kind == BuildingKind.Keep)
                 {
-                    if (keepSeen || cell != GridState.KeepCell || bd.price != 0) return "Keep record invalid.";
+                    if (keepSeen || cell != grid.KeepAt || bd.price != 0) return "Keep record invalid.";
                     keepSeen = true;
                 }
 
@@ -1341,7 +1341,7 @@ namespace TheLastFortress
             {
                 e.CarryUnits = 0; // residual movement is discarded at the final attack cell
                 if (!freshStep) return; // the attack is acquired on the next simulation step
-                var attackCell = e.Route.IsBreach ? e.Route.Blocker : GridState.KeepCell;
+                var attackCell = e.Route.IsBreach ? e.Route.Blocker : grid.KeepAt;
                 var target = grid.GetOccupant(attackCell);
                 if (target == null || !target.IsAlive || !e.Cell.IsCardinalNeighbor(attackCell))
                     throw new InvalidOperationException($"Enemy {e.Id} at {e.Cell} has invalid attack cell {attackCell}.");
@@ -2307,7 +2307,7 @@ namespace TheLastFortress
             hero.Facing = 0;
             hero.VelX = hero.VelZ = 0;
             hero.ClearAttack();
-            hero.PlaceAt(HeroSpawnCell(GridState.KeepCell));
+            hero.PlaceAt(HeroSpawnCell(grid.KeepAt));
             provokedArchers.Clear();
             heroDayAccumulatorNs = 0;
             heroDayTick = 0;
@@ -2355,7 +2355,7 @@ namespace TheLastFortress
                 hero.SwingReadyTick = Tick;
                 hero.VelX = hero.VelZ = 0;
                 hero.ClearAttack();
-                hero.PlaceAt(HeroSpawnCell(GridState.KeepCell));
+                hero.PlaceAt(HeroSpawnCell(grid.KeepAt));
                 provokedArchers.Clear();
                 events.Add(new SimEvent(SimEventType.HeroRespawned, Tick, HeroRules.SourceId, -1, hero.Cell, hero.X, hero.Z, hero.X, hero.Z));
             }

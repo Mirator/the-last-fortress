@@ -35,7 +35,20 @@ namespace TheLastFortress
         /// <summary>Spec 016: gold vein cells (land; a Mine may only stand on one). Empty for the MVP, the flat map and older saves.</summary>
         public readonly List<GridPos> Veins = new List<GridPos>();
 
+        /// <summary>Spec 017: the Keep's cell (the fixed centre for the MVP, the flat map and the plan 008 profiles).</summary>
+        public GridPos Keep = GridState.KeepCell;
+
+        /// <summary>
+        /// Spec 017: the map's entries in campaign index order (the table's W, E, N, S are indices 0-3). Null for the MVP and
+        /// the flat map, whose campaigns name the side midpoints directly.
+        /// </summary>
+        public List<GridPos> Entries;
+
         public TerrainType this[GridPos c] => Cells[c.Z * GridCoordinates.Size + c.X];
+
+        /// <summary>The map's entries, or the four side midpoints when it lists none.</summary>
+        public IReadOnlyList<GridPos> EntriesOrSides() =>
+            Entries ?? (IReadOnlyList<GridPos>)new[] { MvpCampaign.West, MvpCampaign.East, MvpCampaign.North, MvpCampaign.South };
 
         public bool IsVein(GridPos c) => Veins.Contains(c);
 

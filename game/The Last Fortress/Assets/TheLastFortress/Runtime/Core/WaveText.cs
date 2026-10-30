@@ -9,10 +9,12 @@ namespace TheLastFortress
     {
         public static string EntryName(GridPos cell)
         {
-            if (cell == MvpCampaign.West) return "West";
-            if (cell == MvpCampaign.East) return "East";
-            if (cell == MvpCampaign.North) return "North";
-            if (cell == MvpCampaign.South) return "South";
+            // Spec 017: entries anywhere on the boundary ring are named by their side (the side midpoints as before).
+            var max = GridCoordinates.Size - 1;
+            if (cell.X == 0 && cell.Z > 0 && cell.Z < max) return "West";
+            if (cell.X == max && cell.Z > 0 && cell.Z < max) return "East";
+            if (cell.Z == max && cell.X > 0 && cell.X < max) return "North";
+            if (cell.Z == 0 && cell.X > 0 && cell.X < max) return "South";
             return cell.ToString();
         }
 

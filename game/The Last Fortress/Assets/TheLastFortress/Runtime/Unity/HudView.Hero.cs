@@ -92,7 +92,7 @@ namespace TheLastFortress
             var arrow = "";
             if (show)
             {
-                var keep = Prims.CellCenter(GridState.KeepCell, 1.5f);
+                var keep = Prims.CellCenter(sim.Keep.Cell, 1.5f);
                 var sp = ProjectToScreen(keep);
                 var c = ScreenToCanvas(new Vector2(sp.x, sp.y));
                 var behind = sp.z < 0f;

@@ -937,7 +937,7 @@ namespace TheLastFortress
                 if (map.Cells[i] != TerrainType.Land || crossings.Contains(cell)) Around(mask, cell, map.Cells[i] == TerrainType.Water || crossings.Contains(cell) ? 1 : 0);
             }
 
-            Around(mask, GridState.KeepCell, 1);
+            Around(mask, map.Keep, 1);
             var detail = new GameObject("GroundDetail").transform;
             detail.SetParent(terrainRoot.transform, false);
             for (var i = 0; i < map.Cells.Length; i++)
@@ -1402,7 +1402,7 @@ namespace TheLastFortress
                 else if (e.TargetsHero && sim.Hero != null)
                     facing = new Vector3((float)sim.Hero.X, 0f, (float)sim.Hero.Z) - cur;
                 else facing = cur - prev;
-                if (!view.Oriented && facing.sqrMagnitude <= 1e-6f) facing = Prims.CellCenter(GridState.KeepCell) - cur; // standing spawn: face the Keep
+                if (!view.Oriented && facing.sqrMagnitude <= 1e-6f) facing = Prims.CellCenter(sim.Keep.Cell) - cur; // standing spawn: face the Keep
                 t.position = pos;
                 if (facing.sqrMagnitude > 1e-6f)
                 {

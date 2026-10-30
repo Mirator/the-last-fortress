@@ -305,7 +305,7 @@ namespace TheLastFortress.Tests
             foreach (var e in sim.Enemies)
             {
                 if (!e.Alive) continue;
-                double kx = e.X - (GridState.KeepCell.X + 0.5), kz = e.Z - (GridState.KeepCell.Z + 0.5);
+                double kx = e.X - (sim.Keep.Cell.X + 0.5), kz = e.Z - (sim.Keep.Cell.Z + 0.5);
                 if (kx * kx + kz * kz > ActiveHeroLeash * ActiveHeroLeash) continue;
                 double dx = e.X - hero.X, dz = e.Z - hero.Z;
                 var d = dx * dx + dz * dz;
@@ -332,7 +332,7 @@ namespace TheLastFortress.Tests
                 return HeroCommand.Fine(stop ? -1 : facing, best <= reach * reach, facing);
             }
 
-            var home = sim.HeroSpawnCell(GridState.KeepCell);
+            var home = sim.HeroSpawnCell(sim.Keep.Cell);
             double hx = home.X + 0.5 - hero.X, hz = home.Z + 0.5 - hero.Z;
             if (contact)
                 return hx * hx + hz * hz < 0.2 * 0.2 ? HeroCommand.Fine(-1, false, hero.Facing) : HeroCommand.Fine(HeroRules.FacingToward(hx, hz), false, HeroRules.FacingToward(hx, hz));

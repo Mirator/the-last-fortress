@@ -266,16 +266,26 @@ namespace TheLastFortress
             {
                 var map = Transform(Candidate(profile, seed, attempt), symmetry);
                 if (Validate(profile, map) != null) continue;
-                PlaceVeins(map);
-                PlaceFertile(map);
+                Finish(map, symmetry);
                 return map;
             }
 
             var fallback = Transform(Skeleton(profile, seed), symmetry);
             fallback.Fallback = true;
-            PlaceVeins(fallback);
-            PlaceFertile(fallback);
+            Finish(fallback, symmetry);
             return fallback;
+        }
+
+        /// <summary>Spec 017: a profile map keeps the centre Keep and lists the four side midpoints, turned, as entries 0-3; then veins and meadows.</summary>
+        static void Finish(TerrainMap map, int symmetry)
+        {
+            map.Keep = GridState.KeepCell;
+            map.Entries = new List<GridPos>
+            {
+                EntryFor(symmetry, MvpCampaign.West), EntryFor(symmetry, MvpCampaign.East), EntryFor(symmetry, MvpCampaign.North), EntryFor(symmetry, MvpCampaign.South),
+            };
+            PlaceVeins(map);
+            PlaceFertile(map);
         }
 
         public const uint FertileSalt = 0x1B873593;
@@ -290,7 +300,7 @@ namespace TheLastFortress
         public static void PlaceFertile(TerrainMap map)
         {
             map.Fertile = new HashSet<GridPos>();
-            var keep = GridState.KeepCell;
+            var keep = map.Keep;
             var centres = new List<GridPos>();
             for (var z = 0; z < GridCoordinates.Size; z++)
             for (var x = 0; x < GridCoordinates.Size; x++)
@@ -334,7 +344,7 @@ namespace TheLastFortress
         {
             map.Veins.Clear();
             var route = new HashSet<GridPos>();
-            foreach (var entry in new[] { MvpCampaign.West, MvpCampaign.East, MvpCampaign.North, MvpCampaign.South })
+            foreach (var entry in map.EntriesOrSides())
             {
                 var r = PlanOpen(map, entry);
                 if (r.Found && !r.IsBreach) route.UnionWith(r.Cells);
@@ -347,7 +357,7 @@ namespace TheLastFortress
             {
                 var c = new GridPos(x, z);
                 if (GridCoordinates.IsReservedRing(c) || map[c] != TerrainType.Land || route.Contains(c) || river.Contains(c)) continue;
-                if (Chebyshev(c, GridState.KeepCell) < VeinKeepDistance) continue;
+                if (Chebyshev(c, map.Keep) < VeinKeepDistance) continue;
                 var near = false;
                 foreach (var r in route)
                     if (Chebyshev(c, r) <= VeinRouteReach) { near = true; break; }
@@ -366,7 +376,7 @@ namespace TheLastFortress
             foreach (var c in candidates)
             {
                 if (map.Veins.Count >= VeinCount) return;
-                var q = (c.X < GridState.KeepCell.X ? 0 : 1) + (c.Z < GridState.KeepCell.Z ? 0 : 2);
+                var q = (c.X < map.Keep.X ? 0 : 1) + (c.Z < map.Keep.Z ? 0 : 2);
                 if (pass == 0 && quadrants[q]) continue;
                 if (map.Veins.Exists(v => v == c || Chebyshev(v, c) < VeinSpacing)) continue;
                 map.Veins.Add(c);
@@ -451,8 +461,8 @@ namespace TheLastFortress
 
         static Route PlanOpen(TerrainMap map, GridPos entry)
         {
-            var grid = new GridState(map.ImpassableCells());
-            grid.Install(new Building(1, PrototypeDefinitions.CreateDefault().Keep, GridState.KeepCell, 0));
+            var grid = new GridState(map.ImpassableCells(), map.Keep);
+            grid.Install(new Building(1, PrototypeDefinitions.CreateDefault().Keep, map.Keep, 0));
             return new RoutePlanner().Plan(grid, entry, null);
         }
     }

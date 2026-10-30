@@ -663,7 +663,8 @@ namespace TheLastFortress
         /// entries turned to the terrain's symmetry so its rivers and channels face the fronts they were made for).
         /// </summary>
         CampaignConfig CreateCampaign(uint seed, string mapProfile, TerrainMap terrain) =>
-            IsRelease ? ReleaseCampaign.Create(seed, mapProfile, terrain.Symmetry) : MvpCampaign.CreateSixNights();
+            !IsRelease ? MvpCampaign.CreateSixNights()
+            : terrain.Entries != null ? ReleaseCampaign.Create(seed, terrain) : ReleaseCampaign.Create(seed, mapProfile, terrain.Symmetry); // spec 017: the map's entries by index
 
         /// <summary>Stress fixture: prototype Grunts in the prototype scene; mixed MVP archetypes in the MVP scene.</summary>
         public void EnterStressMode()
@@ -993,7 +994,7 @@ namespace TheLastFortress
             // Spec 010: show the Keep, every entry used tonight and its road mouth (enemies walk in from there); at once when
             // the hero view takes over.
             nightFrame.Clear();
-            var keep = Prims.CellCenter(GridState.KeepCell, 0f);
+            var keep = Prims.CellCenter(Sim.Keep.Cell, 0f);
             nightFrame.Add(keep);
             foreach (var entry in Sim.Wave.EntryCells)
             {

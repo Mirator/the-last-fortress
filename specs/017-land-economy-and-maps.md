@@ -1,6 +1,6 @@
 # Feature spec 017: land economy and map overhaul
 
-Version 0.3, 2026-10-30. Status: **APPROVED 2026-10-30.** Owner decisions 2026-10-30: D1-a, D5-a, D6-a, D7-a, D9-a; D2-a, D3, D4-a, D8 and D10 as recommended, confirmed with plan 037; v0.3 adds the owner's answers on how tiers and perks combine with D3. Builds on spec 016 (raids, gold veins, the Mine), whose pressure gate it takes over.
+Version 0.4, 2026-10-30. Status: **APPROVED 2026-10-30.** Owner decisions 2026-10-30: D1-a, D5-a, D6-a, D7-a, D9-a; D2-a, D3, D4-a, D8 and D10 as recommended, confirmed with plan 037; v0.3 adds the owner's answers on how tiers and perks combine with D3; v0.4 adds how nights use 3-5 entries, the fairness values and the four recipes. Builds on spec 016 (raids, gold veins, the Mine), whose pressure gate it takes over.
 
 Changes `002-game-rules.md` (v1.21 once spec 016 is merged), sections 2, 5, 6, 7, 9, 11, 12, 13 and 16, under `release-rules-4`. Legacy profiles are unchanged.
 
@@ -56,10 +56,13 @@ Wealth then sits away from the core, and the player chooses how far to reach and
 - **D7: Entries and roads.**
   - (a) *Recommended:* each map generates 3–5 entries anywhere on the boundary ring, at least 4 cells apart, with roads to the Keep. The campaign table names entries by index, opened night by night as now.
   - (b) The four side midpoints stay, and only the terrain between them changes.
+  - v0.4 (owner, 2026-10-30): the table's W, E, N, S are entry indices 0-3. On a map with k entries a night keeps its entry count, capped at k; an index the map lacks is replaced by its lowest unused index; Nights 8-12 open every entry (so a 5-entry map gets its fifth front from Night 8, a 3-entry map peaks at 3).
 - **D8: How maps are generated.** Feature recipes replace the skeleton-plus-variation profiles.
   - Each recipe places regions in turn: fertile meadows, forest belts, rock ridges, rivers with fords, then the Keep, entries and veins. Every map is validated with the real route planner.
   - Fairness checks: fertile cells within a band, Keep-to-entry distances within a band, at least one choke and one open approach.
   - *Recommended:* 4 recipes for this milestone, for example River Valley, Highlands, Forest Edge and Open Plains. The current three profiles stay only for older saves.
+  - v0.4 (owner, 2026-10-30): the four recipes are River Valley (a river with 2-3 fords splits the board, meadows along it), Highlands (rock ridges make chokes, small meadows between), Forest Edge (a forest belt on one side, meadows on the far side) and Open Plains (wide meadows, few blockers).
+  - v0.4 (owner) fairness values [P]: 50-110 fertile cells; each entry's open Day-1 route 9-22 steps; at least one entry route passes a choke (land at most 2 wide across the route); at least one has 3+ land cells on each side for most of its length; the Keep has at least two sides clear of forest, rock and water for 3 cells.
 - **D9: Rules version.**
   - (a) *Recommended:* change `release-rules-4` in place, as for specs 012–016. Saves store their terrain, so older runs keep their maps. Their income switches to the land rule. A save without a fertile list treats every free land cell as fertile (the D1-b rule), so an older run is not starved.
   - (b) A new `release-rules-5`. Older runs keep today's rules exactly; it costs one more legacy profile.

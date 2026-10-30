@@ -111,13 +111,13 @@ namespace TheLastFortress
         static bool IsSolid(GridState grid, GridPos cell, ICollection<GridPos> preview) =>
             grid.IsSolid(cell) || (preview != null && preview.Contains(cell));
 
-        static bool IsKeepNeighbor(GridPos cell) => cell.IsCardinalNeighbor(GridState.KeepCell);
+        static bool IsKeepNeighbor(GridState grid, GridPos cell) => cell.IsCardinalNeighbor(grid.KeepAt);
 
         /// <summary>Cost to enter a cell, or -1 when the cell can never be traversed in this phase.</summary>
         static int EnterCost(GridState grid, GridPos cell, ICollection<GridPos> preview, bool breach)
         {
             if (!GridCoordinates.IsInBounds(cell) || grid.IsImpassableTerrain(cell)) return -1;
-            if (cell == GridState.KeepCell) return -1;
+            if (cell == grid.KeepAt) return -1;
             if (!IsSolid(grid, cell, preview)) return LandCost;
             if (!breach) return -1;
             var occupant = grid.GetOccupant(cell);
@@ -147,7 +147,7 @@ namespace TheLastFortress
                 settled[nodeIndex] = true;
                 var cell = FromIndex(nodeIndex);
 
-                var isGoal = IsKeepNeighbor(cell) && (breach || !IsSolid(grid, cell, preview));
+                var isGoal = IsKeepNeighbor(grid, cell) && (breach || !IsSolid(grid, cell, preview));
                 if (isGoal) return !breach && TurnLate ? BuildStraightRoute(grid, preview, start, nodeIndex, nodeCost) : BuildRoute(grid, preview, nodeIndex, nodeCost, breach);
 
                 foreach (var dir in GridPos.CardinalOrder)

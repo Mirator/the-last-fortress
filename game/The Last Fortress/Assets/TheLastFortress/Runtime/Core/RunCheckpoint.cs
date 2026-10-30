@@ -42,6 +42,11 @@ namespace TheLastFortress
         public int[] fertile = new int[0];
 
         public bool fertileListed;
+
+        /// <summary>Spec 017: the map's Keep cell (z * 20 + x) and entries in index order. Optional: -1 / none = the centre Keep and the nights' own entries.</summary>
+        public int keepCell = -1;
+
+        public int[] entries = new int[0];
         public NightData[] nights = new NightData[0];
 
         /// <summary>Active, Victory or Defeat. Terminal records keep the summary but cannot be continued.</summary>
@@ -189,6 +194,8 @@ namespace TheLastFortress
                 foreach (var c in cfg.Terrain.Fertile) fertile.Add(c.Z * GridCoordinates.Size + c.X);
             fertile.Sort();
             cp.fertile = fertile.ToArray();
+            cp.keepCell = cfg.Terrain == null ? -1 : cfg.Terrain.Keep.Z * GridCoordinates.Size + cfg.Terrain.Keep.X;
+            cp.entries = cfg.Terrain?.Entries == null ? new int[0] : cfg.Terrain.Entries.ConvertAll(e => e.Z * GridCoordinates.Size + e.X).ToArray();
 
             var nights = new List<NightData>();
             foreach (var w in sim.Campaign.Nights)
@@ -333,19 +340,36 @@ namespace TheLastFortress
             const int cells = GridCoordinates.Size * GridCoordinates.Size;
             if (cp.terrain == null || cp.terrain.Length != cells) return Fail("Terrain size mismatch.", out problem, out message);
             var map = new TerrainMap { Seed = seed, Attempt = cp.mapAttempt, Fallback = cp.mapFallback, Authored = cp.flatMap, Profile = release ? cp.mapProfile : "" };
+            if (cp.keepCell >= 0)
+            {
+                if (cp.keepCell >= cells) return Fail("Bad Keep cell.", out problem, out message);
+                map.Keep = new GridPos(cp.keepCell % GridCoordinates.Size, cp.keepCell / GridCoordinates.Size);
+                if (GridCoordinates.IsReservedRing(map.Keep)) return Fail("Bad Keep cell.", out problem, out message);
+            }
+
+            if (cp.entries != null && cp.entries.Length > 0)
+            {
+                map.Entries = new List<GridPos>();
+                foreach (var e in cp.entries)
+                {
+                    var c = new GridPos(e % GridCoordinates.Size, e / GridCoordinates.Size);
+                    if (e < 0 || e >= cells || !GridCoordinates.IsReservedRing(c) || map.Entries.Contains(c)) return Fail("Bad map entry.", out problem, out message);
+                    map.Entries.Add(c);
+                }
+            }
             for (var i = 0; i < cells; i++)
             {
                 if (cp.terrain[i] < 0 || cp.terrain[i] > (int)TerrainType.Water) return Fail("Unknown terrain type.", out problem, out message);
                 map.Cells[i] = (TerrainType)cp.terrain[i];
                 var c = new GridPos(i % GridCoordinates.Size, i / GridCoordinates.Size);
-                if (map.Cells[i] != TerrainType.Land && (c == GridState.KeepCell || GridCoordinates.IsReservedRing(c)))
+                if (map.Cells[i] != TerrainType.Land && (c == map.Keep || GridCoordinates.IsReservedRing(c)))
                     return Fail($"Terrain blocks a fixed cell {c}.", out problem, out message);
             }
 
             foreach (var v in cp.veins ?? new int[0])
             {
                 var c = new GridPos(v % GridCoordinates.Size, v / GridCoordinates.Size);
-                if (v < 0 || v >= cells || map.Cells[v] != TerrainType.Land || c == GridState.KeepCell || GridCoordinates.IsReservedRing(c) || map.IsVein(c))
+                if (v < 0 || v >= cells || map.Cells[v] != TerrainType.Land || c == map.Keep || GridCoordinates.IsReservedRing(c) || map.IsVein(c))
                     return Fail("Bad gold vein.", out problem, out message);
                 map.Veins.Add(c);
             }

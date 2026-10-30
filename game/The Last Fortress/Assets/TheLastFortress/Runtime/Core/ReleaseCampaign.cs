@@ -192,11 +192,17 @@ namespace TheLastFortress
         public static CampaignConfig Create(uint seed, string mapProfile, int symmetry, string rulesVersion = RulesVersion) =>
             Create(seed, mapProfile, Table(rulesVersion), symmetry, rulesVersion);
 
-        public static CampaignConfig Create(uint seed, string mapProfile, IReadOnlyList<Recipe> table, int symmetry = 0, string rulesVersion = RulesVersion)
+        /// <summary>Spec 017: the nights on a map that lists its entries; the table's W, E, N, S are entry indices 0-3 (see <see cref="NightEntries"/>).</summary>
+        public static CampaignConfig Create(uint seed, TerrainMap map, string rulesVersion = RulesVersion) =>
+            Create(seed, map.Profile, Table(rulesVersion), 0, rulesVersion, map.Entries);
+
+        public static CampaignConfig Create(uint seed, string mapProfile, IReadOnlyList<Recipe> table, int symmetry = 0, string rulesVersion = RulesVersion,
+            IReadOnlyList<GridPos> mapEntries = null)
         {
             var rng = new RunRandom(seed ^ WaveSalt);
             var nights = new List<WavePlan>();
-            for (var i = 0; i < table.Count; i++) nights.Add(BuildNight($"Night {i + 1}", table[i], rng, symmetry));
+            for (var i = 0; i < table.Count; i++)
+                nights.Add(mapEntries == null ? BuildNight($"Night {i + 1}", table[i], rng, symmetry) : BuildNight($"Night {i + 1}", table[i], rng, NightEntries(i + 1, table[i], mapEntries)));
             return new CampaignConfig
             {
                 Label = Label, Nights = nights, OffersRewards = true,
@@ -216,6 +222,41 @@ namespace TheLastFortress
         {
             var entries = new GridPos[r.Entries.Length];
             for (var i = 0; i < entries.Length; i++) entries[i] = MapProfiles.EntryFor(symmetry, r.Entries[i]);
+            return BuildNight(name, r, rng, entries);
+        }
+
+        /// <summary>From this night on, every entry of the map is open (spec 017 v0.4).</summary>
+        public const int AllEntriesFromNight = 8;
+
+        /// <summary>
+        /// Spec 017 v0.4: a night's entries on a map with k entries. The recipe's W, E, N, S are indices 0-3; an index the map
+        /// lacks becomes its lowest unused one, so the night keeps its count capped at k; from Night 8 every entry is open.
+        /// With four entries this is the table exactly.
+        /// </summary>
+        public static GridPos[] NightEntries(int night, Recipe r, IReadOnlyList<GridPos> map)
+        {
+            var used = new List<int>();
+            if (night >= AllEntriesFromNight)
+                for (var i = 0; i < map.Count; i++) used.Add(i);
+            else
+                foreach (var e in r.Entries)
+                {
+                    var index = e == W ? 0 : e == E ? 1 : e == N ? 2 : 3;
+                    if (index >= map.Count || used.Contains(index))
+                    {
+                        index = -1;
+                        for (var i = 0; i < map.Count && index < 0; i++)
+                            if (!used.Contains(i)) index = i;
+                    }
+
+                    if (index >= 0) used.Add(index);
+                }
+
+            return used.ConvertAll(i => map[i]).ToArray();
+        }
+
+        static WavePlan BuildNight(string name, Recipe r, RunRandom rng, GridPos[] entries)
+        {
             var count = entries.Length;
             var offset = (int)rng.NextBounded((uint)count);
             var cadence = PrototypeDefinitions.ToTicks(r.CadenceSeconds);

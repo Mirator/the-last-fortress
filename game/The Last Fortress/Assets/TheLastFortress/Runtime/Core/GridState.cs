@@ -22,14 +22,19 @@ namespace TheLastFortress
         public int TrapRevision { get; private set; }
         public Building Keep { get; private set; }
 
+        /// <summary>Spec 017: the Keep's cell on this board (<see cref="KeepCell"/> unless the map places it elsewhere).</summary>
+        public GridPos KeepAt { get; }
+
         /// <param name="impassableCells">Indestructible, unbuildable terrain (forest/rock/water or test maps).</param>
-        public GridState(IEnumerable<GridPos> impassableCells = null)
+        /// <param name="keep">Spec 017: the map's Keep cell; null for the fixed centre.</param>
+        public GridState(IEnumerable<GridPos> impassableCells = null, GridPos? keep = null)
         {
+            KeepAt = keep ?? KeepCell;
             if (impassableCells == null) return;
             foreach (var cell in impassableCells)
             {
                 if (!GridCoordinates.IsInBounds(cell)) throw new ArgumentException($"Terrain cell {cell} out of bounds.");
-                if (cell == KeepCell) throw new ArgumentException("Terrain cannot cover the Keep cell.");
+                if (cell == KeepAt) throw new ArgumentException("Terrain cannot cover the Keep cell.");
                 impassable[Index(cell)] = true;
             }
         }
