@@ -49,7 +49,7 @@ namespace TheLastFortress
                     float fx = (float)rng.NextDouble(), fz = (float)rng.NextDouble();
                     float px = x + fx, pz = z + fz;
                     if (onBoard && TerrainShape.SideDistance(cell, fx, fz, shape.River) < 0.2f) continue; // banks stay bare soil
-                    if (!onBoard && TerrainShape.RoadDistance(px, pz) < TerrainShape.RoadHalfWidth + 0.08f) continue; // roads stay bare
+                    if (!onBoard && shape.RoadDistance(px, pz) < TerrainShape.RoadHalfWidth + 0.08f) continue; // roads stay bare
                     var h = shape.Height(px, pz);
                     if (h < -0.004f) continue; // river outlets
                     spots.Add(new Vector4(px, h, pz, 0.7f + 0.55f * (float)rng.NextDouble()));

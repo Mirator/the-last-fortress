@@ -12,7 +12,7 @@ namespace TheLastFortress
     public sealed class RouteOverlay : MonoBehaviour
     {
         const float LineY = 0.07f;
-        const int MaxEntries = 4;
+        const int MaxEntries = 5; // spec 017: generated maps have 3-5 entries
 
         PrototypeContent content;
         LineRenderer committedLine, primaryLine, rangeRing, selectionSquare, reachSquare;
@@ -43,6 +43,35 @@ namespace TheLastFortress
         public bool BreachMarkerVisible => breachMarker.activeSelf;
         public Vector3 BreachMarkerPosition => breachMarker.transform.position;
         public bool GhostVisible => ghostRoot.activeSelf;
+
+        /// <summary>Spec 017 D4: fertile cells a House or Farm ghost would count, marked on the ground (tests read the count).</summary>
+        public int GhostFieldCount { get; private set; }
+
+        readonly List<GameObject> fieldMarks = new List<GameObject>();
+        Material fieldMat;
+
+        void ShowFields(RunSimulation sim, BuildingKind? kind, GridPos cell)
+        {
+            var fields = kind.HasValue ? null : new List<GridPos>();
+            if (kind.HasValue) sim.PreviewIncome(kind.Value, cell, out fields);
+            GhostFieldCount = fields.Count;
+            if (fieldMat == null) fieldMat = Prims.Tinted(content.overlay, Palette.Hex(0x9BD35A).WithAlpha(0.6f));
+            for (var i = 0; i < fields.Count; i++)
+            {
+                if (i == fieldMarks.Count)
+                {
+                    var mark = Prims.Create(PrimitiveType.Cube, transform, Vector3.zero, new Vector3(0.62f, 0.02f, 0.62f), fieldMat, "FieldMark");
+                    mark.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    fieldMarks.Add(mark);
+                }
+
+                fieldMarks[i].transform.position = Prims.CellCenter(fields[i], 0.03f);
+                if (!fieldMarks[i].activeSelf) fieldMarks[i].SetActive(true);
+            }
+
+            for (var i = fields.Count; i < fieldMarks.Count; i++)
+                if (fieldMarks[i].activeSelf) fieldMarks[i].SetActive(false);
+        }
         public bool GhostValid { get; private set; }
         public PlacementRejection GhostRejection { get; private set; }
         public int PreviewPlanCount { get; private set; }
@@ -467,6 +496,7 @@ namespace TheLastFortress
             if (!day || !player.Tool.HasValue || !player.HoverCell.HasValue)
             {
                 if (ghostRoot.activeSelf) ghostRoot.SetActive(false);
+                if (GhostFieldCount > 0) ShowFields(sim, null, default);
                 return;
             }
 
@@ -474,6 +504,7 @@ namespace TheLastFortress
             var cell = player.HoverCell.Value;
             GhostRejection = sim.CheckPlacement(kind, cell);
             GhostValid = GhostRejection == PlacementRejection.None;
+            ShowFields(sim, GhostValid && sim.Definitions.For(kind)?.LandIncome > 0 ? kind : (BuildingKind?)null, cell);
             if (!ghostRoot.activeSelf) ghostRoot.SetActive(true);
             ghostRoot.transform.position = Prims.CellCenter(cell, 0.01f);
             foreach (var pair in ghosts)

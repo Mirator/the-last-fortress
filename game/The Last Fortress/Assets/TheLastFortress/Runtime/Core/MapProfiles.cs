@@ -204,6 +204,7 @@ namespace TheLastFortress
         public static List<GridPos> RiverCrossings(TerrainMap map)
         {
             var cells = new List<GridPos>();
+            if (map != null && map.Fords.Count > 0) return new List<GridPos>(map.Fords); // spec 017 recipe rivers
             if (map == null || map.Profile != Crossing) return cells;
             var skeleton = CreateCrossing().Skeleton;
             for (var s = 0; s < 8; s++)
@@ -458,6 +459,9 @@ namespace TheLastFortress
 
             return count;
         }
+
+        /// <summary>Spec 017: an entry's route on the empty board as played (roads and the worn tracks follow it).</summary>
+        public static Route OpenRoute(TerrainMap map, GridPos entry) => PlanOpen(map, entry);
 
         static Route PlanOpen(TerrainMap map, GridPos entry)
         {

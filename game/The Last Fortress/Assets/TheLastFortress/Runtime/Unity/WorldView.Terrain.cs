@@ -98,11 +98,25 @@ namespace TheLastFortress
             readonly TerrainMap map;
             readonly HashSet<GridPos> crossings;
 
+            readonly IReadOnlyList<GridPos> entries;
+            readonly HashSet<GridPos> tracks = new HashSet<GridPos>();
+
             public TerrainShape(TerrainMap map)
             {
                 this.map = map;
                 crossings = map != null ? new HashSet<GridPos>(MapProfiles.RiverCrossings(map)) : new HashSet<GridPos>();
+                entries = map != null ? map.EntriesOrSides() : new[] { MvpCampaign.West, MvpCampaign.East, MvpCampaign.North, MvpCampaign.South };
+
+                // Spec 017: a faint worn track along each entry's open route on the empty board (generated maps only).
+                if (map?.Entries == null || map.Profile == "" || !MapRecipes.IsRecipe(map.Profile)) return;
+                foreach (var e in map.Entries)
+                {
+                    var r = MapProfiles.OpenRoute(map, e);
+                    if (r.Found && !r.IsBreach) tracks.UnionWith(r.Cells);
+                }
             }
+
+            public bool IsFertile(GridPos c) => map?.Fertile != null && map.Fertile.Contains(c);
 
             public TerrainType Type(GridPos c) => map == null || !GridCoordinates.IsInBounds(c) ? TerrainType.Land : map[c];
 
@@ -182,7 +196,7 @@ namespace TheLastFortress
             /// Verge, then open ground rising gently into the mist (plan 016). <paramref name="d"/> is the distance from the
             /// board. Roads cut a little into the rise so they read as worn tracks.
             /// </summary>
-            static float Surround(float x, float z, float d)
+            float Surround(float x, float z, float d)
             {
                 var n1 = Mathf.PerlinNoise(x * 0.31f + 3.1f, z * 0.31f + 7.7f);
                 var n2 = Mathf.PerlinNoise(x * 0.93f + 11.3f, z * 0.93f + 2.9f);
@@ -196,24 +210,23 @@ namespace TheLastFortress
             public const float RoadHalfWidth = 0.22f;
 
             /// <summary>
-            /// Distance from (x, z) to the nearest road's centre line, off the board. Each road leaves its side's midpoint (the
-            /// entry cell's centre) straight out, then bends away about two tiles to one side before the mist. 99 when no
-            /// road is near (or on the board).
+            /// Distance from (x, z) to the nearest road's centre line, off the board. Each road leaves its entry cell's centre
+            /// (the map's entries; the side midpoints without a list) straight out, then bends away about two tiles to one side
+            /// before the mist. 99 when no road is near (or on the board).
             /// </summary>
-            public static float RoadDistance(float x, float z)
+            public float RoadDistance(float x, float z)
             {
-                const float size = GridCoordinates.Size, mid = GridCoordinates.Size * 0.5f + 0.5f;
+                const float size = GridCoordinates.Size;
                 var best = 99f;
-                void Side(float outward, float across, Vector3 direction)
+                foreach (var e in entries)
                 {
-                    if (outward < 0f) return;
+                    var direction = RouteOverlay.Outward(e);
+                    var outward = direction.x < 0f ? -x : direction.x > 0f ? x - size : direction.z < 0f ? -z : z - size;
+                    if (outward < 0f) continue;
+                    var across = direction.x != 0f ? z - (e.Z + 0.5f) : x - (e.X + 0.5f);
                     best = Mathf.Min(best, Mathf.Abs(across - RoadBend(direction) * RoadOffset(outward)));
                 }
 
-                Side(-x, z - mid, Vector3.left);
-                Side(x - size, z - mid, Vector3.right);
-                Side(-z, x - mid, Vector3.back);
-                Side(z - size, x - mid, Vector3.forward);
                 return best;
             }
 
@@ -227,7 +240,7 @@ namespace TheLastFortress
             public static Vector3 AcrossAxis(Vector3 outward) => outward.x != 0f ? Vector3.forward : Vector3.right;
 
             /// <summary>Road weight: 1 on the track, soft at its shoulders, 0 elsewhere.</summary>
-            public static float Road(float x, float z) => 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(RoadHalfWidth, RoadHalfWidth + 0.14f, RoadDistance(x, z)));
+            public float Road(float x, float z) => 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(RoadHalfWidth, RoadHalfWidth + 0.14f, RoadDistance(x, z)));
 
             /// <summary>
             /// Material weights for the ground shader: r soil (banks, fords, forest floor, roads, worn ground by the Keep),
@@ -281,6 +294,26 @@ namespace TheLastFortress
                     soil = Mathf.Max(soil, 0.5f * inner);
                     lush = 1f;
                 }
+
+                // Spec 017: fertile meadows read as rich green with soft furrows; other land on a fertile-list map is drier.
+                if (map?.Fertile != null && type == TerrainType.Land)
+                {
+                    var fertile = 0f;
+                    for (var dz = -1; dz <= 1; dz++)
+                    for (var dx = -1; dx <= 1; dx++)
+                    {
+                        if (!IsFertile(new GridPos(cell.X + dx, cell.Z + dz))) continue;
+                        var ox = Mathf.Max(0f, Mathf.Abs(fx - 0.5f - dx) - 0.5f);
+                        var oz = Mathf.Max(0f, Mathf.Abs(fz - 0.5f - dz) - 0.5f);
+                        fertile = Mathf.Max(fertile, Mathf.Clamp01(1f - Mathf.Sqrt(ox * ox + oz * oz) / 0.25f));
+                    }
+
+                    var furrow = Mathf.Clamp01((Mathf.Sin((x + z) * Mathf.PI * 2.5f) - 0.55f) * 3f) * 0.14f;
+                    lush = Mathf.Lerp(Mathf.Min(lush, 0.2f), 1f, fertile);
+                    soil = Mathf.Lerp(Mathf.Max(soil, 0.38f), furrow, fertile);
+                }
+
+                if (tracks.Contains(cell)) soil = Mathf.Max(soil, 0.3f); // a worn track along an entry's route
 
                 var k = map?.Keep ?? GridState.KeepCell; // the prototype scene has no map
                 var keep = Mathf.Max(Mathf.Abs(x - k.X - 0.5f), Mathf.Abs(z - k.Z - 0.5f));

@@ -31,6 +31,18 @@ namespace TheLastFortress
             }
         }
 
+        public static string Summary(string id)
+        {
+            switch (id)
+            {
+                case RiverValley: return "A river splits the land; fords are the crossings and the meadows lie along the banks.";
+                case Highlands: return "Rock ridges make chokepoints; small meadows sit between them.";
+                case ForestEdge: return "A forest belt closes one side; the meadows lie across the open far side.";
+                case OpenPlains: return "Wide meadows and few obstacles: a rich economy, few natural chokepoints.";
+                default: return "";
+            }
+        }
+
         public static bool IsRecipe(string id) => Array.IndexOf(All, id) >= 0;
 
         public const uint RecipeSalt = 0x7FEB352D;
@@ -82,6 +94,7 @@ namespace TheLastFortress
 
             if (!PlaceEntries(map, rng)) return null;
             if (!HasChoke(map)) Pinch(map, rng);
+            map.Fords.RemoveAll(f => map[f] != TerrainType.Land); // a later clump or pinch may have covered one
             MapProfiles.PlaceVeins(map);
             foreach (var (centre, radius) in meadows) Meadow(map, centre, radius);
             return map;
@@ -163,8 +176,17 @@ namespace TheLastFortress
                 var t = Next(rng, 1, line.Count - 3);
                 if (taken.Exists(o => Math.Abs(o - t) < 4)) continue;
                 taken.Add(t);
-                foreach (var c in new[] { line[t], line[t + 1] }) map.Cells[c.Z * GridCoordinates.Size + c.X] = TerrainType.Land;
+                foreach (var c in new[] { line[t], line[t + 1] })
+                {
+                    map.Cells[c.Z * GridCoordinates.Size + c.X] = TerrainType.Land;
+                    map.Fords.Add(c);
+                }
             }
+
+            // The river runs on under bridges on the ring at both ends.
+            var max = GridCoordinates.Size - 1;
+            foreach (var end in new[] { line[0], line[line.Count - 1] })
+                map.Fords.Add(vertical ? new GridPos(end.X, end.Z == 1 ? 0 : max) : new GridPos(end.X == 1 ? 0 : max, end.Z));
 
             Clumps(map, rng, 3, 2);
             var river = new HashSet<GridPos>(line);

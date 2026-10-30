@@ -91,10 +91,10 @@ namespace TheLastFortress.Tests
             Assert.AreEqual("", game.MapProfile, "by default the seed picks the map");
             game.Hud.MapButton.onClick.Invoke();
             game.Hud.MapButton.onClick.Invoke();
-            Assert.AreEqual(MapProfiles.Crossing, game.MapProfile, "the title cycles by seed → Ravine → Crossing for the next New Run");
+            Assert.AreEqual(MapRecipes.Highlands, game.MapProfile, "the title cycles by seed → River Valley → Highlands for the next New Run");
             game.NewRun(7, false);
             yield return null;
-            Assert.AreEqual((12, MapProfiles.Crossing, MapProfiles.Crossing), (game.Sim.TotalNights, game.Sim.Campaign.MapProfile, game.Sim.Config.Terrain.Profile));
+            Assert.AreEqual((12, MapRecipes.Highlands, MapRecipes.Highlands), (game.Sim.TotalNights, game.Sim.Campaign.MapProfile, game.Sim.Config.Terrain.Profile));
             Assert.AreEqual(9, RulesProfile.ContactKinds.Count(k => game.Hud.CardFor(k).gameObject.activeSelf), "all nine build cards (spec 016: the Mine)");
 
             // A custom stored night with every 008 threat, loaded through the real save path.
@@ -190,6 +190,76 @@ namespace TheLastFortress.Tests
         }
 
         /// <summary>Spec 015: a Tower selected by click goes to tier III through U and the button by Day; Night refuses with its reason.</summary>
+        /// <summary>
+        /// Spec 017: a New Run on each recipe starts on the whole board, names its recipe, and plays its first night (four
+        /// Towers on the Keep's diagonals) through to the reward without an error.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator EveryRecipeStartsOnTheWholeBoardAndPlaysItsFirstNight()
+        {
+            foreach (var recipe in MapRecipes.All)
+            {
+                game.SetMapProfile(recipe);
+                game.NewRun(3, false);
+                game.AutoAdvance = false;
+                yield return null;
+                Assert.AreEqual(recipe, game.Sim.Config.Terrain.Profile);
+                Assert.AreEqual(CameraRig.WholeBoardSize, game.CameraRig.Size, $"{recipe}: the run starts on the whole board");
+                StringAssert.Contains(MapRecipes.Title(recipe), game.Hud.SeedText, "the seed line names the recipe");
+                var k = game.Sim.Keep.Cell;
+                foreach (var (dx, dz) in new[] { (-1, -1), (1, 1), (-1, 1), (1, -1) })
+                    game.Sim.TryPlace(BuildingKind.Tower, new GridPos(k.X + dx, k.Z + dz), out _);
+                Assert.IsTrue(game.StartNight(), recipe);
+                for (var i = 0; i < 20000 && game.Sim.State == RunState.Night; i++)
+                {
+                    game.AdvanceSimulation(0.25f);
+                    if (i % 40 == 0) yield return null;
+                }
+
+                Assert.AreEqual(RunState.Reward, game.Sim.State, $"{recipe}: Night 1 cleared");
+                game.OpenMenu();
+                yield return null;
+            }
+        }
+
+        /// <summary>
+        /// Spec 017 D4: a Farm ghost marks the fertile cells it would count and its tooltip names the income; once placed by
+        /// click the Farm earns exactly that (the payment's rule). Open Plains, seed 3, the first Farm site with a field.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator AFarmGhostPreviewsTheIncomeItEarnsOncePlaced()
+        {
+            game.SetMapProfile(MapRecipes.OpenPlains);
+            game.NewRun(3, false);
+            yield return null;
+            var sim = game.Sim;
+            GridPos? site = null;
+            for (var z = 2; z < 17 && site == null; z++)
+            for (var x = 2; x < 17 && site == null; x++)
+            {
+                var c = new GridPos(x, z);
+                if (sim.CheckPlacement(BuildingKind.Farm, c) == PlacementRejection.None && sim.PreviewIncome(BuildingKind.Farm, c, out var f) > 0 && f.Count >= 3) site = c;
+            }
+
+            Assert.IsNotNull(site, "scenario: a Farm site with at least three fields");
+            var income = sim.PreviewIncome(BuildingKind.Farm, site.Value, out var fields);
+            yield return Press(Key.Digit4);
+            Assert.AreEqual(BuildingKind.Farm, game.Player.Tool);
+            game.CameraRig.SetView(Prims.CellCenter(site.Value, 0f), CameraRig.DefaultSize); // mid-screen, clear of the build bar
+            yield return null;
+            var at = game.CameraRig.CellToScreen(site.Value);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = at });
+            yield return null;
+            yield return null;
+            Assert.AreEqual(fields.Count, game.Overlay.GhostFieldCount, "the ghost marks its fields");
+            StringAssert.Contains($"Here: +{income}/day · {fields.Count} fields", game.Hud.TooltipText);
+            yield return Click(at);
+            var farm = sim.Grid.GetOccupant(site.Value);
+            Assert.AreEqual(BuildingKind.Farm, farm?.Kind, "placed through input");
+            Assert.AreEqual(income, sim.BuildingIncome(farm), "the preview is the income it earns");
+            Assert.AreEqual(income, sim.IncomeForecast().Farms, "and what the next dawn pays for Farms");
+        }
+
         [UnityTest]
         public IEnumerator ASelectedTowerUpgradesTwiceByDayAndNightRefusesWithItsReason()
         {
@@ -284,7 +354,7 @@ namespace TheLastFortress.Tests
             Assert.IsTrue(marker.x < 0f || marker.x > 20f || marker.z < 0f || marker.z > 20f, "its torch on the road, never on a legal cell");
 
             Assert.Greater(game.Overlay.VisibleChevronCount, 3);
-            var keep = Prims.CellCenter(GridState.KeepCell);
+            var keep = Prims.CellCenter(game.Sim.Keep.Cell);
             var toward = 0f;
             for (var i = 0; i < game.Overlay.VisibleChevronCount; i++)
             {

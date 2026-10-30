@@ -1,6 +1,6 @@
 # Feature spec 017: land economy and map overhaul
 
-Version 0.5, 2026-10-30. Status: **APPROVED 2026-10-30.** Owner decisions 2026-10-30: D1-a, D5-a, D6-a, D7-a, D9-a; D2-a, D3, D4-a, D8 and D10 as recommended, confirmed with plan 037; v0.3 adds the owner's answers on how tiers and perks combine with D3; v0.4 adds how nights use 3-5 entries, the fairness values and the four recipes; v0.5 records the owner loosening D10. Builds on spec 016 (raids, gold veins, the Mine), whose pressure gate it takes over.
+Version 0.5, 2026-10-30. Status: **IMPLEMENTED and merged into `../002-game-rules.md` v1.22 (2026-10-30); archived; the D10 gate was loosened by the owner (v0.5).** Not current: plan from `002-game-rules.md`. Approved 2026-10-30. Owner decisions 2026-10-30: D1-a, D5-a, D6-a, D7-a, D9-a; D2-a, D3, D4-a, D8 and D10 as recommended, confirmed with plan 037; v0.3 adds the owner's answers on how tiers and perks combine with D3; v0.4 adds how nights use 3-5 entries, the fairness values and the four recipes; v0.5 records the owner loosening D10. Builds on spec 016 (raids, gold veins, the Mine), whose pressure gate it takes over.
 
 Changes `002-game-rules.md` (v1.21 once spec 016 is merged), sections 2, 5, 6, 7, 9, 11, 12, 13 and 16, under `release-rules-4`. Legacy profiles are unchanged.
 
@@ -97,3 +97,24 @@ Board sizes beyond D5, new enemy types, a wave director, keystone perks, and the
 - **Too many moving parts at once.** A new economy, new maps and new scripts all change the probe. Mitigation: land a stage at a time and re-run the probe after each (plan 037).
 - **Readability.** Players must see why a building earns what it does. D4 is the mitigation.
 - **Scripts versus players.** Heuristic scripts can make a strategy look worse than a player would. The owner's live check across several seeds is the acceptance that matters.
+
+## 7. As built (2026-10-30)
+
+- Land income, recipe maps, the per-map Keep and entries, the D4 preview and the presentation are implemented as in sections 3 and 4, with the owner's v0.3-v0.5 answers. They are merged into `002-game-rules.md` v1.22.
+- Values after tuning [P]:
+  - House 4 + 3 and Farm 8 + 4 per field.
+  - Enemy counts ×1.3 on Nights 4-8 and ×1.6 on Nights 9-12.
+  - Enemy HP ×1.2.
+- **Beyond the spec:**
+  - Entries span at least two sides of the board.
+  - A choke is pinched with two short rock walls when no route has one.
+  - River Valley stores its fords for presentation.
+  - The older profiles got a provisional fertile layer.
+  - A run starts on the whole board; Reset Camera returns to the run's Keep.
+- **D10 not met; loosened by the owner.**
+  - With the adopted values, house-ring wins at most 2/5 on every recipe.
+  - A Wall-sealed Keep (kill-zone) wins 5/5 on every recipe.
+  - On Highlands and Open Plains no second strategy reaches 3/5.
+  - The scripted economy also seals its Keep, so an open economy is under-tested.
+  - The sealed Keep is left for a later spec.
+- The owner's live check is pending.

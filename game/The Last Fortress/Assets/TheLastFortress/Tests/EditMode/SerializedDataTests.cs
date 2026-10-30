@@ -114,10 +114,10 @@ namespace TheLastFortress.Tests
         [Test]
         public void TerrainKeepsTheBoardFlatAndSinksOnlyWater()
         {
-            foreach (var profile in MapProfiles.All)
+            foreach (var profile in MapProfiles.All.Concat(MapRecipes.All)) // spec 017: the recipes' own entries and rivers too
             for (var seed = 1u; seed <= 3; seed++)
             {
-                var map = MapProfiles.Generate(profile, seed);
+                var map = MapRecipes.IsRecipe(profile) ? MapRecipes.Generate(profile, seed) : MapProfiles.Generate(profile, seed);
                 var shape = new WorldView.TerrainShape(map);
                 var crossings = new System.Collections.Generic.HashSet<GridPos>(MapProfiles.RiverCrossings(map));
                 for (var z = 0; z < GridCoordinates.Size; z++)
@@ -132,11 +132,11 @@ namespace TheLastFortress.Tests
                             Assert.AreEqual(0f, shape.Height(x + k * 0.25f, z + j * 0.25f), $"{profile}/{seed} land {cell} stays flat");
                 }
 
-                foreach (var entry in new[] { new GridPos(0, 10), new GridPos(19, 10), new GridPos(10, 0), new GridPos(10, 19) })
+                foreach (var entry in map.EntriesOrSides())
                 {
                     var mouth = RouteOverlay.RoadMouth(entry);
                     Assert.AreEqual(0f, shape.Height(mouth.x, mouth.z), 0.03f, $"{profile}/{seed} road mouth at {entry} is at board level");
-                    Assert.Less(WorldView.TerrainShape.RoadDistance(mouth.x, mouth.z), WorldView.TerrainShape.RoadHalfWidth, $"{profile}/{seed} entry {entry} has its road");
+                    Assert.Less(shape.RoadDistance(mouth.x, mouth.z), WorldView.TerrainShape.RoadHalfWidth, $"{profile}/{seed} entry {entry} has its road");
                 }
             }
         }

@@ -463,6 +463,12 @@ namespace TheLastFortress
         static string IncomeDetails(RunSimulation sim, Building b)
         {
             var text = $"Income +{sim.BuildingIncome(b)}/day";
+            if (b.Definition.LandIncome > 0)
+            {
+                var fields = EconomyRules.Fields(sim.Grid, b);
+                text += $" · {fields} field{(fields == 1 ? "" : "s")}"; // spec 017 D4: the free fertile cells it counts
+            }
+
             if (b.Kind == BuildingKind.Farm && EconomyRules.FarmHasAdjacentHouse(sim.Grid, b)) text += " · House link";
             if (b.Kind == BuildingKind.Farm && sim.HasPerk(PerkRules.EfficientFarming)) text += " · Efficient Farming";
             return text;
@@ -689,6 +695,12 @@ namespace TheLastFortress
                 var price = sim.PriceFor(player.Tool.Value);
                 var extra = !campaign ? "" : player.Tool == BuildingKind.Wall ? " · Automatic connections" : RunSimulation.IsRotatable(player.Tool.Value) ? " · R rotates" : "";
                 var detail = campaign ? "\n" + BuildDetail(sim, def) : "";
+                if (campaign && overlay.GhostValid && def.LandIncome > 0 && player.HoverCell.HasValue)
+                {
+                    // Spec 017 D4: what it would earn here, from the free fertile cells marked under the ghost.
+                    var income = sim.PreviewIncome(def.Kind, player.HoverCell.Value, out var fields);
+                    detail += $"\nHere: +{income}/day · {fields.Count} field{(fields.Count == 1 ? "" : "s")}";
+                }
                 Set(tooltipText, overlay.GhostValid
                     ? $"{def.DisplayName}{size} — {price} gold\nOK: can build here{extra}{detail}"
                     : $"{def.DisplayName}{size} — {price} gold\nCan't build: {PlacementText.Describe(overlay.GhostRejection)}");

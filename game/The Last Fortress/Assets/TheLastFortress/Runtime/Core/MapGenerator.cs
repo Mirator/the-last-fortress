@@ -58,6 +58,9 @@ namespace TheLastFortress
         /// </summary>
         public HashSet<GridPos> Fertile;
 
+        /// <summary>Spec 017 River Valley: land cells where the river is crossed (fords, and bridges on the ring); presentation and vein placement only.</summary>
+        public readonly List<GridPos> Fords = new List<GridPos>();
+
         public List<GridPos> ImpassableCells()
         {
             var list = new List<GridPos>();

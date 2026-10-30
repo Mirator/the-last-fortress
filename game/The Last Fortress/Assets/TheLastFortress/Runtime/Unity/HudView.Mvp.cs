@@ -890,7 +890,13 @@ namespace TheLastFortress
                 if (game.MapProfile == "")
                 {
                     Set(mapLabel, "Map: by seed");
-                    Set(menuSubtitle, hasRun ? "" : "Twelve nights to the final siege. The seed picks Ravine, Crossing or Meadow and turns it.");
+                    Set(menuSubtitle, hasRun ? "" : "Twelve nights to the final siege. The seed draws a River Valley, Highlands, Forest Edge or Open Plains map.");
+                }
+                else if (MapRecipes.IsRecipe(game.MapProfile))
+                {
+                    var title = MapRecipes.Title(game.MapProfile);
+                    Set(mapLabel, "Map: " + title);
+                    Set(menuSubtitle, hasRun ? "" : $"Twelve nights to the final siege. {title}: {MapRecipes.Summary(game.MapProfile)}");
                 }
                 else
                 {

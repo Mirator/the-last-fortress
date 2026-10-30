@@ -129,15 +129,16 @@ namespace TheLastFortress
         public PrototypeDefinitions NewRunDefinitions { get; private set; }
 
         /// <summary>
-        /// Release: map profile for the next New Run; "" (the default) lets the seed pick one. The title cycles
-        /// by seed → Ravine → Crossing → Meadow; -map ravine|crossing|meadow|random overrides.
+        /// Release: map recipe for the next New Run (spec 017); "" (the default) lets the seed pick one. The title cycles
+        /// by seed → River Valley → Highlands → Forest Edge → Open Plains; -map with a recipe or an old profile id
+        /// (ravine|crossing|meadow, kept for tests and captures) or random overrides.
         /// </summary>
         public string MapProfile { get; private set; } = "";
 
         public void CycleMapProfile()
         {
-            var i = System.Array.IndexOf(MapProfiles.All, MapProfile); // -1 for "by seed"
-            MapProfile = i + 1 < MapProfiles.All.Length ? MapProfiles.All[i + 1] : "";
+            var i = System.Array.IndexOf(MapRecipes.All, MapProfile); // -1 for "by seed" (or an old profile from -map)
+            MapProfile = i + 1 < MapRecipes.All.Length ? MapRecipes.All[i + 1] : "";
         }
 
         public void SetMapProfile(string id)
@@ -147,7 +148,7 @@ namespace TheLastFortress
         }
 
         /// <summary>The profile a New Run on this seed will use.</summary>
-        public string MapProfileFor(uint seed) => MapProfile == "" ? MapProfiles.ForSeed(seed) : MapProfile;
+        public string MapProfileFor(uint seed) => MapProfile == "" ? MapRecipes.ForSeed(seed) : MapProfile;
 
         /// <summary>When false, Update does not advance the simulation (tests step it explicitly).</summary>
         public bool AutoAdvance { get; set; } = true;
@@ -747,11 +748,12 @@ namespace TheLastFortress
         public void NewRun(uint seed, bool flat)
         {
             var profile = MapProfileFor(seed);
-            var terrain = flat ? TerrainMap.Flat() : IsRelease ? MapProfiles.Generate(profile, seed) : MapGenerator.Generate(seed);
+            var terrain = flat ? TerrainMap.Flat() : !IsRelease ? MapGenerator.Generate(seed)
+                : MapRecipes.IsRecipe(profile) ? MapRecipes.Generate(profile, seed) : MapProfiles.Generate(profile, seed);
             Debug.Log($"New run: {terrain.Describe()}");
             CreateRun(new RunConfig { Definitions = NewRunDefinitions, Seed = seed, Terrain = terrain, Campaign = CreateCampaign(seed, profile, terrain) });
             MenuOpen = false;
-            cameraRig.ResetView(); // the Keep and the western approach
+            cameraRig.ShowWholeBoard(); // spec 017: a run starts on the whole map (the Keep and entries move per map)
             Onboarding?.BeginRun();
             Persistence.BeginNewRun(Catalog);
             Persistence.CommitDay(Sim);
@@ -764,7 +766,7 @@ namespace TheLastFortress
             LoadRun(load.Sim);
             Persistence.Adopt(load);
             MenuOpen = false;
-            cameraRig.ResetView();
+            cameraRig.ShowWholeBoard();
         }
 
         /// <summary>Explicit recovery of the previous checkpoint (.bak) when the latest save is damaged.</summary>
@@ -777,7 +779,7 @@ namespace TheLastFortress
             Persistence.Adopt(load);
             Persistence.CommitDay(Sim);
             MenuOpen = false;
-            cameraRig.ResetView();
+            cameraRig.ShowWholeBoard();
             return true;
         }
 
@@ -963,7 +965,8 @@ namespace TheLastFortress
                 SettingsProblem = Persistence.Store.WriteSettings(settings, out var error) ? null : error;
         }
 
-        public void ResetCamera() => cameraRig.ResetView();
+        /// <summary>Reset Camera: the default zoom on this run's Keep (spec 017: it varies by map).</summary>
+        public void ResetCamera() => cameraRig.SetView(Sim != null && Sim.Keep != null ? Prims.CellCenter(Sim.Keep.Cell, 0f) : CameraRig.DefaultFocus, CameraRig.DefaultSize);
 
         /// <summary>A second Start Night click this soon after starting is ignored instead of pausing.</summary>
         public const float DoubleClickGuardSeconds = 0.4f;

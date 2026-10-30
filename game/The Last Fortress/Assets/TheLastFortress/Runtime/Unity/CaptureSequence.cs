@@ -126,6 +126,13 @@ namespace TheLastFortress
                 yield break;
             }
 
+            if (game.IsRelease && captureSet == "037")
+            {
+                yield return RunPlan037();
+                Application.Quit();
+                yield break;
+            }
+
             if (game.IsRelease && captureSet == "scale")
             {
                 yield return RunScaleLineup();
@@ -698,6 +705,70 @@ namespace TheLastFortress
             }
 
             File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-012-capture-log.txt"), log.ToString());
+        }
+
+        /// <summary>
+        /// -capture-set 037 (spec 017): per map recipe, seed 3, a New Run as the title starts it: the whole board by Day
+        /// (fertile meadows, worn tracks, roads, veins), a Farm ghost previewing its fields and income, and Night 1 on the whole
+        /// board with four Towers on the Keep's diagonals.
+        /// </summary>
+        IEnumerator RunPlan037()
+        {
+            var log = new StringBuilder();
+            game.QuitApplication = () => log.AppendLine("quit requested (suppressed during capture)");
+            game.SkipOnboarding();
+            foreach (var recipe in MapRecipes.All)
+            {
+                game.AutoAdvance = false;
+                game.SetMapProfile(recipe);
+                game.NewRun(3, flat: false);
+                yield return null;
+                var sim = game.Sim;
+                var map = sim.Config.Terrain;
+                log.AppendLine($"{recipe}: {map.Describe()} keep {map.Keep} entries {string.Join(" ", map.Entries)} fertile {map.Fertile?.Count} veins {map.Veins.Count} fords {map.Fords.Count}");
+                yield return Shot($"037-{recipe}-1-day-board");
+
+                GridPos? site = null;
+                var best = 0;
+                for (var z = 2; z < 17; z++)
+                for (var x = 2; x < 17; x++)
+                {
+                    var c = new GridPos(x, z);
+                    if (sim.CheckPlacement(BuildingKind.Farm, c) != PlacementRejection.None) continue;
+                    sim.PreviewIncome(BuildingKind.Farm, c, out var f);
+                    if (f.Count > best) (best, site) = (f.Count, c);
+                }
+
+                if (site.HasValue)
+                {
+                    game.Player.SetTool(BuildingKind.Farm);
+                    game.Player.HoverOverride = site;
+                    game.CameraRig.SetView(Prims.CellCenter(site.Value, 0f), CameraRig.DefaultSize);
+                    yield return Shot($"037-{recipe}-2-farm-preview");
+                    log.AppendLine($"  farm at {site}: {game.Hud.TooltipText?.Replace("\n", " | ")}");
+                    game.Player.HoverOverride = null;
+                    game.Player.CancelTool();
+                }
+
+                var k = sim.Keep.Cell;
+                foreach (var (dx, dz) in new[] { (-1, -1), (1, 1), (-1, 1), (1, -1) })
+                    sim.TryPlace(BuildingKind.Tower, new GridPos(k.X + dx, k.Z + dz), out _);
+                game.CameraRig.ShowWholeBoard();
+                game.StartNight();
+                for (var i = 0; i < 500 && sim.State == RunState.Night; i++)
+                {
+                    sim.Step();
+                    game.SyncViews((float)PrototypeDefinitions.StepSeconds);
+                }
+
+                game.CameraRig.ShowWholeBoard();
+                yield return Shot($"037-{recipe}-3-night");
+                log.AppendLine($"  night: tick {sim.Tick}, alive {sim.AliveEnemyCount}, state {sim.State}");
+                game.OpenMenu();
+                yield return null;
+            }
+
+            File.WriteAllText(Path.Combine(dir, $"{Screen.width}x{Screen.height}-037-capture-log.txt"), log.ToString());
         }
 
         /// <summary>

@@ -388,6 +388,17 @@ namespace TheLastFortress
         public int BuildingIncome(Building b) =>
             EconomyRules.BuildingIncome(grid, b, FarmBonusPercent(HasPerk(PerkRules.EfficientFarming)), HouseLinkBonus(HasPerk(PerkRules.MarketSquare)));
 
+        /// <summary>
+        /// Spec 017 D4: what a House or Farm would earn a day if built at <paramref name="anchor"/> now (the payment's rule and
+        /// perks), and the free fertile cells it would count. Read-only: nothing is placed.
+        /// </summary>
+        public int PreviewIncome(BuildingKind kind, GridPos anchor, out List<GridPos> fields)
+        {
+            var ghost = new Building(-1, Definitions.For(kind), anchor, 0);
+            fields = EconomyRules.FieldCells(grid, ghost.Cells);
+            return EconomyRules.IncomeOf(grid, ghost, FarmBonusPercent(HasPerk(PerkRules.EfficientFarming)), HouseLinkBonus(HasPerk(PerkRules.MarketSquare)));
+        }
+
         static int FarmBonusPercent(bool efficientFarming) => efficientFarming ? PerkRules.EfficientFarmingPercent : 0;
 
         static int HouseLinkBonus(bool marketSquare) => marketSquare ? PerkRules.MarketSquareBonus : 0;

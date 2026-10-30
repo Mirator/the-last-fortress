@@ -47,6 +47,9 @@ namespace TheLastFortress
         public int keepCell = -1;
 
         public int[] entries = new int[0];
+
+        /// <summary>Spec 017 River Valley: river crossings as z * 20 + x (optional, presentation).</summary>
+        public int[] fords = new int[0];
         public NightData[] nights = new NightData[0];
 
         /// <summary>Active, Victory or Defeat. Terminal records keep the summary but cannot be continued.</summary>
@@ -196,6 +199,7 @@ namespace TheLastFortress
             cp.fertile = fertile.ToArray();
             cp.keepCell = cfg.Terrain == null ? -1 : cfg.Terrain.Keep.Z * GridCoordinates.Size + cfg.Terrain.Keep.X;
             cp.entries = cfg.Terrain?.Entries == null ? new int[0] : cfg.Terrain.Entries.ConvertAll(e => e.Z * GridCoordinates.Size + e.X).ToArray();
+            cp.fords = cfg.Terrain == null ? new int[0] : cfg.Terrain.Fords.ConvertAll(f => f.Z * GridCoordinates.Size + f.X).ToArray();
 
             var nights = new List<NightData>();
             foreach (var w in sim.Campaign.Nights)
@@ -372,6 +376,12 @@ namespace TheLastFortress
                 if (v < 0 || v >= cells || map.Cells[v] != TerrainType.Land || c == map.Keep || GridCoordinates.IsReservedRing(c) || map.IsVein(c))
                     return Fail("Bad gold vein.", out problem, out message);
                 map.Veins.Add(c);
+            }
+
+            foreach (var f in cp.fords ?? new int[0])
+            {
+                if (f < 0 || f >= cells || map.Cells[f] != TerrainType.Land) return Fail("Bad ford.", out problem, out message);
+                map.Fords.Add(new GridPos(f % GridCoordinates.Size, f / GridCoordinates.Size));
             }
 
             if (cp.fertileListed)
