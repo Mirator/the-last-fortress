@@ -588,6 +588,7 @@ namespace TheLastFortress
         static string MapLabel(TerrainMap map)
         {
             if (map == null || map.Authored) return "flat map";
+            if (MapRecipes.IsRecipe(map.Profile)) return MapRecipes.Title(map.Profile) + (map.Fallback ? " · fallback" : ""); // spec 017
             if (map.Profile != "" && MapProfiles.IsKnown(map.Profile))
             {
                 var turn = MapProfiles.SymmetryNames[map.Symmetry];

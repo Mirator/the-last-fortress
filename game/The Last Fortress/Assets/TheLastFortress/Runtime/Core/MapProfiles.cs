@@ -99,7 +99,7 @@ namespace TheLastFortress
             public Func<TerrainMap, int, string> Constraint = (_, _) => null;
         }
 
-        public static bool IsKnown(string id) => Array.IndexOf(All, id) >= 0;
+        public static bool IsKnown(string id) => Array.IndexOf(All, id) >= 0 || MapRecipes.IsRecipe(id); // spec 017: recipe maps are stored whole
 
         public static Profile Get(string id)
         {
