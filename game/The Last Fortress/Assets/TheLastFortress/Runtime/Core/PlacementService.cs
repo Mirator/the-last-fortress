@@ -10,6 +10,7 @@ namespace TheLastFortress
         InsufficientGold,
         NotDay,
         NotPurchasable,
+        NoVein,
     }
 
     public enum SellRejection
@@ -45,6 +46,7 @@ namespace TheLastFortress
                 case PlacementRejection.InsufficientGold: return "Not enough gold";
                 case PlacementRejection.NotDay: return "Build only during Day";
                 case PlacementRejection.NotPurchasable: return "Cannot be built";
+                case PlacementRejection.NoVein: return "Mines need a gold vein";
                 default: return r.ToString();
             }
         }
@@ -63,6 +65,9 @@ namespace TheLastFortress
 
         /// <summary>ThriftyConstruction: future prices max(1, floor(base * 0.9)). Existing instance prices are unchanged.</summary>
         public bool Thrifty { get; set; }
+
+        /// <summary>Spec 016: the map's gold vein cells; a Mine's footprint must lie on them.</summary>
+        public TerrainMap Terrain { get; set; }
 
         public PlacementService(GridState grid, PrototypeDefinitions definitions, int startingGold)
         {
@@ -93,6 +98,7 @@ namespace TheLastFortress
                 if (GridCoordinates.IsReservedRing(cell)) return PlacementRejection.ReservedRing;
                 if (grid.IsImpassableTerrain(cell)) return PlacementRejection.ImpassableTerrain;
                 if (grid.IsSolid(cell) || grid.HasTrap(cell)) return PlacementRejection.Occupied;
+                if (kind == BuildingKind.Mine && (Terrain == null || !Terrain.IsVein(cell))) return PlacementRejection.NoVein;
             }
 
             if (Gold < PriceFor(kind)) return PlacementRejection.InsufficientGold;

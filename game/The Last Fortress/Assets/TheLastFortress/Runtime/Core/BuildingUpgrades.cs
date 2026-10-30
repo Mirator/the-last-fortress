@@ -28,7 +28,7 @@ namespace TheLastFortress
         /// <summary>Replaces the definition's attack interval when positive.</summary>
         public double IntervalSeconds;
 
-        /// <summary>House and Farm: gold added to the definition's daily income.</summary>
+        /// <summary>House, Farm and Mine: gold added to the definition's daily income.</summary>
         public int IncomeBonus;
 
         /// <summary>Spike Trap: replaces the definition's damage on entry when positive.</summary>
@@ -53,6 +53,9 @@ namespace TheLastFortress
 
         /// <summary>Farm Granary: destroyed in combat, it still pays half its income at the next dawn.</summary>
         public bool Granary;
+
+        /// <summary>Mine Stockade (spec 016): melee hits received during a raid are halved.</summary>
+        public bool Stockade;
 
         /// <summary>Watchtower: range bonus (replaces the definition's), spotter damage percentage, and Chebyshev reach (0 = edge-adjacent).</summary>
         public double WatchRangeBonus;
@@ -152,6 +155,12 @@ namespace TheLastFortress
                     {
                         new BuildingTier { RepairBudget = 60, RepairReach = 3 },
                         new BuildingTier { RepairBudget = 80, RepairReach = 3, KeepCare = true },
+                    };
+                case BuildingKind.Mine:
+                    return new[]
+                    {
+                        new BuildingTier { IncomeBonus = 10 },
+                        new BuildingTier { IncomeBonus = 20, Stockade = true },
                     };
                 default:
                     return null;

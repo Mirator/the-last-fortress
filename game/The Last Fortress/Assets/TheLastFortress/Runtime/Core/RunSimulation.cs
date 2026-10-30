@@ -117,6 +117,9 @@ namespace TheLastFortress
 
         /// <summary>Bombers light at the first solid building beside them (<see cref="ReleaseCampaign.BombersLightOnContact"/>).</summary>
         bool bombersLightOnContact;
+
+        /// <summary>Spec 016 (release-rules-4 campaigns): raid time in steps; 0 = no raids.</summary>
+        int raidTicks;
         long heroDayAccumulatorNs;
 
         GridState grid;
@@ -227,7 +230,7 @@ namespace TheLastFortress
             PendingOffer = null;
             Planner.ClearCache();
             grid = new GridState(config.Terrain != null ? config.Terrain.ImpassableCells() : config.ImpassableCells);
-            placement = new PlacementService(grid, Definitions, Definitions.StartingGold);
+            placement = new PlacementService(grid, Definitions, Definitions.StartingGold) { Terrain = config.Terrain };
             rewardRng = RunRandom.ForRewards(config.Seed);
             Stats = new RunStats();
             LastNight = null;
@@ -247,6 +250,7 @@ namespace TheLastFortress
             grid.Install(keep);
             buildingsById[keep.Id] = keep;
             bombersLightOnContact = config.Campaign != null && ReleaseCampaign.BombersLightOnContact(config.Campaign.RulesVersion);
+            raidTicks = config.Campaign != null && config.Campaign.RulesVersion == ReleaseCampaign.RulesV4 ? PrototypeDefinitions.ToTicks(ReleaseCampaign.RaidSeconds) : 0;
             var heroRules = config.Campaign != null && config.Campaign.HasHero ? config.Campaign.RulesVersion
                 : config.StressMode && ReleaseCampaign.HasHero(config.StressHeroRules) ? config.StressHeroRules : null;
             hero = heroRules != null ? new Hero { MoveUnits = ReleaseCampaign.HeroMoveUnits(heroRules), Profile = HeroProfile.For(heroRules) } : null;
@@ -441,6 +445,9 @@ namespace TheLastFortress
 
         static BuildingTier TierOf(Building b) => BuildingUpgrades.For(b.Definition, b.Tier);
 
+        /// <summary>Spec 016 Stockade (tier III Mine) [P]: its raider's melee hits are halved.</summary>
+        public const int StockadeReductionPercent = 50;
+
         /// <summary>
         /// Range of an Archer Tower or Cannon: base + tier, x1.1 with ExpandedVision (Archer Towers only), then +the buffing
         /// Watchtower's bonus once (floating point).
@@ -623,8 +630,9 @@ namespace TheLastFortress
             var aura = CommanderAuraPercent(e);
             if (aura > 0) damage = damage * (100 + aura) / 100;
             if (GatehouseProtects(target)) damage = Reduce(damage, PerkRules.GatehouseReductionPercent);
+            if (e.RaidBuildingId == target.Id && TierOf(target).Stockade) damage = Reduce(damage, StockadeReductionPercent);
             if (e.Definition.IsRanged && HasPerk(PerkRules.HardenedRoofs) &&
-                (target.Kind == BuildingKind.House || target.Kind == BuildingKind.Farm || target.Kind == BuildingKind.Watchtower || target.Kind == BuildingKind.RepairStation))
+                (target.Kind == BuildingKind.House || target.Kind == BuildingKind.Farm || target.Kind == BuildingKind.Mine || target.Kind == BuildingKind.Watchtower || target.Kind == BuildingKind.RepairStation))
                 damage = Reduce(damage, PerkRules.HardenedRoofsReductionPercent);
             return damage;
         }
@@ -888,7 +896,7 @@ namespace TheLastFortress
             var keepSeen = false;
             foreach (var bd in cp.buildings ?? new BuildingData[0])
             {
-                if (bd == null || bd.kind < 0 || bd.kind > (int)BuildingKind.RepairStation) return "Unknown building type.";
+                if (bd == null || bd.kind < 0 || bd.kind > (int)BuildingKind.Mine) return "Unknown building type.";
                 var kind = (BuildingKind)bd.kind;
                 var def = Definitions.For(kind);
                 if (def == null) return $"{kind} is not defined.";
@@ -906,6 +914,7 @@ namespace TheLastFortress
                     if (!GridCoordinates.IsInBounds(c) || grid.IsImpassableTerrain(c)) return $"Building {bd.id} lies outside buildable land.";
                     if (kind != BuildingKind.Keep && GridCoordinates.IsReservedRing(c)) return $"Building {bd.id} lies on the reserved ring.";
                     if (grid.IsSolid(c) || grid.HasTrap(c)) return $"Building {bd.id} overlaps another structure.";
+                    if (kind == BuildingKind.Mine && (config.Terrain == null || !config.Terrain.IsVein(c))) return $"Mine {bd.id} is not on a gold vein.";
                 }
 
                 // Spec 015: a missing tier is tier I and a missing total the purchase price (saves from before upgrades).
@@ -922,7 +931,7 @@ namespace TheLastFortress
             }
 
             if (!keepSeen) return "Keep missing.";
-            placement = new PlacementService(grid, Definitions, cp.gold) { Thrifty = HasPerk(PerkRules.ThriftyConstruction) };
+            placement = new PlacementService(grid, Definitions, cp.gold) { Thrifty = HasPerk(PerkRules.ThriftyConstruction), Terrain = config.Terrain };
             NightNumber = cp.checkpointNight;
             LastPaidDay = cp.lastPaidDay;
             nextBuildingId = cp.nextBuildingId;
@@ -1326,6 +1335,7 @@ namespace TheLastFortress
             if (e.Definition.IsRanged && RangedHold(e, freshStep)) return;
             if (hero != null && hero.Profile.PursuitTicks > 0 ? StartsPursuit(e, freshStep) : MeleeHoldsHero(e, freshStep)) return;
             if (e.Definition.IsBomber && bombersLightOnContact && LightOnContact(e, freshStep)) return;
+            if (raidTicks > 0 && RaidOnContact(e, freshStep)) return;
 
             if (e.RouteIndex >= e.Route.ReachableEndIndex)
             {
@@ -1386,6 +1396,89 @@ namespace TheLastFortress
         }
 
         static int ContactRank(Building b) => b.Kind == BuildingKind.Keep ? 0 : b.Kind == BuildingKind.Wall ? 1 : 2;
+
+        /// <summary>Spec 016: whether enemies raid in this run (release-rules-4 campaigns).</summary>
+        public bool RaidsEnabled => raidTicks > 0;
+
+        /// <summary>
+        /// Spec 016 Day preview: living Houses, Farms and Mines with a cardinal neighbour on one of tonight's current routes,
+        /// so a passing raider would stop at them (lowest ID first per cell, as the raid picks).
+        /// </summary>
+        public List<Building> RaidExposed()
+        {
+            var list = new List<Building>();
+            if (!RaidsEnabled || Wave == null) return list;
+            var cells = new HashSet<GridPos>();
+            foreach (var entry in Wave.EntryCells)
+            {
+                var route = GetLiveRoute(entry);
+                if (route.Found) cells.UnionWith(route.Cells);
+            }
+
+            foreach (var b in grid.AllBuildings())
+            {
+                if (!b.IsAlive || !IsEconomy(b.Kind)) continue;
+                var exposed = false;
+                foreach (var c in b.Cells)
+                foreach (var d in GridPos.CardinalOrder)
+                    if (cells.Contains(c + d)) exposed = true;
+                if (exposed) list.Add(b);
+            }
+
+            return list;
+        }
+
+        static bool IsEconomy(BuildingKind kind) => kind == BuildingKind.House || kind == BuildingKind.Farm || kind == BuildingKind.Mine;
+
+        /// <summary>
+        /// Spec 016 raid: a Grunt, Runner or Brute at a cell centre with a living House, Farm or Mine on a cardinal neighbour
+        /// stops there and attacks it (lowest ID first; the first hit one interval later), once per night. It walks on when
+        /// the target falls, the raid time runs out, or the hero draws it away (a chase or fighting back ends the raid).
+        /// The route is never changed; the enemy only waits on it.
+        /// </summary>
+        bool RaidOnContact(Enemy e, bool freshStep)
+        {
+            if (e.RaidBuildingId >= 0)
+            {
+                var target = GetBuilding(e.RaidBuildingId);
+                if (target != null && target.IsAlive && Tick < e.RaidUntilTick && e.TargetBuildingId == e.RaidBuildingId && !e.TargetsHero)
+                {
+                    e.CarryUnits = 0;
+                    return true;
+                }
+
+                EndRaid(e);
+                return false;
+            }
+
+            if (e.Raided || e.Definition.IsRanged || e.Definition.IsBomber || e.Definition.IsBoss) return false;
+            Building best = null;
+            foreach (var d in GridPos.CardinalOrder)
+            {
+                var b = grid.GetOccupant(e.Cell + d);
+                if (b != null && b.IsAlive && IsEconomy(b.Kind) && (best == null || b.Id < best.Id)) best = b;
+            }
+
+            if (best == null) return false;
+            e.CarryUnits = 0;
+            if (!freshStep) return true; // the raid starts on the next simulation step, like any attack
+            e.Raided = true;
+            e.RaidBuildingId = best.Id;
+            e.RaidUntilTick = Tick + raidTicks;
+            e.TargetBuildingId = best.Id;
+            e.AttackDueTick = Tick + e.AttackTicks;
+            events.Add(new SimEvent(SimEventType.RaidStarted, Tick, e.Id, best.Id, e.Cell));
+            return true;
+        }
+
+        void EndRaid(Enemy e)
+        {
+            if (e.RaidBuildingId < 0) return;
+            events.Add(new SimEvent(SimEventType.RaidEnded, Tick, e.Id, e.RaidBuildingId, e.Cell));
+            if (e.TargetBuildingId == e.RaidBuildingId) e.TargetBuildingId = -1;
+            if (e.ResumeBuildingId == e.RaidBuildingId) e.ResumeBuildingId = -1;
+            e.RaidBuildingId = -1;
+        }
 
         /// <summary>
         /// Raider Archer at a cell centre of its own route (game rules section 8, Raider Archer): keeps a living target in range; otherwise picks
@@ -1471,7 +1564,8 @@ namespace TheLastFortress
             switch (kind)
             {
                 case BuildingKind.House:
-                case BuildingKind.Farm: return 0;
+                case BuildingKind.Farm:
+                case BuildingKind.Mine: return 0;
                 case BuildingKind.Watchtower:
                 case BuildingKind.RepairStation: return 1;
                 case BuildingKind.Tower:
@@ -2525,6 +2619,7 @@ namespace TheLastFortress
             if (!PursuitLineClear(e)) return false;
             e.CarryUnits = 0;
             if (!freshStep) return true; // as for buildings: the chase starts on the next simulation step
+            EndRaid(e);
             e.Pursuing = true;
             e.Chased = true;
             e.PursueUntilTick = Tick + p.PursuitTicks;
@@ -2569,6 +2664,7 @@ namespace TheLastFortress
             if (Tick >= e.ProvokedUntilTick && (e.TargetBuildingId >= 0 || e.RouteIndex >= e.Route.ReachableEndIndex)) return false;
             e.CarryUnits = 0;
             if (!freshStep) return true; // as for buildings: the target is taken on the next simulation step
+            EndRaid(e); // spec 016: the hero ends a raid; it is never resumed
             if (e.TargetBuildingId >= 0) e.ResumeBuildingId = e.TargetBuildingId;
             else e.AttackDueTick = Tick + e.AttackTicks;
             e.TargetBuildingId = -1;

@@ -53,7 +53,7 @@ namespace TheLastFortress.Tests
                 "RepairStation 6 9", "Cannon 4 9", "Cannon 15 9", "Cannon 9 15", "Cannon 9 4",
                 "Tower 7 10", "Tower 13 10", "Tower 10 7", "Tower 10 13", "Tower 6 11", "Tower 14 9",
             },
-            Economy = new[] { "House 12 8", "House 8 12", "House 13 8", "Farm 12 13", "House 7 12", "Farm 6 13", "House 13 7", "Farm 15 7" },
+            Economy = new[] { "House 12 8", "House 8 12", "Mine vein0", "House 13 8", "Farm 12 13", "House 7 12", "Farm 6 13", "House 13 7", "Farm 15 7" },
             MinDefense = new[] { 4, 4, 6, 7, 11, 13, 16, 17, 20, 23, 26, 29 },
             EconomyUntilDay = 6,
             Perks = new[]
@@ -81,7 +81,7 @@ namespace TheLastFortress.Tests
                 "Tower 3 11", "Tower 16 9", "SpikeTrap 3 10", "SpikeTrap 16 10", "Tower 9 8", "Tower 11 12", "Tower 5 11", "Tower 14 9",
                 "SpikeTrap 2 10", "SpikeTrap 17 10", "Tower 2 9", "Tower 17 11",
             },
-            Economy = new[] { "House 13 15", "House 14 15", "Farm 13 16", "House 6 15", "House 7 15", "Farm 6 16", "House 15 4", "Farm 13 3" },
+            Economy = new[] { "House 13 15", "House 14 15", "Mine vein0", "Farm 13 16", "House 6 15", "House 7 15", "Farm 6 16", "House 15 4", "Farm 13 3" },
             MinDefense = new[] { 4, 6, 6, 7, 9, 11, 14, 17, 21, 26, 30, 34 },
             EconomyUntilDay = 7,
             Perks = new[]
@@ -108,7 +108,8 @@ namespace TheLastFortress.Tests
             },
             Economy = new[]
             {
-                "House 8 12", "House 8 13", "Farm 6 12", "House 12 8", "House 13 8", "Farm 12 6", "House 12 12", "House 12 13",
+                "House 8 12", "Mine vein0", "Mine vein1", "House 8 13", "Mine vein2", "Farm 6 12", "House 12 8", "House 13 8", "Farm 12 6",
+                "Mine vein0 2", "Mine vein1 2", "House 12 12", "House 12 13",
                 "Farm 13 12", "House 7 8", "House 8 7", "Farm 6 6", "House 7 13", "House 13 7", "House 8 12 2", "House 8 13 2", "Farm 6 12 2",
             },
             MinDefense = new[] { 3, 4, 4, 6, 6, 9, 11, 14, 17, 20, 23, 26 },
@@ -120,6 +121,32 @@ namespace TheLastFortress.Tests
                 PerkRules.BlastShields, PerkRules.Overwatch, PerkRules.Shrapnel, PerkRules.HeavyShot, PerkRules.ThriftyConstruction,
                 PerkRules.Gatehouse, PerkRules.SignalFires, PerkRules.ReinforcedTimber, PerkRules.FocusedFire, PerkRules.LastStand,
                 PerkRules.Recycling, PerkRules.BarbedDefenses, PerkRules.KillZone, PerkRules.SpikedCorridor,
+            },
+        };
+
+        // Spec 016 D5: the owner's 2026-10-29 playtest layout. Houses seal the Keep and ring it, Archer Towers stand around
+        // them; no Walls, traps or Cannons. Its Houses are its defense, so they sit in the defense queue.
+        public static readonly Policy HouseRing = new Policy
+        {
+            Name = "house-ring", Map = MapProfiles.Crossing, Recorded = new uint[0],
+            Defense = new[]
+            {
+                "House 9 10", "House 11 10", "House 10 9", "House 10 11", "Tower 9 9", "Tower 11 11", "Tower 9 11", "Tower 11 9",
+                "House 8 10", "House 12 10", "House 10 8", "House 10 12", "Tower 8 9", "Tower 12 11", "Tower 9 12", "Tower 11 8",
+                "Tower 8 11", "Tower 12 9", "Tower 9 8", "Tower 11 12", "Tower 9 9 2", "Tower 11 11 2", "Tower 9 11 2", "Tower 11 9 2",
+                "Tower 7 10", "Tower 13 10", "Tower 10 7", "Tower 10 13", "Tower 8 9 2", "Tower 12 11 2", "Tower 9 12 2", "Tower 11 8 2",
+                "Tower 7 8", "Tower 13 12", "Tower 8 13", "Tower 12 7", "Tower 9 9 3", "Tower 11 11 3", "Tower 9 11 3", "Tower 11 9 3",
+            },
+            Economy = new[] { "Farm 12 12", "Farm 7 6", "House 8 8", "House 12 13", "Farm 6 12", "House 13 8", "Farm 15 7", "House 9 14" },
+            MinDefense = new[] { 6, 8, 9, 11, 13, 15, 17, 20, 23, 26, 29, 32 },
+            EconomyUntilDay = 7,
+            Perks = new[]
+            {
+                PerkRules.MarketSquare, PerkRules.EfficientFarming, PerkRules.WarBonds, PerkRules.Sharpshooters, PerkRules.FlamingArrows,
+                PerkRules.ExpandedVision, PerkRules.FortressHeart, PerkRules.HardenedRoofs, PerkRules.Overwatch, PerkRules.FocusedFire,
+                PerkRules.CounterBattery, PerkRules.ThriftyConstruction, PerkRules.LastStand, PerkRules.BlastShields, PerkRules.Recycling,
+                PerkRules.KillZone, PerkRules.Gatehouse, PerkRules.ReinforcedTimber, PerkRules.SignalFires, PerkRules.Shrapnel,
+                PerkRules.HeavyShot, PerkRules.BarbedDefenses, PerkRules.SpikedCorridor, PerkRules.FieldEngineers,
             },
         };
 
@@ -136,13 +163,21 @@ namespace TheLastFortress.Tests
             /// <summary>
             /// Buys the next items while affordable; skips illegal cells for good. Stops on gold or <paramref name="limit"/>.
             /// Spec 015: "Kind x y tier" raises the building there to that tier and counts as one item; it is skipped when
-            /// there is none or the rules have no tiers.
+            /// there is none or the rules have no tiers. Spec 016: "Mine veinN [tier]" means the map's N-th gold vein in (z,x)
+            /// order, skipped when the map has fewer.
             /// </summary>
             public void Buy(RunSimulation sim, List<string> log, int limit = int.MaxValue)
             {
                 while (next < items.Length && Bought < limit)
                 {
-                    var p = items[next].Split(' ');
+                    var p = VeinCell(sim, items[next].Split(' '));
+                    if (p == null)
+                    {
+                        log.Add($"{items[next]} SKIP no such vein");
+                        next++;
+                        continue;
+                    }
+
                     var kind = (BuildingKind)Enum.Parse(typeof(BuildingKind), p[0]);
                     if (p.Length > 3)
                     {
@@ -160,6 +195,18 @@ namespace TheLastFortress.Tests
                     next++;
                 }
             }
+        }
+
+        /// <summary>Spec 016: "Mine veinN ..." becomes "Mine x z ..." on the N-th vein in (z,x) order; null when there is none.</summary>
+        static string[] VeinCell(RunSimulation sim, string[] p)
+        {
+            if (p.Length < 2 || !p[1].StartsWith("vein")) return p;
+            var veins = sim.Config.Terrain?.Veins.OrderBy(v => v.Z).ThenBy(v => v.X).ToList() ?? new List<GridPos>();
+            var n = int.Parse(p[1].Substring(4));
+            if (n >= veins.Count) return null;
+            var q = new List<string> { p[0], veins[n].X.ToString(), veins[n].Z.ToString() };
+            q.AddRange(p.Skip(2));
+            return q.ToArray();
         }
 
         /// <summary>Raises the building at <paramref name="cell"/> to <paramref name="tier"/>; false while a tier is unaffordable.</summary>
@@ -305,6 +352,7 @@ namespace TheLastFortress.Tests
             public readonly HashSet<int> Chasing = new HashSet<int>(), OffRoute = new HashSet<int>();
             public long EnemySteps, OffRouteSteps;
         }
+
 
         public static RunSimulation Play(Policy policy, uint seed, StringBuilder log, int symmetry = 0, string rules = ReleaseCampaign.RulesV1,
             HeroScript hero = HeroScript.Idle, bool build = true, HeroLog heroLog = null)
@@ -502,7 +550,7 @@ namespace TheLastFortress.Tests
         /// <summary>"Kind x z" with its footprint turned about the Keep cell (mirror first, then quarter turns, as the map).</summary>
         static string TurnAboutKeep(string item, int s)
         {
-            if (s == 0) return item;
+            if (s == 0 || item.Contains(" vein")) return item; // spec 016: veins are already on the board as played
             var p = item.Split(' ');
             var kind = (BuildingKind)Enum.Parse(typeof(BuildingKind), p[0]);
             var k = GridState.KeepCell;

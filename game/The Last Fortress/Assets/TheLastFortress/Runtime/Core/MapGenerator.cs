@@ -32,7 +32,12 @@ namespace TheLastFortress
         /// <summary>Plan 008: which of the 8 board symmetries (rotations/mirrors) was applied to the profile layout.</summary>
         public int Symmetry;
 
+        /// <summary>Spec 016: gold vein cells (land; a Mine may only stand on one). Empty for the MVP, the flat map and older saves.</summary>
+        public readonly List<GridPos> Veins = new List<GridPos>();
+
         public TerrainType this[GridPos c] => Cells[c.Z * GridCoordinates.Size + c.X];
+
+        public bool IsVein(GridPos c) => Veins.Contains(c);
 
         public List<GridPos> ImpassableCells()
         {

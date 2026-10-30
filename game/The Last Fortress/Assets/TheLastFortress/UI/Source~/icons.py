@@ -1,7 +1,7 @@
 """
 The Last Fortress — HUD icons rasterized from the line-icon style in design/icons/ (64-unit grid, 3.5 stroke, round
 caps and joins, white on transparent; the HUD tints them). Wall, Archer Tower and Gold follow the existing SVG paths;
-House, Farm and Spike Trap are new drawings in the same style; Cannon, Watchtower and Repair Station were added for plan 008. Pillow only, no SVG dependency.
+House, Farm and Spike Trap are new drawings in the same style; Cannon, Watchtower and Repair Station were added for plan 008, the Mine for spec 016. Pillow only, no SVG dependency.
 
     python icons.py <output directory>
 """
@@ -107,6 +107,15 @@ def repair(d):
     polyline(d, [(28, 56), (58, 56)])                              # ground
 
 
+def mine(d):
+    polyline(d, [(14, 52), (26, 12), (38, 52)])                    # headframe
+    circle(d, 26, 14, 7)                                           # winding wheel
+    polyline(d, [(18, 36), (34, 36)])                              # cross brace
+    polyline(d, [(40, 40), (58, 40), (55, 52), (43, 52)], closed=True)  # ore cart
+    polyline(d, [(44, 40), (47, 34), (51, 37), (55, 33), (57, 40)])     # ore heap
+    polyline(d, [(6, 58), (60, 58)])                               # ground
+
+
 def gold(d):
     circle(d, 32, 32, 23)
     circle(d, 32, 32, 16)
@@ -146,7 +155,7 @@ def pan_cursor(out):
 
 
 ICONS = {"icon_wall": wall, "icon_tower": tower, "icon_house": house, "icon_farm": farm, "icon_trap": trap, "icon_gold": gold,
-         "icon_cannon": cannon, "icon_watchtower": watchtower, "icon_repair": repair}
+         "icon_cannon": cannon, "icon_watchtower": watchtower, "icon_repair": repair, "icon_mine": mine}
 
 
 def main():

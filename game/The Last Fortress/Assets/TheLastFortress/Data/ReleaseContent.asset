@@ -28,6 +28,7 @@ MonoBehaviour:
   cannonPrefab: {fileID: 2198366529454211407, guid: 7015a01102cf6c6478f4cbba2da5f9ff, type: 3}
   watchtowerPrefab: {fileID: 1325927115242731038, guid: 8400e329883a39e49b1e2314fba44c8d, type: 3}
   repairStationPrefab: {fileID: 8360726647778069353, guid: 115a817572fccea47bdf7da2f663d333, type: 3}
+  minePrefab: {fileID: 2041188590309090682, guid: 1921c3a1a43bc8c4eaf8adb94b04662e, type: 3}
   raiderArcherPrefab: {fileID: 7120807620281102858, guid: 9f9fa7a5fe606f6439b0cd5c0fbed5e2, type: 3}
   bomberPrefab: {fileID: 2359386809958955175, guid: 6a50c7ea44548aa46a9def3fd9e3d5e5, type: 3}
   commanderPrefab: {fileID: 5108529738428571984, guid: 988740485a79f2a4898a9c3e59c4f09f, type: 3}
@@ -63,6 +64,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: c70a9b3b9c1ba18498516f02e9bd1788, type: 3}
   - {fileID: 2800000, guid: bd11c8e994d0a94459a114d8ae2e7893, type: 3}
   - {fileID: 2800000, guid: ab68fe39c20acea499ca71c2ca7139f7, type: 3}
+  - {fileID: 2800000, guid: 734f721c6faf84c4b896fd31bfa7441e, type: 3}
   goldIcon: {fileID: 2800000, guid: d849103021cf3504391180abb36abcd4, type: 3}
   panCursor: {fileID: 2800000, guid: a0106ed712ff36d4dbf101cfebd01a8b, type: 3}
   winningLayout: {fileID: 0}

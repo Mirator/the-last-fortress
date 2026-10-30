@@ -31,6 +31,13 @@ namespace TheLastFortress
             BuildingKind.Cannon, BuildingKind.Watchtower, BuildingKind.RepairStation,
         };
 
+        /// <summary>release-rules-4: the release kinds plus the Mine (spec 016), hotkey 9.</summary>
+        public static readonly BuildingKind[] ContactKinds =
+        {
+            BuildingKind.Wall, BuildingKind.Tower, BuildingKind.House, BuildingKind.Farm, BuildingKind.SpikeTrap,
+            BuildingKind.Cannon, BuildingKind.Watchtower, BuildingKind.RepairStation, BuildingKind.Mine,
+        };
+
         /// <summary>The six-night MVP (also the legacy profile every release build keeps for old saves).</summary>
         public static RulesProfile SixNights(PrototypeDefinitions defs) => new RulesProfile
         {
@@ -58,7 +65,7 @@ namespace TheLastFortress
         {
             RulesVersion = ReleaseCampaign.RulesV4, CampaignId = ReleaseCampaign.CampaignId, Label = ReleaseCampaign.Label,
             ContentVersion = ReleaseCampaign.ContentVersion, Schema = RunCheckpoint.CurrentSchema, Definitions = ReleaseCampaign.Contact(defs),
-            PerkPool = PerkRules.ReleaseIds, PurchasableKinds = ReleaseKinds,
+            PerkPool = PerkRules.ReleaseIds, PurchasableKinds = ContactKinds,
         };
 
         /// <summary>Twelve nights with the player hero (release-rules-2): kept so saves from before release-rules-3 continue.</summary>

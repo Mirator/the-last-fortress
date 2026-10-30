@@ -265,13 +265,71 @@ namespace TheLastFortress
             for (var attempt = 0; attempt < MapGenerator.MaxAttempts; attempt++)
             {
                 var map = Transform(Candidate(profile, seed, attempt), symmetry);
-                if (Validate(profile, map) == null) return map;
+                if (Validate(profile, map) != null) continue;
+                PlaceVeins(map);
+                return map;
             }
 
             var fallback = Transform(Skeleton(profile, seed), symmetry);
             fallback.Fallback = true;
+            PlaceVeins(fallback);
             return fallback;
         }
+
+        public const uint VeinSalt = 0x3C6EF372;
+        public const int VeinCount = 3, VeinKeepDistance = 5, VeinRouteReach = 2, VeinSpacing = 3;
+
+        /// <summary>
+        /// Spec 016 gold veins on the board as played: buildable land at Chebyshev distance at least 5 from the Keep, off every
+        /// entry's open route but within 2 of one, never on a river's line, at least 3 apart. Candidates in (z,x) order are
+        /// shuffled by their own stream (seed ^ VeinSalt); the first pass takes one per quadrant around the Keep, the second
+        /// fills up to three. Fewer when the board has no room; none is still a valid map.
+        /// </summary>
+        public static void PlaceVeins(TerrainMap map)
+        {
+            map.Veins.Clear();
+            var route = new HashSet<GridPos>();
+            foreach (var entry in new[] { MvpCampaign.West, MvpCampaign.East, MvpCampaign.North, MvpCampaign.South })
+            {
+                var r = PlanOpen(map, entry);
+                if (r.Found && !r.IsBreach) route.UnionWith(r.Cells);
+            }
+
+            var river = new HashSet<GridPos>(RiverCrossings(map));
+            var candidates = new List<GridPos>();
+            for (var z = 0; z < GridCoordinates.Size; z++)
+            for (var x = 0; x < GridCoordinates.Size; x++)
+            {
+                var c = new GridPos(x, z);
+                if (GridCoordinates.IsReservedRing(c) || map[c] != TerrainType.Land || route.Contains(c) || river.Contains(c)) continue;
+                if (Chebyshev(c, GridState.KeepCell) < VeinKeepDistance) continue;
+                var near = false;
+                foreach (var r in route)
+                    if (Chebyshev(c, r) <= VeinRouteReach) { near = true; break; }
+                if (near) candidates.Add(c);
+            }
+
+            var rng = new RunRandom(map.Seed ^ VeinSalt);
+            for (var i = 0; i < candidates.Count; i++)
+            {
+                var j = i + (int)rng.NextBounded((uint)(candidates.Count - i));
+                (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+            }
+
+            var quadrants = new bool[4];
+            for (var pass = 0; pass < 2; pass++)
+            foreach (var c in candidates)
+            {
+                if (map.Veins.Count >= VeinCount) return;
+                var q = (c.X < GridState.KeepCell.X ? 0 : 1) + (c.Z < GridState.KeepCell.Z ? 0 : 2);
+                if (pass == 0 && quadrants[q]) continue;
+                if (map.Veins.Exists(v => v == c || Chebyshev(v, c) < VeinSpacing)) continue;
+                map.Veins.Add(c);
+                quadrants[q] = true;
+            }
+        }
+
+        static int Chebyshev(GridPos a, GridPos b) => Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Z - b.Z));
 
         public static TerrainMap Skeleton(Profile profile, uint seed)
         {

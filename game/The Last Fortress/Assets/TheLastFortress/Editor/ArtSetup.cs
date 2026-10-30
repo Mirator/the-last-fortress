@@ -267,6 +267,26 @@ namespace TheLastFortress.Editor
         }
 
         /// <summary>
+        /// Spec 016: imports only the Mine (Art/Source~/models_ext.py mine) and its HUD icon, and assigns both to the release
+        /// content; every other asset stays untouched. Batch: -executeMethod TheLastFortress.Editor.ArtSetup.RunMine
+        /// </summary>
+        [MenuItem("The Last Fortress/Art/Import and Assign Mine")]
+        public static void RunMine()
+        {
+            PrototypeSetup.EnsureFolder(Prefabs);
+            AssetDatabase.Refresh();
+            var mats = CreateMaterials();
+            ConfigureModels(mats, $"{Models}/ArtMine.fbx");
+            var mine = Variant("ArtMine");
+            var content = AssetDatabase.LoadAssetAtPath<PrototypeContent>(ReleaseSetup.ContentPath);
+            if (content == null) throw new FileNotFoundException("Release content missing; run the release setup first.");
+            content.minePrefab = mine;
+            PresentationSetup.Link(content);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Mine imported and assigned to the release content.");
+        }
+
+        /// <summary>
         /// Plan 029 (spec 011): creates the hero-view fade material (TheLastFortress/HeroFade) and assigns it to the release
         /// content, so the shader reaches the player build; every other asset stays untouched.
         /// Batch: -executeMethod TheLastFortress.Editor.ArtSetup.RunHeroFade

@@ -35,6 +35,9 @@ namespace TheLastFortress
         public GameObject cannonPrefab;
         public GameObject watchtowerPrefab;
         public GameObject repairStationPrefab;
+
+        /// <summary>Spec 016 Mine (release-rules-4 only).</summary>
+        public GameObject minePrefab;
         public GameObject raiderArcherPrefab;
         public GameObject bomberPrefab;
         public GameObject commanderPrefab;
@@ -138,6 +141,7 @@ namespace TheLastFortress
                 case BuildingKind.Cannon: prefab = cannonPrefab; break;
                 case BuildingKind.Watchtower: prefab = watchtowerPrefab; break;
                 case BuildingKind.RepairStation: prefab = repairStationPrefab; break;
+                case BuildingKind.Mine: prefab = minePrefab; break;
                 default: throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
             }
 

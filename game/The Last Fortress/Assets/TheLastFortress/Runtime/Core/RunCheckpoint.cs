@@ -34,6 +34,9 @@ namespace TheLastFortress
         public bool mapFallback;
         public int mapAttempt = -1;
         public int[] terrain = new int[0];
+
+        /// <summary>Spec 016: gold vein cells as z * 20 + x (optional; older saves have none).</summary>
+        public int[] veins = new int[0];
         public NightData[] nights = new NightData[0];
 
         /// <summary>Active, Victory or Defeat. Terminal records keep the summary but cannot be continued.</summary>
@@ -174,6 +177,7 @@ namespace TheLastFortress
             cp.terrain = new int[GridCoordinates.Size * GridCoordinates.Size];
             if (cfg.Terrain != null)
                 for (var i = 0; i < cp.terrain.Length; i++) cp.terrain[i] = (int)cfg.Terrain.Cells[i];
+            cp.veins = cfg.Terrain == null ? new int[0] : cfg.Terrain.Veins.ConvertAll(v => v.Z * GridCoordinates.Size + v.X).ToArray();
 
             var nights = new List<NightData>();
             foreach (var w in sim.Campaign.Nights)
@@ -325,6 +329,14 @@ namespace TheLastFortress
                 var c = new GridPos(i % GridCoordinates.Size, i / GridCoordinates.Size);
                 if (map.Cells[i] != TerrainType.Land && (c == GridState.KeepCell || GridCoordinates.IsReservedRing(c)))
                     return Fail($"Terrain blocks a fixed cell {c}.", out problem, out message);
+            }
+
+            foreach (var v in cp.veins ?? new int[0])
+            {
+                var c = new GridPos(v % GridCoordinates.Size, v / GridCoordinates.Size);
+                if (v < 0 || v >= cells || map.Cells[v] != TerrainType.Land || c == GridState.KeepCell || GridCoordinates.IsReservedRing(c) || map.IsVein(c))
+                    return Fail("Bad gold vein.", out problem, out message);
+                map.Veins.Add(c);
             }
 
             // Waves

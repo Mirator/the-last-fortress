@@ -193,6 +193,14 @@ namespace TheLastFortress
 
         public long DetonateTick;
 
+        /// <summary>Spec 016: this enemy has used its one raid (an enemy lives one night, so once per night).</summary>
+        public bool Raided;
+
+        /// <summary>Spec 016: the House, Farm or Mine it is raiding (-1 when not raiding) and when the raid time runs out.</summary>
+        public int RaidBuildingId = -1;
+
+        public long RaidUntilTick;
+
         public Enemy(int id, int entryIndex, EnemyDefinition definition, GridPos cell)
         {
             Id = id;

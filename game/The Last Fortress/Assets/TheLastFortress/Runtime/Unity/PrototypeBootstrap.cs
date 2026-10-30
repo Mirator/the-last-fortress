@@ -239,7 +239,7 @@ namespace TheLastFortress
                 var legacy = RulesProfile.SixNights(content.mvpDefinitions != null ? content.mvpDefinitions.ToDefinitions() : MvpDefinitions.CreateDefault());
                 Catalog = new RulesCatalog(release, walking, heroRun, beforeHero, legacy);
                 Definitions = release.Definitions;
-                PurchasableKinds = RulesProfile.ReleaseKinds;
+                PurchasableKinds = release.PurchasableKinds; // spec 016: the Mine is card 9 (older runs hide cards their rules lack)
             }
             else if (IsMvp)
             {

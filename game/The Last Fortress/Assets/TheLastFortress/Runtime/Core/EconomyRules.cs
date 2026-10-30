@@ -11,6 +11,11 @@ namespace TheLastFortress
         public int HouseCount;
         public int FarmCount;
 
+        /// <summary>Spec 016: surviving Mines and their income.</summary>
+        public int Mines;
+
+        public int MineCount;
+
         /// <summary>Farms that currently receive the Farm + House adjacency bonus.</summary>
         public int LinkedFarms;
 
@@ -23,7 +28,7 @@ namespace TheLastFortress
         /// <summary>Spec 015: half the income of tier III Farms destroyed in the previous night; its own dawn line, never forecast.</summary>
         public int Granary;
 
-        public int Total => Keep + Houses + Farms + Bonus + EarlyCall + Granary;
+        public int Total => Keep + Houses + Farms + Mines + Bonus + EarlyCall + Granary;
     }
 
     /// <summary>Fixed MVP economy rules from specification 003. Pure functions over authoritative grid state.</summary>
@@ -114,6 +119,11 @@ namespace TheLastFortress
                     r.FarmCount++;
                     if (FarmHasAdjacentHouse(grid, b)) r.LinkedFarms++;
                 }
+                else if (b.Kind == BuildingKind.Mine)
+                {
+                    r.Mines += BuildingIncome(grid, b, farmBonusPercent);
+                    r.MineCount++;
+                }
             }
 
             return r;
@@ -135,6 +145,7 @@ namespace TheLastFortress
             var tier = BuildingUpgrades.For(b.Definition, b.Tier);
             if (b.Kind == BuildingKind.House)
                 return b.Definition.DailyIncome + tier.IncomeBonus + (houseLinkBonus > 0 && HouseHasAdjacentHouse(grid, b) ? houseLinkBonus : 0);
+            if (b.Kind == BuildingKind.Mine) return b.Definition.DailyIncome + tier.IncomeBonus;
             if (b.Kind != BuildingKind.Farm) return 0;
             var gross = b.Definition.DailyIncome + tier.IncomeBonus + (FarmHasAdjacentHouse(grid, b) ? FarmHouseBonus : 0) + MarketHallBonus(grid, b);
             return gross * (100 + farmBonusPercent) / 100;

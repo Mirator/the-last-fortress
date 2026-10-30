@@ -15,6 +15,7 @@ namespace TheLastFortress
         Cannon = 6,
         Watchtower = 7,
         RepairStation = 8,
+        Mine = 9,
     }
 
     /// <summary>Tuning values for a structure. Shared and read-only during a run; perks never mutate it.</summary>
@@ -169,6 +170,9 @@ namespace TheLastFortress
         public BuildingDefinition Cannon;
         public BuildingDefinition Watchtower;
         public BuildingDefinition RepairStation;
+
+        /// <summary>Spec 016 (release-rules-4 only): built on a gold vein, earns daily income.</summary>
+        public BuildingDefinition Mine;
         public EnemyDefinition RaiderArcher;
         public EnemyDefinition Bomber;
         public EnemyDefinition SiegeCommander;
@@ -210,6 +214,7 @@ namespace TheLastFortress
             d.Cannon = U(Cannon);
             d.Watchtower = U(Watchtower);
             d.RepairStation = U(RepairStation);
+            d.Mine = U(Mine);
             return d;
         }
 
@@ -252,6 +257,7 @@ namespace TheLastFortress
                 case BuildingKind.Cannon: return Cannon;
                 case BuildingKind.Watchtower: return Watchtower;
                 case BuildingKind.RepairStation: return RepairStation;
+                case BuildingKind.Mine: return Mine;
                 default: throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
             }
         }
@@ -312,6 +318,12 @@ namespace TheLastFortress
                 ValidateBuilding(RepairStation, BuildingKind.RepairStation, errors);
                 if (RepairStation.RepairBudget <= 0) errors.Add("Repair Station budget must be positive.");
                 if (RepairStation.RepairReach < 1) errors.Add("Repair Station reach must be at least 1.");
+            }
+
+            if (Mine != null)
+            {
+                ValidateBuilding(Mine, BuildingKind.Mine, errors);
+                if (Mine.DailyIncome <= 0) errors.Add("Mine income must be positive.");
             }
 
             if (Grunt == null)

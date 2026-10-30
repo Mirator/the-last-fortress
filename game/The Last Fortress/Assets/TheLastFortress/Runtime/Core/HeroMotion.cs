@@ -82,6 +82,7 @@ namespace TheLastFortress
                 case BuildingKind.Farm: return 154; // its fence line, 0.872 tile from the centre of the 2 x 2 field
                 case BuildingKind.Cannon: return 0; // the 1 x 1 field gun is drawn shapes: see FieldGunRadiusUnits
                 case BuildingKind.RepairStation: return 144; // 1.76 of 2 tiles
+                case BuildingKind.Mine: return 84; // its 0.86-tile spoil pad
                 default: return 0; // Wall, Keep
             }
         }

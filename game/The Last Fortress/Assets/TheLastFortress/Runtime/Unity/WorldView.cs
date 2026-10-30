@@ -848,7 +848,38 @@ namespace TheLastFortress
 
             if (HasTerrain) BuildTerrain(map);
             BuildWater(map);
+            BuildVeins(map);
             if (art != null && art.tuft != null) BuildGroundDetail(map);
+        }
+
+        Material veinGold, veinRock;
+
+        /// <summary>
+        /// Spec 016: each gold vein is a patch of dark spoil with flat gold-flecked stones, low enough that the hero walks
+        /// over it and a building's own model covers it. Decoration only; never touches the simulation.
+        /// </summary>
+        void BuildVeins(TerrainMap map)
+        {
+            if (map.Veins.Count == 0) return;
+            if (veinGold == null) veinGold = Prims.Tinted(content.rock, Palette.Hex(0xE2AE3A));
+            if (veinRock == null) veinRock = Prims.Tinted(content.rock, Palette.Hex(0x5A5048));
+            var root = new GameObject("GoldVeins").transform;
+            root.SetParent(terrainRoot.transform, false);
+            foreach (var cell in map.Veins)
+            {
+                var c = Prims.CellCenter(cell);
+                var patch = Prims.Create(PrimitiveType.Cylinder, root, c + new Vector3(0, 0.012f, 0), new Vector3(0.78f, 0.006f, 0.7f), veinRock, "VeinPatch");
+                patch.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                for (var k = 0; k < 6; k++)
+                {
+                    var a = (cell.X * 37 + cell.Z * 11 + k * 61) % 360 * Mathf.Deg2Rad;
+                    var r = 0.1f + 0.22f * ((k * 0.37f + cell.X * 0.13f) % 1f);
+                    var s = 0.07f + 0.03f * (k % 3);
+                    var fleck = Prims.Create(PrimitiveType.Cube, root, c + new Vector3(Mathf.Cos(a) * r, 0.025f, Mathf.Sin(a) * r), new Vector3(s, 0.03f, s * 0.8f),
+                        k % 2 == 0 ? veinGold : veinRock, "VeinFleck", Quaternion.Euler(0, k * 47 + cell.Z * 13, 0));
+                    fleck.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                }
+            }
         }
 
         /// <summary>
@@ -1626,6 +1657,7 @@ namespace TheLastFortress
                 case BuildingKind.Cannon: return 0.65f;
                 case BuildingKind.Watchtower: return 2.15f;
                 case BuildingKind.RepairStation: return 1.6f;
+                case BuildingKind.Mine: return 1.2f;
                 default: return 0.8f;
             }
         }

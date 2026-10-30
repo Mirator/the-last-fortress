@@ -36,7 +36,7 @@ namespace TheLastFortress.Editor
         {
             AssetDatabase.Refresh();
             content.audio = LinkAudio();
-            content.buildingIcons = new Texture2D[9];
+            content.buildingIcons = new Texture2D[10];
             content.buildingIcons[(int)BuildingKind.Wall] = Icon("icon_wall");
             content.buildingIcons[(int)BuildingKind.Tower] = Icon("icon_tower");
             content.buildingIcons[(int)BuildingKind.House] = Icon("icon_house");
@@ -45,6 +45,7 @@ namespace TheLastFortress.Editor
             content.buildingIcons[(int)BuildingKind.Cannon] = Icon("icon_cannon");
             content.buildingIcons[(int)BuildingKind.Watchtower] = Icon("icon_watchtower");
             content.buildingIcons[(int)BuildingKind.RepairStation] = Icon("icon_repair");
+            content.buildingIcons[(int)BuildingKind.Mine] = Icon("icon_mine");
             content.goldIcon = Icon("icon_gold");
             content.panCursor = Icon("cursor_pan", cursor: true);
             EditorUtility.SetDirty(content);

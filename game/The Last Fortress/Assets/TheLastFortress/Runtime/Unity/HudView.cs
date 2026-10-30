@@ -165,11 +165,12 @@ namespace TheLastFortress
             if (mvpMenu) restartTop.fontSize = resetTop.fontSize = 21;
             if (game.IsMvp) BuildRunMenuRow(menu);
 
-            // Bottom-center: build cards (the release's eight kinds wrap into two rows of four; row 0 is the lower one).
+            // Bottom-center: build cards (eight kinds wrap into two rows of four, release-rules-4's nine with the Mine into
+            // two narrower rows of five; row 0 is the lower one).
             var kinds = game.PurchasableKinds;
-            var cardWidth = kinds.Count > 2 ? 204f : 240f;
+            var cardWidth = kinds.Count > 8 ? 178f : kinds.Count > 2 ? 204f : 240f;
             var gap = kinds.Count > 2 ? 10f : 20f;
-            var perRow = kinds.Count > 5 ? 4 : kinds.Count;
+            var perRow = kinds.Count > 8 ? 5 : kinds.Count > 5 ? 4 : kinds.Count;
             var rows = (kinds.Count + perRow - 1) / perRow;
             cardBarTop = 24f + rows * 120f + (rows - 1) * gap + 8f;
             var cardRow = Rect(root, "BuildCards", new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(perRow * (cardWidth + gap) - gap, rows * 120 + (rows - 1) * gap));
@@ -179,7 +180,7 @@ namespace TheLastFortress
                 var kind = kinds[i];
                 var def = game.Definitions.For(kind);
                 var buildCard = new BuildCard { Kind = kind };
-                var row = rows - 1 - i / perRow; // first four on top, read left to right like the hotkeys
+                var row = rows - 1 - i / perRow; // the first row on top, read left to right like the hotkeys
                 buildCard.Button = Card(cardRow, def.DisplayName, def.Cost, (i + 1).ToString(), new Vector2(i % perRow * (cardWidth + gap), row * (120 + gap)), cardWidth,
                     () => game.Player.SetTool(kind), out buildCard.Image, out buildCard.Cost, game.IsMvp ? CardEffect(def) : null, game.Content.IconFor(kind));
                 if (game.IsMvp) buildCard.Effect = buildCard.Button.transform.Find("Effect").GetComponent<Text>();
@@ -253,6 +254,8 @@ namespace TheLastFortress
             breachText.text = "BREACH";
             breachText.fontStyle = FontStyle.Bold;
             breachLabel.SetActive(false);
+
+            raidTagRoot = root;
 
             // Stress banner
             stressBanner = Panel(root, "StressBanner", new Vector2(0.5f, 1), new Vector2(0, -186), new Vector2(900, 56)).gameObject;
@@ -446,6 +449,7 @@ namespace TheLastFortress
             if (t.SlowPercent > 0) parts.Add($"slows {t.SlowPercent}% for {t.SlowSeconds.ToString("0.#", inv)} s");
             if (t.MarketHallBonus > 0) parts.Add($"Market hall: touching Farms +{t.MarketHallBonus}");
             if (t.Granary) parts.Add("Granary: half its income if destroyed");
+            if (t.Stockade) parts.Add("Stockade: raids do half damage");
             if (t.WatchRangeBonus > 0) parts.Add($"+{t.WatchRangeBonus.ToString("0.#", inv)} range");
             if (t.SpotterPercent > 0) parts.Add($"+{t.SpotterPercent}% damage");
             if (t.WatchReach > 0) parts.Add($"reach {t.WatchReach} tiles");
@@ -699,6 +703,7 @@ namespace TheLastFortress
             var showBreach = overlay.BreachMarkerVisible && breach.z > 0f; // never pointing at something behind the camera
             if (breachLabel.activeSelf != showBreach) breachLabel.SetActive(showBreach);
             if (showBreach) breachRect.anchoredPosition = ScreenToCanvas(new Vector2(breach.x, breach.y));
+            SyncRaidTags(sim);
 
             if (stressBanner.activeSelf != sim.StressMode) stressBanner.SetActive(sim.StressMode);
 
@@ -787,6 +792,8 @@ namespace TheLastFortress
                     return $"+{d.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range to Archer Towers and Cannons touching it (never stacks)";
                 case BuildingKind.RepairStation:
                     return RepairStationDetails(sim, new Building(-1, d, default, 0)) + " · 2x2";
+                case BuildingKind.Mine:
+                    return "Only on a gold vein · enemies passing beside it stop to raid it";
                 case BuildingKind.House:
                 case BuildingKind.Farm:
                     var dawns = Mathf.Max(0, sim.TotalNights - sim.NightNumber);
@@ -869,6 +876,56 @@ namespace TheLastFortress
         }
 
         /// <summary>World point to screen with the camera that is rendering (strategic or hero view); z below 0 is behind it.</summary>
+        Transform raidTagRoot;
+        readonly List<RectTransform> raidTags = new List<RectTransform>();
+        List<Building> raidExposed = new List<Building>();
+        (int revision, int night) raidKey = (-1, -1);
+
+        /// <summary>
+        /// Spec 016: by Day a small amber RAID tag over each House, Farm or Mine beside one of tonight's routes (a passing
+        /// Grunt, Runner or Brute would stop to raid it). Recomputed only when the board or the night changes.
+        /// </summary>
+        void SyncRaidTags(RunSimulation sim)
+        {
+            var show = sim.RaidsEnabled && sim.State == RunState.Day && !game.HeroViewActive;
+            if (show && raidKey != (sim.Grid.Revision, sim.NightNumber))
+            {
+                raidKey = (sim.Grid.Revision, sim.NightNumber);
+                raidExposed = sim.RaidExposed();
+            }
+
+            var shown = 0;
+            if (show)
+                foreach (var b in raidExposed)
+                {
+                    if (!b.IsAlive) continue;
+                    var p = ProjectToScreen(new Vector3((float)b.CenterX, 1.25f, (float)b.CenterZ));
+                    if (p.z <= 0f) continue;
+                    if (shown == raidTags.Count)
+                    {
+                        var tag = Panel(raidTagRoot, "RaidTag", Vector2.zero, Vector2.zero, new Vector2(78, 28));
+                        tag.pivot = new Vector2(0.5f, 0);
+                        var image = tag.GetComponent<Image>();
+                        image.color = Palette.Amber;
+                        image.raycastTarget = false;
+                        var text = Label(tag, "Text", 18, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(78, 28), Palette.HudSurface, true);
+                        text.text = "RAID";
+                        text.fontStyle = FontStyle.Bold;
+                        tag.SetSiblingIndex(breachLabel.transform.GetSiblingIndex());
+                        raidTags.Add(tag);
+                    }
+
+                    var t = raidTags[shown++];
+                    if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
+                    t.anchoredPosition = ScreenToCanvas(new Vector2(p.x, p.y));
+                }
+
+            for (var i = shown; i < raidTags.Count; i++)
+                if (raidTags[i].gameObject.activeSelf) raidTags[i].gameObject.SetActive(false);
+        }
+
+        public int VisibleRaidTagCount => raidTags.FindAll(t => t.gameObject.activeSelf).Count;
+
         Vector3 ProjectToScreen(Vector3 world) => (game != null ? game.ActiveCamera : Camera.main).WorldToScreenPoint(world);
 
         static void Set(Text t, string value)
@@ -1063,6 +1120,7 @@ namespace TheLastFortress
                 case BuildingKind.Cannon: return d.FootprintSize > 1 ? "Splash · slow · 2x2" : "Splash · slow";
                 case BuildingKind.Watchtower: return $"+{d.RangeBonus.ToString("0.#", CultureInfo.InvariantCulture)} range nearby";
                 case BuildingKind.RepairStation: return "Repairs at dawn · 2x2";
+                case BuildingKind.Mine: return $"+{d.DailyIncome}/day · gold vein";
                 default: return "";
             }
         }
@@ -1082,9 +1140,24 @@ namespace TheLastFortress
             var compact = effect != null;
             var titleX = icon != null ? 52f : 16f;
             if (icon != null) Icon(rt, icon, new Vector2(12, -8), 34f, Palette.HudText);
-            Label(rt, "Title", width < 240 ? 22 : 26, TextAnchor.UpperLeft, new Vector2(titleX, compact ? -10 : -12), new Vector2(width - titleX - 10, 34), Palette.HudText).text = title;
+            var titleText = Label(rt, "Title", width < 240 ? 22 : 26, TextAnchor.UpperLeft, new Vector2(titleX, compact ? -10 : -12), new Vector2(width - titleX - 10, 34), Palette.HudText);
+            titleText.text = title;
+            Text effectText = null;
             if (compact)
-                Label(rt, "Effect", 18, TextAnchor.UpperLeft, new Vector2(16, -38), new Vector2(width - 24, 24), Palette.HudText.WithAlpha(0.75f)).text = effect;
+            {
+                effectText = Label(rt, "Effect", 18, TextAnchor.UpperLeft, new Vector2(16, -38), new Vector2(width - 24, 24), Palette.HudText.WithAlpha(0.75f));
+                effectText.text = effect;
+            }
+
+            // Two rows of five narrower cards (release-rules-4 with the Mine): long titles and effects shrink to stay on one line.
+            foreach (var t in new[] { titleText, effectText })
+            {
+                if (t == null || width >= 200) continue;
+                t.resizeTextForBestFit = true;
+                t.resizeTextMinSize = 14;
+                t.resizeTextMaxSize = t.fontSize;
+                t.verticalOverflow = VerticalWrapMode.Truncate;
+            }
             costText = Label(rt, "Cost", compact ? 25 : 28, TextAnchor.UpperLeft, new Vector2(16, compact ? -70 : -52), new Vector2(width - 90, 40), Palette.Amber);
             costText.text = $"{cost} gold";
             var keyX = width - 62;

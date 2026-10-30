@@ -95,7 +95,7 @@ namespace TheLastFortress.Tests
             game.NewRun(7, false);
             yield return null;
             Assert.AreEqual((12, MapProfiles.Crossing, MapProfiles.Crossing), (game.Sim.TotalNights, game.Sim.Campaign.MapProfile, game.Sim.Config.Terrain.Profile));
-            Assert.AreEqual(8, RulesProfile.ReleaseKinds.Count(k => game.Hud.CardFor(k).gameObject.activeSelf), "all eight build cards");
+            Assert.AreEqual(9, RulesProfile.ContactKinds.Count(k => game.Hud.CardFor(k).gameObject.activeSelf), "all nine build cards (spec 016: the Mine)");
 
             // A custom stored night with every 008 threat, loaded through the real save path.
             // The Bomber and the Raider Archer come from the undefended east so they live to light a fuse and to shoot (at
@@ -111,8 +111,26 @@ namespace TheLastFortress.Tests
                 Label = "threats", Nights = new[] { wave, new WavePlan("calm", new SpawnEntry[0], new[] { MvpCampaign.West }) }, OffersRewards = true,
                 RulesVersion = ReleaseCampaign.RulesVersion, CampaignId = ReleaseCampaign.CampaignId, PerkPool = PerkRules.ReleaseIds, MapProfile = MapProfiles.Meadow,
             };
-            ContinueSaved(new RunSimulation(new RunConfig { Definitions = game.NewRunDefinitions, Seed = 7, Terrain = TerrainMap.Flat(), Campaign = campaign }));
+            var terrain = TerrainMap.Flat();
+            terrain.Veins.Add(new GridPos(2, 11)); // spec 016: a gold vein beside the West route (row 10), reached before the Cannon
+            ContinueSaved(new RunSimulation(new RunConfig { Definitions = game.NewRunDefinitions, Seed = 7, Terrain = terrain, Campaign = campaign }));
             yield return null;
+
+            // Spec 016: hotkey 9 is the Mine; off a vein the click builds nothing, on the vein it builds one (whole board in view).
+            game.CameraRig.ShowWholeBoard();
+            yield return null;
+            yield return Press(Key.Digit9);
+            Assert.AreEqual(BuildingKind.Mine, game.Player.Tool, "hotkey 9 = Mine");
+            yield return Click(game.CameraRig.CellToScreen(new GridPos(3, 12)));
+            Assert.IsNull(game.Sim.Grid.GetOccupant(new GridPos(3, 12)), "no Mine off a gold vein");
+            yield return Click(game.CameraRig.CellToScreen(new GridPos(2, 11)));
+            var mine = game.Sim.Grid.GetOccupant(new GridPos(2, 11));
+            Assert.AreEqual(BuildingKind.Mine, mine?.Kind, "Mine placed on the vein through the Input System");
+            Assert.AreEqual(1, game.World.CountBuildingViews(BuildingKind.Mine), "one view");
+            game.Player.CancelTool();
+            game.SyncViews();
+            Assert.AreEqual(1, game.Hud.VisibleRaidTagCount, "the Mine beside tonight's route is tagged RAID by Day");
+
 
             yield return Press(Key.Digit6);
             Assert.AreEqual(BuildingKind.Cannon, game.Player.Tool, "hotkey 6 = Cannon");
@@ -137,7 +155,7 @@ namespace TheLastFortress.Tests
             StringAssert.Contains("Watchtower +" + game.Sim.Definitions.Watchtower.RangeBonus.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture), game.Hud.SelectionText);
 
             Assert.IsTrue(game.StartNight());
-            bool shell = false, blast = false, fuse = false, aura = false, enemyArrow = false, boss = false;
+            bool shell = false, blast = false, fuse = false, aura = false, enemyArrow = false, boss = false, raid = false;
             int maxVoices = 0, maxFamily = 0;
             for (var i = 0; i < 4000 && game.Sim.State == RunState.Night; i++)
             {
@@ -149,6 +167,7 @@ namespace TheLastFortress.Tests
                 {
                     fuse |= e.FuseLit && game.World.FuseVisible(e.Id);
                     aura |= e.Kind == EnemyKind.SiegeCommander && game.World.AuraVisible(e.Id);
+                    raid |= e.RaidBuildingId == mine.Id;
                 }
 
                 enemyArrow |= game.Audio.PlayCount(SoundId.RaiderShot) > 0;
@@ -163,6 +182,8 @@ namespace TheLastFortress.Tests
             Assert.IsTrue(aura, "the Commander shows its aura");
             Assert.IsTrue(enemyArrow, "a Raider Archer stopped to shoot");
             Assert.IsTrue(boss, "the boss bar covers the Siege Commander");
+            Assert.IsTrue(raid, "a Grunt passing the Mine stopped to raid it");
+            Assert.AreEqual(0, game.Hud.VisibleRaidTagCount, "no RAID tags at Night");
             Assert.LessOrEqual(maxVoices, AudioDirector.MaxVoices);
             Assert.LessOrEqual(maxFamily, AudioDirector.MaxPerFamily);
             Assert.LessOrEqual(game.World.PendingCueCount, WorldView.CueCaps.Sum(), "cues stay pooled and capped");

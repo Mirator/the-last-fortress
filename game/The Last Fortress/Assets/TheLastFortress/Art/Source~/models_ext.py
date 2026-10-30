@@ -319,6 +319,45 @@ def repair_station():
     export("ArtRepairStation")
 
 
+def mine():
+    """Spec 016 Mine, 1 x 1, ~1.1 (pivot at the cell centre): a rocky spoil mound with a timber-framed shaft mouth, an A-frame
+    headframe with its winding wheel, and an ore cart heaped with amber ore on a short rail; a torch at the shaft."""
+    r = root("Mine")
+    p = Part("Body")
+    p.add(box_bm((0.86, 0.86, 0.03), 0.012), SOIL_DARK, trs((0, 0, 0)))
+    rng = random.Random(16)
+    for (x, y, s) in ((-0.2, 0.18, 0.28), (0.08, 0.26, 0.24), (-0.3, -0.08, 0.2), (0.28, 0.2, 0.17), (-0.05, 0.06, 0.2), (0.3, -0.02, 0.12)):
+        p.add(ico_bm(s, 1), STONE_DARK, trs((x, y, 0.02), (rng.uniform(0, 40), rng.uniform(0, 40), rng.uniform(0, 90)), (1.0, 0.9, 0.55)))
+    # shaft mouth: a dark opening in a timber frame, set into the mound's south face
+    p.add(box_bm((0.3, 0.06, 0.26), 0.004), DOOR, trs((-0.08, -0.02, 0.03)))
+    for sx in (-1, 1):
+        p.add(box_bm((0.04, 0.05, 0.3), 0.004), TIMBER, trs((-0.08 + sx * 0.16, -0.05, 0.03)), grain=(0, 0, 1))
+    p.add(box_bm((0.38, 0.06, 0.04), 0.004), TIMBER, trs((-0.08, -0.05, 0.32)), grain=(1, 0, 0))
+    # headframe: two A-frames over the shaft, a cross beam and the winding wheel
+    for sy in (-1, 1):
+        beam(p, (-0.3, sy * 0.1 + 0.08, 0.06), (-0.08, sy * 0.1 + 0.08, 0.86), 0.035, 0.035, TIMBER, 0.004)
+        beam(p, (0.14, sy * 0.1 + 0.08, 0.06), (-0.08, sy * 0.1 + 0.08, 0.86), 0.035, 0.035, TIMBER, 0.004)
+    beam(p, (-0.08, -0.04, 0.86), (-0.08, 0.2, 0.86), 0.04, 0.04, TIMBER_DARK, 0.004)
+    p.add(cyl_bm(0.11, 0.025, 14, bevel=0.004, cap=True), TIMBER_DARK, trs((-0.08, 0.08, 0.86), (90, 0, 0)))
+    p.add(cyl_bm(0.05, 0.03, 8), IRON, trs((-0.08, 0.095, 0.86), (90, 0, 0)))
+    p.add(cyl_bm(0.005, 0.62, 4), TIMBER_DARK, trs((-0.08 + 0.11, 0.08, 0.24)))
+    # rails and an ore cart heaped with amber ore
+    for sx in (-1, 1):
+        p.add(box_bm((0.02, 0.5, 0.015), 0.0), IRON, trs((0.22 + sx * 0.07, -0.18, 0.03)))
+    for i in range(4):
+        p.add(box_bm((0.2, 0.03, 0.012), 0.0), TIMBER_DARK, trs((0.22, -0.4 + i * 0.13, 0.03)))
+    p.add(box_bm((0.2, 0.26, 0.12), 0.01, taper=1.12), TIMBER, trs((0.22, -0.2, 0.08)), grain=(0, 1, 0))
+    for sy in (-1, 1):
+        for sx in (-1, 1):
+            p.add(cyl_bm(0.035, 0.02, 8), IRON, trs((0.22 + sx * 0.1, -0.2 + sy * 0.08, 0.075), (0, 90, 0)))
+    for (x, y, s) in ((0.2, -0.24, 0.06), (0.25, -0.15, 0.05), (0.18, -0.14, 0.045), (0.26, -0.27, 0.045)):
+        p.add(ico_bm(s, 1), PENNANT, trs((x, y, 0.19)))
+    tip = wall_torch(p, (0.1, -0.07, 0.28), (0, -1))
+    p.build(r)
+    empty("Torch", tip, r)
+    export("ArtMine")
+
+
 if __name__ == "__main__":
     only = sys.argv[sys.argv.index("--") + 2:] if "--" in sys.argv else []
     if only:  # e.g. -- <output folder> cannon_field: regenerate only the named models
@@ -332,4 +371,5 @@ if __name__ == "__main__":
     cannon_field()
     watchtower()
     repair_station()
+    mine()
     # the six other enemy kinds: characters.py (plan 013)

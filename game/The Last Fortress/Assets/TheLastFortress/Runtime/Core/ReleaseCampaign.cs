@@ -53,7 +53,34 @@ namespace TheLastFortress
         public static bool BombersLightOnContact(string rulesVersion) => WalkingEnemies(rulesVersion);
 
         /// <summary>release-rules-4 definitions: release-rules-3 enemies, a 1 x 1 Cannon (owner, 2026-10-21) and upgrade tiers (spec 015).</summary>
-        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => Bodies(Walking(defs)).WithCompactCannon().WithUpgrades();
+        public static PrototypeDefinitions Contact(PrototypeDefinitions defs) => WithMine(Pressure(Bodies(Walking(defs))).WithCompactCannon()).WithUpgrades();
+
+        /// <summary>Spec 016 pressure [P]: release-rules-4 enemy HP against release-rules-3, as a percentage (floor).</summary>
+        public const int PressureHpPercent = 100; // round 1 (120, with counts 130) favoured the sealed ring: see plan 036
+
+        /// <summary>Spec 016 pressure [P]: release-rules-4 ordinary enemy counts on Nights 4-12, as a percentage (floor); the
+        /// spawn cadence shrinks by the same factor, so a night's spawns take about as long.</summary>
+        public const int PressureCountPercent = 100;
+
+        public const int PressureFromNight = 4;
+
+        public static PrototypeDefinitions Pressure(PrototypeDefinitions defs) => defs.WithEnemies(e =>
+        {
+            e.MaxHp = e.MaxHp * PressureHpPercent / 100;
+            return e;
+        });
+
+        /// <summary>Spec 016 raid time [P]: how long a raider attacks an economy building beside its route before walking on.</summary>
+        public const double RaidSeconds = 5.0;
+
+        /// <summary>Spec 016 Mine [P]: 1 x 1, only on a gold vein, 45 gold, 64 HP, 30 gold a day.</summary>
+        public static PrototypeDefinitions WithMine(PrototypeDefinitions defs)
+        {
+            if (defs.Mine != null) return defs;
+            var d = defs.WithEnemies(e => e);
+            d.Mine = new BuildingDefinition { Kind = BuildingKind.Mine, DisplayName = "Mine", Cost = 45, MaxHp = 64, DailyIncome = 30 };
+            return d;
+        }
 
         /// <summary>Spec 014 (release-rules-4): body radii in tiles [P]; bosses are wider.</summary>
         public static PrototypeDefinitions Bodies(PrototypeDefinitions defs) => defs.WithEnemies(e =>
@@ -90,7 +117,7 @@ namespace TheLastFortress
         public const uint WaveSalt = 0x5BD1E995;
 
         /// <summary>Per-night cap on scheduled spawns (the living cap of 100 still applies during play).</summary>
-        public const int MaxSpawnsPerNight = 100;
+        public const int MaxSpawnsPerNight = 150; // spec 016: 100 → 150; the living cap of 100 is unchanged
 
         public sealed class Recipe
         {
@@ -112,9 +139,17 @@ namespace TheLastFortress
         public static Recipe[] Table(string rulesVersion)
         {
             var table = Table();
-            if (rulesVersion == RulesV4)
-                foreach (var r in table)
-                    r.BossSeconds = BossSecondsV4;
+            if (rulesVersion != RulesV4) return table;
+            for (var i = 0; i < table.Length; i++)
+            {
+                var r = table[i];
+                r.BossSeconds = BossSecondsV4;
+                if (i + 1 < PressureFromNight) continue;
+                int P(int n) => n * PressureCountPercent / 100;
+                (r.Grunts, r.Runners, r.Brutes, r.Bombers, r.Archers) = (P(r.Grunts), P(r.Runners), P(r.Brutes), P(r.Bombers), P(r.Archers));
+                r.CadenceSeconds = System.Math.Round(r.CadenceSeconds * 100 / PressureCountPercent, 2);
+            }
+
             return table;
         }
 

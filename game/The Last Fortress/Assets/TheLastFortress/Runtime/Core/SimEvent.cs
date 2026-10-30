@@ -70,6 +70,12 @@ namespace TheLastFortress
 
         /// <summary>Spec 015: a building went up one tier (source building, target = its new tier).</summary>
         BuildingUpgraded,
+
+        /// <summary>Spec 016: an enemy stopped to raid an economy building beside its route (source enemy, target building).</summary>
+        RaidStarted,
+
+        /// <summary>Spec 016: a raid ended (its time ran out, its target fell or the hero drew the raider); source enemy, target building.</summary>
+        RaidEnded,
     }
 
     /// <summary>Notification for presentation adapters. Simulation state stays authoritative.</summary>
